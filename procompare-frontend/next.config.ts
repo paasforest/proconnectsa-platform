@@ -51,6 +51,9 @@ const nextConfig: NextConfig = {
   experimental: {
     optimizeCss: true,
     optimizePackageImports: ['lucide-react', '@radix-ui/react-icons'],
+    turbopack: {
+      root: '/home/paas/work_platform/procompare-frontend',
+    },
   },
 
   // Output configuration for Vercel
