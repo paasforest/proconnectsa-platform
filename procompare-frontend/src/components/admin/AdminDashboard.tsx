@@ -6,10 +6,10 @@ import {
   LayoutDashboard, MessageSquare, Users, DollarSign, Wrench, 
   Settings, BarChart3, Bell, LogOut, Menu, X
 } from 'lucide-react';
-import AdminSupportDashboard from './AdminSupportDashboard';
-import StaffManagement from './StaffManagement';
-import FinanceDashboard from './FinanceDashboard';
-import TechnicalDashboard from './TechnicalDashboard';
+// import AdminSupportDashboard from './AdminSupportDashboard';
+// import StaffManagement from './StaffManagement';
+// import FinanceDashboard from './FinanceDashboard';
+// import TechnicalDashboard from './TechnicalDashboard';
 
 type DashboardView = 'overview' | 'support' | 'staff' | 'finance' | 'technical' | 'settings';
 
@@ -30,13 +30,13 @@ const AdminDashboard = () => {
   const renderCurrentView = () => {
     switch (currentView) {
       case 'support':
-        return <AdminSupportDashboard />;
+        return <div className="p-6"><h1 className="text-2xl font-bold">Support Dashboard</h1><p>Support dashboard temporarily disabled for deployment.</p></div>;
       case 'staff':
-        return <StaffManagement />;
+        return <div className="p-6"><h1 className="text-2xl font-bold">Staff Management</h1><p>Staff management temporarily disabled for deployment.</p></div>;
       case 'finance':
-        return <FinanceDashboard />;
+        return <div className="p-6"><h1 className="text-2xl font-bold">Finance Dashboard</h1><p>Finance dashboard temporarily disabled for deployment.</p></div>;
       case 'technical':
-        return <TechnicalDashboard />;
+        return <div className="p-6"><h1 className="text-2xl font-bold">Technical Dashboard</h1><p>Technical dashboard temporarily disabled for deployment.</p></div>;
       case 'settings':
         return <div className="p-6"><h1 className="text-2xl font-bold">Settings</h1><p>Settings panel coming soon...</p></div>;
       default:
