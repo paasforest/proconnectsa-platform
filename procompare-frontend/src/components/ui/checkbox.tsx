@@ -4,7 +4,10 @@ import * as React from "react"
 import * as CheckboxPrimitive from "@radix-ui/react-checkbox"
 import { Check } from "lucide-react"
 
-import { cn } from "@/lib/utils"
+// Simple utility function
+const cn = (...classes: (string | undefined | null | boolean)[]) => {
+  return classes.filter(Boolean).join(' ');
+};
 
 const Checkbox = React.forwardRef<
   React.ElementRef<typeof CheckboxPrimitive.Root>,
