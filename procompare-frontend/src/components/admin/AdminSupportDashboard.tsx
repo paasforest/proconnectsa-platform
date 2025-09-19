@@ -7,7 +7,7 @@ import {
   Filter, Search, RefreshCw, UserPlus, Settings, BarChart3,
   Phone, Mail, Calendar, Tag, ArrowUpDown, Eye, Edit, Trash2
 } from 'lucide-react';
-import { apiClient } from '@/lib/api';
+import { apiClient } from '@/lib/api-simple';
 
 interface SupportTicket {
   id: string;

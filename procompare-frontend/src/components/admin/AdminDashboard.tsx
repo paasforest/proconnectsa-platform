@@ -6,7 +6,7 @@ import {
   LayoutDashboard, MessageSquare, Users, DollarSign, Wrench, 
   Settings, BarChart3, Bell, LogOut, Menu, X
 } from 'lucide-react';
-// import AdminSupportDashboard from './AdminSupportDashboard';
+import AdminSupportDashboard from './AdminSupportDashboard';
 // import StaffManagement from './StaffManagement';
 // import FinanceDashboard from './FinanceDashboard';
 // import TechnicalDashboard from './TechnicalDashboard';
@@ -30,7 +30,7 @@ const AdminDashboard = () => {
   const renderCurrentView = () => {
     switch (currentView) {
       case 'support':
-        return <div className="p-6"><h1 className="text-2xl font-bold">Support Dashboard</h1><p>Support dashboard temporarily disabled for deployment.</p></div>;
+        return <AdminSupportDashboard />;
       case 'staff':
         return <div className="p-6"><h1 className="text-2xl font-bold">Staff Management</h1><p>Staff management temporarily disabled for deployment.</p></div>;
       case 'finance':
