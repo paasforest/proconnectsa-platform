@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Invoice {{ invoice_data.invoice_number }}</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .header {
+            text-align: center;
+            border-bottom: 2px solid #007bff;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+        .company-info {
+            text-align: left;
+            margin-bottom: 20px;
+        }
+        .invoice-details {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 30px;
+        }
+        .invoice-info, .client-info {
+            flex: 1;
+        }
+        .invoice-info {
+            margin-right: 20px;
+        }
+        .amount-details {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 5px;
+            margin-bottom: 30px;
+        }
+        .bank-details {
+            background-color: #e9ecef;
+            padding: 20px;
+            border-radius: 5px;
+            margin-bottom: 30px;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #ddd;
+            font-size: 0.9em;
+            color: #666;
+        }
+        .highlight {
+            background-color: #fff3cd;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        th, td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            background-color: #f8f9fa;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>{{ company_info.name }}</h1>
+        <p>{{ company_info.address }}</p>
+        <p>Phone: {{ company_info.phone }} | Email: {{ company_info.email }}</p>
+        <p>Website: {{ company_info.website }}</p>
+    </div>
+
+    <div class="invoice-details">
+        <div class="invoice-info">
+            <h2>Invoice Details</h2>
+            <p><strong>Invoice Number:</strong> {{ invoice_data.invoice_number }}</p>
+            <p><strong>Invoice Date:</strong> {{ invoice_data.invoice_date }}</p>
+            <p><strong>Due Date:</strong> {{ invoice_data.due_date }}</p>
+            <p><strong>Reference:</strong> {{ invoice_data.reference_number }}</p>
+        </div>
+        <div class="client-info">
+            <h2>Bill To</h2>
+            <p><strong>{{ provider.name }}</strong></p>
+            <p>{{ provider.email }}</p>
+            {% if provider.phone %}<p>{{ provider.phone }}</p>{% endif %}
+            {% if provider_profile.business_name %}<p>{{ provider_profile.business_name }}</p>{% endif %}
+        </div>
+    </div>
+
+    <div class="amount-details">
+        <h3>Payment Details</h3>
+        <table>
+            <tr>
+                <th>Description</th>
+                <th>Amount</th>
+            </tr>
+            <tr>
+                <td>{{ invoice_data.description }}</td>
+                <td>R{{ invoice_data.amount|floatformat:2 }}</td>
+            </tr>
+            <tr>
+                <td><strong>Total Amount</strong></td>
+                <td><strong>R{{ invoice_data.amount|floatformat:2 }}</strong></td>
+            </tr>
+        </table>
+        
+        <div class="highlight">
+            <p><strong>Credits to be activated:</strong> {{ invoice_data.credits_to_activate }} credits</p>
+            <p><strong>Credit rate:</strong> R{{ invoice_data.credit_rate|floatformat:2 }} per credit</p>
+        </div>
+    </div>
+
+    <div class="bank-details">
+        <h3>Banking Details</h3>
+        <p><strong>Bank:</strong> {{ company_info.bank_details.bank_name }}</p>
+        <p><strong>Branch Code:</strong> {{ company_info.bank_details.branch_code }}</p>
+        <p><strong>Account Number:</strong> {{ company_info.bank_details.account_number }}</p>
+        <p><strong>Account Holder:</strong> {{ company_info.bank_details.account_holder }}</p>
+        <p><strong>Swift Code:</strong> {{ company_info.bank_details.swift_code }}</p>
+        
+        <div class="highlight">
+            <p><strong>IMPORTANT:</strong> Use your customer code <strong>{{ invoice_data.customer_code }}</strong> as the reference when making payment.</p>
+        </div>
+    </div>
+
+    <div class="footer">
+        <p>Thank you for your business!</p>
+        <p>This invoice was generated automatically. For any queries, please contact us at {{ company_info.email }}</p>
+        <p>&copy; {{ current_year }} {{ company_info.name }}. All rights reserved.</p>
+    </div>
+</body>
+</html>
+

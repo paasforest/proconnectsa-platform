@@ -1,0 +1,28 @@
+User-agent: *
+Allow: /
+
+# Important pages
+Allow: /how-it-works
+Allow: /services
+Allow: /providers
+Allow: /business-services
+Allow: /register
+Allow: /login
+
+# Block admin and private areas
+Disallow: /admin
+Disallow: /dashboard
+Disallow: /api
+Disallow: /_next
+
+# Sitemap location
+Sitemap: https://proconnectsa.co.za/sitemap.xml
+
+# Crawl delay for politeness
+Crawl-delay: 1
+
+
+
+
+
+

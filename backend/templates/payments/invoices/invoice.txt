@@ -1,0 +1,48 @@
+INVOICE {{ invoice_data.invoice_number }}
+{{ company_info.name }}
+{{ company_info.address }}
+Phone: {{ company_info.phone }} | Email: {{ company_info.email }}
+Website: {{ company_info.website }}
+
+================================================================================
+
+INVOICE DETAILS
+Invoice Number: {{ invoice_data.invoice_number }}
+Invoice Date: {{ invoice_data.invoice_date }}
+Due Date: {{ invoice_data.due_date }}
+Reference: {{ invoice_data.reference_number }}
+
+BILL TO
+{{ provider.name }}
+{{ provider.email }}
+{% if provider.phone %}{{ provider.phone }}{% endif %}
+{% if provider_profile.business_name %}{{ provider_profile.business_name }}{% endif %}
+
+================================================================================
+
+PAYMENT DETAILS
+Description: {{ invoice_data.description }}
+Amount: R{{ invoice_data.amount|floatformat:2 }}
+Total Amount: R{{ invoice_data.amount|floatformat:2 }}
+
+Credits to be activated: {{ invoice_data.credits_to_activate }} credits
+Credit rate: R{{ invoice_data.credit_rate|floatformat:2 }} per credit
+
+================================================================================
+
+BANKING DETAILS
+Bank: {{ company_info.bank_details.bank_name }}
+Branch Code: {{ company_info.bank_details.branch_code }}
+Account Number: {{ company_info.bank_details.account_number }}
+Account Holder: {{ company_info.bank_details.account_holder }}
+Swift Code: {{ company_info.bank_details.swift_code }}
+
+IMPORTANT: Use your customer code {{ invoice_data.customer_code }} as the reference when making payment.
+
+================================================================================
+
+Thank you for your business!
+This invoice was generated automatically. For any queries, please contact us at {{ company_info.email }}
+
+© {{ current_year }} {{ company_info.name }}. All rights reserved.
+
