@@ -1,20 +1,13 @@
 {
-  "framework": "nextjs",
-  "buildCommand": "npm run build",
-  "devCommand": "npm run dev",
-  "installCommand": "npm install",
+  "version": 2,
+  "builds": [
+    {
+      "src": "package.json",
+      "use": "@vercel/next"
+    }
+  ],
   "env": {
     "NEXT_PUBLIC_API_URL": "https://api.proconnectsa.co.za",
     "NEXT_PUBLIC_FRONTEND_URL": "https://proconnectsa.co.za"
-  },
-  "build": {
-    "env": {
-      "NEXT_PUBLIC_API_URL": "https://api.proconnectsa.co.za"
-    }
-  },
-  "functions": {
-    "app/api/**": {
-      "maxDuration": 30
-    }
   }
 }
