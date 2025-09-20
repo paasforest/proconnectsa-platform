@@ -24,7 +24,7 @@ const registerSchema = z.object({
   password: z.string().min(8, "Password must be at least 8 characters"),
   confirmPassword: z.string(),
   user_type: z.enum(["client", "provider"], {
-    required_error: "Please select an account type",
+    message: "Please select an account type",
   }),
   city: z.string().min(2, "City is required"),
   suburb: z.string().min(2, "Suburb is required"),
