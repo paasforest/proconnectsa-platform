@@ -4,8 +4,6 @@ import { useState, useEffect } from 'react'
 
 // Force this page to be rendered dynamically (not statically generated)
 export const dynamic = 'force-dynamic'
-export const dynamicParams = true  
-export const revalidate = 0
 import { useSearchParams } from 'next/navigation'
 import { ClientHeader } from "@/components/layout/ClientHeader"
 import { Footer } from "@/components/layout/Footer"
