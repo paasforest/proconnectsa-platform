@@ -30,7 +30,7 @@ export async function POST(request: NextRequest) {
     }
     
     // Create the user
-    const newUser = userStore.createUser({
+    const newUser = await userStore.createUser({
       first_name: validatedData.first_name,
       last_name: validatedData.last_name,
       name: `${validatedData.first_name} ${validatedData.last_name}`,
