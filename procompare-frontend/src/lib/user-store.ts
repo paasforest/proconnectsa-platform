@@ -2,6 +2,12 @@ interface UserData {
   id: string
   email: string
   name: string
+  first_name: string
+  last_name: string
+  phone?: string
+  user_type?: string
+  city?: string
+  suburb?: string
   password: string // hashed
   role: string
   createdAt: Date
@@ -38,8 +44,12 @@ export const userStore = {
     const id = `user_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
     const now = new Date()
     
+    // Auto-generate name from first_name and last_name if not provided
+    const name = userData.name || `${userData.first_name} ${userData.last_name}`
+    
     const user: UserData = {
       ...userData,
+      name,
       id,
       createdAt: now,
       updatedAt: now
