@@ -7,7 +7,7 @@ import {
   CheckCircle, Clock, BarChart3, PieChart, RefreshCw,
   Filter, Search, Download, Eye, Edit, Trash2
 } from 'lucide-react';
-import { apiClient } from '@/lib/api';
+import { apiClient } from '@/lib/api-simple';
 
 interface FinanceTicket {
   id: string;

@@ -8,7 +8,7 @@ import {
   HelpCircle, LogOut, Bell, Menu, X, ChevronDown, User,
   Home, Target, CreditCard, Wrench, MessageSquare, BarChart3
 } from 'lucide-react';
-import { apiClient } from '@/lib/api';
+import { apiClient } from '@/lib/api-simple';
 
 interface UserStats {
   credit_balance: number;

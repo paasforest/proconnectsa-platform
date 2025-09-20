@@ -6,7 +6,7 @@ import {
   Clock, Target, DollarSign, Activity, BarChart3, Zap,
   ArrowUpRight, ArrowDownRight, Eye, Star
 } from 'lucide-react';
-import { apiClient } from '@/lib/api';
+import { apiClient } from '@/lib/api-simple';
 import { useSession } from 'next-auth/react';
 
 interface DashboardStats {

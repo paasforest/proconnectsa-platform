@@ -18,7 +18,7 @@ import {
   AlertCircle,
   Calendar
 } from 'lucide-react'
-import { apiClient } from '@/lib/api'
+import { apiClient } from '@/lib/api-simple'
 
 interface ClientStats {
   total_requests: number

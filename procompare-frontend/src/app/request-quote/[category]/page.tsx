@@ -15,7 +15,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Loader2, MapPin, Calendar, DollarSign, Clock, CheckCircle } from "lucide-react"
 import { toast } from "sonner"
-import { apiClient } from "@/lib/api"
+import { apiClient } from "@/lib/api-simple"
 
 const leadSchema = z.object({
   title: z.string().min(5, "Title must be at least 5 characters"),

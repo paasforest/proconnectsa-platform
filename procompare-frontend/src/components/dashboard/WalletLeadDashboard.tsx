@@ -10,7 +10,7 @@ import {
   Send, Timer, Lock, Unlock, CreditCard, TrendingDown, Award, BarChart3,
   Banknote, Building2, ExternalLink
 } from 'lucide-react';
-import { apiClient } from '@/lib/api';
+import { apiClient } from '@/lib/api-simple';
 
 // Types
 interface Lead {

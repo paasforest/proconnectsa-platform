@@ -70,7 +70,7 @@ export default function RequestQuotePage() {
     
     try {
       // Import the API client
-      const { apiClient } = await import('@/lib/api')
+      const { apiClient } = await import('@/lib/api-simple')
       
       // Map form data to API format (including client contact details)
       const leadData = {

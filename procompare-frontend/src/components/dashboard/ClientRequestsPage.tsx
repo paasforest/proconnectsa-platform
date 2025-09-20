@@ -21,7 +21,7 @@ import {
   Star,
   Calendar
 } from 'lucide-react'
-import { apiClient } from '@/lib/api'
+import { apiClient } from '@/lib/api-simple'
 
 interface ProviderInterest {
   provider_name: string

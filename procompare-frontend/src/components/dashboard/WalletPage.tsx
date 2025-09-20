@@ -6,7 +6,7 @@ import {
   ArrowDownRight, Clock, CheckCircle, XCircle, Copy, ExternalLink,
   RefreshCw, AlertCircle, TrendingUp, DollarSign, Calendar
 } from 'lucide-react';
-import { apiClient } from '@/lib/api';
+import { apiClient } from '@/lib/api-simple';
 import { useSession } from 'next-auth/react';
 
 interface Transaction {

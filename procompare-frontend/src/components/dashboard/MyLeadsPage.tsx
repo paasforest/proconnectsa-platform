@@ -6,7 +6,7 @@ import {
   CheckCircle, XCircle, AlertCircle, Eye, Calendar, User,
   Filter, Search, SortAsc, SortDesc, RefreshCw, ExternalLink
 } from 'lucide-react';
-import { apiClient } from '@/lib/api';
+import { apiClient } from '@/lib/api-simple';
 import { useSession } from 'next-auth/react';
 
 interface MyLead {

@@ -6,7 +6,7 @@ import {
   Users, UserPlus, Edit, Trash2, Shield, Phone, Mail, 
   Calendar, Tag, CheckCircle, XCircle, Settings, BarChart3, X
 } from 'lucide-react';
-import { apiClient } from '@/lib/api';
+import { apiClient } from '@/lib/api-simple';
 
 interface SupportStaff {
   id: number;

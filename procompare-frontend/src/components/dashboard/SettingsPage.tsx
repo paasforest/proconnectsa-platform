@@ -5,7 +5,7 @@ import {
   User, Mail, Phone, MapPin, Save, Eye, EyeOff, 
   Camera, Upload, CheckCircle, AlertCircle
 } from 'lucide-react';
-import { apiClient } from '@/lib/api';
+import { apiClient } from '@/lib/api-simple';
 
 interface UserProfile {
   id: string;

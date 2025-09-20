@@ -7,7 +7,7 @@ import {
   CheckCircle, Clock, BarChart3, RefreshCw, Search,
   Filter, Eye, Edit, Trash2, Download, Settings
 } from 'lucide-react';
-import { apiClient } from '@/lib/api';
+import { apiClient } from '@/lib/api-simple';
 
 interface TechnicalTicket {
   id: string;

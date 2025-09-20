@@ -1,5 +1,9 @@
 import { Loader2 } from 'lucide-react'
-import { cn } from '@/lib/utils'
+
+// Simple utility function to replace @/lib/utils
+const cn = (...classes: (string | undefined | null | boolean)[]) => {
+  return classes.filter(Boolean).join(' ');
+};
 
 interface LoadingProps {
   size?: 'sm' | 'md' | 'lg'

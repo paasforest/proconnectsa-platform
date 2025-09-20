@@ -7,7 +7,7 @@ import {
   Eye, EyeOff, Unlock, Lock, Star, Zap, Target, Users,
   ChevronDown, SortAsc, SortDesc, RefreshCw, AlertCircle, Wallet
 } from 'lucide-react';
-import { apiClient } from '@/lib/api';
+import { apiClient } from '@/lib/api-simple';
 import { trackLeadViewDebounced } from '@/lib/leadTracking';
 
 interface Lead {

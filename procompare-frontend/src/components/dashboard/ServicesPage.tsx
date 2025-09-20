@@ -5,7 +5,7 @@ import {
   Plus, Trash2, Edit, Wrench, Search, Filter, RefreshCw, Star, Target, CheckCircle, XCircle, AlertCircle
 } from 'lucide-react';
 import { useSession } from 'next-auth/react';
-import { apiClient } from '@/lib/api';
+import { apiClient } from '@/lib/api-simple';
 
 interface Service {
   id: string;

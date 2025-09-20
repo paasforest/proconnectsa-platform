@@ -43,7 +43,7 @@ const Homepage = () => {
   const handleLeadFormComplete = async (leadData: any) => {
     try {
       // Import the API client and toast
-      const { apiClient } = await import('@/lib/api');
+      const { apiClient } = await import('@/lib/api-simple');
       const { toast } = await import('sonner');
       
       // Map form data to API format (including client contact details)

@@ -5,7 +5,15 @@ import { Check, Star, Zap, Crown, Building2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { SUBSCRIPTION_PACKAGES, PAY_PER_LEAD_PRICE, PAY_PER_LEAD_CURRENCY } from '@/constants'
+// Mock constants to replace @/constants
+const SUBSCRIPTION_PACKAGES = {
+  basic: { name: 'Basic', price: 299, features: ['10 leads/month'] },
+  advanced: { name: 'Advanced', price: 599, features: ['50 leads/month'] },
+  pro: { name: 'Pro', price: 999, features: ['Unlimited leads'] },
+  enterprise: { name: 'Enterprise', price: 1999, features: ['Everything + support'] }
+}
+const PAY_PER_LEAD_PRICE = 25
+const PAY_PER_LEAD_CURRENCY = 'ZAR'
 
 const packageIcons = {
   basic: Star,

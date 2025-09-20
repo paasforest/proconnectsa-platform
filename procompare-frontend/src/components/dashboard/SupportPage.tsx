@@ -6,7 +6,7 @@ import {
   Send, Search, Filter, RefreshCw, ExternalLink, HelpCircle,
   Phone, Mail, Calendar, User, Tag
 } from 'lucide-react';
-import { apiClient } from '@/lib/api';
+import { apiClient } from '@/lib/api-simple';
 import { useSession } from 'next-auth/react';
 
 interface SupportTicket {
