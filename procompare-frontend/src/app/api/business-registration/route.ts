@@ -40,6 +40,10 @@ export async function POST(request: NextRequest) {
         attempt++
         console.log(`🔄 Attempt ${attempt}/${maxAttempts} - Sending to Django backend...`)
         
+        // Create AbortController for timeout
+        const controller = new AbortController()
+        const timeoutId = setTimeout(() => controller.abort(), 30000) // 30 second timeout
+        
         backendResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://api.proconnectsa.co.za'}/api/business/registrations/`, {
           method: 'POST',
           headers: {
@@ -47,8 +51,10 @@ export async function POST(request: NextRequest) {
             'X-Request-ID': `REQ_${Date.now()}`,
           },
           body: JSON.stringify(data),
-          timeout: 30000, // 30 second timeout
+          signal: controller.signal
         })
+        
+        clearTimeout(timeoutId) // Clear timeout if request succeeds
         
         break // Success, exit retry loop
         
