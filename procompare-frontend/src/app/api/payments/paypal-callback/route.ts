@@ -6,8 +6,8 @@ import { userStore } from '@/lib/user-store'
 const authOptions = {
   providers: [],
   callbacks: {
-    session: async ({ session }) => session,
-    jwt: async ({ token }) => token,
+    session: async ({ session }: any) => session,
+    jwt: async ({ token }: any) => token,
   },
 }
 
