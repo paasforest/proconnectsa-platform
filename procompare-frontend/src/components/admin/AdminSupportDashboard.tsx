@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Search, User, MessageCircle, Clock, CheckCircle, AlertCircle, Filter } from 'lucide-react';
 
 // Simple utility function to replace @/lib/utils
-const cn = (...classes) => {
+const cn = (...classes: (string | undefined | null | boolean)[]) => {
   return classes.filter(Boolean).join(' ');
 };
 
