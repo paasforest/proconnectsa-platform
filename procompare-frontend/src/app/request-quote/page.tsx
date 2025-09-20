@@ -120,7 +120,7 @@ export default function RequestQuotePage() {
       toast.success('Your request has been submitted successfully! We\'ll match you with the best providers.')
     } catch (error) {
       console.error('Error submitting lead:', error)
-      console.error('Error details:', error.response?.data || error.message)
+      console.error('Error details:', (error as any).response?.data || (error as Error).message)
       toast.error('Failed to submit your request. Please try again or contact support.')
     }
   }
