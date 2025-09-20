@@ -70,6 +70,11 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    // Check if we have a response (should always be true if we reach here, but TypeScript needs the check)
+    if (!backendResponse) {
+      throw new Error('No response received from backend')
+    }
+
     if (!backendResponse.ok) {
       const errorText = await backendResponse.text()
       let errorData
