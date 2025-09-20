@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 
 // Force this page to be rendered dynamically (not statically generated)
 export const dynamic = 'force-dynamic'
-import { useSearchParams } from 'next/navigation'
+// Removed useSearchParams import to avoid prerendering issues
 import { ClientHeader } from "@/components/layout/ClientHeader"
 import { Footer } from "@/components/layout/Footer"
 import { Button } from "@/components/ui/button"
@@ -31,13 +31,21 @@ import LeadGenerationForm from "@/components/leads/LeadGenerationForm"
 import { toast } from "sonner"
 
 export default function RequestQuotePage() {
-  const searchParams = useSearchParams()
   const [showForm, setShowForm] = useState(false)
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
   const [formSubmitted, setFormSubmitted] = useState(false)
+  const [searchParams, setSearchParams] = useState<URLSearchParams | null>(null)
+
+  // Manual URL parameter extraction to avoid prerendering issues
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      setSearchParams(new URLSearchParams(window.location.search))
+    }
+  }, [])
 
   // Read service parameter from URL and auto-select category
   useEffect(() => {
+    if (!searchParams) return
     const serviceParam = searchParams.get('service')
     if (serviceParam) {
       // Map service ID to service name (matching LeadGenerationForm categories)
