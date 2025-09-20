@@ -1,6 +1,9 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+
+// Force dynamic rendering to avoid useSearchParams prerendering issues
+export const dynamic = 'force-dynamic'
 import { useSearchParams } from 'next/navigation'
 import { ClientHeader } from "@/components/layout/ClientHeader"
 import { Footer } from "@/components/layout/Footer"

@@ -1,6 +1,9 @@
 "use client"
 
 import { useState, useEffect } from "react"
+
+// Force dynamic rendering to avoid useSearchParams prerendering issues
+export const dynamic = 'force-dynamic'
 import Link from "next/link"
 import { useRouter, useSearchParams } from "next/navigation"
 import { useForm } from "react-hook-form"
