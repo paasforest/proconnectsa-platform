@@ -33,12 +33,15 @@ export async function POST(request: NextRequest) {
     const newUser = userStore.createUser({
       first_name: validatedData.first_name,
       last_name: validatedData.last_name,
+      name: `${validatedData.first_name} ${validatedData.last_name}`,
       email: validatedData.email,
       phone: validatedData.phone,
       city: validatedData.city,
       suburb: validatedData.suburb,
       password: validatedData.password, // In real app, hash this
-      user_type: validatedData.user_type
+      user_type: validatedData.user_type,
+      role: validatedData.user_type || 'client', // Set role based on user_type
+      emailVerified: false // New users start with unverified email
     })
     
     console.log('Registration successful:', {
