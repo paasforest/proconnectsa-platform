@@ -49,7 +49,7 @@ const nextConfig: NextConfig = {
 
   // Experimental features
   experimental: {
-    optimizeCss: true,
+    optimizeCss: false, // Disable CSS optimization to avoid critters issues
     optimizePackageImports: ['lucide-react', '@radix-ui/react-icons'],
   },
 
