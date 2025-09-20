@@ -10,6 +10,7 @@ interface UserData {
   suburb?: string
   password: string // hashed
   role: string
+  subscription_tier?: 'basic' | 'advanced' | 'pro' | 'enterprise'
   createdAt: Date
   updatedAt: Date
   emailVerified: boolean
