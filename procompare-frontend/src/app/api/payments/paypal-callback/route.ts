@@ -1,7 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth/next'
-import { authOptions } from '@/lib/auth'
 import { userStore } from '@/lib/user-store'
+
+// Mock auth options since we don't have NextAuth configured
+const authOptions = {
+  providers: [],
+  callbacks: {
+    session: async ({ session }) => session,
+    jwt: async ({ token }) => token,
+  },
+}
 
 export async function GET(request: NextRequest) {
   try {

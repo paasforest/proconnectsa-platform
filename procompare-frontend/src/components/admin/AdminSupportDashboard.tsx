@@ -8,7 +8,7 @@ const cn = (...classes: (string | undefined | null | boolean)[]) => {
 
 // Simple API client to replace @/lib/api-simple
 const apiClient = {
-  async get(endpoint) {
+  async get(endpoint: string) {
     // Mock API response for demonstration
     await new Promise(resolve => setTimeout(resolve, 500));
     
@@ -55,7 +55,7 @@ const apiClient = {
     return { data: [] };
   },
 
-  async post(endpoint, data) {
+  async post(endpoint: string, data?: any) {
     await new Promise(resolve => setTimeout(resolve, 300));
     return { success: true, data };
   }

@@ -1,13 +1,13 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
 import { Providers } from "@/components/providers/Providers";
 import { Toaster } from "@/components/ui/sonner";
 import "./globals.css";
 
-const inter = Inter({
-  subsets: ["latin"],
+// Use system fonts instead of Google Fonts to avoid network issues
+const inter = {
   variable: "--font-inter",
-});
+  className: "font-sans"
+};
 
 export const metadata: Metadata = {
   title: "ProConnectSA - Connect with Verified Service Providers",
