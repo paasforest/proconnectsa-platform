@@ -12,7 +12,10 @@ import {
   type FieldValues,
 } from "react-hook-form"
 
-import { cn } from "@/lib/utils"
+// Simple utility function
+const cn = (...classes: (string | undefined | null | boolean)[]) => {
+  return classes.filter(Boolean).join(' ');
+};
 import { Label } from "@/components/ui/label"
 
 const Form = FormProvider

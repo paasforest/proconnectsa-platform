@@ -1,4 +1,7 @@
-import { cn } from "@/lib/utils"
+// Simple utility function
+const cn = (...classes: (string | undefined | null | boolean)[]) => {
+  return classes.filter(Boolean).join(' ');
+};
 
 function Skeleton({ className, ...props }: React.ComponentProps<"div">) {
   return (
