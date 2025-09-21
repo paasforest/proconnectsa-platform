@@ -1,6 +1,7 @@
 import { NextRequest } from 'next/server'
 import jwt from 'jsonwebtoken'
 import bcrypt from 'bcryptjs'
+import CredentialsProvider from "next-auth/providers/credentials"
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-this-in-production'
 const JWT_EXPIRES_IN = '7d'
@@ -153,8 +154,6 @@ export function verifyResetToken(token: string): boolean {
 }
 
 // NextAuth configuration for API routes
-import CredentialsProvider from "next-auth/providers/credentials"
-
 export const authOptions = {
   secret: process.env.NEXTAUTH_SECRET,
   providers: [
