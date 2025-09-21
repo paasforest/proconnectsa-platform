@@ -69,8 +69,15 @@ CELERY_RESULT_BACKEND = REDIS_URL
 CORS_ALLOWED_ORIGINS = [
     "https://proconnectsa.co.za",
     "https://www.proconnectsa.co.za",
-    "https://proconnectsa.vercel.app",  # Vercel preview URLs
-    "https://*.vercel.app",  # All Vercel subdomains
+    "https://proconnectsa.vercel.app",  # Main Vercel deployment
+    "https://proconnectsa-git-main.vercel.app",  # Git branch deployments
+    "https://proconnectsa-preview.vercel.app",  # Preview deployments
+]
+
+# Allow all Vercel subdomains for development
+CORS_ALLOW_ALL_ORIGINS = False  # Keep false for security
+CORS_ALLOWED_ORIGIN_REGEXES = [
+    r"^https://proconnectsa.*\.vercel\.app$",  # All ProConnectSA Vercel deployments
 ]
 
 CORS_ALLOW_CREDENTIALS = True

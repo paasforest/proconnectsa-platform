@@ -225,6 +225,9 @@ CORS_ALLOWED_ORIGINS = [
     "http://127.0.0.1:3001",
     "https://proconnectsa.co.za",
     "https://www.proconnectsa.co.za",
+    "https://proconnectsa.vercel.app",
+    "https://proconnectsa-git-main-your-username.vercel.app",  # Replace with your actual Vercel URL
+    "https://proconnectsa-your-username.vercel.app",  # Replace with your actual Vercel URL
 ]
 
 CORS_ALLOW_CREDENTIALS = True

@@ -30,8 +30,8 @@ const authOptions = {
         }
 
         try {
-          const API_URL = 'http://128.140.123.48:8000' // Hardcoded to bypass wrong env var
-          const loginUrl = `${API_URL}/api/auth/backend-login/`
+          // Use Vercel proxy route to bypass mixed content issues
+          const loginUrl = '/api/auth/backend-login/'
           
           console.log(`🌐 Calling backend: ${loginUrl}`)
           console.log(`📤 Sending data:`, { email: credentials.email, password: '***' })
@@ -75,18 +75,24 @@ const authOptions = {
             return null
           }
           
-          // Validate required fields
-          if (!userData || !userData.id || !userData.email) {
-            console.error('❌ Invalid user data - missing id or email:', userData)
+          // Handle proxy response format (which forwards Flask API response)
+          if (!userData || !userData.success) {
+            console.error('❌ Login failed - API returned:', userData)
+            return null
+          }
+          
+          const user = userData.user
+          if (!user || !user.id || !user.email) {
+            console.error('❌ Invalid user data - missing id or email:', user)
             return null
           }
           
           // Create user object for NextAuth
           const userObject = {
-            id: String(userData.id),
-            email: userData.email,
-            name: userData.name || userData.email,
-            role: userData.role || 'user',
+            id: String(user.id),
+            email: user.email,
+            name: `${user.first_name} ${user.last_name}`.trim() || user.email,
+            role: user.user_type || 'user',
           }
           
           console.log('🎯 Returning user object to NextAuth:', userObject)
