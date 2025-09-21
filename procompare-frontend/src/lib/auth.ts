@@ -175,9 +175,9 @@ export const authOptions: NextAuthOptions = {
         try {
           console.log(`🔐 Attempting login for: ${credentials.email}`)
           
-          // Use the correct backend URL
-          const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://128.140.123.48:8000'
-          const loginUrl = `${API_URL}/api/auth/backend-login/`
+          // Use Vercel proxy route to bypass mixed content issues
+          const baseUrl = process.env.NEXTAUTH_URL || process.env.NEXT_PUBLIC_FRONTEND_URL || 'http://localhost:3000'
+          const loginUrl = `${baseUrl}/api/auth/backend-login/`
           
           console.log(`🌐 Calling backend: ${loginUrl}`)
           
@@ -191,6 +191,8 @@ export const authOptions: NextAuthOptions = {
               email: credentials.email,
               password: credentials.password,
             }),
+            // Add timeout to prevent hanging
+            signal: AbortSignal.timeout(10000) // 10 second timeout
           })
           
           console.log(`📡 Backend response status: ${response.status}`)
