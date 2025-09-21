@@ -1,10 +1,11 @@
-import NextAuth from 'next-auth'
+import NextAuth, { NextAuthOptions } from 'next-auth'
 import CredentialsProvider from 'next-auth/providers/credentials'
 
-console.log('🔥 NEXTAUTH ROUTE LOADED:', new Date().toISOString())
+console.log('🔥 [App Router] NextAuth route.ts loaded at:', new Date().toISOString())
 
-const authOptions = {
-  secret: process.env.NEXTAUTH_SECRET,
+const authOptions: NextAuthOptions = {
+  debug: process.env.NODE_ENV === 'development',
+  
   providers: [
     CredentialsProvider({
       name: 'credentials',
@@ -12,79 +13,126 @@ const authOptions = {
         email: { label: 'Email', type: 'email' },
         password: { label: 'Password', type: 'password' }
       },
-      async authorize(credentials) {
-        console.log('🔥 AUTHORIZE CALLED for:', credentials?.email)
+      async authorize(credentials, req) {
+        console.log('🔍 [App Router] NextAuth authorize() called')
+        console.log(`📤 [App Router] Credentials: email=${credentials?.email}`)
         
         if (!credentials?.email || !credentials?.password) {
-          console.log('❌ Missing credentials')
+          console.log('❌ [App Router] Missing credentials')
           return null
         }
 
         try {
-          // Call your Hetzner backend directly (this should work from server-side)
+          const controller = new AbortController()
+          const timeoutId = setTimeout(() => controller.abort(), 15000)
+
+          console.log('📡 [App Router] Calling Hetzner backend...')
+          console.log(`📡 [App Router] Backend URL: http://128.140.123.48:8000/api/auth/login/`)
+
           const response = await fetch('http://128.140.123.48:8000/api/auth/login/', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
+              'Accept': 'application/json',
             },
             body: JSON.stringify({
               email: credentials.email,
               password: credentials.password,
             }),
+            signal: controller.signal
           })
 
-          console.log('🌐 Backend response status:', response.status)
+          clearTimeout(timeoutId)
 
-          if (response.ok) {
-            const userData = await response.json()
-            console.log('✅ Backend success:', userData)
-            
-            if (userData.success && userData.user) {
-              return {
-                id: String(userData.user.id),
-                email: userData.user.email,
-                name: `${userData.user.first_name} ${userData.user.last_name}`.trim() || userData.user.email,
-                role: userData.user.user_type || 'user',
-                accessToken: userData.token,
-              }
+          console.log(`📡 [App Router] Backend status: ${response.status}`)
+          console.log(`📡 [App Router] Backend headers: ${JSON.stringify([...response.headers.entries()])}`)
+          
+          if (!response.ok) {
+            const errorText = await response.text()
+            console.log(`❌ [App Router] Backend error: ${errorText}`)
+            return null
+          }
+
+          const userData = await response.json()
+          console.log('✅ [App Router] Backend success')
+          console.log(`👤 [App Router] User data: ${JSON.stringify(userData, null, 2)}`)
+
+          if (userData && userData.success && userData.user) {
+            const authUser = {
+              id: String(userData.user.id || Date.now()),
+              email: userData.user.email,
+              name: `${userData.user.first_name} ${userData.user.last_name}`.trim() || userData.user.email,
+              accessToken: userData.token,
+              roles: [userData.user.user_type || 'user']
             }
+            console.log(`✅ [App Router] Returning user: ${JSON.stringify(authUser, null, 2)}`)
+            return authUser
+          }
+
+          console.log('❌ [App Router] Invalid user data from backend')
+          return null
+
+        } catch (error: any) {
+          console.log(`💥 [App Router] Error: ${error.message}`)
+          console.log(`💥 [App Router] Error type: ${error.name}`)
+          
+          if (error.name === 'AbortError') {
+            console.log('⏰ [App Router] Backend timeout')
           }
           
-          console.log('❌ Backend authentication failed')
-          return null
-        } catch (error) {
-          console.error('🚨 Auth error:', error)
           return null
         }
       }
     })
   ],
+
   callbacks: {
     async jwt({ token, user }) {
+      console.log('🔍 [App Router] JWT callback')
+      
       if (user) {
-        token.id = user.id
-        token.role = user.role
-        token.accessToken = user.accessToken
+        token.accessToken = (user as any).accessToken
+        token.roles = (user as any).roles
+        console.log('✅ [App Router] JWT updated')
       }
+      
       return token
     },
+
     async session({ session, token }) {
+      console.log('🔍 [App Router] Session callback')
+      
       if (token) {
-        session.user.id = token.id as string
-        session.user.role = token.role as string
-        session.accessToken = token.accessToken
+        (session as any).accessToken = token.accessToken;
+        (session.user as any).roles = token.roles
+        console.log('✅ [App Router] Session updated')
       }
+      
       return session
     }
   },
-  session: {
-    strategy: 'jwt' as const
-  },
+
   pages: {
-    signIn: '/login'
+    signIn: '/login',
+    error: '/login'
   },
-  debug: process.env.NODE_ENV === 'development'
+
+  session: {
+    strategy: 'jwt',
+    maxAge: 30 * 24 * 60 * 60, // 30 days
+  },
+
+  events: {
+    async signIn(message) {
+      console.log('🎉 [App Router] SignIn event:', message.user.email)
+    },
+    async signOut(message) {
+      console.log('👋 [App Router] SignOut event')
+    },
+  },
 }
 
 const handler = NextAuth(authOptions)
+
+// App Router requires named exports
 export { handler as GET, handler as POST }
