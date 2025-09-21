@@ -165,20 +165,13 @@ export const authOptions = {
       },
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) {
-          console.log('❌ NextAuth: Missing credentials')
           return null
         }
 
         try {
-          const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://128.140.123.48:8000'
-          console.log('🔑 NextAuth: Attempting login to:', API_URL)
-          console.log('🔑 NextAuth: Environment variables:', {
-            NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL,
-            NEXTAUTH_URL: process.env.NEXTAUTH_URL,
-            NODE_ENV: process.env.NODE_ENV
-          })
-          
-          const response = await fetch(`${API_URL}/api/auth/login/`, {
+          // Use Vercel API route to call backend (production solution)
+          const baseUrl = process.env.NEXTAUTH_URL || 'https://proconnectsa.co.za'
+          const response = await fetch(`${baseUrl}/api/auth/backend-login`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -187,52 +180,24 @@ export const authOptions = {
               email: credentials.email,
               password: credentials.password,
             }),
-            // Add timeout and retry logic
-            signal: AbortSignal.timeout(10000) // 10 second timeout
           })
 
-          console.log('📡 NextAuth: Response status:', response.status)
-          
           if (response.ok) {
             const data = await response.json()
-            console.log('📦 NextAuth: Response data:', data)
-            
             if (data.success && data.user) {
-              const user = {
+              return {
                 id: String(data.user.id),
                 email: data.user.email,
                 name: `${data.user.first_name || 'User'} ${data.user.last_name || 'Name'}`,
                 userType: data.user.user_type,
                 token: data.token
               }
-              console.log('✅ NextAuth: User created:', user)
-              return user
             }
-          } else {
-            const errorData = await response.text() // Use text() in case JSON parsing fails
-            console.log('❌ NextAuth: Login failed:', errorData)
           }
+          
           return null
         } catch (error) {
-          console.error('💥 NextAuth authorize error:', error)
-          console.error('💥 Error details:', {
-            name: error instanceof Error ? error.name : 'Unknown',
-            message: error instanceof Error ? error.message : 'Unknown error',
-            cause: error instanceof Error ? error.cause : undefined
-          })
-          
-          // Temporary fallback for testing - REMOVE IN PRODUCTION
-          if (credentials.email === 'admin@proconnectsa.co.za' && credentials.password === 'admin123') {
-            console.log('🔧 NextAuth: Using fallback authentication for admin')
-            return {
-              id: '1',
-              email: 'admin@proconnectsa.co.za',
-              name: 'Admin User',
-              userType: 'admin',
-              token: 'fallback-token'
-            }
-          }
-          
+          console.error('NextAuth authorization failed:', error)
           return null
         }
       }
