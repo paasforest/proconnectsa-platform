@@ -1,6 +1,12 @@
 import NextAuth from "next-auth"
 import CredentialsProvider from "next-auth/providers/credentials"
 
+// Environment Variables Debug Logging
+console.log('🔍 Environment Variables on Auth Route:')
+console.log('NEXTAUTH_URL:', process.env.NEXTAUTH_URL)
+console.log('NEXTAUTH_SECRET:', process.env.NEXTAUTH_SECRET ? 'SET' : 'NOT SET')
+console.log('NEXT_PUBLIC_API_URL:', process.env.NEXT_PUBLIC_API_URL)
+
 // Define the auth configuration
 const authOptions = {
   secret: process.env.NEXTAUTH_SECRET,
