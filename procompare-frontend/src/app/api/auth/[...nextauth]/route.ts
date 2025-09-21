@@ -30,7 +30,7 @@ const authOptions = {
         }
 
         try {
-          const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://128.140.123.48:8000'
+          const API_URL = 'http://128.140.123.48:8000' // Hardcoded to bypass wrong env var
           const loginUrl = `${API_URL}/api/auth/backend-login/`
           
           console.log(`🌐 Calling backend: ${loginUrl}`)
