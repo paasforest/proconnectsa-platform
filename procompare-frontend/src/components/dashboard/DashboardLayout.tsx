@@ -72,9 +72,8 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     const fetchUserStats = async () => {
       try {
-        if (session?.user) {
-          // For now, use a mock token since we don't have backend token in session yet
-          apiClient.setToken('mock-token-for-demo');
+        if (session?.accessToken) {
+          apiClient.setToken(session.accessToken);
         }
         const response = await apiClient.get('/api/auth/stats/');
         setUserStats(response);
@@ -83,18 +82,17 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
       }
     };
 
-    if (session?.user) {
+    if (session?.accessToken) {
       fetchUserStats();
     }
-  }, [session?.user]);
+  }, [session?.accessToken]);
 
   // Fetch user profile for personalization
   useEffect(() => {
     const fetchUserProfile = async () => {
       try {
-        if (session?.user) {
-          // For now, use a mock token since we don't have backend token in session yet
-          apiClient.setToken('mock-token-for-demo');
+        if (session?.accessToken) {
+          apiClient.setToken(session.accessToken);
         }
         const response = await apiClient.get('/api/auth/profile/');
         setUserProfile(response);
@@ -104,10 +102,10 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
       }
     };
 
-    if (session?.user) {
+    if (session?.accessToken) {
       fetchUserProfile();
     }
-  }, [session?.user]);
+  }, [session?.accessToken]);
 
   // Fetch real notifications from API
   useEffect(() => {
@@ -126,14 +124,14 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
       }
     };
 
-    if (session?.user) {
+    if (session?.accessToken) {
       fetchNotifications();
       
       // Refresh notifications every 30 seconds
       const interval = setInterval(fetchNotifications, 30000);
       return () => clearInterval(interval);
     }
-  }, [session?.user]);
+  }, [session?.accessToken]);
 
   // Fetch notification count separately for accurate badge
   useEffect(() => {
@@ -150,19 +148,19 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
       }
     };
 
-    if (session?.user) {
+    if (session?.accessToken) {
       fetchNotificationCount();
       
       // Refresh count every 10 seconds for real-time updates
       const interval = setInterval(fetchNotificationCount, 10000);
       return () => clearInterval(interval);
     }
-  }, [session?.user]);
+  }, [session?.accessToken]);
 
   const handleLogout = async () => {
     try {
-      // Call backend logout endpoint if we have a session
-      if (session?.user) {
+      // Call backend logout endpoint if we have a token
+      if (session?.accessToken) {
         try {
           await apiClient.logout();
         } catch (error) {

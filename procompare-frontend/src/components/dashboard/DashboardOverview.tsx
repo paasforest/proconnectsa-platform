@@ -51,9 +51,8 @@ const DashboardOverview = () => {
     const fetchDashboardData = async () => {
       try {
         setLoading(true);
-        if (session?.user) {
-          // For now, use a mock token since we don't have backend token in session yet
-          apiClient.setToken('mock-token-for-demo');
+        if (session?.accessToken) {
+          apiClient.setToken(session.accessToken);
         }
         
         // Fetch both stats and profile data
@@ -72,10 +71,10 @@ const DashboardOverview = () => {
       }
     };
 
-    if (session?.user) {
+    if (session?.accessToken) {
       fetchDashboardData();
     }
-  }, [session?.user]);
+  }, [session?.accessToken]);
 
   if (loading) {
     return (
