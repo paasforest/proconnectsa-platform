@@ -31,7 +31,9 @@ const authOptions = {
 
         try {
           // Use Vercel proxy route to bypass mixed content issues
-          const loginUrl = '/api/auth/backend-login/'
+          // Make URL absolute to ensure NextAuth can call it properly
+          const baseUrl = process.env.NEXTAUTH_URL || process.env.NEXT_PUBLIC_FRONTEND_URL || 'http://localhost:3000'
+          const loginUrl = `${baseUrl}/api/auth/backend-login/`
           
           console.log(`🌐 Calling backend: ${loginUrl}`)
           console.log(`📤 Sending data:`, { email: credentials.email, password: '***' })
@@ -46,6 +48,8 @@ const authOptions = {
               email: credentials.email,
               password: credentials.password,
             }),
+            // Add timeout to prevent hanging
+            signal: AbortSignal.timeout(10000) // 10 second timeout
           })
           
           console.log(`📡 Backend response status: ${response.status}`)
