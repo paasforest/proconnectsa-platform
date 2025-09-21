@@ -2,10 +2,12 @@ import NextAuth from "next-auth"
 import CredentialsProvider from "next-auth/providers/credentials"
 
 // Environment Variables Debug Logging
+console.log('🔍 NextAuth Route Loaded at:', new Date().toISOString())
 console.log('🔍 Environment Variables on Auth Route:')
 console.log('NEXTAUTH_URL:', process.env.NEXTAUTH_URL)
 console.log('NEXTAUTH_SECRET:', process.env.NEXTAUTH_SECRET ? 'SET' : 'NOT SET')
 console.log('NEXT_PUBLIC_API_URL:', process.env.NEXT_PUBLIC_API_URL)
+console.log('🔍 Route file is being executed!')
 
 // Define the auth configuration
 const authOptions = {
@@ -21,6 +23,8 @@ const authOptions = {
       },
       
       async authorize(credentials, req) {
+        console.log('🔥 AUTHORIZE FUNCTION CALLED! This means NextAuth is working!')
+        console.log('🔥 Timestamp:', new Date().toISOString())
         console.log('🔐 NextAuth authorize called for:', credentials?.email)
         console.log('🔐 Full credentials object:', { ...credentials, password: '***' })
         console.log('🔐 Request headers:', req?.headers || 'No headers')
@@ -34,6 +38,15 @@ const authOptions = {
         if (!credentials?.email || !credentials?.password) {
           console.error("❌ Missing credentials - email:", !!credentials?.email, "password:", !!credentials?.password)
           return null
+        }
+
+        // TEMPORARY: Return a test user to see if NextAuth works
+        console.log('🧪 TEMPORARY TEST: Returning mock user without backend call')
+        return {
+          id: '123',
+          email: credentials.email,
+          name: 'Test User',
+          role: 'user'
         }
 
         try {
