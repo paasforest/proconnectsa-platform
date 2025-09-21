@@ -5,6 +5,8 @@
   "devCommand": "npm run dev",
   "env": {
     "NEXT_PUBLIC_API_URL": "http://128.140.123.48:8000",
-    "NEXT_PUBLIC_FRONTEND_URL": "https://proconnectsa.co.za"
+    "NEXT_PUBLIC_FRONTEND_URL": "https://proconnectsa.co.za",
+    "NEXTAUTH_SECRET": "proconnectsa-nextauth-secret-key-2024-production",
+    "NEXTAUTH_URL": "https://proconnectsa.co.za"
   }
 }
