@@ -164,18 +164,17 @@ export const authOptions = {
         password: { label: "Password", type: "password" }
       },
       async authorize(credentials) {
-        if (!credentials?.email || !credentials?.password) {
-          return null
-        }
-
         try {
-          // Use internal Vercel API route as proxy to backend
-          const baseUrl = process.env.NEXTAUTH_URL || 'https://proconnectsa.co.za'
-          const apiUrl = `${baseUrl}/api/auth/backend-login`
+          console.log('🔐 NextAuth authorize called for:', credentials?.email)
           
-          console.log('🔑 NextAuth: Using Vercel API proxy:', apiUrl)
-          
-          const response = await fetch(apiUrl, {
+          if (!credentials?.email || !credentials?.password) {
+            console.log('❌ Missing credentials')
+            return null
+          }
+
+          // Call the backend endpoint directly (as suggested in the fix)
+          const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://128.140.123.48:8000'
+          const response = await fetch(`${API_URL}/api/auth/backend-login/`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -184,69 +183,55 @@ export const authOptions = {
               email: credentials.email,
               password: credentials.password,
             }),
-            // Add timeout for reliability
-            signal: AbortSignal.timeout(15000)
           })
 
-          console.log('📡 NextAuth: Vercel API response status:', response.status)
+          console.log('📡 Backend response status:', response.status)
 
-          if (response.ok) {
-            const data = await response.json()
-            console.log('📦 NextAuth: Vercel API response data:', data)
-            
-            if (data.success && data.user) {
-              const user = {
-                id: String(data.user.id),
-                email: data.user.email,
-                name: `${data.user.first_name || 'User'} ${data.user.last_name || 'Name'}`,
-                userType: data.user.user_type,
-                token: data.token
-              }
-              console.log('✅ NextAuth: User object created:', user)
-              return user
-            }
-          } else {
-            const errorData = await response.json().catch(() => ({ message: 'Unknown error' }))
-            console.log('❌ NextAuth: Vercel API error:', errorData)
+          if (!response.ok) {
+            console.error('❌ Authentication failed:', response.status)
+            return null
           }
-          
-          return null
+
+          const user = await response.json()
+          console.log('✅ User authenticated:', user.email)
+
+          return {
+            id: user.id,
+            email: user.email,
+            name: user.name,
+            role: user.role
+          }
         } catch (error) {
-          console.error('💥 NextAuth authorization failed:', error)
-          console.error('💥 Error details:', {
-            name: error instanceof Error ? error.name : 'Unknown',
-            message: error instanceof Error ? error.message : String(error)
-          })
+          console.error('🚨 NextAuth authorize error:', error)
           return null
         }
       }
     })
   ],
+  
   callbacks: {
     async jwt({ token, user }: any) {
       if (user) {
-        console.log('🎫 NextAuth JWT: Adding user to token:', user)
-        token.userType = user.userType
-        token.backendToken = user.token
+        token.id = user.id
+        token.role = user.role
       }
       return token
     },
     async session({ session, token }: any) {
-      console.log('🎭 NextAuth Session: Creating session for token:', token)
-      session.user.userType = token.userType
-      session.user.backendToken = token.backendToken
+      session.user.id = token.id
+      session.user.role = token.role
       return session
-    },
-    async redirect({ url, baseUrl }: any) {
-      console.log('🔀 NextAuth Redirect: url =', url, 'baseUrl =', baseUrl)
-      // Redirect to dashboard after successful login
-      if (url.startsWith('/')) return `${baseUrl}${url}`
-      else if (new URL(url).origin === baseUrl) return url
-      return `${baseUrl}/dashboard`
-    },
+    }
   },
+  
+  session: {
+    strategy: 'jwt' as const,
+  },
+  
   pages: {
     signIn: '/login',
-    error: '/api/auth/error',
+    error: '/login',
   },
+  
+  debug: true, // Enable for debugging as suggested
 }

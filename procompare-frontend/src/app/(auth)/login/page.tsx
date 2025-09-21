@@ -40,29 +40,30 @@ export default function LoginPage() {
     setError("")
 
     try {
-      console.log("🔑 Frontend: Starting NextAuth login for:", data.email)
+      console.log('🚀 Attempting login via NextAuth for:', data.email)
       
-      const result = await signIn("credentials", {
+      const result = await signIn('credentials', {
         email: data.email,
         password: data.password,
         redirect: false,
       })
 
-      console.log("📡 Frontend: NextAuth result:", result)
+      console.log('📡 Login result:', result)
 
       if (result?.error) {
-        console.error("❌ Frontend: NextAuth error:", result.error)
-        setError("Invalid email or password")
+        console.error('❌ Login failed:', result.error)
+        setError('Invalid email or password')
       } else if (result?.ok) {
-        console.log("✅ Frontend: Login successful, redirecting...")
-        router.push("/dashboard")
+        console.log('✅ Login successful')
+        // Redirect to dashboard
+        router.push('/dashboard')
       } else {
-        console.error("❌ Frontend: Unknown login result:", result)
-        setError("Login failed. Please try again.")
+        console.error('❌ Unexpected login result:', result)
+        setError('Login failed. Please try again.')
       }
     } catch (error) {
-      console.error("💥 Frontend: Login exception:", error)
-      setError("An unexpected error occurred. Please try again.")
+      console.error('💥 Login error:', error)
+      setError('An unexpected error occurred. Please try again.')
     } finally {
       setIsLoading(false)
     }
