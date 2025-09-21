@@ -42,13 +42,14 @@ const NewProviderDashboard = () => {
   const { socket, isConnected } = useWebSocket();
   const { notifications: wsNotifications } = useNotifications();
 
-  // Fetch real provider data
+  // Fetch real provider data from Hetzner backend
   const token = (session as any)?.accessToken || (session as any)?.token;
-  const { data: profile, mutate: mutateProfile } = useSWR(token ? ['http://localhost:8000/api/auth/profile/', token] : null, ([url, token]) => fetcher(url, token));
-  const { data: stats, mutate: mutateStats } = useSWR(token ? ['http://localhost:8000/api/auth/provider-stats/', token] : null, ([url, token]) => fetcher(url, token));
-  const { data: leads, mutate: mutateLeads } = useSWR(token ? ['http://localhost:8000/api/leads/bark/available/', token] : null, ([url, token]) => fetcher(url, token));
-  const { data: myClaims, mutate: mutateClaims } = useSWR(token ? ['http://localhost:8000/api/auth/leads/my-claims/', token] : null, ([url, token]) => fetcher(url, token));
-  const { data: deposits, mutate: mutateDeposits } = useSWR(token ? ['http://localhost:8000/api/payments/dashboard/deposits/', token] : null, ([url, token]) => fetcher(url, token));
+  const API_BASE = 'http://128.140.123.48:8000';
+  const { data: profile, mutate: mutateProfile } = useSWR(token ? [`${API_BASE}/api/auth/profile/`, token] : null, ([url, token]) => fetcher(url, token));
+  const { data: stats, mutate: mutateStats } = useSWR(token ? [`${API_BASE}/api/auth/stats/`, token] : null, ([url, token]) => fetcher(url, token));
+  const { data: leads, mutate: mutateLeads } = useSWR(token ? [`${API_BASE}/api/leads/wallet/available/`, token] : null, ([url, token]) => fetcher(url, token));
+  const { data: myClaims, mutate: mutateClaims } = useSWR(token ? [`${API_BASE}/api/auth/leads/my-claims/`, token] : null, ([url, token]) => fetcher(url, token));
+  const { data: deposits, mutate: mutateDeposits } = useSWR(token ? [`${API_BASE}/api/payments/dashboard/deposits/`, token] : null, ([url, token]) => fetcher(url, token));
 
   // Handle WebSocket events
   useEffect(() => {

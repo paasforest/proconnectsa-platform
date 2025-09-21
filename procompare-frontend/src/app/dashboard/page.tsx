@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
-import WalletLeadDashboard from '@/components/dashboard/WalletLeadDashboard'
+import NewProviderDashboard from '@/components/dashboard/NewProviderDashboard'
 
 export default async function DashboardPage() {
   // Check if user is authenticated
@@ -21,8 +21,8 @@ export default async function DashboardPage() {
     redirect('/admin');
   }
 
-  // Professional provider dashboard with live backend data
-  return <WalletLeadDashboard />;
+  // Complete professional provider dashboard with Nedbank integration
+  return <NewProviderDashboard />;
 }
 
 
