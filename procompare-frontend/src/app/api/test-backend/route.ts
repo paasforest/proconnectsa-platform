@@ -1,33 +1,27 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextResponse } from 'next/server'
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
-    const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://128.140.123.48:8000'
-    console.log('🔍 Testing backend connection to:', API_URL)
-    
-    const response = await fetch(`${API_URL}/health/`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+    const response = await fetch('http://128.140.123.48:8000/api/auth/backend-login/', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        email: 'admin@proconnectsa.co.za',
+        password: 'admin123'
+      })
     })
-
-    const data = await response.json()
+    
+    const data = await response.text()
     
     return NextResponse.json({
-      success: true,
-      backend_url: API_URL,
-      backend_response: data,
-      response_status: response.status,
-      can_reach_backend: response.ok
+      status: response.status,
+      data: data,
+      reachable: true
     })
   } catch (error) {
-    console.error('❌ Backend connection test failed:', error)
     return NextResponse.json({
-      success: false,
-      backend_url: process.env.NEXT_PUBLIC_API_URL || 'http://128.140.123.48:8000',
       error: error instanceof Error ? error.message : 'Unknown error',
-      can_reach_backend: false
-    }, { status: 500 })
+      reachable: false
+    })
   }
 }
