@@ -146,3 +146,7 @@ const handler = NextAuth(authOptions)
 
 // Export the handler for both GET and POST requests (App Router format)
 export { handler as GET, handler as POST }
+
+// Alternative export format (try this if above doesn't work)
+// export const GET = handler
+// export const POST = handler
