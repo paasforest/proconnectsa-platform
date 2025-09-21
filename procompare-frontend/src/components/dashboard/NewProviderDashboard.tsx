@@ -42,9 +42,9 @@ const NewProviderDashboard = () => {
   const { socket, isConnected } = useWebSocket();
   const { notifications: wsNotifications } = useNotifications();
 
-  // Fetch real provider data from Hetzner backend
-  const token = (session as any)?.backendToken || 'mock-token'; // Use the token from our backend
-  const API_BASE = 'http://128.140.123.48:8000';
+  // Fetch real provider data via Vercel proxy (secure HTTPS)
+  const token = (session as any)?.backendToken || 'mock-token';
+  const API_BASE = '/api/proxy'; // Use Vercel proxy for secure HTTPS communication
   
   // Simple fetch without SWR to avoid hanging
   const [profile, setProfile] = useState(null);
@@ -55,13 +55,13 @@ const NewProviderDashboard = () => {
   
   const fetchData = async () => {
     try {
-      console.log('📊 Fetching dashboard data...');
+      console.log('📊 Fetching dashboard data via secure proxy...');
       const [profileRes, statsRes, leadsRes, claimsRes, depositsRes] = await Promise.all([
-        fetch(`${API_BASE}/api/auth/profile/`),
-        fetch(`${API_BASE}/api/auth/stats/`), 
-        fetch(`${API_BASE}/api/leads/wallet/available/`),
-        fetch(`${API_BASE}/api/auth/leads/my-claims/`),
-        fetch(`${API_BASE}/api/payments/dashboard/deposits/`)
+        fetch('/api/proxy/api/auth/profile/'),
+        fetch('/api/proxy/api/auth/stats/'), 
+        fetch('/api/proxy/api/leads/wallet/available/'),
+        fetch('/api/proxy/api/auth/leads/my-claims/'),
+        fetch('/api/proxy/api/payments/dashboard/deposits/')
       ]);
       
       if (profileRes.ok) setProfile(await profileRes.json());
@@ -70,7 +70,7 @@ const NewProviderDashboard = () => {
       if (claimsRes.ok) setMyClaims(await claimsRes.json());
       if (depositsRes.ok) setDeposits(await depositsRes.json());
       
-      console.log('✅ Dashboard data loaded');
+      console.log('✅ Dashboard data loaded via secure proxy');
     } catch (error) {
       console.error('❌ Dashboard data loading failed:', error);
     }
