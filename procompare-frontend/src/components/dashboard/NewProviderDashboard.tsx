@@ -53,26 +53,30 @@ const NewProviderDashboard = () => {
   const [myClaims, setMyClaims] = useState(null);
   const [deposits, setDeposits] = useState(null);
   
+  const fetchData = async () => {
+    try {
+      console.log('📊 Fetching dashboard data...');
+      const [profileRes, statsRes, leadsRes, claimsRes, depositsRes] = await Promise.all([
+        fetch(`${API_BASE}/api/auth/profile/`),
+        fetch(`${API_BASE}/api/auth/stats/`), 
+        fetch(`${API_BASE}/api/leads/wallet/available/`),
+        fetch(`${API_BASE}/api/auth/leads/my-claims/`),
+        fetch(`${API_BASE}/api/payments/dashboard/deposits/`)
+      ]);
+      
+      if (profileRes.ok) setProfile(await profileRes.json());
+      if (statsRes.ok) setStats(await statsRes.json());
+      if (leadsRes.ok) setLeads(await leadsRes.json());
+      if (claimsRes.ok) setMyClaims(await claimsRes.json());
+      if (depositsRes.ok) setDeposits(await depositsRes.json());
+      
+      console.log('✅ Dashboard data loaded');
+    } catch (error) {
+      console.error('❌ Dashboard data loading failed:', error);
+    }
+  };
+
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        console.log('📊 Fetching dashboard data...');
-        const [profileRes, statsRes, leadsRes] = await Promise.all([
-          fetch(`${API_BASE}/api/auth/profile/`),
-          fetch(`${API_BASE}/api/auth/stats/`), 
-          fetch(`${API_BASE}/api/leads/wallet/available/`)
-        ]);
-        
-        if (profileRes.ok) setProfile(await profileRes.json());
-        if (statsRes.ok) setStats(await statsRes.json());
-        if (leadsRes.ok) setLeads(await leadsRes.json());
-        
-        console.log('✅ Dashboard data loaded');
-      } catch (error) {
-        console.error('❌ Dashboard data loading failed:', error);
-      }
-    };
-    
     if (session) {
       fetchData();
     }
@@ -82,13 +86,12 @@ const NewProviderDashboard = () => {
   useEffect(() => {
     if (socket && socket.readyState === WebSocket.OPEN) {
       const handleLeadUpdate = (data: any) => {
-        mutateLeads();
+        fetchData();
         toast.success('New lead available!');
       };
 
       const handleLeadClaimed = (data: any) => {
-        mutateLeads();
-        mutateClaims();
+        fetchData();
         toast.info('Lead claimed by another provider');
       };
 
@@ -111,7 +114,7 @@ const NewProviderDashboard = () => {
         socket.removeEventListener('message', handleLeadClaimed);
       };
     }
-  }, [socket, mutateLeads, mutateClaims]);
+  }, [socket, fetchData]);
 
   // Calculate wallet balance from deposits
   const walletBalance = deposits?.deposits?.reduce((total: number, deposit: any) => {
@@ -148,9 +151,7 @@ const NewProviderDashboard = () => {
       if (response.ok) {
         const result = await response.json();
         toast.success(`Lead claimed successfully! ${result.credit_cost} credits deducted.`);
-        mutateLeads();
-        mutateClaims();
-        mutateProfile();
+        fetchData();
       } else {
         const error = await response.json();
         toast.error(error.error || 'Failed to claim lead');
@@ -174,7 +175,7 @@ const NewProviderDashboard = () => {
       if (response.ok) {
         const result = await response.json();
         toast.success(`Deposit request created! Reference: ${result.reference_number || result.id}`);
-        mutateDeposits();
+        fetchData();
       } else {
         const error = await response.json();
         toast.error(error.detail || 'Failed to create deposit request');
@@ -336,7 +337,7 @@ const NewProviderDashboard = () => {
                 </div>
                 <div className="flex space-x-2">
                   <button 
-                    onClick={() => mutateLeads()}
+                    onClick={() => fetchData()}
                     className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
                   >
                     <RefreshCw className="w-4 h-4 mr-2 inline" />
