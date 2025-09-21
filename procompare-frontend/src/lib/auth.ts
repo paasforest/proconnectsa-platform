@@ -169,29 +169,30 @@ export const authOptions = {
         }
 
         try {
-          // Direct backend call (server-to-server from Vercel to Hetzner)
-          const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://128.140.123.48:8000'
-          console.log('🔑 NextAuth: Attempting direct backend login to:', API_URL)
+          // Use internal Vercel API route as proxy to backend
+          const baseUrl = process.env.NEXTAUTH_URL || 'https://proconnectsa.co.za'
+          const apiUrl = `${baseUrl}/api/auth/backend-login`
           
-          const response = await fetch(`${API_URL}/api/auth/login/`, {
+          console.log('🔑 NextAuth: Using Vercel API proxy:', apiUrl)
+          
+          const response = await fetch(apiUrl, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
-              'User-Agent': 'NextAuth-Vercel/1.0'
             },
             body: JSON.stringify({
               email: credentials.email,
               password: credentials.password,
             }),
             // Add timeout for reliability
-            signal: AbortSignal.timeout(10000)
+            signal: AbortSignal.timeout(15000)
           })
 
-          console.log('📡 NextAuth: Backend response status:', response.status)
+          console.log('📡 NextAuth: Vercel API response status:', response.status)
 
           if (response.ok) {
             const data = await response.json()
-            console.log('📦 NextAuth: Backend response data:', data)
+            console.log('📦 NextAuth: Vercel API response data:', data)
             
             if (data.success && data.user) {
               const user = {
@@ -205,8 +206,8 @@ export const authOptions = {
               return user
             }
           } else {
-            const errorText = await response.text()
-            console.log('❌ NextAuth: Backend error response:', errorText)
+            const errorData = await response.json().catch(() => ({ message: 'Unknown error' }))
+            console.log('❌ NextAuth: Vercel API error:', errorData)
           }
           
           return null
