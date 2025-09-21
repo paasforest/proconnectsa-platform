@@ -36,11 +36,15 @@ export default function LoginPage() {
   })
 
   const onSubmit = async (data: LoginForm) => {
+    console.log('🚀 FRONTEND LOGIN START - Timestamp:', new Date().toISOString())
+    console.log('🚀 Login form data received:', { email: data.email, password: '***' })
+    
     setIsLoading(true)
     setError("")
 
     try {
-      console.log('🚀 Attempting login via NextAuth for:', data.email)
+      console.log('🚀 Step 1: Calling NextAuth signIn...')
+      console.log('🚀 Step 2: Using credentials provider with email:', data.email)
       
       const result = await signIn('credentials', {
         email: data.email,
@@ -48,23 +52,35 @@ export default function LoginPage() {
         redirect: false,
       })
 
-      console.log('📡 Login result:', result)
+      console.log('📡 Step 3: NextAuth signIn completed')
+      console.log('📡 Step 4: Login result object:', result)
+      console.log('📡 Step 5: Result properties:', {
+        ok: result?.ok,
+        error: result?.error,
+        status: result?.status,
+        url: result?.url
+      })
 
       if (result?.error) {
-        console.error('❌ Login failed:', result.error)
+        console.error('❌ Step 6: Login failed with error:', result.error)
         setError('Invalid email or password')
       } else if (result?.ok) {
-        console.log('✅ Login successful')
+        console.log('✅ Step 6: Login successful!')
+        console.log('✅ Step 7: Redirecting to dashboard...')
         // Redirect to dashboard
         router.push('/dashboard')
       } else {
-        console.error('❌ Unexpected login result:', result)
+        console.error('❌ Step 6: Unexpected login result (not ok, no error):', result)
         setError('Login failed. Please try again.')
       }
     } catch (error) {
-      console.error('💥 Login error:', error)
+      console.error('💥 FRONTEND EXCEPTION during login:', error)
+      console.error('💥 Exception type:', error?.constructor?.name)
+      console.error('💥 Exception message:', error?.message)
+      console.error('💥 Exception stack:', error?.stack)
       setError('An unexpected error occurred. Please try again.')
     } finally {
+      console.log('🏁 FRONTEND LOGIN END - Setting loading to false')
       setIsLoading(false)
     }
   }

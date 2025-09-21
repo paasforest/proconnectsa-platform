@@ -22,10 +22,17 @@ const authOptions = {
       
       async authorize(credentials, req) {
         console.log('🔐 NextAuth authorize called for:', credentials?.email)
+        console.log('🔐 Full credentials object:', { ...credentials, password: '***' })
+        console.log('🔐 Request headers:', req?.headers || 'No headers')
+        console.log('🔐 Environment check:', {
+          NEXTAUTH_URL: process.env.NEXTAUTH_URL,
+          NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL,
+          NODE_ENV: process.env.NODE_ENV
+        })
         
         // Validate input
         if (!credentials?.email || !credentials?.password) {
-          console.error("❌ Missing credentials")
+          console.error("❌ Missing credentials - email:", !!credentials?.email, "password:", !!credentials?.password)
           return null
         }
 
@@ -33,8 +40,9 @@ const authOptions = {
           // Use Vercel proxy route to bypass mixed content issues
           const loginUrl = '/api/auth/backend-login/'
           
-          console.log(`🌐 Calling backend: ${loginUrl}`)
-          console.log(`📤 Sending data:`, { email: credentials.email, password: '***' })
+          console.log(`🌐 Step 1: Preparing to call backend at: ${loginUrl}`)
+          console.log(`📤 Step 2: Sending data:`, { email: credentials.email, password: '***' })
+          console.log(`🕒 Step 3: Starting fetch request at:`, new Date().toISOString())
           
           const response = await fetch(loginUrl, {
             method: 'POST',
@@ -48,44 +56,68 @@ const authOptions = {
             }),
           })
           
-          console.log(`📡 Backend response status: ${response.status}`)
-          console.log(`📡 Backend response headers:`, Object.fromEntries(response.headers.entries()))
+          console.log(`🕒 Step 4: Fetch completed at:`, new Date().toISOString())
+          console.log(`📡 Step 5: Backend response status: ${response.status}`)
+          console.log(`📡 Step 6: Backend response headers:`, Object.fromEntries(response.headers.entries()))
+          console.log(`📡 Step 7: Response OK?`, response.ok)
           
           if (!response.ok) {
-            console.error(`❌ Backend returned ${response.status}`)
+            console.error(`❌ Step 8: Backend returned non-OK status ${response.status}`)
             
             const errorText = await response.text()
-            console.error('❌ Backend error response:', errorText)
+            console.error('❌ Step 9: Backend error response:', errorText)
+            console.error('❌ Step 10: Returning null due to error response')
             
             return null
           }
           
+          console.log(`✅ Step 8: Response OK, reading response body...`)
+          
           // Get response text first
           const responseText = await response.text()
-          console.log('📄 Raw backend response:', responseText)
+          console.log('📄 Step 9: Raw backend response length:', responseText.length)
+          console.log('📄 Step 10: Raw backend response:', responseText)
           
           // Parse JSON
           let userData
           try {
+            console.log('🔄 Step 11: Attempting to parse JSON...')
             userData = JSON.parse(responseText)
-            console.log('✅ Parsed user data:', userData)
+            console.log('✅ Step 12: Successfully parsed user data:', userData)
           } catch (parseError) {
-            console.error('❌ JSON parse error:', parseError)
-            console.error('❌ Response text was:', responseText)
+            console.error('❌ Step 12: JSON parse error:', parseError)
+            console.error('❌ Response text that failed to parse:', responseText)
+            console.error('❌ Returning null due to parse error')
             return null
           }
           
           // Handle proxy response format (which forwards Flask API response)
+          console.log('🔄 Step 13: Checking response format...')
+          console.log('🔍 userData exists?', !!userData)
+          console.log('🔍 userData.success?', userData?.success)
+          
           if (!userData || !userData.success) {
-            console.error('❌ Login failed - API returned:', userData)
+            console.error('❌ Step 14: Login failed - API returned unsuccessful response')
+            console.error('❌ Full response data:', userData)
+            console.error('❌ Returning null due to unsuccessful response')
             return null
           }
           
+          console.log('✅ Step 14: Response indicates success, extracting user data...')
+          
           const user = userData.user
+          console.log('🔍 Step 15: Extracted user object:', user)
+          console.log('🔍 User has id?', !!user?.id)
+          console.log('🔍 User has email?', !!user?.email)
+          
           if (!user || !user.id || !user.email) {
-            console.error('❌ Invalid user data - missing id or email:', user)
+            console.error('❌ Step 16: Invalid user data - missing required fields')
+            console.error('❌ User object:', user)
+            console.error('❌ Returning null due to missing user data')
             return null
           }
+          
+          console.log('✅ Step 16: User data valid, creating NextAuth user object...')
           
           // Create user object for NextAuth
           const userObject = {
@@ -95,12 +127,17 @@ const authOptions = {
             role: user.user_type || 'user',
           }
           
-          console.log('🎯 Returning user object to NextAuth:', userObject)
+          console.log('🎯 Step 17: Final user object for NextAuth:', userObject)
+          console.log('✅ Step 18: Returning user object to NextAuth - LOGIN SUCCESS!')
           return userObject
           
         } catch (error) {
-          console.error('🚨 Exception in authorize function:', error)
-          console.error('🚨 Error stack:', error.stack)
+          console.error('🚨 CRITICAL ERROR in authorize function at step:', new Date().toISOString())
+          console.error('🚨 Error type:', error?.constructor?.name)
+          console.error('🚨 Error message:', error?.message)
+          console.error('🚨 Error stack:', error?.stack)
+          console.error('🚨 Full error object:', error)
+          console.error('🚨 Returning null due to exception - LOGIN FAILED!')
           
           // Return null on any error
           return null
@@ -111,32 +148,44 @@ const authOptions = {
   
   callbacks: {
     async jwt({ token, user }) {
-      console.log('🔑 JWT callback triggered')
-      console.log('🔑 JWT - user:', user)
-      console.log('🔑 JWT - token before:', token)
+      console.log('🔑 JWT CALLBACK START - Timestamp:', new Date().toISOString())
+      console.log('🔑 JWT - Received user object:', user)
+      console.log('🔑 JWT - Existing token before update:', token)
+      console.log('🔑 JWT - User exists?', !!user)
       
       if (user) {
+        console.log('🔑 JWT - Updating token with user data...')
         token.id = user.id
         token.role = user.role
         token.email = user.email
         token.name = user.name
+        console.log('🔑 JWT - Token updated with user data')
+      } else {
+        console.log('🔑 JWT - No user object, keeping existing token')
       }
       
-      console.log('🔑 JWT - token after:', token)
+      console.log('🔑 JWT - Final token:', token)
+      console.log('🔑 JWT CALLBACK END - Success!')
       return token
     },
     
     async session({ session, token }) {
-      console.log('👤 Session callback triggered')
-      console.log('👤 Session - token:', token)
-      console.log('👤 Session - session before:', session)
+      console.log('👤 SESSION CALLBACK START - Timestamp:', new Date().toISOString())
+      console.log('👤 Session - Received token:', token)
+      console.log('👤 Session - Existing session before update:', session)
+      console.log('👤 Session - Token exists?', !!token)
       
       if (token) {
+        console.log('👤 Session - Updating session with token data...')
         session.user.id = token.id as string
         session.user.role = token.role as string
+        console.log('👤 Session - Session updated with token data')
+      } else {
+        console.log('👤 Session - No token, keeping existing session')
       }
       
-      console.log('👤 Session - session after:', session)
+      console.log('👤 Session - Final session:', session)
+      console.log('👤 SESSION CALLBACK END - Success!')
       return session
     }
   },
