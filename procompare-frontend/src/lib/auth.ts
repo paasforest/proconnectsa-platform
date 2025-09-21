@@ -2,6 +2,7 @@ import { NextRequest } from 'next/server'
 import jwt from 'jsonwebtoken'
 import bcrypt from 'bcryptjs'
 import CredentialsProvider from "next-auth/providers/credentials"
+import { NextAuthOptions } from "next-auth"
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-this-in-production'
 const JWT_EXPIRES_IN = '7d'
@@ -154,8 +155,9 @@ export function verifyResetToken(token: string): boolean {
 }
 
 // NextAuth configuration for API routes
-export const authOptions = {
+export const authOptions: NextAuthOptions = {
   secret: process.env.NEXTAUTH_SECRET,
+  
   providers: [
     CredentialsProvider({
       name: "credentials",
@@ -163,46 +165,60 @@ export const authOptions = {
         email: { label: "Email", type: "email" },
         password: { label: "Password", type: "password" }
       },
+      
       async authorize(credentials) {
-        try {
-          console.log('🔐 NextAuth authorize called for:', credentials?.email)
-          
-          if (!credentials?.email || !credentials?.password) {
-            console.log('❌ Missing credentials')
-            return null
-          }
+        if (!credentials?.email || !credentials?.password) {
+          console.error("❌ Missing credentials")
+          return null
+        }
 
-          // Call the backend endpoint directly (as suggested in the fix)
+        try {
+          console.log(`🔐 Attempting login for: ${credentials.email}`)
+          
+          // Use the correct backend URL
           const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://128.140.123.48:8000'
-          const response = await fetch(`${API_URL}/api/auth/backend-login/`, {
+          const loginUrl = `${API_URL}/api/auth/backend-login/`
+          
+          console.log(`🌐 Calling backend: ${loginUrl}`)
+          
+          const response = await fetch(loginUrl, {
             method: 'POST',
-            headers: {
+            headers: { 
               'Content-Type': 'application/json',
+              'Accept': 'application/json',
             },
             body: JSON.stringify({
               email: credentials.email,
               password: credentials.password,
             }),
           })
-
-          console.log('📡 Backend response status:', response.status)
-
+          
+          console.log(`📡 Backend response status: ${response.status}`)
+          
           if (!response.ok) {
-            console.error('❌ Authentication failed:', response.status)
+            const errorData = await response.json().catch(() => ({}))
+            console.error(`❌ Backend error (${response.status}):`, errorData)
             return null
           }
-
+          
           const user = await response.json()
-          console.log('✅ User authenticated:', user.email)
-
-          return {
-            id: user.id,
-            email: user.email,
-            name: user.name,
-            role: user.role
+          console.log('✅ User authenticated:', user)
+          
+          // Ensure user object has required fields
+          if (user && user.id && user.email) {
+            return {
+              id: user.id,
+              email: user.email,
+              name: user.name || user.email,
+              role: user.role || 'user'
+            }
           }
+          
+          console.error("❌ Invalid user object returned:", user)
+          return null
+          
         } catch (error) {
-          console.error('🚨 NextAuth authorize error:', error)
+          console.error('🚨 Network/Auth error:', error)
           return null
         }
       }
@@ -210,22 +226,26 @@ export const authOptions = {
   ],
   
   callbacks: {
-    async jwt({ token, user }: any) {
+    async jwt({ token, user }) {
       if (user) {
         token.id = user.id
         token.role = user.role
       }
       return token
     },
-    async session({ session, token }: any) {
-      session.user.id = token.id
-      session.user.role = token.role
+    
+    async session({ session, token }) {
+      if (token) {
+        session.user.id = token.id as string
+        session.user.role = token.role as string
+      }
       return session
     }
   },
   
   session: {
-    strategy: 'jwt' as const,
+    strategy: "jwt",
+    maxAge: 30 * 24 * 60 * 60, // 30 days
   },
   
   pages: {
@@ -233,5 +253,5 @@ export const authOptions = {
     error: '/login',
   },
   
-  debug: true, // Enable for debugging as suggested
+  debug: process.env.NODE_ENV === 'development',
 }
