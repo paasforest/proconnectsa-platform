@@ -40,32 +40,7 @@ export default function LoginPage() {
     setError("")
 
     try {
-      console.log("🔑 Frontend: Starting login process for:", data.email)
-      
-      // Try direct backend authentication first (temporary hotfix)
-      try {
-        const directResponse = await fetch('/api/auth/backend-login', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            email: data.email,
-            password: data.password,
-          }),
-        })
-
-        if (directResponse.ok) {
-          const directData = await directResponse.json()
-          if (directData.success) {
-            console.log("✅ Frontend: Direct login successful, redirecting...")
-            router.push("/dashboard")
-            return
-          }
-        }
-      } catch (directError) {
-        console.log("⚠️ Frontend: Direct login failed, trying NextAuth...")
-      }
+      console.log("🔑 Frontend: Starting NextAuth login for:", data.email)
       
       const result = await signIn("credentials", {
         email: data.email,

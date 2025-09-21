@@ -169,35 +169,53 @@ export const authOptions = {
         }
 
         try {
-          // Use Vercel API route to call backend (production solution)
-          const baseUrl = process.env.NEXTAUTH_URL || 'https://proconnectsa.co.za'
-          const response = await fetch(`${baseUrl}/api/auth/backend-login`, {
+          // Direct backend call (server-to-server from Vercel to Hetzner)
+          const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://128.140.123.48:8000'
+          console.log('🔑 NextAuth: Attempting direct backend login to:', API_URL)
+          
+          const response = await fetch(`${API_URL}/api/auth/login/`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
+              'User-Agent': 'NextAuth-Vercel/1.0'
             },
             body: JSON.stringify({
               email: credentials.email,
               password: credentials.password,
             }),
+            // Add timeout for reliability
+            signal: AbortSignal.timeout(10000)
           })
+
+          console.log('📡 NextAuth: Backend response status:', response.status)
 
           if (response.ok) {
             const data = await response.json()
+            console.log('📦 NextAuth: Backend response data:', data)
+            
             if (data.success && data.user) {
-              return {
+              const user = {
                 id: String(data.user.id),
                 email: data.user.email,
                 name: `${data.user.first_name || 'User'} ${data.user.last_name || 'Name'}`,
                 userType: data.user.user_type,
                 token: data.token
               }
+              console.log('✅ NextAuth: User object created:', user)
+              return user
             }
+          } else {
+            const errorText = await response.text()
+            console.log('❌ NextAuth: Backend error response:', errorText)
           }
           
           return null
         } catch (error) {
-          console.error('NextAuth authorization failed:', error)
+          console.error('💥 NextAuth authorization failed:', error)
+          console.error('💥 Error details:', {
+            name: error instanceof Error ? error.name : 'Unknown',
+            message: error instanceof Error ? error.message : String(error)
+          })
           return null
         }
       }
