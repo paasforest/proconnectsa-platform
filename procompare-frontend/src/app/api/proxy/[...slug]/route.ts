@@ -43,8 +43,8 @@ async function handleRequest(
   method: string
 ) {
   try {
-    // Reconstruct the API path
-    const apiPath = '/' + params.slug.join('/')
+    // Reconstruct the API path with trailing slash for Django compatibility
+    const apiPath = '/' + params.slug.join('/') + '/'
     const backendUrl = `${BACKEND_URL}${apiPath}`
     
     console.log(`🔄 Proxying ${method} request to: ${backendUrl}`)
@@ -100,7 +100,7 @@ async function handleRequest(
     
     // Make the request to backend with timeout
     const controller = new AbortController()
-    const timeoutId = setTimeout(() => controller.abort(), 15000) // 15 second timeout
+    const timeoutId = setTimeout(() => controller.abort(), 10000) // 10 second timeout
     
     const response = await fetch(finalUrl, {
       ...requestOptions,

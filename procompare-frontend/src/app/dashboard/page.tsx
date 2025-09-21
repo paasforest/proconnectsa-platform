@@ -1,7 +1,8 @@
 import { redirect } from "next/navigation"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
-import NewProviderDashboard from '@/components/dashboard/NewProviderDashboard'
+import DashboardLayout from '@/components/dashboard/DashboardLayout'
+import DashboardOverview from '@/components/dashboard/DashboardOverview'
 
 export default async function DashboardPage() {
   // Check if user is authenticated
@@ -21,8 +22,12 @@ export default async function DashboardPage() {
     redirect('/admin');
   }
 
-  // Complete personalized provider dashboard with "Chabalala Services" branding
-  return <NewProviderDashboard />;
+  // Professional provider dashboard with proper navigation layout
+  return (
+    <DashboardLayout>
+      <DashboardOverview />
+    </DashboardLayout>
+  );
 }
 
 
