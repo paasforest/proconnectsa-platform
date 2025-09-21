@@ -12,6 +12,10 @@ const nextConfig: NextConfig = {
   async rewrites() {
     return [
       {
+        source: '/api/auth/:path*',
+        destination: '/api/auth/:path*', // Keep NextAuth routes local
+      },
+      {
         source: '/api/backend/:path*',
         destination: `${process.env.NEXT_PUBLIC_API_URL || 'https://api.proconnectsa.co.za'}/api/:path*`,
       },
