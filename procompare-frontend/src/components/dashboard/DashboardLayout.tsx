@@ -19,6 +19,21 @@ interface UserStats {
   response_rate: number;
 }
 
+interface UserProfile {
+  id: string;
+  email: string;
+  first_name: string;
+  last_name: string;
+  business_name: string;
+  phone: string;
+  location: string;
+  services: string[];
+  subscription_tier: string;
+  customer_code: string;
+  credit_balance: number;
+  is_verified: boolean;
+}
+
 interface Notification {
   id: string;
   notification_type: string;
@@ -35,6 +50,7 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
   const pathname = usePathname();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [userStats, setUserStats] = useState<UserStats | null>(null);
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [notificationCount, setNotificationCount] = useState(0);
   const [showNotifications, setShowNotifications] = useState(false);
@@ -56,8 +72,9 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     const fetchUserStats = async () => {
       try {
-        if (session?.accessToken) {
-          apiClient.setToken(session.accessToken);
+        if (session?.user) {
+          // For now, use a mock token since we don't have backend token in session yet
+          apiClient.setToken('mock-token-for-demo');
         }
         const response = await apiClient.get('/api/auth/stats/');
         setUserStats(response);
@@ -66,10 +83,31 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
       }
     };
 
-    if (session?.accessToken) {
+    if (session?.user) {
       fetchUserStats();
     }
-  }, [session?.accessToken]);
+  }, [session?.user]);
+
+  // Fetch user profile for personalization
+  useEffect(() => {
+    const fetchUserProfile = async () => {
+      try {
+        if (session?.user) {
+          // For now, use a mock token since we don't have backend token in session yet
+          apiClient.setToken('mock-token-for-demo');
+        }
+        const response = await apiClient.get('/api/auth/profile/');
+        setUserProfile(response);
+        console.log('📊 User profile loaded:', response);
+      } catch (error) {
+        console.error('Failed to fetch user profile:', error);
+      }
+    };
+
+    if (session?.user) {
+      fetchUserProfile();
+    }
+  }, [session?.user]);
 
   // Fetch real notifications from API
   useEffect(() => {
@@ -88,14 +126,14 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
       }
     };
 
-    if (session?.accessToken) {
+    if (session?.user) {
       fetchNotifications();
       
       // Refresh notifications every 30 seconds
       const interval = setInterval(fetchNotifications, 30000);
       return () => clearInterval(interval);
     }
-  }, [session?.accessToken]);
+  }, [session?.user]);
 
   // Fetch notification count separately for accurate badge
   useEffect(() => {
@@ -112,19 +150,19 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
       }
     };
 
-    if (session?.accessToken) {
+    if (session?.user) {
       fetchNotificationCount();
       
       // Refresh count every 10 seconds for real-time updates
       const interval = setInterval(fetchNotificationCount, 10000);
       return () => clearInterval(interval);
     }
-  }, [session?.accessToken]);
+  }, [session?.user]);
 
   const handleLogout = async () => {
     try {
-      // Call backend logout endpoint if we have a token
-      if (session?.accessToken) {
+      // Call backend logout endpoint if we have a session
+      if (session?.user) {
         try {
           await apiClient.logout();
         } catch (error) {
@@ -177,12 +215,18 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
           <div className="flex items-center">
             <div className="flex-shrink-0">
               <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-sm">P</span>
+                <span className="text-white font-bold text-sm">
+                  {userProfile?.business_name ? userProfile.business_name.charAt(0) : 'P'}
+                </span>
               </div>
             </div>
             <div className="ml-3">
-              <h1 className="text-lg font-semibold text-gray-900">ProConnectSA</h1>
-              <p className="text-xs text-gray-500">Professional Dashboard</p>
+              <h1 className="text-lg font-semibold text-gray-900">
+                {userProfile?.business_name || 'ProConnectSA'}
+              </h1>
+              <p className="text-xs text-gray-500">
+                {userProfile?.subscription_tier || 'Professional'} Dashboard
+              </p>
             </div>
           </div>
           <button
@@ -318,9 +362,14 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
                   <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
                     <User className="w-4 h-4 text-white" />
                   </div>
-                  <span className="hidden sm:block text-sm font-medium text-gray-700">
-                    {session?.user?.email}
-                  </span>
+                  <div className="hidden sm:block">
+                    <span className="text-sm font-medium text-gray-700">
+                      {userProfile?.business_name || `${userProfile?.first_name} ${userProfile?.last_name}` || session?.user?.email}
+                    </span>
+                    {userProfile?.business_name && (
+                      <p className="text-xs text-gray-500">{userProfile.email}</p>
+                    )}
+                  </div>
                   <ChevronDown className="w-4 h-4 text-gray-400" />
                 </button>
 

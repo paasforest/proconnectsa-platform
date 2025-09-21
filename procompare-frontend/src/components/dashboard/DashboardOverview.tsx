@@ -26,31 +26,56 @@ interface DashboardStats {
   }>;
 }
 
+interface UserProfile {
+  id: string;
+  email: string;
+  first_name: string;
+  last_name: string;
+  business_name: string;
+  phone: string;
+  location: string;
+  services: string[];
+  subscription_tier: string;
+  customer_code: string;
+  credit_balance: number;
+  is_verified: boolean;
+}
+
 const DashboardOverview = () => {
   const [stats, setStats] = useState<DashboardStats | null>(null);
+  const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const { data: session } = useSession();
 
   useEffect(() => {
-    const fetchDashboardStats = async () => {
+    const fetchDashboardData = async () => {
       try {
         setLoading(true);
-        if (session?.accessToken) {
-          apiClient.setToken(session.accessToken);
+        if (session?.user) {
+          // For now, use a mock token since we don't have backend token in session yet
+          apiClient.setToken('mock-token-for-demo');
         }
-        const response = await apiClient.get('/api/auth/stats/');
-        setStats(response);
+        
+        // Fetch both stats and profile data
+        const [statsResponse, profileResponse] = await Promise.all([
+          apiClient.get('/api/auth/stats/'),
+          apiClient.get('/api/auth/profile/')
+        ]);
+        
+        setStats(statsResponse);
+        setProfile(profileResponse);
+        console.log('📊 Dashboard data loaded - Profile:', profileResponse);
       } catch (error) {
-        console.error('Failed to fetch dashboard stats:', error);
+        console.error('Failed to fetch dashboard data:', error);
       } finally {
         setLoading(false);
       }
     };
 
-    if (session?.accessToken) {
-      fetchDashboardStats();
+    if (session?.user) {
+      fetchDashboardData();
     }
-  }, [session?.accessToken]);
+  }, [session?.user]);
 
   if (loading) {
     return (
@@ -144,8 +169,17 @@ const DashboardOverview = () => {
     <div className="p-6">
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">Dashboard Overview</h1>
-        <p className="text-gray-600 mt-2">Welcome back! Here's what's happening with your leads.</p>
+        <h1 className="text-3xl font-bold text-gray-900">
+          Welcome back, {profile?.business_name || `${profile?.first_name} ${profile?.last_name}` || 'Professional'}
+        </h1>
+        <p className="text-gray-600 mt-2">
+          Here's what's happening with your leads {profile?.business_name && `at ${profile.business_name}`}.
+        </p>
+        {profile?.location && (
+          <p className="text-sm text-gray-500 mt-1">
+            📍 Serving {profile.location} • {profile.subscription_tier} Plan
+          </p>
+        )}
       </div>
 
       {/* Stats Cards */}
