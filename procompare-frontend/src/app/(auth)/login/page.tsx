@@ -42,6 +42,31 @@ export default function LoginPage() {
     try {
       console.log("🔑 Frontend: Starting login process for:", data.email)
       
+      // Try direct backend authentication first (temporary hotfix)
+      try {
+        const directResponse = await fetch('/api/auth/backend-login', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            email: data.email,
+            password: data.password,
+          }),
+        })
+
+        if (directResponse.ok) {
+          const directData = await directResponse.json()
+          if (directData.success) {
+            console.log("✅ Frontend: Direct login successful, redirecting...")
+            router.push("/dashboard")
+            return
+          }
+        }
+      } catch (directError) {
+        console.log("⚠️ Frontend: Direct login failed, trying NextAuth...")
+      }
+      
       const result = await signIn("credentials", {
         email: data.email,
         password: data.password,
@@ -52,10 +77,9 @@ export default function LoginPage() {
 
       if (result?.error) {
         console.error("❌ Frontend: NextAuth error:", result.error)
-        setError(`Login failed: ${result.error}`)
+        setError("Invalid email or password")
       } else if (result?.ok) {
         console.log("✅ Frontend: Login successful, redirecting...")
-        // Redirect to dashboard after successful login
         router.push("/dashboard")
       } else {
         console.error("❌ Frontend: Unknown login result:", result)
@@ -63,7 +87,7 @@ export default function LoginPage() {
       }
     } catch (error) {
       console.error("💥 Frontend: Login exception:", error)
-      setError(`An error occurred: ${error}`)
+      setError("An unexpected error occurred. Please try again.")
     } finally {
       setIsLoading(false)
     }
