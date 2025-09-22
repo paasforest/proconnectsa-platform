@@ -228,10 +228,36 @@ CORS_ALLOWED_ORIGINS = [
     "https://proconnectsa.vercel.app",
     "https://proconnectsa-git-main-your-username.vercel.app",  # Replace with your actual Vercel URL
     "https://proconnectsa-your-username.vercel.app",  # Replace with your actual Vercel URL
+    "https://proconnectsa-git-main.vercel.app",  # Common Vercel pattern
+    "https://proconnectsa-git-develop.vercel.app",  # Common Vercel pattern
+    "https://proconnectsa-git-staging.vercel.app",  # Common Vercel pattern
 ]
 
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOW_ALL_ORIGINS = config('CORS_ALLOW_ALL_ORIGINS', default=False, cast=bool)
+
+# Additional CORS settings for Vercel deployment
+CORS_ALLOWED_ORIGIN_REGEXES = [
+    r"^https://proconnectsa.*\.vercel\.app$",
+    r"^https://.*\.vercel\.app$",  # Allow all Vercel preview deployments
+    r"^https://.*-proconnectsa.*\.vercel\.app$",  # Vercel branch deployments
+]
+
+# Temporarily allow all origins for debugging (REMOVE IN PRODUCTION)
+CORS_ALLOW_ALL_ORIGINS = True
+
+# CORS headers
+CORS_ALLOW_HEADERS = [
+    'accept',
+    'accept-encoding',
+    'authorization',
+    'content-type',
+    'dnt',
+    'origin',
+    'user-agent',
+    'x-csrftoken',
+    'x-requested-with',
+]
 
 # Security settings
 SECURE_BROWSER_XSS_FILTER = True

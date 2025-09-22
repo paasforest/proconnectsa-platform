@@ -1,23 +1,61 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextResponse } from 'next/server'
 
-export async function GET(request: NextRequest) {
-  console.log('🏥 [App Router] Health check requested')
-  
-  return NextResponse.json({
-    status: 'ok',
-    timestamp: new Date().toISOString(),
-    router: 'App Router',
-    nextjs: '15+',
-    nodejs: process.version,
-    environment: {
-      NEXTAUTH_URL: process.env.NEXTAUTH_URL || 'Not set',
-      NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET ? 'Set' : 'Not set',
-      NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL || 'Not set',
-      NODE_ENV: process.env.NODE_ENV || 'Not set'
-    },
-    routes_check: {
-      nextauth_route: 'Should be at /app/api/auth/[...nextauth]/route.ts',
-      health_route: 'This endpoint is working ✅'
+export async function GET() {
+  try {
+    // Test backend connectivity
+    const backendUrl = 'http://128.140.123.48:8000/health/'
+    
+    console.log('🔍 [Health] Testing backend connectivity...')
+    console.log(`🔍 [Health] Backend URL: ${backendUrl}`)
+    
+    const response = await fetch(backendUrl, {
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+      },
+      signal: AbortSignal.timeout(10000) // 10 second timeout
+    })
+    
+    console.log(`📡 [Health] Backend response status: ${response.status}`)
+    
+    if (response.ok) {
+      const data = await response.json()
+      console.log('✅ [Health] Backend is healthy:', data)
+      
+      return NextResponse.json({
+        status: 'healthy',
+        backend: {
+          url: backendUrl,
+          status: response.status,
+          data: data
+        },
+        timestamp: new Date().toISOString()
+      })
+    } else {
+      console.log('❌ [Health] Backend returned error status:', response.status)
+      
+      return NextResponse.json({
+        status: 'unhealthy',
+        backend: {
+          url: backendUrl,
+          status: response.status,
+          error: 'Backend returned error status'
+        },
+        timestamp: new Date().toISOString()
+      }, { status: 503 })
     }
-  })
+    
+  } catch (error: any) {
+    console.log('💥 [Health] Backend connectivity error:', error)
+    
+    return NextResponse.json({
+      status: 'unhealthy',
+      backend: {
+        url: 'http://128.140.123.48:8000/health/',
+        error: error.message,
+        type: error.name
+      },
+      timestamp: new Date().toISOString()
+    }, { status: 503 })
+  }
 }

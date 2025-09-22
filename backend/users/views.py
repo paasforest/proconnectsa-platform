@@ -58,7 +58,15 @@ class UserLoginView(generics.GenericAPIView):
     
     def post(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
+        
+        if not serializer.is_valid():
+            # Return error in expected format for NextAuth
+            return Response({
+                'success': False,
+                'message': 'Invalid email or password',
+                'errors': serializer.errors
+            }, status=status.HTTP_401_UNAUTHORIZED)
+        
         user = serializer.validated_data['user']
         
         # Create or get auth token
@@ -68,8 +76,10 @@ class UserLoginView(generics.GenericAPIView):
         user.update_last_active()
         
         return Response({
+            'success': True,
             'user': UserSerializer(user).data,
-            'token': token.key
+            'token': token.key,
+            'message': 'Login successful'
         })
 
 

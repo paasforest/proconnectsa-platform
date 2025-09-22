@@ -56,14 +56,17 @@ const authOptions: NextAuthOptions = {
           console.log('✅ [NextAuth] Backend login successful!')
           console.log(`👤 [NextAuth] User data:`, userData)
 
-          // Handle Flask API response format
+          // Handle Django API response format
           if (userData && userData.success && userData.user) {
             const user = {
               id: userData.user.id?.toString() || Date.now().toString(),
               email: userData.user.email,
-              name: `${userData.user.first_name} ${userData.user.last_name}`.trim() || userData.user.email,
+              name: `${userData.user.first_name || ''} ${userData.user.last_name || ''}`.trim() || userData.user.email,
               roles: [userData.user.user_type || 'user'],
-              accessToken: userData.token
+              accessToken: userData.token,
+              userType: userData.user.user_type,
+              firstName: userData.user.first_name,
+              lastName: userData.user.last_name
             }
             
             console.log(`✅ [NextAuth] Returning user:`, user)
@@ -71,6 +74,7 @@ const authOptions: NextAuthOptions = {
           }
 
           console.log('❌ [NextAuth] Invalid user data from backend')
+          console.log('❌ [NextAuth] Response structure:', JSON.stringify(userData, null, 2))
           return null
 
         } catch (error: any) {
@@ -98,6 +102,9 @@ const authOptions: NextAuthOptions = {
         console.log('📝 [NextAuth] Adding user data to JWT token')
         token.accessToken = (user as any).accessToken
         token.roles = (user as any).roles
+        token.userType = (user as any).userType
+        token.firstName = (user as any).firstName
+        token.lastName = (user as any).lastName
       }
       
       return token
@@ -109,7 +116,10 @@ const authOptions: NextAuthOptions = {
       // Send properties to the client
       if (token) {
         (session as any).accessToken = token.accessToken;
-        (session.user as any).roles = token.roles
+        (session.user as any).roles = token.roles;
+        (session.user as any).userType = token.userType;
+        (session.user as any).firstName = token.firstName;
+        (session.user as any).lastName = token.lastName;
       }
       
       console.log('📤 [NextAuth] Final session:', session)

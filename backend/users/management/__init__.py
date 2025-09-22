@@ -1,5 +1,1 @@
-# Management commands for users app
-
-
-
-
+# Management package
