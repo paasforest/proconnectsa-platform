@@ -11,8 +11,8 @@
   },
   "env": {
     "NEXT_PUBLIC_API_URL": "http://128.140.123.48:8000",
-    "NEXT_PUBLIC_FRONTEND_URL": "https://proconnectsa.vercel.app",
+    "NEXT_PUBLIC_FRONTEND_URL": "https://proconnectsa-platform.vercel.app",
     "NEXTAUTH_SECRET": "proconnectsa-nextauth-secret-key-2024-production-at-least-32-chars-long",
-    "NEXTAUTH_URL": "https://proconnectsa.vercel.app"
+    "NEXTAUTH_URL": "https://proconnectsa-platform.vercel.app"
   }
 }
