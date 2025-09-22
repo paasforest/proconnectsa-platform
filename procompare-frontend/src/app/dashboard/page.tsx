@@ -1,34 +1,5 @@
-import { redirect } from "next/navigation"
-import { getServerSession } from "next-auth"
-import { authOptions } from "@/lib/auth"
-import DashboardLayout from '@/components/dashboard/DashboardLayout'
-import DashboardOverview from '@/components/dashboard/DashboardOverview'
+import ProviderDashboard from '@/components/ProviderDashboard'
 
-export default async function DashboardPage() {
-  // Check if user is authenticated
-  const session = await getServerSession(authOptions);
-  
-  if (!session) {
-    redirect('/login');
-  }
-
-  // Redirect clients to their dashboard
-  if (session.user.role === 'client') {
-    redirect('/client');
-  }
-
-  // Redirect admins to admin dashboard
-  if (session.user.role === 'admin') {
-    redirect('/admin');
-  }
-
-  // Professional provider dashboard with proper navigation layout
-  return (
-    <DashboardLayout>
-      <DashboardOverview />
-    </DashboardLayout>
-  );
+export default function DashboardPage() {
+  return <ProviderDashboard />
 }
-
-
-

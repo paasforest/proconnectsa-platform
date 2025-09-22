@@ -1,162 +1,100 @@
-import NextAuth from 'next-auth'
-import type { NextAuthOptions } from 'next-auth'
-import CredentialsProvider from 'next-auth/providers/credentials'
+import NextAuth from "next-auth"
+import CredentialsProvider from "next-auth/providers/credentials"
 
-console.log('🔥 [NextAuth] Route loaded at:', new Date().toISOString())
-
-const authOptions: NextAuthOptions = {
-  debug: true, // Enable debug mode
-  
+const handler = NextAuth({
   providers: [
     CredentialsProvider({
-      name: 'credentials',
+      name: "credentials",
       credentials: {
-        email: { label: 'Email', type: 'email' },
-        password: { label: 'Password', type: 'password' }
+        email: { label: "Email", type: "email" },
+        password: { label: "Password", type: "password" }
       },
-      async authorize(credentials, req) {
-        console.log('🔍 [NextAuth] authorize() called')
-        console.log(`📧 [NextAuth] Email: ${credentials?.email}`)
-        
-        // Validate credentials exist
+      async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) {
-          console.log('❌ [NextAuth] Missing email or password')
           return null
         }
 
         try {
-          console.log('🔄 [NextAuth] Attempting Hetzner backend login...')
-          console.log('🔄 [NextAuth] Backend URL: http://128.140.123.48:8000/api/auth/login/')
+          // Call Django backend to authenticate
+          const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://128.140.123.48:8000'
           
-          // Call your Hetzner backend (not localhost!)
-          const response = await fetch('http://128.140.123.48:8000/api/auth/login/', {
+          const controller = new AbortController()
+          const timeoutId = setTimeout(() => controller.abort(), 10000) // 10 second timeout
+          
+          const response = await fetch(`${API_URL}/api/auth/login/`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
-              'Accept': 'application/json',
             },
             body: JSON.stringify({
               email: credentials.email,
               password: credentials.password,
             }),
-            // Add timeout to prevent hanging
-            signal: AbortSignal.timeout(10000) // 10 second timeout
+            signal: controller.signal,
           })
+          
+          clearTimeout(timeoutId)
 
-          console.log(`📡 [NextAuth] Backend response status: ${response.status}`)
-          console.log(`📡 [NextAuth] Backend response headers:`, Object.fromEntries(response.headers.entries()))
+          // Get response text first to avoid consuming the stream twice
+          const responseText = await response.text()
 
-          if (!response.ok) {
-            const errorText = await response.text()
-            console.log(`❌ [NextAuth] Backend error response: ${errorText}`)
-            return null
-          }
-
-          const userData = await response.json()
-          console.log('✅ [NextAuth] Backend login successful!')
-          console.log(`👤 [NextAuth] User data:`, userData)
-
-          // Handle Django API response format
-          if (userData && userData.success && userData.user) {
-            const user = {
-              id: userData.user.id?.toString() || Date.now().toString(),
-              email: userData.user.email,
-              name: `${userData.user.first_name || ''} ${userData.user.last_name || ''}`.trim() || userData.user.email,
-              roles: [userData.user.user_type || 'user'],
-              accessToken: userData.token,
-              userType: userData.user.user_type,
-              firstName: userData.user.first_name,
-              lastName: userData.user.last_name
+          if (response.ok) {
+            try {
+              const data = JSON.parse(responseText)
+              
+              if (data.success && data.user) {
+                const user = {
+                  id: data.user.id.toString(),
+                  email: data.user.email,
+                  name: `${data.user.first_name} ${data.user.last_name}`,
+                  userType: data.user.user_type,
+                  subscriptionTier: data.user.subscription_tier || 'basic',
+                  accessToken: data.token,
+                }
+                return user
+              }
+            } catch (jsonError) {
+              console.error('NextAuth: JSON parse error:', jsonError)
             }
-            
-            console.log(`✅ [NextAuth] Returning user:`, user)
-            return user
           }
-
-          console.log('❌ [NextAuth] Invalid user data from backend')
-          console.log('❌ [NextAuth] Response structure:', JSON.stringify(userData, null, 2))
-          return null
-
-        } catch (error: any) {
-          console.log(`💥 [NextAuth] Error during authorization:`, error)
-          
-          if (error.name === 'AbortError') {
-            console.log('⏰ [NextAuth] Backend request timed out')
-          } else if (error.name === 'TypeError' && error.message.includes('fetch')) {
-            console.log('🚫 [NextAuth] Cannot connect to Hetzner backend')
-            console.log('🔍 [NextAuth] Check if backend is running on http://128.140.123.48:8000')
-          }
-          
-          return null
+        } catch (error) {
+          console.error('NextAuth authorize error:', error)
         }
+
+        return null
       }
     })
   ],
-
+  pages: {
+    signIn: '/login',
+    error: '/login',
+  },
   callbacks: {
-    async jwt({ token, user, account }) {
-      console.log('🔍 [NextAuth] JWT callback triggered')
-      
-      // First time JWT callback runs, user object is available
+    async redirect({ url, baseUrl }) {
+      // Always redirect to home page after login
+      return baseUrl
+    },
+    async jwt({ token, user }) {
+      // Persist the OAuth access_token and or the user id to the token right after signin
       if (user) {
-        console.log('📝 [NextAuth] Adding user data to JWT token')
-        token.accessToken = (user as any).accessToken
-        token.roles = (user as any).roles
-        token.userType = (user as any).userType
-        token.firstName = (user as any).firstName
-        token.lastName = (user as any).lastName
+        token.accessToken = user.accessToken
+        token.userType = user.userType
+        token.subscriptionTier = user.subscriptionTier
       }
-      
       return token
     },
-
     async session({ session, token }) {
-      console.log('🔍 [NextAuth] Session callback triggered')
-      
       // Send properties to the client
-      if (token) {
-        (session as any).accessToken = token.accessToken;
-        (session.user as any).roles = token.roles;
-        (session.user as any).userType = token.userType;
-        (session.user as any).firstName = token.firstName;
-        (session.user as any).lastName = token.lastName;
-      }
-      
-      console.log('📤 [NextAuth] Final session:', session)
+      session.accessToken = token.accessToken
+      session.user.userType = token.userType
+      session.user.subscriptionTier = token.subscriptionTier
       return session
-    }
+    },
   },
-
-  pages: {
-    signIn: '/login', // Your login page
-    error: '/login',   // Redirect errors to login
-  },
-
   session: {
     strategy: 'jwt',
-    maxAge: 30 * 24 * 60 * 60, // 30 days
   },
+  secret: process.env.NEXTAUTH_SECRET,
+})
 
-  // Add events for debugging
-  events: {
-    async signIn(message) {
-      console.log('🎉 [NextAuth] SignIn event triggered:', message.user.email)
-    },
-    async signOut(message) {
-      console.log('👋 [NextAuth] SignOut event triggered')
-    },
-    async session(message) {
-      console.log('📱 [NextAuth] Session event triggered')
-    }
-  }
-}
-
-// Create the NextAuth handler
-const handler = NextAuth(authOptions)
-
-// Export the handler for both GET and POST requests (App Router format)
 export { handler as GET, handler as POST }
-
-// Alternative export format (try this if above doesn't work)
-// export const GET = handler
-// export const POST = handler

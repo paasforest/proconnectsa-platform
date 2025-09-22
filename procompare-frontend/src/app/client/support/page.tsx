@@ -3,7 +3,7 @@
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import { useEffect } from 'react'
-import DashboardLayout from '@/components/dashboard/DashboardLayout'
+import ClientDashboardLayout from '@/components/dashboard/ClientDashboardLayout'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -19,7 +19,7 @@ import {
 } from 'lucide-react'
 import { useState } from 'react'
 
-export default function ProviderSupportPage() {
+export default function ClientSupportPage() {
   const { data: session, status } = useSession()
   const router = useRouter()
   const [message, setMessage] = useState('')
@@ -46,9 +46,9 @@ export default function ProviderSupportPage() {
 
   if (!session) return null
 
-  // Only show support page for providers
-  if (session.user.userType !== 'provider') {
-    router.push('/client')
+  // Only show support page for clients
+  if (session.user.userType !== 'client') {
+    router.push('/dashboard')
     return null
   }
 
@@ -69,7 +69,7 @@ export default function ProviderSupportPage() {
   }
 
   return (
-    <DashboardLayout>
+    <ClientDashboardLayout>
       <div className="space-y-6">
         {/* Header */}
         <div className="bg-white shadow rounded-lg p-6">
@@ -79,7 +79,7 @@ export default function ProviderSupportPage() {
             </div>
             <div>
               <h1 className="text-2xl font-bold text-gray-900">Help & Support</h1>
-              <p className="text-gray-600">Get help with your provider account and services</p>
+              <p className="text-gray-600">Get help with your requests and account</p>
             </div>
           </div>
         </div>
@@ -128,16 +128,13 @@ export default function ProviderSupportPage() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
-                <Button variant="outline" className="w-full justify-start" onClick={() => router.push('/dashboard/leads')}>
-                  View Available Leads
+                <Button variant="outline" className="w-full justify-start" onClick={() => router.push('/client/requests')}>
+                  View My Requests
                 </Button>
-                <Button variant="outline" className="w-full justify-start" onClick={() => router.push('/dashboard/my-leads')}>
-                  My Active Leads
+                <Button variant="outline" className="w-full justify-start" onClick={() => router.push('/request-quote')}>
+                  Create New Request
                 </Button>
-                <Button variant="outline" className="w-full justify-start" onClick={() => router.push('/dashboard/wallet')}>
-                  Check Wallet Balance
-                </Button>
-                <Button variant="outline" className="w-full justify-start" onClick={() => router.push('/dashboard/settings')}>
+                <Button variant="outline" className="w-full justify-start">
                   Account Settings
                 </Button>
               </CardContent>
@@ -223,34 +220,34 @@ export default function ProviderSupportPage() {
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="border-l-4 border-blue-500 pl-4">
-                  <h4 className="font-semibold text-gray-900">How do I respond to leads?</h4>
+                  <h4 className="font-semibold text-gray-900">How do I create a service request?</h4>
                   <p className="text-sm text-gray-600 mt-1">
-                    Go to "Leads" to see available service requests. Click on a lead to view details 
-                    and submit your response with pricing and availability.
+                    Go to "Request Quote" and fill out the form with details about your service needs. 
+                    Providers will then be able to see and respond to your request.
                   </p>
                 </div>
                 
                 <div className="border-l-4 border-blue-500 pl-4">
-                  <h4 className="font-semibold text-gray-900">How do I manage my wallet?</h4>
+                  <h4 className="font-semibold text-gray-900">How do I contact providers?</h4>
                   <p className="text-sm text-gray-600 mt-1">
-                    Check your wallet balance and transaction history in the "Wallet" section. 
-                    You can add funds and track payments received from completed jobs.
+                    Once providers show interest in your request, you can unlock their contact details 
+                    to communicate directly with them.
                   </p>
                 </div>
                 
                 <div className="border-l-4 border-blue-500 pl-4">
-                  <h4 className="font-semibold text-gray-900">How do I update my services?</h4>
+                  <h4 className="font-semibold text-gray-900">What if I'm not satisfied with a provider?</h4>
                   <p className="text-sm text-gray-600 mt-1">
-                    Go to "Services" in your dashboard to add, edit, or remove the services you offer. 
-                    This helps clients find you for relevant requests.
+                    We recommend reviewing provider profiles and ratings before making a decision. 
+                    If you have concerns, please contact our support team.
                   </p>
                 </div>
                 
                 <div className="border-l-4 border-blue-500 pl-4">
-                  <h4 className="font-semibold text-gray-900">How do I communicate with clients?</h4>
+                  <h4 className="font-semibold text-gray-900">How do I update my account information?</h4>
                   <p className="text-sm text-gray-600 mt-1">
-                    Use the "Chat" feature to communicate directly with clients once they've shown 
-                    interest in your services.
+                    Go to Settings in your dashboard to update your profile, contact information, 
+                    and preferences.
                   </p>
                 </div>
               </CardContent>
@@ -258,11 +255,6 @@ export default function ProviderSupportPage() {
           </div>
         </div>
       </div>
-    </DashboardLayout>
+    </ClientDashboardLayout>
   )
 }
-
-
-
-
-

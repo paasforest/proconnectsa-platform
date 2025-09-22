@@ -145,17 +145,14 @@ const SupportPage = () => {
       setShowNewTicketModal(false);
       
       // Set success message with details
-      console.log('Setting success message...');
       setSuccessMessage('Ticket created successfully!');
       setSuccessDetails({
         ticketId: response.id || response.ticket_id || `TICKET-${Date.now()}`,
         timestamp: new Date().toISOString()
       });
-      console.log('Success message set:', successMessage);
       
       // Clear success message after 5 seconds
       setTimeout(() => {
-        console.log('Clearing success message...');
         setSuccessMessage('');
         setSuccessDetails(null);
       }, 5000);
@@ -249,7 +246,6 @@ const SupportPage = () => {
         {/* Test Success Message Button */}
         <button 
           onClick={() => {
-            console.log('Testing success message...');
             setSuccessMessage('Test success message!');
             setSuccessDetails({
               ticketId: 'TEST-12345',

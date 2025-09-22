@@ -4,17 +4,25 @@ import React, { useState, useEffect } from 'react';
 import {
   Users, ShoppingCart, Wallet, MessageSquare, TrendingUp, 
   Clock, Target, DollarSign, Activity, BarChart3, Zap,
-  ArrowUpRight, ArrowDownRight, Eye, Star
+  ArrowUpRight, ArrowDownRight, Eye, Star, CheckCircle, Wrench
 } from 'lucide-react';
 import { apiClient } from '@/lib/api-simple';
 import { useSession } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 
 interface DashboardStats {
   total_leads: number;
   active_leads: number;
   completed_jobs: number;
+  total_revenue: number;
   average_rating: number;
   response_rate: number;
+  conversion_rate: number;
+  profile_views: number;
+  avg_response_time?: number;
+  total_spent?: number;
   credit_balance: number;
   recent_leads?: Array<{
     id: string;
@@ -46,11 +54,13 @@ const DashboardOverview = () => {
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const { data: session } = useSession();
+  const router = useRouter();
 
   useEffect(() => {
     const fetchDashboardData = async () => {
       try {
         setLoading(true);
+        // Use NextAuth session token if available
         if (session?.accessToken) {
           apiClient.setToken(session.accessToken);
         }
@@ -63,7 +73,6 @@ const DashboardOverview = () => {
         
         setStats(statsResponse);
         setProfile(profileResponse);
-        console.log('📊 Dashboard data loaded - Profile:', profileResponse);
       } catch (error) {
         console.error('Failed to fetch dashboard data:', error);
       } finally {
@@ -71,10 +80,10 @@ const DashboardOverview = () => {
       }
     };
 
-    if (session?.accessToken) {
+    if (session?.user) {
       fetchDashboardData();
     }
-  }, [session?.accessToken]);
+  }, [session]);
 
   if (loading) {
     return (
@@ -179,13 +188,20 @@ const DashboardOverview = () => {
             📍 Serving {profile.location} • {profile.subscription_tier} Plan
           </p>
         )}
+        {profile?.services && profile.services.length > 0 && (
+          <div className="mt-2">
+            <p className="text-sm text-gray-600">
+              🔧 Services: {profile.services.join(', ')}
+            </p>
+          </div>
+        )}
       </div>
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         {statCards.map((card, index) => {
           const Icon = card.icon;
-          const colorClasses = {
+          const colorClasses: { [key: string]: string } = {
             blue: 'bg-blue-50 text-blue-600',
             green: 'bg-green-50 text-green-600',
             purple: 'bg-purple-50 text-purple-600',
@@ -275,7 +291,7 @@ const DashboardOverview = () => {
             <div className="space-y-4">
               {quickActions.map((action, index) => {
                 const Icon = action.icon;
-                const colorClasses = {
+                const colorClasses: { [key: string]: string } = {
                   blue: 'bg-blue-50 text-blue-600',
                   green: 'bg-green-50 text-green-600',
                   purple: 'bg-purple-50 text-purple-600',

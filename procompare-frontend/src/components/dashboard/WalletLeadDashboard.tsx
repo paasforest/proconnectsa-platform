@@ -394,7 +394,8 @@ const LeadDetails: React.FC<{
 // Performance Panel Component (Right Panel)
 const PerformancePanel: React.FC<{ 
   userStats?: any;
-}> = ({ userStats }) => {
+  onTopUp?: () => void;
+}> = ({ userStats, onTopUp }) => {
   return (
     <div className="p-4 space-y-6">
       <div>
@@ -418,6 +419,22 @@ const PerformancePanel: React.FC<{
             <div className="text-sm text-gray-600">Credits Remaining</div>
           </div>
         </div>
+      </div>
+
+      {/* Top Up Credits Section */}
+      <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+        <h3 className="font-medium text-green-900 mb-3">💰 Top Up Credits</h3>
+        <p className="text-sm text-green-800 mb-3">
+          Need more credits to unlock leads? Top up your account instantly.
+        </p>
+        <Button 
+          onClick={onTopUp}
+          className="w-full bg-green-600 hover:bg-green-700 text-white"
+          size="sm"
+        >
+          <Plus className="w-4 h-4 mr-2" />
+          Top Up Credits
+        </Button>
       </div>
 
       {/* Tips Section */}
@@ -488,12 +505,36 @@ const WalletLeadDashboard: React.FC = () => {
   // Fetch deposit instructions
   const fetchDepositInstructions = useCallback(async () => {
     try {
-      const response = await apiClient.post('/api/auth/api/wallet/deposit-reference/');
+      // Get user profile which contains customer_code
+      const profileResponse = await apiClient.get('/api/auth/profile/');
+      
+      // Create banking instructions response using profile data
+      const response = {
+        success: true,
+        customer_code: profileResponse.customer_code,
+        account_details: {
+          bank_name: 'Nedbank',
+          account_number: '1313872032',
+          branch_code: '198765',
+          account_holder: 'ProConnectSA (Pty) Ltd'
+        },
+        amount: 100,
+        instructions: [
+          `Make a deposit of any amount (minimum R50) to the Nedbank account below`,
+          `IMPORTANT: Use your customer code: ${profileResponse.customer_code} as reference`,
+          '🏦 Nedbank Account: 1313872032',
+          '🏦 Branch Code: 198765',
+          '🏦 Account Holder: ProConnectSA (Pty) Ltd',
+          'Credits will be added automatically within 5 minutes',
+          'Contact support if credits don\'t appear within 30 minutes'
+        ]
+      };
+      
       setDepositInstructions(response);
       setShowBankingModal(true);
     } catch (error) {
       console.error('Failed to fetch deposit instructions:', error);
-      addNotification('error', 'Failed to load banking details', 'Please try again later.');
+      addNotification('error', 'Service Unavailable', 'The banking service is currently unavailable. Please contact support at +27679518124 for assistance with deposits.');
     }
   }, []);
 
@@ -537,7 +578,7 @@ const WalletLeadDashboard: React.FC = () => {
         // Handle insufficient credits or other 400 errors
         const errorData = error.response.data;
         if (errorData.error === 'Insufficient credits') {
-          addNotification('warning', 'Insufficient Credits', 
+          addNotification('error', 'Insufficient Credits', 
             `You need ${errorData.credits_needed} credits but only have ${errorData.credits_available}. Deposit R${errorData.deposit_needed} to continue.`);
         } else {
           addNotification('error', 'Unable to unlock', errorData.error || 'Please check your credits and try again.');
@@ -619,10 +660,10 @@ const WalletLeadDashboard: React.FC = () => {
               variant="outline" 
               size="sm"
               onClick={fetchDepositInstructions}
-              className="bg-blue-50 hover:bg-blue-100 text-blue-700 border-blue-200"
+              className="bg-green-50 hover:bg-green-100 text-green-700 border-green-200"
             >
-              <Banknote className="w-4 h-4 mr-2" />
-              Banking Details
+              <Plus className="w-4 h-4 mr-2" />
+              Top Up Credits
             </Button>
             <Button 
               variant="outline" 
@@ -663,7 +704,6 @@ const WalletLeadDashboard: React.FC = () => {
                 <div className="p-8 text-center text-gray-500">
                   <Users className="w-12 h-12 mx-auto mb-4 text-gray-300" />
                   <p>No leads available at the moment</p>
-                  <p className="text-xs text-gray-400 mt-2">Debug: {leads.length} leads loaded</p>
                 </div>
               )}
             </div>
@@ -680,7 +720,7 @@ const WalletLeadDashboard: React.FC = () => {
 
         {/* RIGHT: Performance/Stats (25%) */}
         <div className="col-span-3 border-l bg-white overflow-y-auto">
-          <PerformancePanel userStats={userStats} />
+          <PerformancePanel userStats={userStats} onTopUp={fetchDepositInstructions} />
         </div>
       </div>
 
@@ -709,19 +749,19 @@ const WalletLeadDashboard: React.FC = () => {
                   <div className="space-y-2">
                     <div className="flex justify-between">
                       <span className="text-gray-600">Account Name:</span>
-                      <span className="font-medium">{depositInstructions.deposit_instructions?.account_name || 'ProConnectSA Platform'}</span>
+                      <span className="font-medium">{depositInstructions.account_details?.account_holder || depositInstructions.deposit_instructions?.account_name || 'ProConnectSA (Pty) Ltd'}</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-gray-600">Account Number:</span>
-                      <span className="font-mono font-medium">{depositInstructions.deposit_instructions?.account_number || '1234567890'}</span>
+                      <span className="font-mono font-medium">{depositInstructions.account_details?.account_number || depositInstructions.deposit_instructions?.account_number || '1313872032'}</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-gray-600">Bank:</span>
-                      <span className="font-medium">{depositInstructions.deposit_instructions?.bank || 'Standard Bank'}</span>
+                      <span className="font-medium">{depositInstructions.account_details?.bank_name || depositInstructions.deposit_instructions?.bank || 'Nedbank'}</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-gray-600">Branch Code:</span>
-                      <span className="font-mono font-medium">{depositInstructions.deposit_instructions?.branch_code || '051001'}</span>
+                      <span className="font-mono font-medium">{depositInstructions.account_details?.branch_code || depositInstructions.deposit_instructions?.branch_code || '198765'}</span>
                     </div>
                   </div>
                 </div>
@@ -733,14 +773,17 @@ const WalletLeadDashboard: React.FC = () => {
                     <span className="text-gray-600">Reference Number:</span>
                     <div className="flex items-center gap-2">
                       <span className="font-mono text-lg font-bold text-green-600 bg-white px-3 py-1 rounded border">
-                        {depositInstructions.customer_code}
+                        {depositInstructions.customer_code || 'Loading...'}
                       </span>
                       <button
                         onClick={() => {
-                          navigator.clipboard.writeText(depositInstructions.customer_code);
-                          addNotification('success', 'Copied!', 'Customer code copied to clipboard');
+                          if (depositInstructions.customer_code) {
+                            navigator.clipboard.writeText(depositInstructions.customer_code);
+                            addNotification('success', 'Copied!', 'Customer code copied to clipboard');
+                          }
                         }}
                         className="p-1 hover:bg-green-100 rounded"
+                        disabled={!depositInstructions.customer_code}
                       >
                         <Copy className="w-4 h-4 text-green-600" />
                       </button>
@@ -765,7 +808,7 @@ const WalletLeadDashboard: React.FC = () => {
                     </div>
                     <div className="flex items-start gap-3">
                       <div className="w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm font-bold">3</div>
-                      <p className="text-gray-700">Enter the reference number: <code className="font-mono bg-white px-1 rounded">{depositInstructions.customer_code}</code></p>
+                      <p className="text-gray-700">Enter the reference number: <code className="font-mono bg-white px-1 rounded">{depositInstructions.customer_code || 'Your Customer Code'}</code></p>
                     </div>
                     <div className="flex items-start gap-3">
                       <div className="w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm font-bold">4</div>

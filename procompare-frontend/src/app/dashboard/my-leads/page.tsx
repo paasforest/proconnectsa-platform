@@ -1,31 +1,38 @@
-import { redirect } from "next/navigation"
-import { getServerSession } from "next-auth"
-import { authOptions } from "@/lib/auth"
-// import DashboardLayout from '@/components/dashboard/DashboardLayout';
-// import MyLeadsPage from '@/components/dashboard/MyLeadsPage';
+'use client'
 
-export default async function MyLeadsPageRoute() {
-  const session = await getServerSession(authOptions);
-  
-  if (!session) {
-    redirect('/login');
-  }
+import { useSession } from 'next-auth/react'
+import { useRouter } from 'next/navigation'
+import { useEffect } from 'react'
+import MyLeadsPage from '@/components/dashboard/MyLeadsPage'
 
-  return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="p-6">
-        <h1 className="text-3xl font-bold text-gray-900 mb-6">My Leads</h1>
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-          <p className="text-gray-600">My leads page temporarily simplified for deployment.</p>
+export default function MyLeadsPageRoute() {
+  const { data: session, status } = useSession()
+  const router = useRouter()
+
+  useEffect(() => {
+    if (status === 'unauthenticated') {
+      router.push('/login')
+    }
+  }, [status, router])
+
+  if (status === 'loading') {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Loading your leads...</p>
         </div>
       </div>
-    </div>
-  );
+    )
+  }
+
+  if (!session) return null
+
+  // Only show my leads page for providers
+  if (session.user.userType !== 'provider') {
+    router.push('/client')
+    return null
+  }
+
+  return <MyLeadsPage />
 }
-
-
-
-
-
-
-

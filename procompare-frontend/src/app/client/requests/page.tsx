@@ -1,29 +1,44 @@
-import { redirect } from "next/navigation"
-import { getServerSession } from "next-auth"
-import { authOptions } from "@/lib/auth"
-// import ClientDashboardLayout from '@/components/dashboard/ClientDashboardLayout'
-// import ClientRequestsPage from '@/components/dashboard/ClientRequestsPage'
+'use client'
 
-export default async function ClientRequestsPageRoute() {
-  const session = await getServerSession(authOptions)
-  
-  if (!session) {
-    redirect('/login')
+import { useSession } from 'next-auth/react'
+import { useRouter } from 'next/navigation'
+import { useEffect } from 'react'
+import ClientDashboardLayout from '@/components/dashboard/ClientDashboardLayout'
+import ClientRequestsOverview from '@/components/dashboard/ClientRequestsOverview'
+
+export default function ClientRequestsPage() {
+  const { data: session, status } = useSession()
+  const router = useRouter()
+
+  useEffect(() => {
+    if (status === 'unauthenticated') {
+      router.push('/login')
+    }
+  }, [status, router])
+
+  if (status === 'loading') {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Loading...</p>
+        </div>
+      </div>
+    )
   }
 
+  if (!session) return null
+
+  // Only show client requests for clients
   if (session.user.userType !== 'client') {
-    redirect('/dashboard')
+    router.push('/dashboard')
+    return null
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="p-6">
-        <h1 className="text-3xl font-bold text-gray-900 mb-6">My Requests</h1>
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-          <p className="text-gray-600">Client requests page temporarily simplified for deployment.</p>
-        </div>
-      </div>
-    </div>
+    <ClientDashboardLayout>
+      <ClientRequestsOverview />
+    </ClientDashboardLayout>
   )
 }
 

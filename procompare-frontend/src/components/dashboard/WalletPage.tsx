@@ -67,10 +67,10 @@ const WalletPage = () => {
             credits: 25,
             customer_code: 'CUS12345678',
             account_details: {
-              bank_name: 'Standard Bank',
-              account_number: '1234567890',
-              branch_code: '051001',
-              account_holder: 'ProCompare (Pty) Ltd'
+              bank_name: 'Nedbank',
+              account_number: '1313872032',
+              branch_code: '198765',
+              account_holder: 'ProConnectSA Platform'
             }
           });
         }

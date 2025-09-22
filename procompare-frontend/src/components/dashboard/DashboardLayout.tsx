@@ -72,6 +72,7 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     const fetchUserStats = async () => {
       try {
+        // Use NextAuth session token if available
         if (session?.accessToken) {
           apiClient.setToken(session.accessToken);
         }
@@ -82,30 +83,30 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
       }
     };
 
-    if (session?.accessToken) {
+    if (session?.user) {
       fetchUserStats();
     }
-  }, [session?.accessToken]);
+  }, [session]);
 
   // Fetch user profile for personalization
   useEffect(() => {
     const fetchUserProfile = async () => {
       try {
+        // Use NextAuth session token if available
         if (session?.accessToken) {
           apiClient.setToken(session.accessToken);
         }
         const response = await apiClient.get('/api/auth/profile/');
         setUserProfile(response);
-        console.log('📊 User profile loaded:', response);
       } catch (error) {
         console.error('Failed to fetch user profile:', error);
       }
     };
 
-    if (session?.accessToken) {
+    if (session?.user) {
       fetchUserProfile();
     }
-  }, [session?.accessToken]);
+  }, [session]);
 
   // Fetch real notifications from API
   useEffect(() => {
@@ -140,7 +141,7 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
         if (session?.accessToken) {
           apiClient.setToken(session.accessToken);
           const response = await apiClient.getNotificationCount();
-          setNotificationCount(response.unread_count || 0);
+          setNotificationCount((response as any).unread_count || 0);
         }
       } catch (error) {
         console.error('Failed to fetch notification count:', error);
@@ -148,14 +149,14 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
       }
     };
 
-    if (session?.accessToken) {
+    if (session?.user) {
       fetchNotificationCount();
       
       // Refresh count every 10 seconds for real-time updates
       const interval = setInterval(fetchNotificationCount, 10000);
       return () => clearInterval(interval);
     }
-  }, [session?.accessToken]);
+  }, [session?.user, session?.accessToken]);
 
   const handleLogout = async () => {
     try {
@@ -171,18 +172,8 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
       // Clear API client token
       apiClient.setToken(null);
       
-      // Sign out from NextAuth
-      await signOut({ 
-        redirect: false,
-        callbackUrl: '/login'
-      });
-      
-      // Clear any local storage
-      localStorage.removeItem('api_token');
-      localStorage.removeItem('user_data');
-      
-      // Redirect to login
-      router.push('/login');
+      // Use NextAuth signOut
+      await signOut({ callbackUrl: '/login' });
     } catch (error) {
       console.error('Logout failed:', error);
       // Force redirect even if signOut fails

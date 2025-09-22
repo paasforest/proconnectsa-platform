@@ -38,6 +38,8 @@ export default function ClientDashboardLayout({ children }: ClientDashboardLayou
   const pathname = usePathname()
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [notifications, setNotifications] = useState(0)
+  
+  const user = session?.user
 
   // Client-specific navigation items
   const navigationItems = [
@@ -74,7 +76,7 @@ export default function ClientDashboardLayout({ children }: ClientDashboardLayou
   ]
 
   const handleSignOut = () => {
-    signOut({ callbackUrl: '/' })
+    signOut({ callbackUrl: '/login' })
   }
 
   return (
@@ -91,12 +93,15 @@ export default function ClientDashboardLayout({ children }: ClientDashboardLayou
         sidebarOpen ? 'translate-x-0' : '-translate-x-full'
       }`}>
         <div className="flex items-center justify-between h-16 px-6 border-b">
-          <Link href="/" className="flex items-center space-x-2">
+          <button 
+            onClick={() => router.push('/client')}
+            className="flex items-center space-x-2 hover:opacity-80 transition-opacity"
+          >
             <div className="h-8 w-8 rounded-lg bg-blue-600 flex items-center justify-center">
               <span className="text-white font-bold text-lg">P</span>
             </div>
             <span className="font-bold text-xl text-gray-900">ProConnectSA</span>
-          </Link>
+          </button>
           <Button
             variant="ghost"
             size="sm"
@@ -115,7 +120,7 @@ export default function ClientDashboardLayout({ children }: ClientDashboardLayou
             </div>
             <div>
               <p className="text-sm font-medium text-gray-900">
-                {session?.user?.name || 'Client'}
+                {user?.name || 'Client'}
               </p>
               <Badge variant="secondary" className="text-xs">Client Account</Badge>
             </div>
@@ -127,14 +132,16 @@ export default function ClientDashboardLayout({ children }: ClientDashboardLayou
           <ul className="space-y-1">
             {navigationItems.map((item) => (
               <li key={item.name}>
-                <Link
-                  href={item.href}
-                  className={`group flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors ${
+                <button
+                  onClick={() => {
+                    setSidebarOpen(false)
+                    router.push(item.href)
+                  }}
+                  className={`group flex items-center w-full px-3 py-2 text-sm font-medium rounded-md transition-colors ${
                     item.current
                       ? 'bg-blue-100 text-blue-700 border-r-2 border-blue-700'
                       : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
                   }`}
-                  onClick={() => setSidebarOpen(false)}
                 >
                   <item.icon
                     className={`mr-3 h-5 w-5 ${
@@ -142,7 +149,7 @@ export default function ClientDashboardLayout({ children }: ClientDashboardLayou
                     }`}
                   />
                   {item.name}
-                </Link>
+                </button>
               </li>
             ))}
           </ul>
@@ -204,27 +211,23 @@ export default function ClientDashboardLayout({ children }: ClientDashboardLayou
                       <User className="h-4 w-4 text-blue-600" />
                     </div>
                     <span className="hidden md:block text-sm font-medium">
-                      {session?.user?.name || 'Client'}
+                      {user?.name || 'Client'}
                     </span>
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-56">
                   <div className="px-3 py-2">
-                    <p className="text-sm font-medium">{session?.user?.name}</p>
-                    <p className="text-xs text-gray-500">{session?.user?.email}</p>
+                    <p className="text-sm font-medium">{user?.name}</p>
+                    <p className="text-xs text-gray-500">{user?.email}</p>
                   </div>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem asChild>
-                    <Link href="/client/settings" className="flex items-center">
-                      <Settings className="mr-2 h-4 w-4" />
-                      Settings
-                    </Link>
+                  <DropdownMenuItem onClick={() => router.push('/client/settings')}>
+                    <Settings className="mr-2 h-4 w-4" />
+                    Settings
                   </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link href="/client/support" className="flex items-center">
-                      <HelpCircle className="mr-2 h-4 w-4" />
-                      Help & Support
-                    </Link>
+                  <DropdownMenuItem onClick={() => router.push('/client/support')}>
+                    <HelpCircle className="mr-2 h-4 w-4" />
+                    Help & Support
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={handleSignOut} className="text-red-600">

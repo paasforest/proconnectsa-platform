@@ -91,11 +91,8 @@ const LeadsPage = () => {
     
     try {
       setLoading(true);
-      console.log('🔍 Fetching leads from API...');
       const response = await apiClient.get('/api/leads/wallet/available/');
-      console.log('📊 API Response:', response);
       setLeads(response.leads || []);
-      console.log('✅ Leads set:', response.leads?.length || 0, 'leads');
     } catch (error) {
       console.error('❌ Failed to fetch leads:', error);
       console.error('❌ Error details:', error.response?.data || error.message);
@@ -116,12 +113,9 @@ const LeadsPage = () => {
   const handleUnlockLead = async (leadId: string) => {
     try {
       setUnlockingLead(leadId);
-      console.log('🔓 Attempting to unlock lead:', leadId);
       
       // Use the correct wallet unlock endpoint
       const response = await apiClient.post(`/api/auth/api/leads/${leadId}/unlock/`);
-      
-      console.log('✅ Lead unlocked successfully:', response);
       
       // Update the lead in the list
       setLeads(prevLeads => 
