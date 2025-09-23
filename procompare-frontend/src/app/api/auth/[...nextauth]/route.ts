@@ -33,7 +33,7 @@ const handler = NextAuth({
             return {
               id: data.user.id.toString(),
               email: data.user.email,
-              name: `${data.user.first_name} ${data.user.last_name}`,
+              name: data.user.name || `${data.user.first_name} ${data.user.last_name}`,
               userType: data.user.user_type,
               subscriptionTier: data.user.subscription_tier || 'basic',
               accessToken: data.token,
