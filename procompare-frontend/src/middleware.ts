@@ -6,8 +6,19 @@ export default withAuth(
     const token = req.nextauth.token
     const { pathname } = req.nextUrl
 
-    // Redirect to login if no token
-    if (!token) {
+    // Only redirect to login for protected routes that require authentication
+    const protectedRoutes = [
+      "/dashboard",
+      "/client", 
+      "/admin",
+      "/profile",
+      "/settings",
+      "/leads"
+    ]
+
+    const isProtectedRoute = protectedRoutes.some(route => pathname.startsWith(route))
+    
+    if (isProtectedRoute && !token) {
       return NextResponse.redirect(new URL("/login", req.url))
     }
 
