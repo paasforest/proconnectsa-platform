@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || 'http://128.140.123.48:8000';
+const BACKEND_URL = 'http://128.140.123.48:8000'; // Hardcoded for testing
+console.log('API Proxy: BACKEND_URL =', BACKEND_URL);
 
 export async function GET(request: NextRequest, { params }: { params: { slug: string[] } }) {
   const slug = params.slug.join('/');
@@ -9,15 +10,27 @@ export async function GET(request: NextRequest, { params }: { params: { slug: st
   const fullUrl = searchParams ? `${url}?${searchParams}` : url;
 
   try {
+    console.log('API Proxy: Fetching from:', fullUrl);
+    
     const response = await fetch(fullUrl, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
         'Origin': request.headers.get('origin') || 'https://proconnectsa-platform.vercel.app',
       },
+      timeout: 10000, // 10 second timeout
     });
 
+    console.log('API Proxy: Response status:', response.status);
+    
+    if (!response.ok) {
+      console.error('API Proxy: Backend returned error:', response.status, response.statusText);
+      const errorText = await response.text();
+      console.error('API Proxy: Error response:', errorText);
+    }
+
     const data = await response.json();
+    console.log('API Proxy: Response data:', data);
     
     // Add CORS headers to the response
     const nextResponse = NextResponse.json(data, { status: response.status });
@@ -27,8 +40,12 @@ export async function GET(request: NextRequest, { params }: { params: { slug: st
     
     return nextResponse;
   } catch (error) {
-    console.error('Backend API Error:', error);
-    return NextResponse.json({ error: 'Failed to fetch data from backend' }, { status: 500 });
+    console.error('API Proxy: Fetch error:', error);
+    return NextResponse.json({ 
+      error: 'Failed to fetch data from backend', 
+      details: error instanceof Error ? error.message : 'Unknown error',
+      url: fullUrl
+    }, { status: 500 });
   }
 }
 
