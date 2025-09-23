@@ -159,9 +159,9 @@ const WalletPage = () => {
         // Store the response data for the banking details modal
         setWalletData(prev => prev ? {
           ...prev,
-          account_details: response.account_details,
-          customer_code: response.customer_code,
-          instructions: response.instructions
+          account_details: response.data.account_details,
+          customer_code: response.data.customer_code,
+          instructions: response.data.instructions
         } : null);
         // Refresh wallet data without reloading the page
         setTimeout(() => {

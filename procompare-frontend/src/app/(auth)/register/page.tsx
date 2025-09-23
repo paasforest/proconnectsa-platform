@@ -38,7 +38,7 @@ export default function RegisterPage() {
 
     try {
       // Call the backend registration API
-      const response = await fetch('http://128.140.123.48:8000/api/auth/register/', {
+      const response = await fetch('https://api.proconnectsa.co.za/api/register/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
