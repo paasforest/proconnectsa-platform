@@ -12,11 +12,11 @@ export async function POST(request: NextRequest) {
       }, { status: 400 })
     }
 
-    // Call the real Django backend
-    const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'https://api.proconnectsa.co.za'
+        // Call the real Flask backend
+        const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'http://128.140.123.48:8000'
     
     try {
-      const response = await fetch(`${backendUrl}/api/auth/login/`, {
+      const response = await fetch(`${backendUrl}/api/login/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -27,21 +27,21 @@ export async function POST(request: NextRequest) {
         }),
       })
 
-      const data = await response.json()
-      
-      if (response.ok && data.success) {
-        return NextResponse.json({
-          success: true,
-          user: data.user,
-          token: data.token,
-          message: data.message || 'Login successful'
-        }, { status: 200 })
-      } else {
-        return NextResponse.json({
-          success: false,
-          message: data.message || 'Invalid credentials'
-        }, { status: response.status })
-      }
+          const data = await response.json()
+          
+          if (response.ok && data.success) {
+            return NextResponse.json({
+              success: true,
+              user: data.data.user,
+              token: data.data.token,
+              message: data.message || 'Login successful'
+            }, { status: 200 })
+          } else {
+            return NextResponse.json({
+              success: false,
+              message: data.message || 'Invalid credentials'
+            }, { status: response.status })
+          }
     } catch (backendError) {
       console.error('Django backend error:', backendError)
       return NextResponse.json({

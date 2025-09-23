@@ -5,7 +5,7 @@
   "devCommand": "npm run dev",
   "framework": "nextjs",
   "env": {
-    "NEXT_PUBLIC_API_URL": "https://api.proconnectsa.co.za",
+      "NEXT_PUBLIC_API_URL": "http://128.140.123.48:8000",
     "NEXT_PUBLIC_FRONTEND_URL": "https://www.proconnectsa.co.za",
     "NEXTAUTH_SECRET": "proconnectsa-nextauth-secret-key-2024-production-at-least-32-chars-long",
     "NEXTAUTH_URL": "https://www.proconnectsa.co.za"
