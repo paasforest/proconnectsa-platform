@@ -4,7 +4,7 @@ const nextConfig: NextConfig = {
   // Production environment variables
   env: {
     NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL || 'http://128.140.123.48:8000',
-    NEXT_PUBLIC_FRONTEND_URL: process.env.NEXT_PUBLIC_FRONTEND_URL || 'https://proconnectsa.vercel.app',
+    NEXT_PUBLIC_FRONTEND_URL: process.env.NEXT_PUBLIC_FRONTEND_URL || 'https://www.proconnectsa.co.za',
     NEXT_PUBLIC_APP_NAME: 'ProConnectSA',
   },
   
