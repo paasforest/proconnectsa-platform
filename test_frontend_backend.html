@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Frontend-Backend Connection Test</title>
+</head>
+<body>
+    <h1>ProConnectSA Frontend-Backend Test</h1>
+    <div id="results"></div>
+    
+    <script>
+        const API_URL = 'http://128.140.123.48:8000';
+        
+        async function testConnection() {
+            const results = document.getElementById('results');
+            
+            try {
+                // Test 1: Categories API
+                console.log('Testing categories API...');
+                const categoriesResponse = await fetch(`${API_URL}/api/leads/categories/`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Origin': 'https://proconnectsa-platform.vercel.app'
+                    }
+                });
+                
+                if (categoriesResponse.ok) {
+                    const categoriesData = await categoriesResponse.json();
+                    results.innerHTML += '<h2>✅ Categories API Working</h2>';
+                    results.innerHTML += '<pre>' + JSON.stringify(categoriesData, null, 2) + '</pre>';
+                } else {
+                    results.innerHTML += '<h2>❌ Categories API Failed</h2>';
+                    results.innerHTML += '<p>Status: ' + categoriesResponse.status + '</p>';
+                }
+                
+                // Test 2: Leads API
+                console.log('Testing leads API...');
+                const leadsResponse = await fetch(`${API_URL}/api/leads/`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Origin': 'https://proconnectsa-platform.vercel.app'
+                    }
+                });
+                
+                if (leadsResponse.ok) {
+                    const leadsData = await leadsResponse.json();
+                    results.innerHTML += '<h2>✅ Leads API Working</h2>';
+                    results.innerHTML += '<pre>' + JSON.stringify(leadsData, null, 2) + '</pre>';
+                } else {
+                    results.innerHTML += '<h2>❌ Leads API Failed</h2>';
+                    results.innerHTML += '<p>Status: ' + leadsResponse.status + '</p>';
+                }
+                
+                // Test 3: Login API
+                console.log('Testing login API...');
+                const loginResponse = await fetch(`${API_URL}/api/auth/login/`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Origin': 'https://proconnectsa-platform.vercel.app'
+                    },
+                    body: JSON.stringify({
+                        email: 'john.plumber@test.com',
+                        password: 'password123'
+                    })
+                });
+                
+                if (loginResponse.ok) {
+                    const loginData = await loginResponse.json();
+                    results.innerHTML += '<h2>✅ Login API Working</h2>';
+                    results.innerHTML += '<pre>' + JSON.stringify(loginData, null, 2) + '</pre>';
+                } else {
+                    const loginData = await loginResponse.json();
+                    results.innerHTML += '<h2>⚠️ Login API Response (Expected to fail without valid credentials)</h2>';
+                    results.innerHTML += '<pre>' + JSON.stringify(loginData, null, 2) + '</pre>';
+                }
+                
+            } catch (error) {
+                results.innerHTML += '<h2>❌ Connection Error</h2>';
+                results.innerHTML += '<p>' + error.message + '</p>';
+            }
+        }
+        
+        // Run tests when page loads
+        window.onload = testConnection;
+    </script>
+</body>
+</html>

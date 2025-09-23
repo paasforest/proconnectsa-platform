@@ -1,6 +1,7 @@
 // API utility functions for Django backend integration
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000'
+// Use API proxy routes instead of direct backend calls
+const API_URL = process.env.NODE_ENV === 'production' ? '' : (process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000')
 
 export interface ApiResponse<T = any> {
   success: boolean
@@ -25,7 +26,11 @@ export interface LoginResponse {
 
 // Login function that returns Django token
 export async function loginUser(email: string, password: string): Promise<LoginResponse> {
-  const response = await fetch(`${API_URL}/api/auth/login/`, {
+  const endpoint = process.env.NODE_ENV === 'production' 
+    ? '/api/backend/auth/login/' 
+    : `${API_URL}/api/auth/login/`
+    
+  const response = await fetch(endpoint, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -49,7 +54,11 @@ export async function apiCall<T = any>(
   token: string,
   options: RequestInit = {}
 ): Promise<T> {
-  const response = await fetch(`${API_URL}${endpoint}`, {
+  const fullEndpoint = process.env.NODE_ENV === 'production' 
+    ? `/api/backend${endpoint}` 
+    : `${API_URL}${endpoint}`
+    
+  const response = await fetch(fullEndpoint, {
     ...options,
     headers: {
       'Content-Type': 'application/json',
