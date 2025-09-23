@@ -14,6 +14,10 @@ interface FormData {
   password: string
   confirmPassword: string
   userType: 'client' | 'provider'
+  city: string
+  town: string
+  suburb: string
+  postalCode: string
   businessName: string
   businessPhone: string
   businessEmail: string
@@ -131,6 +135,64 @@ export default function RegistrationSteps({
               </select>
             </div>
 
+            {/* Location Information */}
+            <div className="border-t pt-4 mt-4">
+              <h4 className="text-lg font-medium text-gray-900 mb-4">Location Information</h4>
+              
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="city">City *</Label>
+                  <Input
+                    id="city"
+                    name="city"
+                    type="text"
+                    placeholder="Johannesburg"
+                    value={formData.city}
+                    onChange={onInputChange}
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="town">Town</Label>
+                  <Input
+                    id="town"
+                    name="town"
+                    type="text"
+                    placeholder="Sandton"
+                    value={formData.town}
+                    onChange={onInputChange}
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="suburb">Suburb *</Label>
+                  <Input
+                    id="suburb"
+                    name="suburb"
+                    type="text"
+                    placeholder="Rosebank"
+                    value={formData.suburb}
+                    onChange={onInputChange}
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="postalCode">Postal Code *</Label>
+                  <Input
+                    id="postalCode"
+                    name="postalCode"
+                    type="text"
+                    placeholder="2196"
+                    value={formData.postalCode}
+                    onChange={onInputChange}
+                    required
+                  />
+                </div>
+              </div>
+            </div>
+
             <div className="space-y-2">
               <Label htmlFor="password">Password</Label>
               <Input
@@ -175,6 +237,7 @@ export default function RegistrationSteps({
                 <p><strong>Name:</strong> {formData.firstName} {formData.lastName}</p>
                 <p><strong>Email:</strong> {formData.email}</p>
                 <p><strong>Phone:</strong> {formData.phone || 'Not provided'}</p>
+                <p><strong>Location:</strong> {formData.suburb}, {formData.city} {formData.postalCode}</p>
                 <p><strong>Account Type:</strong> Client</p>
               </div>
             </div>
@@ -228,14 +291,13 @@ export default function RegistrationSteps({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="businessAddress">Business Address *</Label>
+              <Label htmlFor="businessAddress">Business Address</Label>
               <Textarea
                 id="businessAddress"
                 name="businessAddress"
                 placeholder="123 Main Street, Sandton, Johannesburg, 2196"
                 value={formData.businessAddress}
                 onChange={onInputChange}
-                required
                 rows={3}
               />
             </div>
@@ -380,9 +442,15 @@ export default function RegistrationSteps({
               <p className="text-gray-600">Help clients understand your rates and experience</p>
             </div>
 
+            <div className="bg-blue-50 p-4 rounded-lg mb-4">
+              <p className="text-sm text-blue-800">
+                <strong>Note:</strong> Pricing information is optional. Many South African service providers work on project-based quotes rather than hourly rates.
+              </p>
+            </div>
+
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="hourlyRateMin">Min Hourly Rate (R)</Label>
+                <Label htmlFor="hourlyRateMin">Min Hourly Rate (R) - Optional</Label>
                 <Input
                   id="hourlyRateMin"
                   name="hourlyRateMin"
@@ -394,7 +462,7 @@ export default function RegistrationSteps({
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="hourlyRateMax">Max Hourly Rate (R)</Label>
+                <Label htmlFor="hourlyRateMax">Max Hourly Rate (R) - Optional</Label>
                 <Input
                   id="hourlyRateMax"
                   name="hourlyRateMax"
@@ -408,7 +476,7 @@ export default function RegistrationSteps({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="minimumJobValue">Minimum Job Value (R)</Label>
+              <Label htmlFor="minimumJobValue">Minimum Job Value (R) - Optional</Label>
               <Input
                 id="minimumJobValue"
                 name="minimumJobValue"

@@ -24,6 +24,12 @@ export default function RegisterPage() {
     phone: '',
     userType: 'client' as 'client' | 'provider',
     
+    // Location Info (for both clients and providers)
+    city: '',
+    town: '',
+    suburb: '',
+    postalCode: '',
+    
     // Business Info (for providers)
     businessName: '',
     businessPhone: '',
@@ -191,9 +197,9 @@ export default function RegisterPage() {
   const isStepValid = (step: number) => {
     switch (step) {
       case 1:
-        return formData.firstName && formData.lastName && formData.email && formData.password && formData.confirmPassword
+        return formData.firstName && formData.lastName && formData.email && formData.password && formData.confirmPassword && formData.city && formData.suburb && formData.postalCode
       case 2:
-        return formData.userType === 'client' || (formData.businessName && formData.businessPhone && formData.businessAddress)
+        return formData.userType === 'client' || (formData.businessName && formData.businessPhone)
       case 3:
         return formData.userType === 'client' || formData.serviceCategories.length > 0
       case 4:
