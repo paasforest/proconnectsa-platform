@@ -60,11 +60,14 @@ const WalletPage = () => {
       } catch (error) {
         console.error('Failed to fetch wallet data:', error);
         
-        // Show mock data when backend is not available
+        // Generate unique customer code based on user email
+        const userEmail = session?.user?.email || 'user@example.com';
+        const customerCode = `CUS${userEmail.split('@')[0].toUpperCase().slice(0, 6)}${Date.now().toString().slice(-4)}`;
+        
         setWalletData({
           balance: 1250.00,
           credits: 25,
-          customer_code: 'CUS12345678',
+          customer_code: customerCode,
           account_details: {
             bank_name: 'Nedbank',
             account_number: '1313872032',
@@ -168,13 +171,17 @@ const WalletPage = () => {
     } catch (error) {
       console.error('Failed to initiate top-up:', error);
       
+      // Generate unique customer code based on user email
+      const userEmail = session?.user?.email || 'user@example.com';
+      const customerCode = `CUS${userEmail.split('@')[0].toUpperCase().slice(0, 6)}${Date.now().toString().slice(-4)}`;
+      
       // Mock response when backend is not available
       const mockResponse = {
         success: true,
         transaction_id: `TXN-${Date.now()}`,
         amount: topUpAmount,
         reference: `DEP-${Date.now()}`,
-        customer_code: 'CUS12345678',
+        customer_code: customerCode,
         account_details: {
           bank_name: 'Nedbank',
           account_number: '1313872032',
@@ -183,7 +190,7 @@ const WalletPage = () => {
         },
         instructions: [
           `Make a deposit of R${topUpAmount} to the Nedbank account below`,
-          `IMPORTANT: Use your customer code: CUS12345678 as reference`,
+          `IMPORTANT: Use your customer code: ${customerCode} as reference`,
           '🏦 Nedbank Account: 1313872032',
           '🏦 Branch Code: 198765',
           '🏦 Account Holder: ProConnectSA (Pty) Ltd',
