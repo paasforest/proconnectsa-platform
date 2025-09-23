@@ -157,12 +157,14 @@ const WalletPage = () => {
         setShowTopUpModal(false);
         setShowBankingDetails(true);
         // Store the response data for the banking details modal
-        setWalletData(prev => prev ? {
+        setWalletData(prev => ({
           ...prev,
+          balance: prev?.balance || 1250.00,
+          credits: prev?.credits || 25,
           account_details: response.data.account_details,
           customer_code: response.data.customer_code,
           instructions: response.data.instructions
-        } : null);
+        }));
         // Refresh wallet data without reloading the page
         setTimeout(() => {
           refreshWalletData();
@@ -202,12 +204,14 @@ const WalletPage = () => {
       setShowTopUpModal(false);
       setShowBankingDetails(true);
       // Store the mock response data for the banking details modal
-      setWalletData(prev => prev ? {
+      setWalletData(prev => ({
         ...prev,
+        balance: prev?.balance || 1250.00,
+        credits: prev?.credits || 25,
         account_details: mockResponse.account_details,
         customer_code: mockResponse.customer_code,
         instructions: mockResponse.instructions
-      } : null);
+      }));
     }
   };
 
