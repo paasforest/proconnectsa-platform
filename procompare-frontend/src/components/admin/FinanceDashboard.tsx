@@ -104,11 +104,11 @@ const FinanceDashboard = () => {
   }, [session?.accessToken]);
 
   const fetchFinanceData = async () => {
+    if (!session?.accessToken) return;
+    
     try {
       setLoading(true);
-      if (session?.accessToken) {
-        apiClient.setToken(session.accessToken);
-      }
+      apiClient.setToken(session.accessToken);
 
       // Fetch all financial data in parallel
       const [

@@ -94,9 +94,6 @@ const LeadsPage = () => {
       const response = await apiClient.get('/api/leads/wallet/available/');
       setLeads(response.leads || []);
     } catch (error) {
-      console.error('❌ Failed to fetch leads:', error);
-      console.error('❌ Error details:', error.response?.data || error.message);
-      // Set empty array on error to prevent infinite loading
       setLeads([]);
     } finally {
       setLoading(false);

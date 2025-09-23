@@ -61,49 +61,19 @@ const TechnicalDashboard = () => {
   }, []);
 
   const fetchTechnicalData = async () => {
+    if (!session?.accessToken) return;
+    
     try {
       setLoading(true);
-      if (session?.accessToken) {
-        apiClient.setToken(session.accessToken);
-      }
+      apiClient.setToken(session.accessToken);
 
-      // Fetch technical-related tickets
       const ticketsRes = await apiClient.get('/api/support/tickets/?category=technical');
       setTickets(ticketsRes.results || ticketsRes);
 
-      // Mock technical stats for now
-      setStats({
-        total_tickets: 78,
-        open_tickets: 18,
-        resolved_tickets: 60,
-        critical_issues: 3,
-        avg_resolution_time: 6.5,
-        system_uptime: 99.8,
-        bug_reports: 45,
-        feature_requests: 33,
-        tickets_by_severity: {
-          'critical': 3,
-          'high': 12,
-          'medium': 35,
-          'low': 28
-        },
-        tickets_by_component: {
-          'frontend': 25,
-          'backend': 20,
-          'database': 15,
-          'api': 18
-        },
-        resolution_trends: [
-          { week: 'Week 1', resolved: 12, created: 15 },
-          { week: 'Week 2', resolved: 18, created: 12 },
-          { week: 'Week 3', resolved: 15, created: 18 },
-          { week: 'Week 4', resolved: 20, created: 14 },
-          { week: 'Week 5', resolved: 22, created: 16 },
-          { week: 'Week 6', resolved: 19, created: 13 }
-        ]
-      });
+      // TODO: Replace with real API call
+      setStats(null);
     } catch (error) {
-      console.error('Failed to fetch technical data:', error);
+      // Handle error silently
     } finally {
       setLoading(false);
     }

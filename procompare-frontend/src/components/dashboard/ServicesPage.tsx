@@ -54,40 +54,7 @@ const ServicesPage = () => {
         const response = await apiClient.get('/api/services/');
         setServices(response.services || []);
       } catch (error) {
-        console.error('Failed to fetch services:', error);
-        // Mock data for now
-        setServices([
-          {
-            id: '1',
-            name: 'Plumbing Repairs',
-            category: 'Plumbing',
-            description: 'General plumbing repairs, leaks, and installations',
-            is_active: true,
-            created_at: '2024-01-10T10:00:00Z',
-            lead_count: 12,
-            success_rate: 85
-          },
-          {
-            id: '2',
-            name: 'Web Development',
-            category: 'Web Design',
-            description: 'Custom website development and maintenance',
-            is_active: true,
-            created_at: '2024-01-08T14:30:00Z',
-            lead_count: 8,
-            success_rate: 92
-          },
-          {
-            id: '3',
-            name: 'House Cleaning',
-            category: 'Cleaning',
-            description: 'Residential and commercial cleaning services',
-            is_active: false,
-            created_at: '2024-01-05T09:15:00Z',
-            lead_count: 5,
-            success_rate: 78
-          }
-        ]);
+        setServices([]);
       } finally {
         setLoading(false);
       }
@@ -120,14 +87,7 @@ const ServicesPage = () => {
         alert(`❌ ${response.error || 'Failed to add service. Please try again.'}`);
       }
     } catch (error: any) {
-      console.error('Failed to add service:', error);
-      
-      // Extract error message from response
-      const errorMessage = error.response?.data?.error || 
-                          error.message || 
-                          'Failed to add service. Please try again.';
-      
-      alert(`❌ ${errorMessage}`);
+      alert(`❌ Failed to add service. Please try again.`);
     }
   };
 

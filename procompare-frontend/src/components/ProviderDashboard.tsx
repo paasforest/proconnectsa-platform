@@ -26,11 +26,9 @@ export default function ProviderDashboard() {
       </div>
     )
   }
-  
 
   if (!session) return null
 
-  // Only show provider dashboard for providers
   if (session.user.userType !== 'provider') {
     router.push('/client')
     return null

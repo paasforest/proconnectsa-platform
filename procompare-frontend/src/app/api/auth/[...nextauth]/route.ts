@@ -1,5 +1,6 @@
 import NextAuth from "next-auth"
 import CredentialsProvider from "next-auth/providers/credentials"
+import { loginUser } from "@/lib/api"
 
 const handler = NextAuth({
   providers: [
@@ -15,50 +16,21 @@ const handler = NextAuth({
         }
 
         try {
-          // Call Django backend to authenticate
-          const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://128.140.123.48:8000'
+          const data = await loginUser(credentials.email, credentials.password)
           
-          const controller = new AbortController()
-          const timeoutId = setTimeout(() => controller.abort(), 10000) // 10 second timeout
-          
-          const response = await fetch(`${API_URL}/api/auth/login/`, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              email: credentials.email,
-              password: credentials.password,
-            }),
-            signal: controller.signal,
-          })
-          
-          clearTimeout(timeoutId)
-
-          // Get response text first to avoid consuming the stream twice
-          const responseText = await response.text()
-
-          if (response.ok) {
-            try {
-              const data = JSON.parse(responseText)
-              
-              if (data.success && data.user) {
-                const user = {
-                  id: data.user.id.toString(),
-                  email: data.user.email,
-                  name: `${data.user.first_name} ${data.user.last_name}`,
-                  userType: data.user.user_type,
-                  subscriptionTier: data.user.subscription_tier || 'basic',
-                  accessToken: data.token,
-                }
-                return user
-              }
-            } catch (jsonError) {
-              console.error('NextAuth: JSON parse error:', jsonError)
+          if (data.success && data.user) {
+            return {
+              id: data.user.id.toString(),
+              email: data.user.email,
+              name: `${data.user.first_name} ${data.user.last_name}`,
+              userType: data.user.user_type,
+              subscriptionTier: data.user.subscription_tier || 'basic',
+              accessToken: data.token,
             }
           }
         } catch (error) {
-          console.error('NextAuth authorize error:', error)
+          // Silent error handling for security
+          console.error('Login error:', error)
         }
 
         return null

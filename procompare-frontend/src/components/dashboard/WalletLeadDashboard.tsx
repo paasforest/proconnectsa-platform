@@ -485,7 +485,6 @@ const WalletLeadDashboard: React.FC = () => {
       const response = await apiClient.get('/api/leads/wallet/available/');
       setLeads(response.leads || []);
     } catch (error) {
-      console.error('Failed to fetch leads:', error);
       addNotification('error', 'Failed to load leads', 'Please try again later.');
     } finally {
       setLoading(false);
@@ -498,7 +497,7 @@ const WalletLeadDashboard: React.FC = () => {
       const response = await apiClient.get('/api/auth/stats/');
       setUserStats(response);
     } catch (error) {
-      console.error('Failed to fetch user stats:', error);
+      // Handle error silently
     }
   }, []);
 

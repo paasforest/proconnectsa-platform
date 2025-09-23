@@ -49,33 +49,17 @@ export default function ClientDashboardOverview() {
 
   useEffect(() => {
     const fetchDashboardData = async () => {
+      if (!session?.accessToken) return;
+      
       try {
-        // Use NextAuth session token if available
-        if (session?.accessToken) {
-          apiClient.setToken(session.accessToken)
-        }
-        
+        apiClient.setToken(session.accessToken)
         const response = await apiClient.get('/api/client/dashboard/')
         setStats(response.stats)
         setUser(response.user)
       } catch (error) {
-        console.error('Failed to fetch client dashboard data:', error)
-        // Enhanced mock data for better demo experience
-        setStats({
-          total_requests: 3,
-          active_requests: 2,
-          completed_jobs: 1,
-          total_provider_interest: 12,
-          providers_unlocked_contact: 8,
-          recent_activity_week: 2,
-          avg_response_hours: 4,
-          success_rate: 85
-        })
-        setUser({
-          name: authUser?.name || 'Client',
-          email: authUser?.email || '',
-          member_since: '2024'
-        })
+        // Handle error - show empty state or error message
+        setStats(null)
+        setUser(null)
       } finally {
         setLoading(false)
       }

@@ -63,101 +63,47 @@ const SupportPage = () => {
 
   useEffect(() => {
     const fetchTickets = async () => {
+      if (!session?.accessToken) return;
+      
       try {
         setLoading(true);
-        if (session?.accessToken) {
-          apiClient.setToken(session.accessToken);
-        }
+        apiClient.setToken(session.accessToken);
         const response = await apiClient.get('/api/support/tickets/');
         setTickets(response.results || []);
       } catch (error) {
-        console.error('Failed to fetch tickets:', error);
-        // Mock data for now
-        setTickets([
-          {
-            id: '1',
-            title: 'Credits not added after deposit',
-            description: 'I made a deposit of R500 yesterday but my credits haven\'t been added yet. The reference was CUS12345678.',
-            status: 'open',
-            priority: 'high',
-            category: 'billing',
-            created_at: '2024-01-15T10:30:00Z',
-            updated_at: '2024-01-15T10:30:00Z',
-            responses: []
-          },
-          {
-            id: '2',
-            title: 'Lead contact information incorrect',
-            description: 'I purchased a plumbing lead but the phone number provided is not working.',
-            status: 'in_progress',
-            priority: 'medium',
-            category: 'technical',
-            created_at: '2024-01-14T16:45:00Z',
-            updated_at: '2024-01-15T09:15:00Z',
-            responses: [
-              {
-                id: '1',
-                message: 'Thank you for reporting this issue. We\'re investigating the lead quality and will get back to you within 24 hours.',
-                is_staff: true,
-                created_at: '2024-01-15T09:15:00Z'
-              }
-            ]
-          },
-          {
-            id: '3',
-            title: 'How to update my services?',
-            description: 'I want to add new services to my profile. How do I do this?',
-            status: 'resolved',
-            priority: 'low',
-            category: 'general',
-            created_at: '2024-01-13T14:20:00Z',
-            updated_at: '2024-01-14T11:30:00Z',
-            responses: [
-              {
-                id: '2',
-                message: 'You can update your services by going to the Services page in your dashboard. Click "Add Service" to add new ones.',
-                is_staff: true,
-                created_at: '2024-01-13T15:45:00Z'
-              }
-            ]
-          }
-        ]);
+        setTickets([]);
       } finally {
         setLoading(false);
       }
     };
 
-    if (session?.accessToken) {
+    if (session?.user) {
       fetchTickets();
     }
-  }, [session?.accessToken]);
+  }, [session]);
 
   const handleCreateTicket = async () => {
+    if (!session?.accessToken) return;
+    
     try {
-      if (session?.accessToken) {
-        apiClient.setToken(session.accessToken);
-      }
-      
+      apiClient.setToken(session.accessToken);
       const response = await apiClient.post('/api/support/tickets/', newTicket);
       
       setTickets([response, ...tickets]);
       setNewTicket({ title: '', description: '', category: 'general', priority: 'medium' });
       setShowNewTicketModal(false);
       
-      // Set success message with details
       setSuccessMessage('Ticket created successfully!');
       setSuccessDetails({
         ticketId: response.id || response.ticket_id || `TICKET-${Date.now()}`,
         timestamp: new Date().toISOString()
       });
       
-      // Clear success message after 5 seconds
       setTimeout(() => {
         setSuccessMessage('');
         setSuccessDetails(null);
       }, 5000);
     } catch (error) {
-      console.error('Failed to create ticket:', error);
       alert('Failed to create ticket. Please try again.');
     }
   };

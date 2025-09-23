@@ -8,19 +8,19 @@ const nextConfig: NextConfig = {
     NEXT_PUBLIC_APP_NAME: 'ProConnectSA',
   },
   
-  // API routes configuration
-  async rewrites() {
-    return [
-      {
-        source: '/api/auth/:path*',
-        destination: '/api/auth/:path*', // Keep NextAuth routes local
-      },
-      {
-        source: '/api/backend/:path*',
-        destination: `${process.env.NEXT_PUBLIC_API_URL || 'http://128.140.123.48:8000'}/api/:path*`,
-      },
-    ]
-  },
+  // API routes configuration - using API routes instead of rewrites
+  // async rewrites() {
+  //   return [
+  //     {
+  //       source: '/api/auth/:path*',
+  //       destination: '/api/auth/:path*', // Keep NextAuth routes local
+  //     },
+  //     {
+  //       source: '/api/backend/:path*',
+  //       destination: `${process.env.NEXT_PUBLIC_API_URL || 'http://128.140.123.48:8000'}/api/:path*`,
+  //     },
+  //   ]
+  // },
 
   // Headers for CORS and security
   async headers() {

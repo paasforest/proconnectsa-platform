@@ -37,14 +37,10 @@ export default function AdminLoginForm() {
       if (result?.error) {
         setError('Invalid credentials. Please try again.');
       } else if (result?.ok) {
-        // Wait a moment for session to be established
         await new Promise(resolve => setTimeout(resolve, 1000));
         
-        // Check if user is admin
         const response = await fetch('/api/auth/session');
         const session = await response.json();
-        
-        console.log('Session after login:', session);
         
         if (session?.user?.userType === 'admin' && 
             session?.user?.email === 'admin@example.com') {

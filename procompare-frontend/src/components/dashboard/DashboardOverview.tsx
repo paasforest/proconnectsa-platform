@@ -58,14 +58,12 @@ const DashboardOverview = () => {
 
   useEffect(() => {
     const fetchDashboardData = async () => {
+      if (!session?.accessToken) return;
+      
       try {
         setLoading(true);
-        // Use NextAuth session token if available
-        if (session?.accessToken) {
-          apiClient.setToken(session.accessToken);
-        }
+        apiClient.setToken(session.accessToken);
         
-        // Fetch both stats and profile data
         const [statsResponse, profileResponse] = await Promise.all([
           apiClient.get('/api/auth/stats/'),
           apiClient.get('/api/auth/profile/')
@@ -74,7 +72,7 @@ const DashboardOverview = () => {
         setStats(statsResponse);
         setProfile(profileResponse);
       } catch (error) {
-        console.error('Failed to fetch dashboard data:', error);
+        // Handle error silently or show user-friendly message
       } finally {
         setLoading(false);
       }

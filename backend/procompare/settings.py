@@ -226,6 +226,7 @@ CORS_ALLOWED_ORIGINS = [
     "https://proconnectsa.co.za",
     "https://www.proconnectsa.co.za",
     "https://proconnectsa.vercel.app",
+    "https://proconnectsa-platform.vercel.app",  # Actual Vercel URL
     "https://proconnectsa-git-main-your-username.vercel.app",  # Replace with your actual Vercel URL
     "https://proconnectsa-your-username.vercel.app",  # Replace with your actual Vercel URL
     "https://proconnectsa-git-main.vercel.app",  # Common Vercel pattern
@@ -234,7 +235,6 @@ CORS_ALLOWED_ORIGINS = [
 ]
 
 CORS_ALLOW_CREDENTIALS = True
-CORS_ALLOW_ALL_ORIGINS = config('CORS_ALLOW_ALL_ORIGINS', default=False, cast=bool)
 
 # Additional CORS settings for Vercel deployment
 CORS_ALLOWED_ORIGIN_REGEXES = [

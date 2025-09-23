@@ -71,15 +71,14 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
   // Fetch user stats
   useEffect(() => {
     const fetchUserStats = async () => {
+      if (!session?.accessToken) return;
+      
       try {
-        // Use NextAuth session token if available
-        if (session?.accessToken) {
-          apiClient.setToken(session.accessToken);
-        }
+        apiClient.setToken(session.accessToken);
         const response = await apiClient.get('/api/auth/stats/');
         setUserStats(response);
       } catch (error) {
-        console.error('Failed to fetch user stats:', error);
+        // Handle error silently
       }
     };
 
@@ -91,15 +90,14 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
   // Fetch user profile for personalization
   useEffect(() => {
     const fetchUserProfile = async () => {
+      if (!session?.accessToken) return;
+      
       try {
-        // Use NextAuth session token if available
-        if (session?.accessToken) {
-          apiClient.setToken(session.accessToken);
-        }
+        apiClient.setToken(session.accessToken);
         const response = await apiClient.get('/api/auth/profile/');
         setUserProfile(response);
       } catch (error) {
-        console.error('Failed to fetch user profile:', error);
+        // Handle error silently
       }
     };
 
@@ -108,51 +106,43 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
     }
   }, [session]);
 
-  // Fetch real notifications from API
+  // Fetch notifications from API
   useEffect(() => {
     const fetchNotifications = async () => {
+      if (!session?.accessToken) return;
+      
       try {
-        if (session?.accessToken) {
-          apiClient.setToken(session.accessToken);
-          // Get recent notifications for display (paginated)
-          const response = await apiClient.get('/api/notifications/');
-          setNotifications(response.results || response);
-        }
+        apiClient.setToken(session.accessToken);
+        const response = await apiClient.get('/api/notifications/');
+        setNotifications(response.results || response);
       } catch (error) {
-        console.error('Failed to fetch notifications:', error);
-        // Fallback to empty array on error
         setNotifications([]);
       }
     };
 
     if (session?.accessToken) {
       fetchNotifications();
-      
-      // Refresh notifications every 30 seconds
       const interval = setInterval(fetchNotifications, 30000);
       return () => clearInterval(interval);
     }
   }, [session?.accessToken]);
 
-  // Fetch notification count separately for accurate badge
+  // Fetch notification count
   useEffect(() => {
     const fetchNotificationCount = async () => {
+      if (!session?.accessToken) return;
+      
       try {
-        if (session?.accessToken) {
-          apiClient.setToken(session.accessToken);
-          const response = await apiClient.getNotificationCount();
-          setNotificationCount((response as any).unread_count || 0);
-        }
+        apiClient.setToken(session.accessToken);
+        const response = await apiClient.getNotificationCount();
+        setNotificationCount((response as any).unread_count || 0);
       } catch (error) {
-        console.error('Failed to fetch notification count:', error);
         setNotificationCount(0);
       }
     };
 
     if (session?.user) {
       fetchNotificationCount();
-      
-      // Refresh count every 10 seconds for real-time updates
       const interval = setInterval(fetchNotificationCount, 10000);
       return () => clearInterval(interval);
     }
@@ -160,23 +150,17 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
 
   const handleLogout = async () => {
     try {
-      // Call backend logout endpoint if we have a token
       if (session?.accessToken) {
         try {
           await apiClient.logout();
         } catch (error) {
-          console.warn('Backend logout failed, continuing with frontend logout:', error);
+          // Continue with logout even if backend call fails
         }
       }
       
-      // Clear API client token
       apiClient.setToken(null);
-      
-      // Use NextAuth signOut
       await signOut({ callbackUrl: '/login' });
     } catch (error) {
-      console.error('Logout failed:', error);
-      // Force redirect even if signOut fails
       router.push('/login');
     }
   };

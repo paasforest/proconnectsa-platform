@@ -1,6 +1,5 @@
 "use client"
 
-import { AuthProvider } from "@/app/contexts/AuthContext"
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { SessionProvider } from "next-auth/react"
 import { useState } from "react"
@@ -21,11 +20,9 @@ export function Providers({ children }: ProvidersProps) {
 
   return (
     <SessionProvider>
-      <AuthProvider>
-        <QueryClientProvider client={queryClient}>
-          {children}
-        </QueryClientProvider>
-      </AuthProvider>
+      <QueryClientProvider client={queryClient}>
+        {children}
+      </QueryClientProvider>
     </SessionProvider>
   )
 }

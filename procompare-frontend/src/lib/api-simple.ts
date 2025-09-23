@@ -19,70 +19,32 @@ export class SimpleApiClient {
     endpoint: string,
     options: RequestInit = {}
   ): Promise<T> {
-    // For now, return mock data to prevent build errors
-    console.log(`API Request: ${endpoint}`, options)
+    const headers: HeadersInit = {
+      'Content-Type': 'application/json',
+      ...options.headers,
+    }
+
+    if (this.token) {
+      headers['Authorization'] = `Token ${this.token}`
+    }
+
+    const url = `${this.baseURL}${endpoint}`
     
-    // Return empty/mock responses for all endpoints
-    if (endpoint.includes('/tickets/')) {
-      return { results: [], total: 0 } as T
+    try {
+      const response = await fetch(url, {
+        ...options,
+        headers,
+      })
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`)
+      }
+
+      const data = await response.json()
+      return data as T
+    } catch (error) {
+      throw error
     }
-    if (endpoint.includes('/staff/')) {
-      return { staff: [] } as T
-    }
-    if (endpoint.includes('/dashboard-stats/')) {
-      return {
-        total_tickets: 0,
-        open_tickets: 0,
-        resolved_tickets: 0,
-        avg_resolution_time: 0,
-        avg_satisfaction_rating: 0,
-        tickets_by_category: {},
-        tickets_by_priority: {},
-        tickets_by_status: {},
-        staff_utilization: 0
-      } as T
-    }
-    if (endpoint.includes('/leads/')) {
-      return { results: [], total: 0 } as T
-    }
-    if (endpoint.includes('/balance/')) {
-      return { balance: 0, credits: 0 } as T
-    }
-    if (endpoint.includes('/transactions/')) {
-      return { results: [] } as T
-    }
-    if (endpoint.includes('/notifications/')) {
-      return { results: [], total: 0 } as T
-    }
-    if (endpoint.includes('/stats/')) {
-      return {
-        total_leads: 25,
-        active_leads: 8,
-        completed_jobs: 15,
-        average_rating: 4.8,
-        response_rate: 95,
-        credit_balance: 150
-      } as T
-    }
-    if (endpoint.includes('/profile/')) {
-      return {
-        id: "2",
-        email: "tshepochabalala220@gmail.com",
-        first_name: "Tshepo",
-        last_name: "Chabalala",
-        business_name: "Chabalala Services",
-        phone: "+27123456789",
-        location: "Johannesburg, Pretoria",
-        services: ["Home Services", "Professional Services"],
-        subscription_tier: "Professional",
-        customer_code: "CUS12345678",
-        credit_balance: 150,
-        is_verified: true
-      } as T
-    }
-    
-    // Default empty response
-    return {} as T
   }
 
   // Generic HTTP methods
@@ -138,18 +100,18 @@ export class SimpleApiClient {
 
   // Lead endpoints
   async getServiceCategories() {
-    return this.request('/api/leads/categories/')
+    return this.request('/api/auth/leads/categories/')
   }
 
   async createLead(leadData: any) {
-    return this.request('/api/leads/create/', {
+    return this.request('/api/leads/', {
       method: 'POST',
       body: JSON.stringify(leadData),
     })
   }
 
   async createPublicLead(leadData: any) {
-    return this.request('/api/leads/create-public/', {
+    return this.request('/api/leads/', {
       method: 'POST',
       body: JSON.stringify(leadData),
     })
@@ -206,7 +168,7 @@ export class SimpleApiClient {
   }
 
   async getNotificationCount() {
-    return this.request('/api/notifications/count/')
+    return this.request('/api/notifications/')
   }
 
   async markNotificationRead(id: string) {
