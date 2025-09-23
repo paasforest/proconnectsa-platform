@@ -180,11 +180,11 @@ export class SimpleApiClient {
 
   // Payment endpoints
   async getCreditBalance() {
-    return this.request('/api/auth/api/wallet/')
+    return this.request('/api/api/wallet/')
   }
 
   async getTransactions() {
-    return this.request('/api/auth/api/wallet/transactions/')
+    return this.request('/api/api/wallet/transactions/')
   }
 
   async purchaseCredits(amount: number, paymentMethod: string, paymentReference?: string) {
