@@ -145,147 +145,149 @@ export default function PersonalizedHeader({
       className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-gray-900 dark:to-gray-800 border-b border-gray-200 dark:border-gray-700"
     >
       <div className="max-w-7xl mx-auto px-6 py-8">
-        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
-          {/* Left side - Provider Info */}
-          <div className="flex-1">
-            <div className="flex items-start gap-4">
-              <div className="bg-white dark:bg-gray-800 p-3 rounded-xl shadow-sm">
-                <Building2 className="h-8 w-8 text-blue-600" />
-              </div>
-              
-              <div className="flex-1">
-                <div className="flex items-center gap-3 mb-2">
-                  <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-                    Welcome back, {stats.business_name || 'Provider'}
-                  </h1>
-                  <Badge className={getSubscriptionColor(stats.subscription_tier || 'basic')}>
-                    {(stats.subscription_tier || 'basic').toUpperCase()}
-                  </Badge>
-                  <div className={`flex items-center gap-1 ${verificationInfo.color}`}>
-                    <VerificationIcon className="h-4 w-4" />
-                    <span className="text-sm font-medium">{verificationInfo.text}</span>
-                  </div>
-                </div>
-                
-                <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600 dark:text-gray-400">
-                  <div className="flex items-center gap-1">
-                    <MapPin className="h-4 w-4" />
-                    <span>{stats.service_areas?.slice(0, 2).join(', ') || 'No areas'}</span>
-                    {stats.service_areas && stats.service_areas.length > 2 && (
-                      <span>+{stats.service_areas.length - 2} more</span>
-                    )}
-                  </div>
-                  
-                  <div className="flex items-center gap-1">
-                    <Zap className="h-4 w-4" />
-                    <span>{stats.service_categories?.length || 0} services</span>
-                  </div>
-                  
-                  <div className="flex items-center gap-1">
-                    <Clock className="h-4 w-4" />
-                    <span>{stats.response_time_hours || 0}h avg response</span>
-                  </div>
+        {/* Business Header - Vertical Layout */}
+        <div className="mb-6">
+          <div className="flex items-center gap-4 mb-4">
+            <div className="bg-white dark:bg-gray-800 p-3 rounded-xl shadow-sm">
+              <Building2 className="h-8 w-8 text-blue-600" />
+            </div>
+            
+            <div className="flex-1">
+              <div className="flex flex-wrap items-center gap-3 mb-2">
+                <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+                  Welcome back, {stats.business_name || 'Provider'}
+                </h1>
+                <Badge className={getSubscriptionColor(stats.subscription_tier || 'basic')}>
+                  {(stats.subscription_tier || 'basic').toUpperCase()}
+                </Badge>
+                <div className={`flex items-center gap-1 ${verificationInfo.color}`}>
+                  <VerificationIcon className="h-4 w-4" />
+                  <span className="text-sm font-medium">{verificationInfo.text}</span>
                 </div>
               </div>
             </div>
           </div>
-
-          {/* Right side - Stats & Actions */}
-          <div className="flex flex-col sm:flex-row gap-4">
-            {/* Quick Stats */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-              <Card className="p-3">
-                <CardContent className="p-0">
-                  <div className="text-center">
-                    <div className="text-2xl font-bold text-blue-600">
-                      {stats.leads_claimed_this_month || 0}
-                    </div>
-                    <div className="text-xs text-gray-600 dark:text-gray-400">
-                      Leads this month
-                    </div>
-                    <div className="text-xs text-gray-500">
-                      / {stats.monthly_lead_limit || 0}
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card className="p-3">
-                <CardContent className="p-0">
-                  <div className="text-center">
-                    <div className="text-2xl font-bold text-green-600">
-                      {stats.credit_balance || 0}
-                    </div>
-                    <div className="text-xs text-gray-600 dark:text-gray-400">
-                      Credits
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card className="p-3">
-                <CardContent className="p-0">
-                  <div className="text-center">
-                    <div className="text-2xl font-bold text-yellow-600">
-                      {Number(stats.average_rating || 0).toFixed(1)}
-                    </div>
-                    <div className="text-xs text-gray-600 dark:text-gray-400">
-                      Rating
-                    </div>
-                    <div className="text-xs text-gray-500">
-                      ({(stats.total_reviews || 0)} reviews)
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card className="p-3">
-                <CardContent className="p-0">
-                  <div className="text-center">
-                    <div className="text-2xl font-bold text-purple-600">
-                      {Number(stats.job_completion_rate || 0).toFixed(0)}%
-                    </div>
-                    <div className="text-xs text-gray-600 dark:text-gray-400">
-                      Completion
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+          
+          {/* Business Info - Vertical Stack */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-gray-600 dark:text-gray-400">
+            <div className="flex items-center gap-2">
+              <MapPin className="h-4 w-4" />
+              <span>
+                <strong>Service Areas:</strong> {stats.service_areas?.slice(0, 2).join(', ') || 'No areas'}
+                {stats.service_areas && stats.service_areas.length > 2 && (
+                  <span> +{stats.service_areas.length - 2} more</span>
+                )}
+              </span>
             </div>
-
-            {/* Action Buttons */}
-            <div className="flex gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={onRefresh}
-                disabled={refreshing}
-                className="flex items-center gap-2"
-              >
-                <RefreshCw className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
-                <span className="hidden sm:inline">Refresh</span>
-              </Button>
-              
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={onProfile}
-                className="flex items-center gap-2"
-              >
-                <User className="h-4 w-4" />
-                <span className="hidden sm:inline">Profile</span>
-              </Button>
-              
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={onSettings}
-                className="flex items-center gap-2"
-              >
-                <Settings className="h-4 w-4" />
-                <span className="hidden sm:inline">Settings</span>
-              </Button>
+            
+            <div className="flex items-center gap-2">
+              <Zap className="h-4 w-4" />
+              <span><strong>Services:</strong> {stats.service_categories?.length || 0} categories</span>
             </div>
+            
+            <div className="flex items-center gap-2">
+              <Clock className="h-4 w-4" />
+              <span><strong>Response Time:</strong> {stats.response_time_hours || 0}h average</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Stats Grid - Vertical Layout */}
+        <div className="mb-6">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <Card className="p-3">
+              <CardContent className="p-0">
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-blue-600">
+                    {stats.leads_claimed_this_month || 0}
+                  </div>
+                  <div className="text-xs text-gray-600 dark:text-gray-400">
+                    Leads this month
+                  </div>
+                  <div className="text-xs text-gray-500">
+                    / {stats.monthly_lead_limit || 0}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="p-3">
+              <CardContent className="p-0">
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-green-600">
+                    {stats.credit_balance || 0}
+                  </div>
+                  <div className="text-xs text-gray-600 dark:text-gray-400">
+                    Credits
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="p-3">
+              <CardContent className="p-0">
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-yellow-600">
+                    {Number(stats.average_rating || 0).toFixed(1)}
+                  </div>
+                  <div className="text-xs text-gray-600 dark:text-gray-400">
+                    Rating
+                  </div>
+                  <div className="text-xs text-gray-500">
+                    ({(stats.total_reviews || 0)} reviews)
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="p-3">
+              <CardContent className="p-0">
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-purple-600">
+                    {Number(stats.job_completion_rate || 0).toFixed(0)}%
+                  </div>
+                  <div className="text-xs text-gray-600 dark:text-gray-400">
+                    Completion
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+
+        {/* Action Buttons - Vertical Layout */}
+        <div className="mb-6">
+          <div className="flex flex-wrap gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={onRefresh}
+              disabled={refreshing}
+              className="flex items-center gap-2"
+            >
+              <RefreshCw className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
+              <span>Refresh</span>
+            </Button>
+            
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={onProfile}
+              className="flex items-center gap-2"
+            >
+              <User className="h-4 w-4" />
+              <span>Profile</span>
+            </Button>
+            
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={onSettings}
+              className="flex items-center gap-2"
+            >
+              <Settings className="h-4 w-4" />
+              <span>Settings</span>
+            </Button>
           </div>
         </div>
 
