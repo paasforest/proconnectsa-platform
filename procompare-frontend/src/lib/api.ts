@@ -26,7 +26,11 @@ export interface LoginResponse {
 
 // Login function that returns Django token
 export async function loginUser(email: string, password: string): Promise<LoginResponse> {
-  const response = await fetch(`${API_URL}/api/auth/login/`, {
+  const endpoint = process.env.NODE_ENV === 'production' 
+    ? '/api/backend/auth/login/' 
+    : `${API_URL}/api/auth/login/`
+    
+  const response = await fetch(endpoint, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',

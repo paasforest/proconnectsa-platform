@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-const BACKEND_URL = 'http://128.140.123.48:8000'; // Hardcoded for testing
-console.log('API Proxy: BACKEND_URL =', BACKEND_URL);
+const BACKEND_URL = 'http://128.140.123.48:8000';
 
 export async function GET(request: NextRequest, { params }: { params: { slug: string[] } }) {
   const slug = params.slug.join('/');
@@ -18,7 +17,6 @@ export async function GET(request: NextRequest, { params }: { params: { slug: st
         'Content-Type': 'application/json',
         'Origin': request.headers.get('origin') || 'https://proconnectsa-platform.vercel.app',
       },
-      timeout: 10000, // 10 second timeout
     });
 
     console.log('API Proxy: Response status:', response.status);
@@ -55,6 +53,8 @@ export async function POST(request: NextRequest, { params }: { params: { slug: s
   const body = await request.json();
 
   try {
+    console.log('API Proxy: POST to:', url);
+    
     const response = await fetch(url, {
       method: 'POST',
       headers: {
@@ -105,7 +105,7 @@ export async function PUT(request: NextRequest, { params }: { params: { slug: st
     return nextResponse;
   } catch (error) {
     console.error('Backend API Error:', error);
-    return NextResponse.json({ error: 'Failed to update data in backend' }, { status: 500 });
+    return NextResponse.json({ error: 'Failed to update data on backend' }, { status: 500 });
   }
 }
 
@@ -133,15 +133,17 @@ export async function DELETE(request: NextRequest, { params }: { params: { slug:
     return nextResponse;
   } catch (error) {
     console.error('Backend API Error:', error);
-    return NextResponse.json({ error: 'Failed to delete data from backend' }, { status: 500 });
+    return NextResponse.json({ error: 'Failed to delete data on backend' }, { status: 500 });
   }
 }
 
 export async function OPTIONS(request: NextRequest) {
-  // Handle preflight requests
-  const nextResponse = new NextResponse(null, { status: 200 });
-  nextResponse.headers.set('Access-Control-Allow-Origin', '*');
-  nextResponse.headers.set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-  nextResponse.headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-  return nextResponse;
+  return new NextResponse(null, {
+    status: 200,
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+    },
+  });
 }
