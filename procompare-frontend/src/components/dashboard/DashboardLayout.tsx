@@ -9,6 +9,7 @@ import {
   Home, Target, CreditCard, Wrench, MessageSquare, BarChart3
 } from 'lucide-react';
 import { apiClient } from '@/lib/api-simple';
+import PersonalizedHeader from './PersonalizedHeader';
 
 interface UserStats {
   credit_balance: number;
@@ -369,6 +370,23 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
             </div>
           </div>
         </div>
+
+        {/* Personalized Header for Providers */}
+        {session?.user?.userType === 'provider' && (
+          <PersonalizedHeader
+            onRefresh={() => {
+              // Refresh user stats and profile
+              if (session?.accessToken) {
+                apiClient.setToken(session.accessToken);
+                // Trigger a refresh of the data
+                window.location.reload();
+              }
+            }}
+            refreshing={false}
+            onSettings={() => router.push('/dashboard/settings')}
+            onProfile={() => router.push('/profile')}
+          />
+        )}
 
         {/* Page content */}
         <main className="flex-1">
