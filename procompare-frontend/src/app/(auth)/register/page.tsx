@@ -7,21 +7,58 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Alert, AlertDescription } from '@/components/ui/alert'
-import { Loader2, AlertCircle, CheckCircle } from 'lucide-react'
+import { Textarea } from '@/components/ui/textarea'
+import { Loader2, AlertCircle, CheckCircle, Building2, User, ArrowLeft, ArrowRight } from 'lucide-react'
 import Link from 'next/link'
+import RegistrationSteps from '@/components/auth/RegistrationSteps'
 
 export default function RegisterPage() {
+  const [currentStep, setCurrentStep] = useState(1)
   const [formData, setFormData] = useState({
+    // Basic Info
     email: '',
     password: '',
     confirmPassword: '',
-    name: '',
-    userType: 'client' as 'client' | 'provider'
+    firstName: '',
+    lastName: '',
+    phone: '',
+    userType: 'client' as 'client' | 'provider',
+    
+    // Business Info (for providers)
+    businessName: '',
+    businessPhone: '',
+    businessEmail: '',
+    businessAddress: '',
+    businessRegistration: '',
+    vatNumber: '',
+    licenseNumber: '',
+    
+    // Service Info (for providers)
+    serviceCategories: [] as string[],
+    serviceAreas: [] as string[],
+    maxTravelDistance: 30,
+    hourlyRateMin: 0,
+    hourlyRateMax: 0,
+    minimumJobValue: 0,
+    yearsExperience: 0,
+    bio: '',
+    
+    // Preferences
+    receivesLeadNotifications: true,
+    notificationMethods: ['email'] as string[]
   })
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
   const router = useRouter()
+
+  const serviceCategories = [
+    'plumbing', 'electrical', 'hvac', 'carpentry', 'painting', 'flooring',
+    'roofing', 'landscaping', 'cleaning', 'appliance_repair', 'water_heater_repair',
+    'pool_maintenance', 'security_systems', 'solar_installation', 'other'
+  ]
+
+  const totalSteps = formData.userType === 'provider' ? 4 : 2
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -36,19 +73,48 @@ export default function RegisterPage() {
       return
     }
 
+    if (formData.userType === 'provider' && formData.serviceCategories.length === 0) {
+      setError('Please select at least one service category')
+      setIsLoading(false)
+      return
+    }
+
     try {
+      // Prepare registration data
+      const registrationData = {
+        email: formData.email,
+        password: formData.password,
+        name: `${formData.firstName} ${formData.lastName}`,
+        user_type: formData.userType,
+        phone: formData.phone,
+        ...(formData.userType === 'provider' && {
+          business_name: formData.businessName,
+          business_phone: formData.businessPhone,
+          business_email: formData.businessEmail,
+          business_address: formData.businessAddress,
+          business_registration: formData.businessRegistration,
+          vat_number: formData.vatNumber,
+          license_number: formData.licenseNumber,
+          service_categories: formData.serviceCategories,
+          service_areas: formData.serviceAreas,
+          max_travel_distance: formData.maxTravelDistance,
+          hourly_rate_min: formData.hourlyRateMin,
+          hourly_rate_max: formData.hourlyRateMax,
+          minimum_job_value: formData.minimumJobValue,
+          years_experience: formData.yearsExperience,
+          bio: formData.bio,
+          receives_lead_notifications: formData.receivesLeadNotifications,
+          notification_methods: formData.notificationMethods
+        })
+      }
+
       // Call the backend registration API
       const response = await fetch('https://api.proconnectsa.co.za/api/register/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          email: formData.email,
-          password: formData.password,
-          name: formData.name,
-          user_type: formData.userType
-        }),
+        body: JSON.stringify(registrationData),
       })
 
       const data = await response.json()
@@ -68,16 +134,78 @@ export default function RegisterPage() {
     }
   }
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+    const { name, value, type } = e.target
+    
+    if (type === 'checkbox') {
+      const checked = (e.target as HTMLInputElement).checked
+      setFormData({
+        ...formData,
+        [name]: checked
+      })
+    } else if (name === 'serviceCategories') {
+      const checked = (e.target as HTMLInputElement).checked
+      const category = value
+      setFormData({
+        ...formData,
+        serviceCategories: checked
+          ? [...formData.serviceCategories, category]
+          : formData.serviceCategories.filter(c => c !== category)
+      })
+    } else {
+      setFormData({
+        ...formData,
+        [name]: value
+      })
+    }
+  }
+
+  const handleServiceAreaAdd = (area: string) => {
+    if (area.trim() && !formData.serviceAreas.includes(area.trim())) {
+      setFormData({
+        ...formData,
+        serviceAreas: [...formData.serviceAreas, area.trim()]
+      })
+    }
+  }
+
+  const handleServiceAreaRemove = (area: string) => {
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value
+      serviceAreas: formData.serviceAreas.filter(a => a !== area)
     })
+  }
+
+  const nextStep = () => {
+    if (currentStep < totalSteps) {
+      setCurrentStep(currentStep + 1)
+    }
+  }
+
+  const prevStep = () => {
+    if (currentStep > 1) {
+      setCurrentStep(currentStep - 1)
+    }
+  }
+
+  const isStepValid = (step: number) => {
+    switch (step) {
+      case 1:
+        return formData.firstName && formData.lastName && formData.email && formData.password && formData.confirmPassword
+      case 2:
+        return formData.userType === 'client' || (formData.businessName && formData.businessPhone && formData.businessAddress)
+      case 3:
+        return formData.userType === 'client' || formData.serviceCategories.length > 0
+      case 4:
+        return true
+      default:
+        return false
+    }
   }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
+      <div className="max-w-2xl w-full space-y-8">
         <div className="text-center">
           <div className="flex items-center justify-center space-x-2 mb-4">
             <div className="h-8 w-8 rounded-lg bg-emerald-600 flex items-center justify-center">
@@ -90,105 +218,95 @@ export default function RegisterPage() {
           </div>
           <h2 className="text-3xl font-bold text-gray-900">Create your account</h2>
           <p className="mt-2 text-sm text-gray-600">
-            Join ProConnectSA today
+            {formData.userType === 'provider' 
+              ? 'Join as a service provider and start getting leads' 
+              : 'Find trusted service providers in your area'
+            }
           </p>
+        </div>
+
+        {/* Progress Bar */}
+        <div className="w-full bg-gray-200 rounded-full h-2">
+          <div 
+            className="bg-emerald-600 h-2 rounded-full transition-all duration-300"
+            style={{ width: `${(currentStep / totalSteps) * 100}%` }}
+          ></div>
+        </div>
+        <div className="text-center text-sm text-gray-600">
+          Step {currentStep} of {totalSteps}
         </div>
 
         <Card>
           <CardHeader>
-            <CardTitle>Sign Up</CardTitle>
+            <CardTitle className="flex items-center gap-2">
+              {formData.userType === 'provider' ? <Building2 className="h-5 w-5" /> : <User className="h-5 w-5" />}
+              {formData.userType === 'provider' ? 'Service Provider Registration' : 'Client Registration'}
+            </CardTitle>
             <CardDescription>
-              Create your account to get started
+              {currentStep === 1 && 'Start with your basic information'}
+              {currentStep === 2 && formData.userType === 'provider' && 'Tell us about your business'}
+              {currentStep === 2 && formData.userType === 'client' && 'Review your information'}
+              {currentStep === 3 && 'What services do you offer?'}
+              {currentStep === 4 && 'Set your rates and experience'}
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form onSubmit={handleSubmit}>
               {success && (
-                <Alert className="border-green-200 bg-green-50">
+                <Alert className="border-green-200 bg-green-50 mb-4">
                   <CheckCircle className="h-4 w-4 text-green-600" />
                   <AlertDescription className="text-green-700">{success}</AlertDescription>
                 </Alert>
               )}
 
               {error && (
-                <Alert variant="destructive">
+                <Alert variant="destructive" className="mb-4">
                   <AlertCircle className="h-4 w-4" />
                   <AlertDescription>{error}</AlertDescription>
                 </Alert>
               )}
 
-              <div className="space-y-2">
-                <Label htmlFor="name">Full Name</Label>
-                <Input
-                  id="name"
-                  name="name"
-                  type="text"
-                  placeholder="Enter your full name"
-                  value={formData.name}
-                  onChange={handleInputChange}
-                  required
-                />
-              </div>
+              <RegistrationSteps
+                currentStep={currentStep}
+                formData={formData}
+                onInputChange={handleInputChange}
+                onServiceAreaAdd={handleServiceAreaAdd}
+                onServiceAreaRemove={handleServiceAreaRemove}
+              />
 
-              <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
-                <Input
-                  id="email"
-                  name="email"
-                  type="email"
-                  placeholder="Enter your email"
-                  value={formData.email}
-                  onChange={handleInputChange}
-                  required
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="userType">Account Type</Label>
-                <select
-                  id="userType"
-                  name="userType"
-                  value={formData.userType}
-                  onChange={handleInputChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+              <div className="flex justify-between mt-8">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={prevStep}
+                  disabled={currentStep === 1}
+                  className="flex items-center gap-2"
                 >
-                  <option value="client">Client - Looking for services</option>
-                  <option value="provider">Provider - Offering services</option>
-                </select>
-              </div>
+                  <ArrowLeft className="h-4 w-4" />
+                  Previous
+                </Button>
 
-              <div className="space-y-2">
-                <Label htmlFor="password">Password</Label>
-                <Input
-                  id="password"
-                  name="password"
-                  type="password"
-                  placeholder="Create a password"
-                  value={formData.password}
-                  onChange={handleInputChange}
-                  required
-                  minLength={8}
-                />
+                {currentStep < totalSteps ? (
+                  <Button
+                    type="button"
+                    onClick={nextStep}
+                    disabled={!isStepValid(currentStep)}
+                    className="flex items-center gap-2"
+                  >
+                    Next
+                    <ArrowRight className="h-4 w-4" />
+                  </Button>
+                ) : (
+                  <Button
+                    type="submit"
+                    disabled={isLoading || !isStepValid(currentStep)}
+                    className="flex items-center gap-2"
+                  >
+                    {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                    Create Account
+                  </Button>
+                )}
               </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="confirmPassword">Confirm Password</Label>
-                <Input
-                  id="confirmPassword"
-                  name="confirmPassword"
-                  type="password"
-                  placeholder="Confirm your password"
-                  value={formData.confirmPassword}
-                  onChange={handleInputChange}
-                  required
-                  minLength={8}
-                />
-              </div>
-
-              <Button type="submit" className="w-full" disabled={isLoading}>
-                {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Create Account
-              </Button>
             </form>
 
             <div className="mt-6 text-center text-sm">
