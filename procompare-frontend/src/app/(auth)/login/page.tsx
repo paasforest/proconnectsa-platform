@@ -27,25 +27,12 @@ export default function LoginPage() {
       const result = await signIn('credentials', {
         email,
         password,
-        redirect: false,
+        redirect: true, // Let NextAuth handle the redirect
+        callbackUrl: '/dashboard' // Default redirect, NextAuth will override based on user type
       })
 
       if (result?.error) {
         setError('Invalid email or password')
-      } else if (result?.ok) {
-        // Wait a moment for session to be established
-        await new Promise(resolve => setTimeout(resolve, 1000))
-        
-        // Get the session to check user type
-        const session = await getSession()
-        
-        if (session?.user?.userType === 'provider') {
-          router.push('/dashboard')
-        } else if (session?.user?.userType === 'client') {
-          router.push('/client')
-        } else {
-          router.push('/')
-        }
       }
     } catch (error) {
       setError('An error occurred. Please try again.')

@@ -53,8 +53,29 @@ const handler = NextAuth({
     error: '/login',
   },
   callbacks: {
-    async redirect({ url, baseUrl }) {
-      // Always redirect to home page after login
+    async redirect({ url, baseUrl, token }) {
+      // If user is already logged in, redirect based on user type
+      if (token?.userType) {
+        if (token.userType === 'admin') {
+          return `${baseUrl}/admin/dashboard`
+        } else if (token.userType === 'provider') {
+          return `${baseUrl}/dashboard`
+        } else if (token.userType === 'client') {
+          return `${baseUrl}/client`
+        }
+      }
+      
+      // If URL is provided and it's a relative URL, use it
+      if (url.startsWith('/')) {
+        return `${baseUrl}${url}`
+      }
+      
+      // If URL is provided and it's from the same origin, use it
+      if (url.startsWith(baseUrl)) {
+        return url
+      }
+      
+      // Default redirect to home page
       return baseUrl
     },
     async jwt({ token, user }) {
