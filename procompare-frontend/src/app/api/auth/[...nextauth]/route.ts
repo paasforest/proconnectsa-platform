@@ -1,6 +1,5 @@
 import NextAuth from "next-auth"
 import CredentialsProvider from "next-auth/providers/credentials"
-import { loginUser } from "@/lib/api"
 
 const handler = NextAuth({
   providers: [
@@ -16,7 +15,19 @@ const handler = NextAuth({
         }
 
         try {
-          const data = await loginUser(credentials.email, credentials.password)
+          // Use our secure proxy route instead of calling backend directly
+          const response = await fetch(`${process.env.NEXTAUTH_URL}/api/backend-login`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              email: credentials.email,
+              password: credentials.password,
+            }),
+          })
+
+          const data = await response.json()
           
           if (data.success && data.user) {
             return {
