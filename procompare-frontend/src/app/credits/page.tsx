@@ -79,7 +79,7 @@ export default function CreditsPage() {
       setLoading(true);
       
       // Fetch profile for credit balance and customer code
-      const profileResponse = await fetch('http://localhost:8000/api/auth/profile/', {
+      const profileResponse = await fetch('https://api.proconnectsa.co.za/api/auth/profile/', {
         headers: {
           'Authorization': `Token ${session?.accessToken}`,
           'Content-Type': 'application/json'

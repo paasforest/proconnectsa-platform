@@ -58,7 +58,7 @@ export default function PersonalizedHeader({
     if (!token) return;
     
     try {
-      const response = await fetch('http://localhost:8000/api/auth/profile/', {
+      const response = await fetch('https://api.proconnectsa.co.za/api/auth/profile/', {
         headers: {
           'Authorization': `Token ${token}`,
           'Content-Type': 'application/json'

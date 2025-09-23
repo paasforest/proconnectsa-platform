@@ -35,7 +35,7 @@ async function handleRequest(
 ) {
   try {
     const path = pathSegments.join('/')
-    const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'http://128.140.123.48:8000'
+    const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'https://api.proconnectsa.co.za'
     const url = `${backendUrl}/api/${path}`
     
     // Get request body for POST/PUT requests

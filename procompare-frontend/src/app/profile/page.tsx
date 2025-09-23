@@ -120,7 +120,7 @@ export default function ProfilePage() {
 
   const fetchProfile = async () => {
     try {
-      const response = await fetch('http://localhost:8000/api/auth/profile/', {
+      const response = await fetch('https://api.proconnectsa.co.za/api/auth/profile/', {
         headers: {
           'Authorization': `Token ${session?.accessToken}`,
           'Content-Type': 'application/json'
@@ -145,7 +145,7 @@ export default function ProfilePage() {
     
     setSaving(true);
     try {
-      const response = await fetch('http://localhost:8000/api/auth/profile/', {
+      const response = await fetch('https://api.proconnectsa.co.za/api/auth/profile/', {
         method: 'PATCH',
         headers: {
           'Authorization': `Token ${session?.accessToken}`,
