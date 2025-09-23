@@ -12,8 +12,8 @@ export async function POST(request: NextRequest) {
       }, { status: 400 })
     }
 
-        // Call the real Flask backend via proxy
-        const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'http://128.140.123.48:8000'
+        // Call the real Flask backend
+        const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'https://api.proconnectsa.co.za'
     
     try {
       const response = await fetch(`${backendUrl}/api/login/`, {

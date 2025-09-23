@@ -1,7 +1,7 @@
 // Simple API client to replace @/lib/api during deployment
 // This provides the same interface but with minimal functionality
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || '/api/backend-proxy'
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://api.proconnectsa.co.za'
 
 export class SimpleApiClient {
   private baseURL: string
