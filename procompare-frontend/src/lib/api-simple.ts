@@ -1,7 +1,7 @@
 // Simple API client to replace @/lib/api during deployment
 // This provides the same interface but with minimal functionality
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://128.140.123.48:8000'
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://api.proconnectsa.co.za'
 
 export class SimpleApiClient {
   private baseURL: string
@@ -180,11 +180,11 @@ export class SimpleApiClient {
 
   // Payment endpoints
   async getCreditBalance() {
-    return this.request('/api/payments/balance/')
+    return this.request('/api/auth/api/wallet/')
   }
 
   async getTransactions() {
-    return this.request('/api/payments/transactions/')
+    return this.request('/api/auth/api/wallet/transactions/')
   }
 
   async purchaseCredits(amount: number, paymentMethod: string, paymentReference?: string) {

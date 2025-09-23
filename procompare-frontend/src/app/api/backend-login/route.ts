@@ -12,31 +12,42 @@ export async function POST(request: NextRequest) {
       }, { status: 400 })
     }
 
-    // Forward to backend
-    const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'http://128.140.123.48:8000'
+    // Call the real Django backend
+    const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'https://api.proconnectsa.co.za'
     
-    const response = await fetch(`${backendUrl}/api/auth/login/`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ email, password })
-    })
+    try {
+      const response = await fetch(`${backendUrl}/api/auth/login/`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email,
+          password,
+        }),
+      })
 
-    const data = await response.json()
-
-    if (response.ok && data.success) {
-      return NextResponse.json({
-        success: true,
-        user: data.user,
-        token: data.token,
-        message: data.message || 'Login successful'
-      }, { status: 200 })
-    } else {
+      const data = await response.json()
+      
+      if (response.ok && data.success) {
+        return NextResponse.json({
+          success: true,
+          user: data.user,
+          token: data.token,
+          message: data.message || 'Login successful'
+        }, { status: 200 })
+      } else {
+        return NextResponse.json({
+          success: false,
+          message: data.message || 'Invalid credentials'
+        }, { status: response.status })
+      }
+    } catch (backendError) {
+      console.error('Django backend error:', backendError)
       return NextResponse.json({
         success: false,
-        message: data.message || 'Login failed'
-      }, { status: 401 })
+        message: 'Unable to connect to authentication service'
+      }, { status: 503 })
     }
     
   } catch (error) {
