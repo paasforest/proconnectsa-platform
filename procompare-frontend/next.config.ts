@@ -79,7 +79,7 @@ const nextConfig: NextConfig = {
   }),
 
   // Output configuration for Vercel
-  output: 'standalone',
+  // output: 'standalone', // Commented out for Vercel deployment
   
   // Disable x-powered-by header
   poweredByHeader: false,
