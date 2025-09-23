@@ -55,7 +55,7 @@ const WalletPage = () => {
         }
         
         apiClient.setToken(session.accessToken);
-        const response = await apiClient.get('/api/api/wallet/');
+        const response = await apiClient.get('/api/auth/api/wallet/');
         setWalletData(response);
       } catch (error) {
         console.error('Failed to fetch wallet data:', error);
@@ -85,7 +85,7 @@ const WalletPage = () => {
         if (session?.accessToken) {
           apiClient.setToken(session.accessToken);
         }
-        const response = await apiClient.get('/api/api/wallet/transactions/');
+        const response = await apiClient.get('/api/auth/api/wallet/transactions/');
         setTransactions(response.transactions || []);
       } catch (error) {
         console.error('Failed to fetch transactions:', error);
@@ -149,7 +149,7 @@ const WalletPage = () => {
       if (session?.accessToken) {
         apiClient.setToken(session.accessToken);
       }
-      const response = await apiClient.post('/api/api/wallet/top-up/', {
+      const response = await apiClient.post('/api/auth/api/wallet/top-up/', {
         amount: topUpAmount
       });
       
@@ -222,8 +222,8 @@ const WalletPage = () => {
         apiClient.setToken(session.accessToken);
       }
       const [walletResponse, transactionsResponse] = await Promise.all([
-        apiClient.get('/api/api/wallet/'),
-        apiClient.get('/api/api/wallet/transactions/')
+        apiClient.get('/api/auth/api/wallet/'),
+        apiClient.get('/api/auth/api/wallet/transactions/')
       ]);
       setWalletData(walletResponse);
       setTransactions(transactionsResponse.transactions || []);
