@@ -24,9 +24,9 @@ export interface LoginResponse {
   message: string
 }
 
-// Login function that returns Django token
+// Login function that uses frontend proxy route
 export async function loginUser(email: string, password: string): Promise<LoginResponse> {
-  const response = await fetch(`${API_URL}/api/auth/login/`, {
+  const response = await fetch('/api/backend-login', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
