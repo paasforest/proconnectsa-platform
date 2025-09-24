@@ -201,7 +201,13 @@ export default function InstantUpgrade({ currentTier, onUpgrade, loading = false
               )}
               
               <CardHeader className="text-center pb-2">
-                <div className={`w-12 h-12 ${tier.color} text-white rounded-full flex items-center justify-center mx-auto mb-3`}>
+                <div className={`w-12 h-12 ${
+                  tier.color === 'bg-blue-600' ? 'bg-blue-600' :
+                  tier.color === 'bg-purple-600' ? 'bg-purple-600' :
+                  tier.color === 'bg-emerald-600' ? 'bg-emerald-600' :
+                  tier.color === 'bg-orange-600' ? 'bg-orange-600' :
+                  'bg-gray-600'
+                } text-white rounded-full flex items-center justify-center mx-auto mb-3`}>
                   <Icon className="h-6 w-6" />
                 </div>
                 <CardTitle className="text-lg">{tier.name}</CardTitle>

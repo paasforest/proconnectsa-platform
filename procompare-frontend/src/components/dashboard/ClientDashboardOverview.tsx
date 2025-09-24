@@ -49,7 +49,7 @@ export default function ClientDashboardOverview() {
 
   useEffect(() => {
     const fetchDashboardData = async () => {
-      if (!session?.accessToken) return;
+      if (!session?.accessToken || !authUser) return;
       
       try {
         apiClient.setToken(session.accessToken)
@@ -65,7 +65,7 @@ export default function ClientDashboardOverview() {
       }
     }
 
-    if (authUser) {
+    if (authUser && authUser.email && authUser.userType) {
       fetchDashboardData()
     }
   }, [authUser, session?.accessToken])
@@ -184,16 +184,28 @@ export default function ClientDashboardOverview() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-gray-600">{card.title}</p>
-                  <p className="text-2xl font-bold text-gray-900">{card.value}</p>
+                  <p className="text-2xl font-bold text-gray-900">{String(card.value || 0)}</p>
                   <p className="text-xs text-gray-500 mt-1">{card.subtitle}</p>
-                  {card.change && (
+                  {card.change && card.change !== null && (
                     <p className="text-xs text-gray-600 mt-2 font-medium">
-                      {card.change}
+                      {String(card.change)}
                     </p>
                   )}
                 </div>
-                <div className={`p-3 rounded-full bg-${card.color}-100`}>
-                  <card.icon className={`h-6 w-6 text-${card.color}-600`} />
+                <div className={`p-3 rounded-full ${
+                  card.color === 'blue' ? 'bg-blue-100' :
+                  card.color === 'orange' ? 'bg-orange-100' :
+                  card.color === 'green' ? 'bg-green-100' :
+                  card.color === 'purple' ? 'bg-purple-100' :
+                  'bg-gray-100'
+                }`}>
+                  <card.icon className={`h-6 w-6 ${
+                    card.color === 'blue' ? 'text-blue-600' :
+                    card.color === 'orange' ? 'text-orange-600' :
+                    card.color === 'green' ? 'text-green-600' :
+                    card.color === 'purple' ? 'text-purple-600' :
+                    'text-gray-600'
+                  }`} />
                 </div>
               </div>
             </CardContent>
@@ -220,8 +232,18 @@ export default function ClientDashboardOverview() {
                 onClick={() => router.push(action.href)}
               >
                 <CardContent className="p-4 text-center">
-                  <div className={`inline-flex p-3 rounded-full bg-${action.color}-100 mb-3`}>
-                    <action.icon className={`h-6 w-6 text-${action.color}-600`} />
+                  <div className={`inline-flex p-3 rounded-full ${
+                    action.color === 'blue' ? 'bg-blue-100' :
+                    action.color === 'green' ? 'bg-green-100' :
+                    action.color === 'purple' ? 'bg-purple-100' :
+                    'bg-gray-100'
+                  } mb-3`}>
+                    <action.icon className={`h-6 w-6 ${
+                      action.color === 'blue' ? 'text-blue-600' :
+                      action.color === 'green' ? 'text-green-600' :
+                      action.color === 'purple' ? 'text-purple-600' :
+                      'text-gray-600'
+                    }`} />
                   </div>
                   <h3 className="font-semibold text-gray-900 mb-1">{action.title}</h3>
                   <p className="text-sm text-gray-600">{action.description}</p>

@@ -59,31 +59,33 @@ const plans: SubscriptionPlan[] = [
 ];
 
 const getColorClasses = (color: string, isPopular: boolean) => {
-  const baseClasses = {
-    slate: "border-slate-200 hover:border-slate-300",
-    blue: "border-blue-200 hover:border-blue-300", 
-    purple: "border-purple-200 hover:border-purple-300",
-    emerald: "border-emerald-200 hover:border-emerald-300"
-  };
-
-  const popularClasses = {
-    slate: "border-slate-500 shadow-slate-200",
-    blue: "border-blue-500 shadow-blue-200",
-    purple: "border-purple-500 shadow-purple-200", 
-    emerald: "border-emerald-500 shadow-emerald-200"
-  };
-
-  return isPopular ? popularClasses[color as keyof typeof popularClasses] : baseClasses[color as keyof typeof baseClasses];
+  // Use explicit conditional logic to prevent hydration mismatches
+  if (color === 'slate') {
+    return isPopular ? "border-slate-500 shadow-slate-200" : "border-slate-200 hover:border-slate-300";
+  } else if (color === 'blue') {
+    return isPopular ? "border-blue-500 shadow-blue-200" : "border-blue-200 hover:border-blue-300";
+  } else if (color === 'purple') {
+    return isPopular ? "border-purple-500 shadow-purple-200" : "border-purple-200 hover:border-purple-300";
+  } else if (color === 'emerald') {
+    return isPopular ? "border-emerald-500 shadow-emerald-200" : "border-emerald-200 hover:border-emerald-300";
+  }
+  // Default fallback
+  return isPopular ? "border-gray-500 shadow-gray-200" : "border-gray-200 hover:border-gray-300";
 };
 
 const getAccentColor = (color: string) => {
-  const colors = {
-    slate: "text-slate-600",
-    blue: "text-blue-600",
-    purple: "text-purple-600", 
-    emerald: "text-emerald-600"
-  };
-  return colors[color as keyof typeof colors];
+  // Use explicit conditional logic to prevent hydration mismatches
+  if (color === 'slate') {
+    return "text-slate-600";
+  } else if (color === 'blue') {
+    return "text-blue-600";
+  } else if (color === 'purple') {
+    return "text-purple-600";
+  } else if (color === 'emerald') {
+    return "text-emerald-600";
+  }
+  // Default fallback
+  return "text-gray-600";
 };
 
 export default function SubscriptionPlans({ currentTier, onSelectPlan }: SubscriptionPlansProps) {

@@ -80,7 +80,7 @@ export default function SettingsPage() {
 
   const fetchSettings = async () => {
     try {
-      const response = await fetch('http://localhost:8000/api/auth/settings/', {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://api.proconnectsa.co.za'}/api/auth/settings/`, {
         headers: {
           'Authorization': `Token ${session?.accessToken}`,
           'Content-Type': 'application/json'
@@ -102,7 +102,7 @@ export default function SettingsPage() {
   const handleSaveSettings = async () => {
     setSaving(true);
     try {
-      const response = await fetch('http://localhost:8000/api/auth/settings/', {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://api.proconnectsa.co.za'}/api/auth/settings/`, {
         method: 'PATCH',
         headers: {
           'Authorization': `Token ${session?.accessToken}`,
@@ -146,7 +146,7 @@ export default function SettingsPage() {
     }
 
     try {
-      const response = await fetch('http://localhost:8000/api/auth/delete-account/', {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://api.proconnectsa.co.za'}/api/auth/delete-account/`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Token ${session?.accessToken}`,

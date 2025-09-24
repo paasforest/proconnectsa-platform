@@ -97,12 +97,17 @@ export default function LeadFeed({
   }, [filteredLeads]);
 
   const getUrgencyColor = (urgency: string) => {
-    switch (urgency) {
-      case 'urgent': return 'bg-red-500'
-      case 'this_week': return 'bg-orange-500'
-      case 'this_month': return 'bg-yellow-500'
-      case 'flexible': return 'bg-green-500'
-      default: return 'bg-gray-500'
+    // Use explicit conditional logic to prevent hydration mismatches
+    if (urgency === 'urgent') {
+      return 'bg-red-500'
+    } else if (urgency === 'this_week') {
+      return 'bg-orange-500'
+    } else if (urgency === 'this_month') {
+      return 'bg-yellow-500'
+    } else if (urgency === 'flexible') {
+      return 'bg-green-500'
+    } else {
+      return 'bg-gray-500'
     }
   }
 

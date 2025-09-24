@@ -56,7 +56,7 @@ export default function PersonalizedHeader({
   const fetchProviderStats = async () => {
     try {
       // Use the Flask API directly without authentication for now
-      const response = await fetch('https://api.proconnectsa.co.za/api/auth/profile/', {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://api.proconnectsa.co.za'}/api/auth/profile/`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json'

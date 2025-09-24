@@ -528,7 +528,13 @@ export default function LeadGenerationForm({ onComplete, onCancel, preselectedCa
                 className="sr-only"
               />
               <div className="flex items-center space-x-2">
-                <div className={`w-3 h-3 rounded-full ${urgency.color}`}></div>
+                <div className={`w-3 h-3 rounded-full ${
+                  urgency.color === 'bg-red-500' ? 'bg-red-500' :
+                  urgency.color === 'bg-orange-500' ? 'bg-orange-500' :
+                  urgency.color === 'bg-yellow-500' ? 'bg-yellow-500' :
+                  urgency.color === 'bg-green-500' ? 'bg-green-500' :
+                  'bg-gray-500'
+                }`}></div>
                 <div>
                   <div className="font-medium text-sm">{urgency.name}</div>
                   <div className="text-xs text-gray-500">{urgency.description}</div>

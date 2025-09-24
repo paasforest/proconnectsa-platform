@@ -79,7 +79,7 @@ export default function CreditsPage() {
       setLoading(true);
       
       // Fetch profile for credit balance and customer code
-      const profileResponse = await fetch('https://api.proconnectsa.co.za/api/auth/profile/', {
+      const profileResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://api.proconnectsa.co.za'}/api/auth/profile/`, {
         headers: {
           'Authorization': `Token ${session?.accessToken}`,
           'Content-Type': 'application/json'
@@ -93,7 +93,7 @@ export default function CreditsPage() {
       }
 
       // Fetch deposit history
-      const depositsResponse = await fetch('http://localhost:8000/api/payments/dashboard/deposits/', {
+      const depositsResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://api.proconnectsa.co.za'}/api/payments/dashboard/deposits/`, {
         headers: {
           'Authorization': `Token ${session?.accessToken}`,
           'Content-Type': 'application/json'
@@ -106,7 +106,7 @@ export default function CreditsPage() {
       }
 
       // Fetch transaction history
-      const transactionsResponse = await fetch('http://localhost:8000/api/payments/dashboard/transactions/', {
+      const transactionsResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://api.proconnectsa.co.za'}/api/payments/dashboard/transactions/`, {
         headers: {
           'Authorization': `Token ${session?.accessToken}`,
           'Content-Type': 'application/json'
@@ -132,7 +132,7 @@ export default function CreditsPage() {
     }
 
     try {
-      const response = await fetch('http://localhost:8000/api/payments/dashboard/deposits/create/', {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://api.proconnectsa.co.za'}/api/payments/dashboard/deposits/create/`, {
         method: 'POST',
         headers: {
           'Authorization': `Token ${session?.accessToken}`,

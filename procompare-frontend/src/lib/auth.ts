@@ -17,7 +17,7 @@ export const authOptions = {
 
         try {
           // Call Django backend to authenticate
-          const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://128.140.123.48:8000'
+          const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://api.proconnectsa.co.za'
           console.log('NextAuth: Attempting login for:', credentials.email)
           
           const response = await fetch(`${API_URL}/api/auth/login/`, {

@@ -15,7 +15,7 @@ export async function POST(request: NextRequest) {
     const validatedData = creditPurchaseSchema.parse(body)
     
     // Forward to backend PayPal service
-    const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
+    const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'https://api.proconnectsa.co.za'
     
     const response = await fetch(`${backendUrl}/api/payments/paypal/create-payment/`, {
       method: 'POST',

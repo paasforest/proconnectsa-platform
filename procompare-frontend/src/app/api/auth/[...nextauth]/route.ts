@@ -29,8 +29,10 @@ const handler = NextAuth({
 
           const data = await response.json()
           
+          console.log('Credentials provider - API response:', data)
+          
           if (data.success && data.user) {
-            return {
+            const user = {
               id: data.user.id.toString(),
               email: data.user.email,
               name: data.user.name || `${data.user.first_name} ${data.user.last_name}`,
@@ -38,6 +40,8 @@ const handler = NextAuth({
               subscriptionTier: data.user.subscription_tier || 'basic',
               accessToken: data.token,
             }
+            console.log('Credentials provider - returning user:', user)
+            return user
           }
         } catch (error) {
           // Silent error handling for security
@@ -61,7 +65,7 @@ const handler = NextAuth({
         } else if (token.userType === 'provider') {
           return `${baseUrl}/dashboard`
         } else if (token.userType === 'client') {
-          return `${baseUrl}/client`
+          return `${baseUrl}/client`  // Fixed: redirect clients to /client
         }
       }
       
@@ -82,18 +86,37 @@ const handler = NextAuth({
       // Persist the OAuth access_token and or the user id to the token right after signin
       if (user) {
         console.log('JWT callback - user data:', user)
-        token.accessToken = user.accessToken
-        token.userType = user.userType
-        token.subscriptionTier = user.subscriptionTier
+        token.accessToken = user.accessToken || ''
+        token.userType = user.userType || 'client'
+        token.subscriptionTier = user.subscriptionTier || 'basic'
         console.log('JWT callback - token after update:', token)
       }
+      
+      // Ensure token has default values to prevent hydration mismatches
+      token.accessToken = token.accessToken || ''
+      token.userType = token.userType || 'client'
+      token.subscriptionTier = token.subscriptionTier || 'basic'
+      
+      // Debug logging
+      console.log('JWT callback - final token:', token)
+      
       return token
     },
     async session({ session, token }) {
-      // Send properties to the client
-      session.accessToken = token.accessToken
-      session.user.userType = token.userType
-      session.user.subscriptionTier = token.subscriptionTier
+      // Send properties to the client with safe defaults to prevent hydration mismatches
+      session.accessToken = token.accessToken || ''
+      session.user.userType = token.userType || 'client'
+      session.user.subscriptionTier = token.subscriptionTier || 'basic'
+      
+      // Ensure user object has all required properties
+      if (!session.user.name) {
+        session.user.name = session.user.email?.split('@')[0] || 'User'
+      }
+      
+      // Debug logging
+      console.log('Session callback - token:', token)
+      console.log('Session callback - session:', session)
+      
       return session
     },
   },
