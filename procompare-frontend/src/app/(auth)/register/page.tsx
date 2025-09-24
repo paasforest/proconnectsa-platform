@@ -68,6 +68,25 @@ export default function RegisterPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    
+    console.log('Form submitted!', {
+      currentStep,
+      totalSteps,
+      shouldSubmit: currentStep === totalSteps,
+      formData: {
+        email: formData.email,
+        userType: formData.userType,
+        serviceCategories: formData.serviceCategories
+      }
+    })
+    
+    // Prevent submission if not on final step
+    if (currentStep !== totalSteps) {
+      console.log('Preventing form submission - not on final step')
+      setIsLoading(false)
+      return
+    }
+    
     setIsLoading(true)
     setError('')
     setSuccess('')
@@ -199,7 +218,12 @@ export default function RegisterPage() {
     })
   }
 
-  const nextStep = () => {
+  const nextStep = (e?: React.MouseEvent) => {
+    if (e) {
+      e.preventDefault()
+      e.stopPropagation()
+    }
+    
     const stepValid = isStepValid(currentStep)
     console.log('Next step clicked:', {
       currentStep,
@@ -335,7 +359,7 @@ export default function RegisterPage() {
                 {currentStep < totalSteps ? (
                   <Button
                     type="button"
-                    onClick={nextStep}
+                    onClick={(e) => nextStep(e)}
                     disabled={!isStepValid(currentStep)}
                     className="flex items-center gap-2"
                     title={`Step ${currentStep} valid: ${isStepValid(currentStep)}`}
