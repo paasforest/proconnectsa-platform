@@ -150,19 +150,26 @@ export default function RegisterPage() {
     
     if (type === 'checkbox') {
       const checked = (e.target as HTMLInputElement).checked
-      setFormData({
-        ...formData,
-        [name]: checked
-      })
-    } else if (name === 'serviceCategories') {
-      const checked = (e.target as HTMLInputElement).checked
-      const category = value
-      setFormData({
-        ...formData,
-        serviceCategories: checked
-          ? [...formData.serviceCategories, category]
-          : formData.serviceCategories.filter(c => c !== category)
-      })
+      
+      if (name === 'serviceCategories') {
+        // Handle service categories array
+        const newCategories = checked
+          ? [...formData.serviceCategories, value]
+          : formData.serviceCategories.filter(c => c !== value)
+        
+        console.log('Service categories updated:', newCategories)
+        
+        setFormData({
+          ...formData,
+          serviceCategories: newCategories
+        })
+      } else {
+        // Handle other checkboxes
+        setFormData({
+          ...formData,
+          [name]: checked
+        })
+      }
     } else {
       setFormData({
         ...formData,
@@ -212,7 +219,14 @@ export default function RegisterPage() {
         if (formData.userType === 'client') {
           return true // Client doesn't have step 3
         }
-        return Array.isArray(formData.serviceCategories) && formData.serviceCategories.length > 0
+        const isValid = Array.isArray(formData.serviceCategories) && formData.serviceCategories.length > 0
+        console.log('Step 3 validation:', {
+          serviceCategories: formData.serviceCategories,
+          isArray: Array.isArray(formData.serviceCategories),
+          length: formData.serviceCategories?.length,
+          isValid
+        })
+        return isValid
       case 4:
         return true // Final step is always valid
       default:
