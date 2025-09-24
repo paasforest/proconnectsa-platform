@@ -66,24 +66,26 @@ const handler = NextAuth({
       }
       
       // If URL is provided and it's a relative URL, use it
-      if (url.startsWith('/')) {
+      if (url && url.startsWith('/')) {
         return `${baseUrl}${url}`
       }
       
       // If URL is provided and it's from the same origin, use it
-      if (url.startsWith(baseUrl)) {
+      if (url && url.startsWith(baseUrl)) {
         return url
       }
       
-      // Default redirect to home page
-      return baseUrl
+      // Default redirect to dashboard
+      return `${baseUrl}/dashboard`
     },
     async jwt({ token, user }) {
       // Persist the OAuth access_token and or the user id to the token right after signin
       if (user) {
+        console.log('JWT callback - user data:', user)
         token.accessToken = user.accessToken
         token.userType = user.userType
         token.subscriptionTier = user.subscriptionTier
+        console.log('JWT callback - token after update:', token)
       }
       return token
     },
