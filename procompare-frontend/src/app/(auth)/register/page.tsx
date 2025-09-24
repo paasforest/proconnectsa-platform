@@ -105,18 +105,18 @@ export default function RegisterPage() {
     }
 
     try {
-      // Prepare registration data for Flask API
+      // Prepare registration data for Django API
       const registrationData = {
+        username: formData.email, // Use email as username
         email: formData.email,
         password: formData.password,
-        firstName: formData.firstName,
-        lastName: formData.lastName,
-        userType: formData.userType,
+        password_confirm: formData.confirmPassword,
+        first_name: formData.firstName,
+        last_name: formData.lastName,
+        user_type: formData.userType,
         phone: formData.phone,
         city: formData.city,
-        town: formData.town,
         suburb: formData.suburb,
-        postalCode: formData.postalCode,
         ...(formData.userType === 'provider' && {
           businessName: formData.businessName,
           businessPhone: formData.businessPhone,
@@ -138,8 +138,8 @@ export default function RegisterPage() {
         })
       }
 
-      // Call the backend registration API
-      const response = await fetch('https://api.proconnectsa.co.za/api/register/', {
+      // Call the Django backend registration API
+      const response = await fetch('https://api.proconnectsa.co.za/api/auth/register/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
