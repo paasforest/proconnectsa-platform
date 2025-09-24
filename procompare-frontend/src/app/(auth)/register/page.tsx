@@ -139,7 +139,7 @@ export default function RegisterPage() {
       }
 
       // Call the Django backend registration API
-      const response = await fetch('https://api.proconnectsa.co.za/api/auth/register/', {
+      const response = await fetch('https://api.proconnectsa.co.za/api/register/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
