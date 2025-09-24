@@ -201,7 +201,7 @@ export default function RegisterPage() {
       case 2:
         return formData.userType === 'client' || (formData.businessName && formData.businessPhone)
       case 3:
-        return formData.userType === 'client' || formData.serviceCategories.length > 0
+        return formData.userType === 'client' || (Array.isArray(formData.serviceCategories) && formData.serviceCategories.length > 0)
       case 4:
         return true
       default:

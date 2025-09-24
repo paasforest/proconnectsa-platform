@@ -109,17 +109,20 @@ export default function RegistrationSteps({
               />
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="phone">Phone Number</Label>
-              <Input
-                id="phone"
-                name="phone"
-                type="tel"
-                placeholder="+27 12 345 6789"
-                value={formData.phone}
-                onChange={onInputChange}
-              />
-            </div>
+            {formData.userType === 'provider' && (
+              <div className="space-y-2">
+                <Label htmlFor="phone">Business Phone Number *</Label>
+                <Input
+                  id="phone"
+                  name="phone"
+                  type="tel"
+                  placeholder="+27 11 123 4567"
+                  value={formData.phone}
+                  onChange={onInputChange}
+                  required
+                />
+              </div>
+            )}
 
             <div className="space-y-2">
               <Label htmlFor="userType">Account Type</Label>
@@ -194,17 +197,18 @@ export default function RegistrationSteps({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
+              <Label htmlFor="password">Password *</Label>
               <Input
                 id="password"
                 name="password"
                 type="password"
-                placeholder="Create a secure password"
+                placeholder="Create a strong password (min 8 characters)"
                 value={formData.password}
                 onChange={onInputChange}
                 required
                 minLength={8}
               />
+              <p className="text-xs text-gray-500">Password must be at least 8 characters long</p>
             </div>
 
             <div className="space-y-2">
@@ -236,9 +240,14 @@ export default function RegistrationSteps({
               <div className="bg-gray-50 p-4 rounded-lg space-y-2">
                 <p><strong>Name:</strong> {formData.firstName} {formData.lastName}</p>
                 <p><strong>Email:</strong> {formData.email}</p>
-                <p><strong>Phone:</strong> {formData.phone || 'Not provided'}</p>
+                {formData.userType === 'provider' && formData.phone && (
+                  <p><strong>Business Phone:</strong> {formData.phone}</p>
+                )}
                 <p><strong>Location:</strong> {formData.suburb}, {formData.city} {formData.postalCode}</p>
-                <p><strong>Account Type:</strong> Client</p>
+                <p><strong>Account Type:</strong> {formData.userType === 'provider' ? 'Service Provider' : 'Client'}</p>
+                {formData.userType === 'provider' && formData.businessName && (
+                  <p><strong>Business:</strong> {formData.businessName}</p>
+                )}
               </div>
             </div>
           )
@@ -353,7 +362,7 @@ export default function RegistrationSteps({
             <div className="space-y-4">
               <div>
                 <Label>Service Categories *</Label>
-                <p className="text-sm text-gray-600 mb-3">Select all that apply</p>
+                <p className="text-sm text-gray-600 mb-3">Select at least one service you offer</p>
                 <div className="grid grid-cols-2 gap-2">
                   {serviceCategories.map((category) => (
                     <label key={category} className="flex items-center space-x-2">
@@ -361,7 +370,7 @@ export default function RegistrationSteps({
                         type="checkbox"
                         name="serviceCategories"
                         value={category}
-                        checked={formData.serviceCategories.includes(category)}
+                        checked={Array.isArray(formData.serviceCategories) && formData.serviceCategories.includes(category)}
                         onChange={onInputChange}
                         className="rounded border-gray-300"
                       />
@@ -372,8 +381,8 @@ export default function RegistrationSteps({
               </div>
 
               <div>
-                <Label>Service Areas</Label>
-                <p className="text-sm text-gray-600 mb-3">Add areas where you provide services</p>
+                <Label>Service Areas (Optional)</Label>
+                <p className="text-sm text-gray-600 mb-3">Add areas where you provide services (optional)</p>
                 <div className="flex gap-2 mb-2">
                   <Input
                     placeholder="e.g., Sandton, Rosebank"
@@ -399,7 +408,7 @@ export default function RegistrationSteps({
                   </Button>
                 </div>
                 <div className="flex flex-wrap gap-2">
-                  {formData.serviceAreas.map((area) => (
+                  {Array.isArray(formData.serviceAreas) && formData.serviceAreas.map((area) => (
                     <span
                       key={area}
                       className="bg-emerald-100 text-emerald-800 px-2 py-1 rounded-full text-sm flex items-center gap-1"
