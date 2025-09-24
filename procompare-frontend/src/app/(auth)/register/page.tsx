@@ -183,7 +183,7 @@ export default function RegisterPage() {
   }
 
   const nextStep = () => {
-    if (currentStep < totalSteps) {
+    if (currentStep < totalSteps && isStepValid(currentStep)) {
       setCurrentStep(currentStep + 1)
     }
   }
@@ -199,11 +199,17 @@ export default function RegisterPage() {
       case 1:
         return formData.firstName && formData.lastName && formData.email && formData.password && formData.confirmPassword && formData.city && formData.suburb && formData.postalCode
       case 2:
-        return formData.userType === 'client' || (formData.businessName && formData.businessPhone)
+        if (formData.userType === 'client') {
+          return true // Client review step is always valid
+        }
+        return formData.businessName && formData.businessPhone
       case 3:
-        return formData.userType === 'client' || (Array.isArray(formData.serviceCategories) && formData.serviceCategories.length > 0)
+        if (formData.userType === 'client') {
+          return true // Client doesn't have step 3
+        }
+        return Array.isArray(formData.serviceCategories) && formData.serviceCategories.length > 0
       case 4:
-        return true
+        return true // Final step is always valid
       default:
         return false
     }
