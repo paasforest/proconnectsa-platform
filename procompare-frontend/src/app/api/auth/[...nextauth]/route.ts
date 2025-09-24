@@ -58,16 +58,8 @@ const handler = NextAuth({
   },
   callbacks: {
     async redirect({ url, baseUrl, token }) {
-      // If user is already logged in, redirect based on user type
-      if (token?.userType) {
-        if (token.userType === 'admin') {
-          return `${baseUrl}/admin/dashboard`
-        } else if (token.userType === 'provider') {
-          return `${baseUrl}/dashboard`
-        } else if (token.userType === 'client') {
-          return `${baseUrl}/client`  // Fixed: redirect clients to /client
-        }
-      }
+      // Since we're using direct API client authentication, 
+      // let the client-side handle redirects
       
       // If URL is provided and it's a relative URL, use it
       if (url && url.startsWith('/')) {
@@ -79,7 +71,7 @@ const handler = NextAuth({
         return url
       }
       
-      // Default redirect to dashboard
+      // Default redirect to dashboard (let client-side handle user type routing)
       return `${baseUrl}/dashboard`
     },
     async jwt({ token, user }) {

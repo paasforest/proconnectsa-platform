@@ -1,61 +1,37 @@
-import { withAuth } from "next-auth/middleware"
 import { NextResponse } from "next/server"
+import type { NextRequest } from "next/server"
 
-export default withAuth(
-  function middleware(req) {
-    const token = req.nextauth.token
-    const { pathname } = req.nextUrl
+export function middleware(request: NextRequest) {
+  const { pathname } = request.nextUrl
 
-    // Only redirect to login for protected routes that require authentication
-    const protectedRoutes = [
-      "/dashboard",
-      "/client", 
-      "/admin",
-      "/profile",
-      "/settings",
-      "/leads"
-    ]
+  // Allow access to public routes
+  const publicRoutes = [
+    "/",
+    "/login",
+    "/register",
+    "/how-it-works",
+    "/services",
+    "/providers",
+    "/about",
+    "/contact",
+    "/privacy",
+    "/terms",
+    "/request-quote",
+    "/business-services",
+    "/register-provider",
+  ]
 
-    const isProtectedRoute = protectedRoutes.some(route => pathname.startsWith(route))
-    
-    if (isProtectedRoute && !token) {
-      return NextResponse.redirect(new URL("/login", req.url))
-    }
-
+  // Check if the current path is a public route
+  const isPublicRoute = publicRoutes.some(route => pathname.startsWith(route))
+  
+  if (isPublicRoute) {
     return NextResponse.next()
-  },
-  {
-    callbacks: {
-      authorized: ({ token, req }) => {
-        const { pathname } = req.nextUrl
-
-        // Allow access to public routes
-        const publicRoutes = [
-          "/",
-          "/login",
-          "/register",
-          "/how-it-works",
-          "/services",
-          "/providers",
-          "/about",
-          "/contact",
-          "/privacy",
-          "/terms",
-          "/request-quote",
-          "/business-services",
-          "/register-provider",
-        ]
-
-        if (publicRoutes.some(route => pathname.startsWith(route))) {
-          return true
-        }
-
-        // Require authentication for protected routes
-        return !!token
-      },
-    },
   }
-)
+
+  // For protected routes, let the client-side handle authentication
+  // This allows our API client to manage authentication instead of NextAuth
+  return NextResponse.next()
+}
 
 export const config = {
   matcher: [
