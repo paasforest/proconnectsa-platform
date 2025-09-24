@@ -404,8 +404,7 @@ export default function LeadFeed({
               </div>
             </CardContent>
           </Card>
-          )
-        })}
+        ))}
       </div>
 
       {/* Empty State */}

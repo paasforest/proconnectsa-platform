@@ -17,7 +17,8 @@ import {
   CheckCircle,
   AlertCircle,
   Gift,
-  TrendingUp
+  TrendingUp,
+  Building2 as Building
 } from 'lucide-react'
 import { toast } from 'sonner'
 

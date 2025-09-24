@@ -123,23 +123,6 @@ export const userStore = {
     return users.get(userId) || null
   },
 
-  // Create user (synchronous version for compatibility)
-  createUser(userData: Omit<UserData, 'id' | 'createdAt' | 'updatedAt'>): UserData {
-    const id = `user_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
-    const now = new Date()
-    
-    const user: UserData = {
-      ...userData,
-      id,
-      createdAt: now,
-      updatedAt: now
-    }
-    
-    users.set(id, user)
-    usersByEmail.set(userData.email.toLowerCase(), id)
-    
-    return user
-  },
 
   // Get dashboard route based on user type and subscription
   getDashboardRoute(user: any): string {
