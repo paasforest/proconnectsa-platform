@@ -86,31 +86,36 @@ export default function RegisterPage() {
     }
 
     try {
-      // Prepare registration data
+      // Prepare registration data for Flask API
       const registrationData = {
         email: formData.email,
         password: formData.password,
-        name: `${formData.firstName} ${formData.lastName}`,
-        user_type: formData.userType,
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        userType: formData.userType,
         phone: formData.phone,
+        city: formData.city,
+        town: formData.town,
+        suburb: formData.suburb,
+        postalCode: formData.postalCode,
         ...(formData.userType === 'provider' && {
-          business_name: formData.businessName,
-          business_phone: formData.businessPhone,
-          business_email: formData.businessEmail,
-          business_address: formData.businessAddress,
-          business_registration: formData.businessRegistration,
-          vat_number: formData.vatNumber,
-          license_number: formData.licenseNumber,
-          service_categories: formData.serviceCategories,
-          service_areas: formData.serviceAreas,
-          max_travel_distance: formData.maxTravelDistance,
-          hourly_rate_min: formData.hourlyRateMin,
-          hourly_rate_max: formData.hourlyRateMax,
-          minimum_job_value: formData.minimumJobValue,
-          years_experience: formData.yearsExperience,
+          businessName: formData.businessName,
+          businessPhone: formData.businessPhone,
+          businessEmail: formData.businessEmail,
+          businessAddress: formData.businessAddress,
+          businessRegistration: formData.businessRegistration,
+          vatNumber: formData.vatNumber,
+          licenseNumber: formData.licenseNumber,
+          serviceCategories: formData.serviceCategories,
+          serviceAreas: formData.serviceAreas,
+          maxTravelDistance: formData.maxTravelDistance,
+          hourlyRateMin: formData.hourlyRateMin,
+          hourlyRateMax: formData.hourlyRateMax,
+          minimumJobValue: formData.minimumJobValue,
+          yearsExperience: formData.yearsExperience,
           bio: formData.bio,
-          receives_lead_notifications: formData.receivesLeadNotifications,
-          notification_methods: formData.notificationMethods
+          receivesLeadNotifications: formData.receivesLeadNotifications,
+          notificationMethods: formData.notificationMethods
         })
       }
 
