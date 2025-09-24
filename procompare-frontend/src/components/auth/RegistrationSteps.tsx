@@ -363,6 +363,9 @@ export default function RegistrationSteps({
               <div>
                 <Label>Service Categories *</Label>
                 <p className="text-sm text-gray-600 mb-3">Select at least one service you offer</p>
+                <div className="text-xs text-gray-500 mb-2">
+                  Debug: Selected {Array.isArray(formData.serviceCategories) ? formData.serviceCategories.length : 'invalid'} categories: {Array.isArray(formData.serviceCategories) ? formData.serviceCategories.join(', ') : 'not an array'}
+                </div>
                 <div className="grid grid-cols-2 gap-2">
                   {serviceCategories.map((category) => (
                     <label key={category} className="flex items-center space-x-2">

@@ -157,7 +157,12 @@ export default function RegisterPage() {
           ? [...formData.serviceCategories, value]
           : formData.serviceCategories.filter(c => c !== value)
         
-        console.log('Service categories updated:', newCategories)
+        console.log('Service categories updated:', {
+          checked,
+          value,
+          currentCategories: formData.serviceCategories,
+          newCategories
+        })
         
         setFormData({
           ...formData,
@@ -195,7 +200,15 @@ export default function RegisterPage() {
   }
 
   const nextStep = () => {
-    if (currentStep < totalSteps && isStepValid(currentStep)) {
+    const stepValid = isStepValid(currentStep)
+    console.log('Next step clicked:', {
+      currentStep,
+      totalSteps,
+      stepValid,
+      canProceed: currentStep < totalSteps && stepValid
+    })
+    
+    if (currentStep < totalSteps && stepValid) {
       setCurrentStep(currentStep + 1)
     }
   }
@@ -221,10 +234,12 @@ export default function RegisterPage() {
         }
         const isValid = Array.isArray(formData.serviceCategories) && formData.serviceCategories.length > 0
         console.log('Step 3 validation:', {
+          userType: formData.userType,
           serviceCategories: formData.serviceCategories,
           isArray: Array.isArray(formData.serviceCategories),
           length: formData.serviceCategories?.length,
-          isValid
+          isValid,
+          timestamp: new Date().toISOString()
         })
         return isValid
       case 4:
@@ -323,6 +338,7 @@ export default function RegisterPage() {
                     onClick={nextStep}
                     disabled={!isStepValid(currentStep)}
                     className="flex items-center gap-2"
+                    title={`Step ${currentStep} valid: ${isStepValid(currentStep)}`}
                   >
                     Next
                     <ArrowRight className="h-4 w-4" />
