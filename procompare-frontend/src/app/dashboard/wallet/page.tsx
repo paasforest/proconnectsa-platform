@@ -41,7 +41,10 @@ export default function WalletPage() {
   const [topUpLoading, setTopUpLoading] = useState(false);
 
   useEffect(() => {
-    loadWalletData();
+    // Only run on client side to avoid hydration issues
+    if (typeof window !== 'undefined') {
+      loadWalletData();
+    }
   }, []);
 
   const loadWalletData = async () => {

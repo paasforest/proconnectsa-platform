@@ -71,9 +71,11 @@ function LoginContent() {
       console.log('Login response:', data);
 
       if (data.success && data.data?.token) {
-        // Store token and user data
-        localStorage.setItem('token', data.data.token);
-        localStorage.setItem('user', JSON.stringify(data.data.user));
+        // Store token and user data (only on client side)
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('token', data.data.token);
+          localStorage.setItem('user', JSON.stringify(data.data.user));
+        }
         
         console.log('Login successful, redirecting to dashboard...');
         

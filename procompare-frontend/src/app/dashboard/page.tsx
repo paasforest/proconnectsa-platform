@@ -38,7 +38,10 @@ function DashboardContent() {
   const router = useRouter();
 
   useEffect(() => {
-    loadDashboardData();
+    // Only run on client side to avoid hydration issues
+    if (typeof window !== 'undefined') {
+      loadDashboardData();
+    }
   }, []);
 
   const loadDashboardData = async () => {
