@@ -232,6 +232,17 @@ export default function LeadGenerationForm({ onComplete, onCancel, preselectedCa
 
   const { register, handleSubmit, watch, setValue, formState: { errors, isValid } } = form
 
+  // Get current form values with fallbacks to prevent undefined values
+  const currentValues = watch()
+  const getValue = (field: string): string => {
+    const value = currentValues?.[field as keyof LeadGenerationForm]
+    return typeof value === 'string' ? value : ''
+  }
+  const getStringValue = (field: keyof LeadGenerationForm): string => {
+    const value = currentValues?.[field]
+    return typeof value === 'string' ? value : ''
+  }
+
   // Handle preselected category
   useEffect(() => {
     if (preselectedCategory) {
@@ -249,32 +260,39 @@ export default function LeadGenerationForm({ onComplete, onCancel, preselectedCa
 
   // Check if current step is valid
   const isCurrentStepValid = () => {
-    const currentValues = watch()
-    
     try {
       switch (currentStep) {
         case 1:
-          return !!(currentValues?.service_category && currentValues?.service_type && currentValues?.property_type)
+          return !!(getStringValue('service_category') && getStringValue('service_type') && getStringValue('property_type'))
         case 2:
-          return !!(currentValues?.title && currentValues.title.length >= 10 && 
-                   currentValues?.description && currentValues.description.length >= 50 &&
-                   currentValues?.urgency && currentValues?.preferred_start_date && currentValues?.preferred_time)
+          const title = getStringValue('title')
+          const description = getStringValue('description')
+          return !!(title && title.length >= 10 && 
+                   description && description.length >= 50 &&
+                   getStringValue('urgency') && getStringValue('preferred_start_date') && getStringValue('preferred_time'))
         case 3:
-          return !!(currentValues?.address && currentValues.address.length >= 10 &&
-                   currentValues?.suburb && currentValues.suburb.length >= 2 &&
-                   currentValues?.city && currentValues.city.length >= 2 &&
-                   currentValues?.postal_code && currentValues.postal_code.length >= 4)
+          const address = getStringValue('address')
+          const suburb = getStringValue('suburb')
+          const city = getStringValue('city')
+          const postalCode = getStringValue('postal_code')
+          return !!(address && address.length >= 10 &&
+                   suburb && suburb.length >= 2 &&
+                   city && city.length >= 2 &&
+                   postalCode && postalCode.length >= 4)
         case 4:
-          return !!(currentValues?.budget_range)
+          return !!(getStringValue('budget_range'))
         case 5:
-          return !!(currentValues?.preferred_communication)
+          return !!(getStringValue('preferred_communication'))
         case 6:
-          return !!(currentValues?.hiring_intent && currentValues?.hiring_timeline)
+          return !!(getStringValue('hiring_intent') && getStringValue('hiring_timeline'))
         case 7:
-          return !!(currentValues?.contact_name && currentValues.contact_name.length >= 2 &&
-                   currentValues?.contact_phone && currentValues.contact_phone.length >= 10 &&
-                   currentValues?.contact_email && currentValues.contact_email.includes('@') &&
-                   currentValues?.preferred_contact_time)
+          const contactName = getStringValue('contact_name')
+          const contactPhone = getStringValue('contact_phone')
+          const contactEmail = getStringValue('contact_email')
+          return !!(contactName && contactName.length >= 2 &&
+                   contactPhone && contactPhone.length >= 10 &&
+                   contactEmail && contactEmail.includes('@') &&
+                   getStringValue('preferred_contact_time'))
         default:
           return false
       }
@@ -286,10 +304,16 @@ export default function LeadGenerationForm({ onComplete, onCancel, preselectedCa
 
   // Debug function to help troubleshoot step validation
   const debugCurrentStep = () => {
-    const currentValues = watch()
+    console.log('=== FORM DEBUG ===')
     console.log('Current step:', currentStep)
     console.log('Current values:', currentValues)
     console.log('Is valid:', isCurrentStepValid())
+    console.log('Step 7 validation details:')
+    console.log('- contact_name:', getStringValue('contact_name'), 'length:', getStringValue('contact_name').length)
+    console.log('- contact_phone:', getStringValue('contact_phone'), 'length:', getStringValue('contact_phone').length)
+    console.log('- contact_email:', getStringValue('contact_email'), 'has @:', getStringValue('contact_email').includes('@'))
+    console.log('- preferred_contact_time:', getStringValue('preferred_contact_time'))
+    console.log('==================')
   }
 
   const nextStep = () => {
@@ -396,7 +420,7 @@ export default function LeadGenerationForm({ onComplete, onCancel, preselectedCa
   }
 
   const renderStep1 = () => {
-    const selectedCategory = watch('service_category')
+    const selectedCategory = getStringValue('service_category')
     const availableServiceTypes = selectedCategory ? serviceTypes[selectedCategory as keyof typeof serviceTypes] : []
     
     return (
@@ -413,7 +437,7 @@ export default function LeadGenerationForm({ onComplete, onCancel, preselectedCa
               <label
                 key={category.id}
                 className={`p-4 border-2 rounded-xl cursor-pointer transition-all duration-200 hover:shadow-md ${
-                  watch('service_category') === category.id
+                  getStringValue('service_category') === category.id
                     ? 'border-emerald-500 bg-emerald-50 shadow-md'
                     : 'border-gray-200 hover:border-emerald-300'
                 }`}
@@ -426,10 +450,10 @@ export default function LeadGenerationForm({ onComplete, onCancel, preselectedCa
                 />
                 <div className="text-center">
                   <Icon className={`h-8 w-8 mx-auto mb-2 ${
-                    watch('service_category') === category.id ? 'text-emerald-600' : 'text-gray-600'
+                    getStringValue('service_category') === category.id ? 'text-emerald-600' : 'text-gray-600'
                   }`} />
                   <div className={`font-medium text-sm ${
-                    watch('service_category') === category.id ? 'text-emerald-900' : 'text-gray-900'
+                    getStringValue('service_category') === category.id ? 'text-emerald-900' : 'text-gray-900'
                   }`}>{category.name}</div>
                   <div className="text-xs text-gray-500 mt-1">{category.description}</div>
                 </div>
@@ -450,7 +474,7 @@ export default function LeadGenerationForm({ onComplete, onCancel, preselectedCa
                 <label
                   key={serviceType}
                   className={`p-3 border-2 rounded-lg cursor-pointer transition-all duration-200 hover:shadow-sm ${
-                    watch('service_type') === serviceType
+                    getStringValue('service_type') === serviceType
                       ? 'border-green-500 bg-green-50 shadow-sm'
                       : 'border-gray-200 hover:border-green-300'
                   }`}
@@ -462,7 +486,7 @@ export default function LeadGenerationForm({ onComplete, onCancel, preselectedCa
                     className="sr-only"
                   />
                   <div className={`text-sm font-medium ${
-                    watch('service_type') === serviceType ? 'text-green-900' : 'text-gray-900'
+                    getStringValue('service_type') === serviceType ? 'text-green-900' : 'text-gray-900'
                   }`}>
                     {serviceType}
                   </div>
@@ -477,7 +501,7 @@ export default function LeadGenerationForm({ onComplete, onCancel, preselectedCa
         
         <div className="mb-6">
           <label className="block text-sm font-medium mb-3">Property Type</label>
-          <Select onValueChange={(value) => setValue('property_type', value)} value={watch('property_type') || ''}>
+          <Select onValueChange={(value) => setValue('property_type', value)} value={getStringValue('property_type')}>
             <SelectTrigger className="h-12 border-2 rounded-lg hover:border-emerald-300 focus:border-emerald-500 transition-colors">
               <SelectValue placeholder="Select property type" />
             </SelectTrigger>
@@ -511,7 +535,7 @@ export default function LeadGenerationForm({ onComplete, onCancel, preselectedCa
         <label className="block text-sm font-medium mb-2">
           Project Title
           <span className="text-xs text-gray-500 ml-2">
-            ({watch('title')?.length || 0}/10 characters minimum)
+            ({getStringValue('title').length}/10 characters minimum)
           </span>
         </label>
         <Input
@@ -528,7 +552,7 @@ export default function LeadGenerationForm({ onComplete, onCancel, preselectedCa
         <label className="block text-sm font-medium mb-2">
           Detailed Description
           <span className="text-xs text-gray-500 ml-2">
-            ({watch('description')?.length || 0}/50 characters minimum)
+            ({getStringValue('description').length}/50 characters minimum)
           </span>
         </label>
         <Textarea
@@ -548,7 +572,7 @@ export default function LeadGenerationForm({ onComplete, onCancel, preselectedCa
             <label
               key={urgency.id}
               className={`p-3 border rounded-lg cursor-pointer transition-colors ${
-                watch('urgency') === urgency.id
+                getStringValue('urgency') === urgency.id
                   ? 'border-emerald-500 bg-emerald-50'
                   : 'border-gray-200 hover:border-gray-300'
               }`}
@@ -595,7 +619,7 @@ export default function LeadGenerationForm({ onComplete, onCancel, preselectedCa
         
         <div>
           <label className="block text-sm font-medium mb-2">Preferred Time</label>
-          <Select onValueChange={(value) => setValue('preferred_time', value)} value={watch('preferred_time') || ''}>
+          <Select onValueChange={(value) => setValue('preferred_time', value)} value={getStringValue('preferred_time')}>
             <SelectTrigger className="h-12 border-2 rounded-lg hover:border-emerald-300 focus:border-emerald-500 transition-colors">
               <SelectValue placeholder="Select time preference" />
             </SelectTrigger>
@@ -695,7 +719,7 @@ export default function LeadGenerationForm({ onComplete, onCancel, preselectedCa
             <label
               key={range.id}
               className={`p-3 border rounded-lg cursor-pointer transition-colors ${
-                watch('budget_range') === range.id
+                getStringValue('budget_range') === range.id
                   ? 'border-emerald-500 bg-emerald-50'
                   : 'border-gray-200 hover:border-gray-300'
               }`}
@@ -718,7 +742,7 @@ export default function LeadGenerationForm({ onComplete, onCancel, preselectedCa
         )}
       </div>
       
-      {watch('budget_range') !== 'no_budget' && (
+      {getStringValue('budget_range') !== 'no_budget' && (
         <div>
           <label className="block text-sm font-medium mb-2">Specific Budget (Optional)</label>
           <Input
@@ -785,7 +809,7 @@ export default function LeadGenerationForm({ onComplete, onCancel, preselectedCa
       
       <div className="mb-6">
         <label className="block text-sm font-medium mb-3">Preferred Communication Method</label>
-        <Select onValueChange={(value) => setValue('preferred_communication', value)} value={watch('preferred_communication') || ''}>
+        <Select onValueChange={(value) => setValue('preferred_communication', value)} value={getStringValue('preferred_communication')}>
           <SelectTrigger className="h-12 border-2 rounded-lg hover:border-emerald-300 focus:border-emerald-500 transition-colors">
             <SelectValue placeholder="Select communication preference" />
           </SelectTrigger>
@@ -836,7 +860,7 @@ export default function LeadGenerationForm({ onComplete, onCancel, preselectedCa
       
       <div>
         <label className="block text-sm font-medium mb-3">Are you ready to hire someone for this project?</label>
-        <RadioGroup onValueChange={(value) => setValue('hiring_intent', value)} value={watch('hiring_intent') || ''} className="space-y-3">
+        <RadioGroup onValueChange={(value) => setValue('hiring_intent', value)} value={getStringValue('hiring_intent')} className="space-y-3">
           <div className="flex items-center space-x-3 p-3 border rounded-lg hover:bg-gray-50">
             <RadioGroupItem value="ready_to_hire" id="ready_to_hire" />
             <label htmlFor="ready_to_hire" className="flex-1 cursor-pointer">
@@ -876,7 +900,7 @@ export default function LeadGenerationForm({ onComplete, onCancel, preselectedCa
       
       <div>
         <label className="block text-sm font-medium mb-3">When do you plan to start this project?</label>
-        <RadioGroup onValueChange={(value) => setValue('hiring_timeline', value)} value={watch('hiring_timeline') || ''} className="space-y-3">
+        <RadioGroup onValueChange={(value) => setValue('hiring_timeline', value)} value={getStringValue('hiring_timeline')} className="space-y-3">
           <div className="flex items-center space-x-3 p-3 border rounded-lg hover:bg-gray-50">
             <RadioGroupItem value="asap" id="asap" />
             <label htmlFor="asap" className="flex-1 cursor-pointer">
@@ -938,7 +962,7 @@ export default function LeadGenerationForm({ onComplete, onCancel, preselectedCa
           <label className="block text-sm font-medium mb-2">
             Full Name
             <span className="text-xs text-gray-500 ml-2">
-              ({watch('contact_name')?.length || 0}/2 characters minimum)
+              ({getStringValue('contact_name').length}/2 characters minimum)
             </span>
           </label>
           <Input
@@ -955,7 +979,7 @@ export default function LeadGenerationForm({ onComplete, onCancel, preselectedCa
           <label className="block text-sm font-medium mb-3">
             Phone Number
             <span className="text-xs text-gray-500 ml-2">
-              ({watch('contact_phone')?.length || 0}/10 characters minimum)
+              ({getStringValue('contact_phone').length}/10 characters minimum)
             </span>
           </label>
           <Input
@@ -996,7 +1020,7 @@ export default function LeadGenerationForm({ onComplete, onCancel, preselectedCa
             (required)
           </span>
         </label>
-        <Select onValueChange={(value) => setValue('preferred_contact_time', value)} value={watch('preferred_contact_time') || ''}>
+        <Select onValueChange={(value) => setValue('preferred_contact_time', value)} value={getStringValue('preferred_contact_time')}>
           <SelectTrigger className="h-12 border-2 rounded-lg hover:border-emerald-300 focus:border-emerald-500 transition-colors">
             <SelectValue placeholder="Select preferred contact time" />
           </SelectTrigger>
