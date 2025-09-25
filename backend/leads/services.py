@@ -649,9 +649,26 @@ class LeadFilteringService:
         try:
             profile = provider.provider_profile
             
-            # Base query for verified leads with optimized database queries
+            # Build base query with filters
+            base_filters = {}
+            
+            # Apply status filter (default to 'active' if not specified)
+            if filters and 'status' in filters:
+                base_filters['status'] = filters['status']
+            else:
+                base_filters['status'] = 'active'  # Use 'active' status for production
+            
+            # Apply availability filter
+            if filters and 'is_available' in filters:
+                base_filters['is_available'] = filters['is_available']
+            
+            # Apply expiry filter
+            if filters and 'expires_at__gt' in filters:
+                base_filters['expires_at__gt'] = filters['expires_at__gt']
+            
+            # Base query with optimized database queries
             leads = Lead.objects.filter(
-                status='verified',
+                **base_filters,
                 service_category__slug__in=profile.service_categories
             ).select_related('service_category', 'client').prefetch_related(
                 'assignments__provider',
@@ -661,7 +678,7 @@ class LeadFilteringService:
             # Apply geographical filter
             leads = LeadFilteringService.apply_geographical_filter(leads, profile)
             
-            # Apply quality filters
+            # Apply additional quality filters
             if filters:
                 leads = LeadFilteringService.apply_quality_filters(leads, filters)
             
@@ -671,6 +688,10 @@ class LeadFilteringService:
             ).values_list('lead_id', flat=True)
             
             leads = leads.exclude(id__in=assigned_lead_ids)
+            
+            # Apply limit if specified
+            if filters and 'limit' in filters:
+                leads = leads[:filters['limit']]
             
             # Order by priority
             leads = leads.order_by(

@@ -29,45 +29,72 @@ def mask_text_content(text):
 def available_leads(request):
     """
     Get available leads with contact masking from database
-    Uses ML services for pricing calculation
+    Uses ML services for both pricing calculation AND intelligent filtering
     """
     from backend.leads.models import Lead
+    from backend.leads.services import LeadFilteringService
     from django.utils import timezone
     from datetime import timedelta
     import uuid
+    import logging
+    
+    logger = logging.getLogger(__name__)
     
     # Get user's wallet
     wallet, created = Wallet.objects.get_or_create(user=request.user)
     
-    # Get available leads from database - BARK-STYLE FLOW
-    # Filter for verified leads that are available and not expired
-    # SECURITY: Only show leads for services this provider offers AND locations they serve
-    provider_service_categories = []
-    provider_service_areas = []
-    if hasattr(request.user, 'provider_profile'):
-        provider_service_categories = request.user.provider_profile.service_categories or []
-        provider_service_areas = request.user.provider_profile.service_areas or []
-    
-    # Start with service category filtering
-    leads = Lead.objects.filter(
-        status='active',  # Changed from 'verified' to 'active' to match actual lead status
-        is_available=True,
-        expires_at__gt=timezone.now(),
-        service_category__id__in=provider_service_categories  # ENFORCE SERVICE MATCHING
-    ).select_related('client', 'service_category').order_by('-created_at')[:20]
-    
-    # Apply geographical filtering if provider has service areas defined
-    if provider_service_areas:
-        from django.db.models import Q
-        geographical_filter = Q()
-        for area in provider_service_areas:
-            area_lower = area.lower()
-            geographical_filter |= (
-                Q(location_suburb__icontains=area_lower) |
-                Q(location_city__icontains=area_lower) |
-                Q(location_address__icontains=area_lower)
-            )
-        leads = leads.filter(geographical_filter)
+    try:
+        # Use ML-based filtering instead of hardcoded queries
+        # This provides intelligent lead-provider matching based on:
+        # - Service categories compatibility
+        # - Geographical proximity with ML
+        # - Lead quality preferences
+        # - Provider availability and preferences
+        leads = LeadFilteringService.get_filtered_leads_for_provider(
+            provider=request.user,
+            filters={
+                'status': 'active',  # Match actual lead status
+                'is_available': True,
+                'expires_at__gt': timezone.now(),
+                'limit': 20
+            }
+        )
+        
+        logger.info(f"ML filtering returned {leads.count()} leads for provider {request.user.id}")
+        
+    except Exception as e:
+        logger.error(f"ML filtering failed for provider {request.user.id}: {str(e)}")
+        
+        # Fallback to basic filtering if ML service fails
+        logger.info("Falling back to basic filtering")
+        
+        # Get provider's service categories and areas
+        provider_service_categories = []
+        provider_service_areas = []
+        if hasattr(request.user, 'provider_profile'):
+            provider_service_categories = request.user.provider_profile.service_categories or []
+            provider_service_areas = request.user.provider_profile.service_areas or []
+        
+        # Basic service category filtering
+        leads = Lead.objects.filter(
+            status='active',
+            is_available=True,
+            expires_at__gt=timezone.now(),
+            service_category__id__in=provider_service_categories
+        ).select_related('client', 'service_category').order_by('-created_at')[:20]
+        
+        # Basic geographical filtering
+        if provider_service_areas:
+            from django.db.models import Q
+            geographical_filter = Q()
+            for area in provider_service_areas:
+                area_lower = area.lower()
+                geographical_filter |= (
+                    Q(location_suburb__icontains=area_lower) |
+                    Q(location_city__icontains=area_lower) |
+                    Q(location_address__icontains=area_lower)
+                )
+            leads = leads.filter(geographical_filter)
     
     # Convert leads to frontend format
     leads_data = []

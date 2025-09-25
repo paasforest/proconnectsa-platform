@@ -431,7 +431,7 @@ def create_public_lead(request):
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def available_leads_view(request):
-    """Get available leads for authenticated providers only"""
+    """Get available leads for authenticated providers using ML-based intelligent filtering"""
     # Only allow providers to access leads
     if not request.user.is_authenticated or request.user.user_type != 'service_provider':
         return Response(
@@ -440,41 +440,29 @@ def available_leads_view(request):
         )
     
     try:
-        # Get available leads that are not already claimed by this provider
-        leads = Lead.objects.filter(
-            is_available=True,
-            status='active',  # Changed from 'verified' to 'active' to match actual lead status
-            expires_at__gt=timezone.now()
-        ).exclude(
-            # Exclude leads already claimed by this provider
-            assignments__provider=request.user
-        ).order_by('-created_at')[:20]
+        # Use ML-based filtering instead of hardcoded queries
+        # This provides intelligent lead-provider matching based on:
+        # - Service categories compatibility with ML scoring
+        # - Geographical proximity with ML optimization
+        # - Lead quality preferences and provider preferences
+        # - Historical success patterns and conversion rates
+        from .services import LeadFilteringService
+        
+        leads = LeadFilteringService.get_filtered_leads_for_provider(
+            provider=request.user,
+            filters={
+                'status': 'active',  # Match actual lead status
+                'is_available': True,
+                'expires_at__gt': timezone.now(),
+                'limit': 20
+            }
+        )
+        
+        logger.info(f"ML filtering returned {leads.count()} leads for provider {request.user.id}")
         
         # For new providers, return empty list to show clean dashboard
         if not request.user.provider_profile or not hasattr(request.user.provider_profile, 'service_categories'):
             return Response({'leads': []})
-        
-        # Filter by provider's service categories
-        provider_categories = request.user.provider_profile.service_categories.all()
-        if provider_categories.exists():
-            leads = leads.filter(service_category__in=provider_categories)
-        else:
-            # New provider with no service categories - return empty
-            return Response({'leads': []})
-        
-        # Apply geographical filtering based on provider's service areas
-        provider_service_areas = getattr(request.user.provider_profile, 'service_areas', [])
-        if provider_service_areas:
-            from django.db.models import Q
-            geographical_filter = Q()
-            for area in provider_service_areas:
-                area_lower = area.lower()
-                geographical_filter |= (
-                    Q(location_suburb__icontains=area_lower) |
-                    Q(location_city__icontains=area_lower) |
-                    Q(location_address__icontains=area_lower)
-                )
-            leads = leads.filter(geographical_filter)
         
         serializer = LeadSerializer(leads, many=True)
         return Response({'leads': serializer.data})
