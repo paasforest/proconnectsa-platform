@@ -83,7 +83,7 @@ const DashboardOverview = () => {
             response_rate: 0,
             conversion_rate: 0,
             profile_views: 0,
-            credit_balance: user?.wallet_balance || 0,
+            credit_balance: 0, // New users start with 0 credits
             recent_leads: []
           });
         } else {
@@ -124,7 +124,7 @@ const DashboardOverview = () => {
           response_rate: 0,
           conversion_rate: 0,
           profile_views: 0,
-          credit_balance: user?.wallet_balance || 0,
+          credit_balance: 0, // New users start with 0 credits
           recent_leads: []
         });
         setProfile({
@@ -249,7 +249,7 @@ const DashboardOverview = () => {
               You're all set up! Start by browsing available leads and building your reputation.
             </p>
             <div className="text-sm text-blue-700">
-              <p>• You have <strong>{user?.wallet_balance || 0} credits</strong> to get started</p>
+              <p>• You have <strong>0 credits</strong> - complete your profile to earn your first credits!</p>
               <p>• Complete your profile to attract more clients</p>
               <p>• Respond quickly to leads to build your rating</p>
             </div>

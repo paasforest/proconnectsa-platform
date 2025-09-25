@@ -85,7 +85,7 @@ export default function PersonalizedHeader({
             leads_claimed_this_month: 0,
             monthly_lead_limit: isNewUser ? 5 : 10, // Lower limit for new users
             subscription_tier: 'basic',
-            credit_balance: user?.wallet_balance || 0,
+            credit_balance: isNewUser ? 0 : (user?.wallet_balance || 0), // New users start with 0 credits
             customer_code: `PC${user?.id || '00000000'}`,
             verification_status: isNewUser ? 'pending' : 'verified'
           });
@@ -107,7 +107,7 @@ export default function PersonalizedHeader({
           leads_claimed_this_month: 0,
           monthly_lead_limit: isNewUser ? 5 : 10,
           subscription_tier: 'basic',
-          credit_balance: user?.wallet_balance || 0,
+          credit_balance: isNewUser ? 0 : (user?.wallet_balance || 0), // New users start with 0 credits
           customer_code: `PC${user?.id || '00000000'}`,
           verification_status: isNewUser ? 'pending' : 'verified'
         });
@@ -129,7 +129,7 @@ export default function PersonalizedHeader({
         leads_claimed_this_month: 0,
         monthly_lead_limit: isNewUser ? 5 : 10,
         subscription_tier: 'basic',
-        credit_balance: user?.wallet_balance || 0,
+        credit_balance: isNewUser ? 0 : (user?.wallet_balance || 0), // New users start with 0 credits
         customer_code: `PC${user?.id || '00000000'}`,
         verification_status: isNewUser ? 'pending' : 'verified'
       });

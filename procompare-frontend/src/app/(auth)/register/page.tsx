@@ -159,7 +159,8 @@ export default function RegisterPage() {
                formData.password && formData.password_confirm && formData.user_type;
       case 2:
         return formData.business_name && formData.primary_service && 
-               formData.city && formData.province && formData.terms_accepted && formData.privacy_accepted;
+               formData.city && formData.province && formData.phone_number && 
+               formData.terms_accepted && formData.privacy_accepted;
       default:
         return true;
     }
@@ -463,6 +464,74 @@ export default function RegisterPage() {
             <option key={level} value={level}>{level}</option>
           ))}
         </select>
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-2">
+          Phone Number
+        </label>
+        <div className="flex gap-2">
+          <div className="w-1/3">
+            <select
+              name="area_code"
+              className="w-full px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors text-sm"
+              value={formData.area_code}
+              onChange={handleChange}
+            >
+              {areaCodes.map((area) => (
+                <option key={area.code} value={area.code}>{area.name}</option>
+              ))}
+            </select>
+          </div>
+          <div className="w-2/3">
+            <input
+              name="phone_number"
+              type="tel"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
+              placeholder="e.g., 123456789"
+              value={formData.phone_number}
+              onChange={handleChange}
+            />
+          </div>
+        </div>
+        <p className="text-xs text-gray-500 mt-1">
+          Full number: {getFullPhoneNumber() || 'Not provided'}
+        </p>
+      </div>
+
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            City
+          </label>
+          <input
+            name="city"
+            type="text"
+            required
+            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
+            placeholder="City"
+            value={formData.city}
+            onChange={handleChange}
+          />
+        </div>
+        
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Province
+          </label>
+          <select
+            name="province"
+            required
+            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
+            value={formData.province}
+            onChange={handleChange}
+          >
+            <option value="">Select province</option>
+            {provinces.map((province) => (
+              <option key={province} value={province}>{province}</option>
+            ))}
+          </select>
+        </div>
       </div>
 
       <div>
