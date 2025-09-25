@@ -26,10 +26,10 @@ export default function ServicesPageRoute() {
     )
   }
 
-  if (!session) return null
+  if (!user) return null
 
   // Only show services page for providers
-  if (user.userType !== 'provider') {
+  if (user.user_type !== 'service_provider') {
     router.push('/client')
     return null
   }
