@@ -111,9 +111,26 @@ export class SimpleApiClient {
   }
 
   async createPublicLead(leadData: any) {
+    // Map budget_range to budget field for API compatibility
+    const budgetMap = {
+      'under_1000': 500,
+      '1000_5000': 3000,
+      '5000_15000': 10000,
+      '15000_50000': 32500,
+      'over_50000': 75000,
+      'no_budget': 5000
+    }
+    
+    const apiData = {
+      ...leadData,
+      budget: budgetMap[leadData.budget_range] || 5000, // Convert budget_range to budget
+      category: leadData.service_category_id || 1, // Add category field
+      location: `${leadData.location_address}, ${leadData.location_suburb}, ${leadData.location_city}` // Add location field
+    }
+    
     return this.request('/api/leads/', {
       method: 'POST',
-      body: JSON.stringify(leadData),
+      body: JSON.stringify(apiData),
     })
   }
 
