@@ -111,27 +111,27 @@ export class SimpleApiClient {
   }
 
   async createPublicLead(leadData: any) {
-    // Map budget_range to budget field for API compatibility
-    const budgetMap = {
-      'under_1000': 500,
-      '1000_5000': 3000,
-      '5000_15000': 10000,
-      '15000_50000': 32500,
-      'over_50000': 75000,
-      'no_budget': 5000
-    }
+    // Use the unified lead creation approach
+    const { createLead } = await import('@/utils/lead-api');
     
-    const apiData = {
-      ...leadData,
-      budget: budgetMap[leadData.budget_range] || 5000, // Convert budget_range to budget
-      category: leadData.service_category_id || 1, // Add category field
-      location: `${leadData.location_address}, ${leadData.location_suburb}, ${leadData.location_city}` // Add location field
-    }
+    // Map the leadData to the unified format
+    const unifiedData = {
+      title: leadData.title,
+      description: leadData.description,
+      budget_range: leadData.budget_range,
+      category: leadData.service_category_id?.toString(),
+      location: `${leadData.location_address || ''}, ${leadData.location_suburb || ''}, ${leadData.location_city || ''}`.replace(/,\s*,/g, ',').replace(/^,\s*|,\s*$/g, ''),
+      client_name: leadData.client_name,
+      client_email: leadData.client_email,
+      client_phone: leadData.client_phone,
+      // Additional fields that might be needed
+      urgency: leadData.urgency,
+      hiring_intent: leadData.hiring_intent,
+      hiring_timeline: leadData.hiring_timeline,
+      source: leadData.source || 'website'
+    };
     
-    return this.request('/api/leads/', {
-      method: 'POST',
-      body: JSON.stringify(apiData),
-    })
+    return createLead(unifiedData);
   }
 
   async getLeads(params?: any) {
