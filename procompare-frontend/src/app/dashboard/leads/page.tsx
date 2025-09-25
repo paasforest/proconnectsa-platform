@@ -25,7 +25,12 @@ import {
   TrendingUp,
   Users,
   Building2,
-  Home
+  Home,
+  Tag,
+  CreditCard,
+  Lock,
+  RefreshCw,
+  Unlock
 } from 'lucide-react'
 import { apiClient } from '@/lib/api-simple'
 
@@ -62,6 +67,7 @@ function LeadsPage({ user }: { user: any }) {
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedLead, setSelectedLead] = useState<Lead | null>(null)
+  const [unlockingLead, setUnlockingLead] = useState<string | null>(null)
 
   useEffect(() => {
     const fetchLeads = async () => {
@@ -114,6 +120,34 @@ function LeadsPage({ user }: { user: any }) {
     }
   }
 
+  const handleUnlockLead = async (leadId: string) => {
+    try {
+      setUnlockingLead(leadId)
+      
+      // Call the unlock API endpoint
+      const response = await apiClient.post(`/api/wallet/unlock-lead/${leadId}/`)
+      
+      if (response.success) {
+        // Update the lead in the state to show it's unlocked
+        setLeads(prevLeads => 
+          prevLeads.map(lead => 
+            lead.id === leadId 
+              ? { ...lead, isUnlocked: true, ...response.unlocked_data }
+              : lead
+          )
+        )
+        
+        // Show success message
+        console.log('Lead unlocked successfully!')
+      }
+    } catch (error) {
+      console.error('Failed to unlock lead:', error)
+      // Show error message to user
+    } finally {
+      setUnlockingLead(null)
+    }
+  }
+
   return (
     <DashboardLayout>
       <div className="space-y-6">
@@ -153,7 +187,7 @@ function LeadsPage({ user }: { user: any }) {
           </div>
         </div>
 
-        {/* Leads Grid */}
+        {/* Bark-Style Leads Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
           {loading ? (
             Array.from({ length: 6 }).map((_, i) => (
@@ -173,14 +207,18 @@ function LeadsPage({ user }: { user: any }) {
             ))
           ) : filteredLeads.length > 0 ? (
             filteredLeads.map((lead) => (
-              <Card key={lead.id} className="hover:shadow-lg transition-shadow">
-                <CardHeader>
+              <Card key={lead.id} className="hover:shadow-lg transition-shadow border-l-4 border-l-blue-500">
+                <CardHeader className="pb-3">
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
                       <CardTitle className="text-lg mb-2">{lead.title}</CardTitle>
                       <div className="flex items-center space-x-2 text-sm text-gray-600">
                         <MapPin className="w-4 h-4" />
                         <span>{lead.location}</span>
+                      </div>
+                      <div className="flex items-center space-x-2 text-sm text-gray-600 mt-1">
+                        <Tag className="w-4 h-4" />
+                        <span>{lead.category}</span>
                       </div>
                     </div>
                     <Badge className={getUrgencyColor(lead.urgency)}>
@@ -195,44 +233,66 @@ function LeadsPage({ user }: { user: any }) {
                     <div className="flex items-center justify-between text-sm">
                       <div className="flex items-center space-x-1 text-green-600">
                         <DollarSign className="w-4 h-4" />
-                        <span className="font-medium">{lead.budget}</span>
+                        <span className="font-medium">R{lead.budget}</span>
                       </div>
                       <div className="flex items-center space-x-1 text-blue-600">
-                        <Zap className="w-4 h-4" />
-                        <span>{lead.credits_required} credits</span>
+                        <CreditCard className="w-4 h-4" />
+                        <span className="font-medium">{lead.access_cost || 50} credits</span>
                       </div>
                     </div>
-
-                    <div className="flex items-center justify-between text-sm text-gray-500">
+                    
+                    {/* Bark-style Competition Stats */}
+                    <div className="flex items-center justify-between text-xs text-gray-500 pt-2 border-t">
                       <div className="flex items-center space-x-1">
-                        <Clock className="w-4 h-4" />
-                        <span>{lead.time_ago}</span>
+                        <Users className="w-3 h-3" />
+                        <span>{lead.responses_count || 0} responses</span>
                       </div>
                       <div className="flex items-center space-x-1">
-                        <Target className="w-4 h-4" />
-                        <span className="capitalize">{lead.category}</span>
+                        <Eye className="w-3 h-3" />
+                        <span>{lead.views_count || 0} views</span>
+                      </div>
+                      <div className="flex items-center space-x-1">
+                        <Clock className="w-3 h-3" />
+                        <span>{lead.timeAgo}</span>
                       </div>
                     </div>
-
-                    <div className="flex items-center justify-between pt-3 border-t">
-                      <div className="flex items-center space-x-2">
-                        <div className="flex items-center space-x-1">
-                          <Users className="w-4 h-4 text-gray-400" />
-                          <span className="text-sm text-gray-600">{lead.response_count} responses</span>
+                    
+                    {/* Contact Details - Locked State */}
+                    <div className="bg-gray-50 rounded-lg p-3 border border-gray-200">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-2">
+                          <Lock className="w-4 h-4 text-gray-400" />
+                          <div className="text-sm">
+                            <p className="text-gray-500">Contact Details Locked</p>
+                            <p className="text-xs text-gray-400">Unlock to see phone & email</p>
+                          </div>
                         </div>
-                        {lead.verified && (
-                          <CheckCircle className="w-4 h-4 text-green-500" />
-                        )}
+                        <Button 
+                          size="sm" 
+                          className="bg-green-600 hover:bg-green-700"
+                          onClick={() => handleUnlockLead(lead.id)}
+                          disabled={unlockingLead === lead.id || lead.isUnlocked}
+                        >
+                          {unlockingLead === lead.id ? (
+                            <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                          ) : (
+                            <Unlock className="w-4 h-4 mr-2" />
+                          )}
+                          {unlockingLead === lead.id ? 'Unlocking...' : 'Unlock Lead'}
+                        </Button>
                       </div>
-                      <Button
-                        size="sm"
-                        onClick={() => setSelectedLead(lead)}
-                        className="flex items-center space-x-1"
-                      >
-                        <Eye className="w-4 h-4" />
-                        <span>View Details</span>
-                      </Button>
                     </div>
+                    
+                    {/* View Details Button */}
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setSelectedLead(lead)}
+                      className="w-full mt-3"
+                    >
+                      <Eye className="w-4 h-4 mr-2" />
+                      View Details
+                    </Button>
                   </div>
                 </CardContent>
               </Card>
