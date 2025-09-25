@@ -57,9 +57,9 @@ export default function RegisterPage() {
     
     if (type === 'checkbox') {
       const checked = (e.target as HTMLInputElement).checked;
-        setFormData({
-          ...formData,
-          [name]: checked
+      setFormData({
+        ...formData,
+        [name]: checked
       });
     } else if (name === 'secondary_services' || name === 'service_areas') {
       // Handle multi-select arrays
@@ -77,6 +77,13 @@ export default function RegisterPage() {
         ...formData,
         [name]: value
       });
+    }
+
+    // Debug logging
+    if (name === 'user_type') {
+      console.log('User type changed to:', value);
+      console.log('Current step:', currentStep);
+      console.log('Total steps:', getTotalSteps());
     }
   };
 
@@ -256,6 +263,11 @@ export default function RegisterPage() {
           <option value="client">Client (Looking for services)</option>
           <option value="service_provider">Service Provider (Offering services)</option>
         </select>
+        {formData.user_type === 'service_provider' && (
+          <p className="text-sm text-emerald-600 mt-2">
+            ✓ Service providers will be asked additional questions in the next step
+          </p>
+        )}
       </div>
 
       <div>
@@ -586,7 +598,8 @@ export default function RegisterPage() {
                         {currentStep === getTotalSteps() ? 'Creating Account...' : 'Loading...'}
                       </div>
                     ) : (
-                      currentStep === getTotalSteps() ? 'Create Account' : 'Next'
+                      currentStep === getTotalSteps() ? 'Create Account' : 
+                      formData.user_type === 'service_provider' ? 'Continue to Provider Details' : 'Next'
                     )}
                   </button>
                 </div>
