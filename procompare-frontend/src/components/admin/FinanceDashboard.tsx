@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { useSession } from 'next-auth/react';
+import { useAuth } from '@/components/AuthProvider';
 import {
   DollarSign, CreditCard, TrendingUp, Users, AlertCircle, 
   CheckCircle, Clock, BarChart3, PieChart, RefreshCw,
@@ -87,7 +87,7 @@ interface FinanceStats {
 }
 
 const FinanceDashboard = () => {
-  const { data: session } = useSession();
+  const { user, token } = useAuth();
   const [tickets, setTickets] = useState<FinanceTicket[]>([]);
   const [stats, setStats] = useState<FinanceStats | null>(null);
   const [loading, setLoading] = useState(true);
@@ -98,17 +98,17 @@ const FinanceDashboard = () => {
   const [amountFilter, setAmountFilter] = useState('all');
 
   useEffect(() => {
-    if (session?.accessToken) {
+    if (token) {
       fetchFinanceData();
     }
-  }, [session?.accessToken]);
+  }, [token]);
 
   const fetchFinanceData = async () => {
-    if (!session?.accessToken) return;
+    if (!token) return;
     
     try {
       setLoading(true);
-      apiClient.setToken(session.accessToken);
+      apiClient.setToken(token);
 
       // Fetch all financial data in parallel
       const [
@@ -292,8 +292,8 @@ const FinanceDashboard = () => {
 
   const handleExportReport = async () => {
     try {
-      if (session?.accessToken) {
-        apiClient.setToken(session.accessToken);
+      if (token) {
+        apiClient.setToken(token);
       }
       
       const response = await apiClient.get('/api/payments/audit/export/', {

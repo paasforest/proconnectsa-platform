@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import Link from "next/link"
-import { useSession, signOut } from "next-auth/react"
+import { useAuth } from "next-auth/react"
 import { Button } from "@/components/ui/button"
 import { 
   DropdownMenu, 
@@ -14,7 +14,7 @@ import {
 import { Menu, X, User, LogOut, Settings, Bell, MessageCircle, FileText, Star, Coins } from "lucide-react"
 
 export function Header() {
-  const { data: session, status } = useSession()
+  const { user, token } = useAuth()
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
 
   const handleSignOut = () => {
@@ -62,7 +62,7 @@ export function Header() {
 
         {/* Desktop Auth */}
         <div className="hidden md:flex items-center space-x-4">
-          {status === "loading" ? (
+          {false ? (
             <div className="h-9 w-20 bg-muted animate-pulse rounded-md" />
           ) : session ? (
             <div className="flex items-center space-x-4">
@@ -79,7 +79,7 @@ export function Header() {
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" className="flex items-center space-x-2">
                     <User className="h-4 w-4" />
-                    <span>{session.user?.name}</span>
+                    <span>{user?.name}</span>
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-56">
@@ -89,7 +89,7 @@ export function Header() {
                       Profile
                     </Link>
                   </DropdownMenuItem>
-                  {session.user?.userType === 'provider' && (
+                  {user?.userType === 'provider' && (
                     <>
                       <DropdownMenuItem asChild>
                         <Link href="/chat" className="flex items-center">
@@ -193,7 +193,7 @@ export function Header() {
               <div className="pt-4 border-t space-y-2">
                 <div className="flex items-center space-x-2 text-sm">
                   <User className="h-4 w-4" />
-                  <span>{session.user?.name}</span>
+                  <span>{user?.name}</span>
                 </div>
                 <div className="flex flex-col space-y-2">
                   <Button variant="ghost" asChild className="justify-start">
@@ -201,7 +201,7 @@ export function Header() {
                       Profile
                     </Link>
                   </Button>
-                  {session.user?.userType === 'provider' && (
+                  {user?.userType === 'provider' && (
                     <>
                       <Button variant="ghost" asChild className="justify-start">
                         <Link href="/chat" onClick={() => setIsMobileMenuOpen(false)}>

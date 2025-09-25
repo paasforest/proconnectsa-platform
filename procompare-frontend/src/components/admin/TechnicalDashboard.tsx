@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { useSession } from 'next-auth/react';
+import { useAuth } from '@/components/AuthProvider';
 import {
   Wrench, Bug, Code, Server, Database, AlertTriangle, 
   CheckCircle, Clock, BarChart3, RefreshCw, Search,
@@ -45,7 +45,7 @@ interface TechnicalStats {
 }
 
 const TechnicalDashboard = () => {
-  const { data: session } = useSession();
+  const { user, token } = useAuth();
   const [tickets, setTickets] = useState<TechnicalTicket[]>([]);
   const [stats, setStats] = useState<TechnicalStats | null>(null);
   const [loading, setLoading] = useState(true);
@@ -61,11 +61,11 @@ const TechnicalDashboard = () => {
   }, []);
 
   const fetchTechnicalData = async () => {
-    if (!session?.accessToken) return;
+    if (!token) return;
     
     try {
       setLoading(true);
-      apiClient.setToken(session.accessToken);
+      apiClient.setToken(token);
 
       const ticketsRes = await apiClient.get('/api/support/tickets/?category=technical');
       setTickets(ticketsRes.results || ticketsRes);

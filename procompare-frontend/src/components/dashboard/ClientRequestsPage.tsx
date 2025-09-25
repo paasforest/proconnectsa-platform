@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useSession } from 'next-auth/react'
+import { useAuth } from '@/components/AuthProvider';
 import { useRouter } from 'next/navigation'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -50,7 +50,7 @@ interface ClientLead {
 }
 
 export default function ClientRequestsPage() {
-  const { data: session } = useSession()
+  const { user, token } = useAuth()
   const router = useRouter()
   const [leads, setLeads] = useState<ClientLead[]>([])
   const [loading, setLoading] = useState(true)
@@ -58,8 +58,8 @@ export default function ClientRequestsPage() {
 
   const fetchLeads = async () => {
     try {
-      if (session?.accessToken) {
-        apiClient.setToken(session.accessToken)
+      if (token) {
+        apiClient.setToken(token)
       }
       
       const response = await apiClient.get('/api/client/leads/')
@@ -79,8 +79,8 @@ export default function ClientRequestsPage() {
 
   const handleResubmit = async (leadId: string) => {
     try {
-      if (session?.accessToken) {
-        apiClient.setToken(session.accessToken)
+      if (token) {
+        apiClient.setToken(token)
       }
       
       await apiClient.post(`/api/client/leads/${leadId}/resubmit/`)
@@ -97,10 +97,10 @@ export default function ClientRequestsPage() {
   }
 
   useEffect(() => {
-    if (session?.accessToken) {
+    if (token) {
       fetchLeads()
     }
-  }, [session?.accessToken])
+  }, [token])
 
   const getStatusColor = (status: string) => {
     switch (status) {

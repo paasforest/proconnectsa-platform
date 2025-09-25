@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import Link from "next/link"
-import { useSession, signOut } from "next-auth/react"
+import { useAuth } from "next-auth/react"
 import { Button } from "@/components/ui/button"
 import { 
   DropdownMenu, 
@@ -14,7 +14,7 @@ import {
 import { Menu, X, User, LogOut, Settings, Bell } from "lucide-react"
 
 export function ClientHeader() {
-  const { data: session, status } = useSession()
+  const { user, token } = useAuth()
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
 
   const handleSignOut = () => {
@@ -56,7 +56,7 @@ export function ClientHeader() {
 
         {/* Desktop Auth */}
         <div className="hidden md:flex items-center space-x-4">
-          {status === "loading" ? (
+          {false ? (
             <div className="h-9 w-20 bg-muted animate-pulse rounded-md" />
           ) : session ? (
             <div className="flex items-center space-x-4">
@@ -73,7 +73,7 @@ export function ClientHeader() {
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" className="flex items-center space-x-2">
                     <User className="h-4 w-4" />
-                    <span>{session.user?.name}</span>
+                    <span>{user?.name}</span>
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-56">
@@ -152,7 +152,7 @@ export function ClientHeader() {
               <div className="pt-4 border-t space-y-2">
                 <div className="flex items-center space-x-2 text-sm">
                   <User className="h-4 w-4" />
-                  <span>{session.user?.name}</span>
+                  <span>{user?.name}</span>
                 </div>
                 <div className="flex flex-col space-y-2">
                   <Button variant="ghost" asChild className="justify-start">

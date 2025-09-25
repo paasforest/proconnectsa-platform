@@ -18,7 +18,7 @@ import {
   Zap
 } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { useSession } from 'next-auth/react';
+import { useAuth } from '@/components/AuthProvider';
 
 interface ProviderStats {
   business_name: string;
@@ -49,7 +49,7 @@ export default function PersonalizedHeader({
   onSettings, 
   onProfile 
 }: PersonalizedHeaderProps) {
-  const { data: session } = useSession();
+  const { user, token } = useAuth();
   const [stats, setStats] = useState<ProviderStats | null>(null);
   const [loading, setLoading] = useState(true);
 

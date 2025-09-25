@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { useSession } from 'next-auth/react';
+import { useAuth } from '@/components/AuthProvider';
 import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -91,7 +91,7 @@ const CAPE_TOWN_AREAS = [
 ];
 
 export default function ProfilePage() {
-  const { data: session, status } = useSession();
+  const { user, token } = useAuth();
   const router = useRouter();
   const [profile, setProfile] = useState<ProviderProfile | null>(null);
   const [loading, setLoading] = useState(true);
@@ -105,15 +105,15 @@ export default function ProfilePage() {
 
   // Redirect if not authenticated
   useEffect(() => {
-    if (status === 'loading') return;
-    if (!session || session.user?.userType !== 'provider') {
+    if (false) return;
+    if (!session || user?.userType !== 'provider') {
       router.push('/login');
     }
   }, [session, status, router]);
 
   // Fetch profile data
   useEffect(() => {
-    if (session?.accessToken) {
+    if (token) {
       fetchProfile();
     }
   }, [session]);
@@ -122,7 +122,7 @@ export default function ProfilePage() {
     try {
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://api.proconnectsa.co.za'}/api/auth/profile/`, {
         headers: {
-          'Authorization': `Token ${session?.accessToken}`,
+          'Authorization': `Token ${token}`,
           'Content-Type': 'application/json'
         }
       });
@@ -148,7 +148,7 @@ export default function ProfilePage() {
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://api.proconnectsa.co.za'}/api/auth/profile/`, {
         method: 'PATCH',
         headers: {
-          'Authorization': `Token ${session?.accessToken}`,
+          'Authorization': `Token ${token}`,
           'Content-Type': 'application/json'
         },
         body: JSON.stringify(profile)
@@ -182,7 +182,7 @@ export default function ProfilePage() {
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://api.proconnectsa.co.za'}/api/auth/change-password/`, {
         method: 'POST',
         headers: {
-          'Authorization': `Token ${session?.accessToken}`,
+          'Authorization': `Token ${token}`,
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({

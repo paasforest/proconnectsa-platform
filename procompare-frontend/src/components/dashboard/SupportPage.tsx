@@ -7,7 +7,7 @@ import {
   Phone, Mail, Calendar, User, Tag
 } from 'lucide-react';
 import { apiClient } from '@/lib/api-simple';
-import { useSession } from 'next-auth/react';
+import { useAuth } from '@/components/AuthProvider';
 
 interface SupportTicket {
   id: string;
@@ -27,7 +27,7 @@ interface SupportTicket {
 }
 
 const SupportPage = () => {
-  const { data: session } = useSession();
+  const { user, token } = useAuth();
   const [tickets, setTickets] = useState<SupportTicket[]>([]);
   const [loading, setLoading] = useState(true);
   const [showNewTicketModal, setShowNewTicketModal] = useState(false);
@@ -63,11 +63,11 @@ const SupportPage = () => {
 
   useEffect(() => {
     const fetchTickets = async () => {
-      if (!session?.accessToken) return;
+      if (!token) return;
       
       try {
         setLoading(true);
-        apiClient.setToken(session.accessToken);
+        apiClient.setToken(token);
         const response = await apiClient.get('/api/support/tickets/');
         setTickets(response.results || []);
       } catch (error) {
@@ -77,16 +77,16 @@ const SupportPage = () => {
       }
     };
 
-    if (session?.user) {
+    if (user) {
       fetchTickets();
     }
   }, [session]);
 
   const handleCreateTicket = async () => {
-    if (!session?.accessToken) return;
+    if (!token) return;
     
     try {
-      apiClient.setToken(session.accessToken);
+      apiClient.setToken(token);
       const response = await apiClient.post('/api/support/tickets/', newTicket);
       
       setTickets([response, ...tickets]);
@@ -112,8 +112,8 @@ const SupportPage = () => {
     if (!newResponse.trim()) return;
 
     try {
-      if (session?.accessToken) {
-        apiClient.setToken(session.accessToken);
+      if (token) {
+        apiClient.setToken(token);
       }
       const response = await apiClient.post(`/api/support/tickets/${ticketId}/responses/`, {
         message: newResponse

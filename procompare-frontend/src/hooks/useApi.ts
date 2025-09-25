@@ -1,24 +1,24 @@
-import { useSession } from 'next-auth/react'
+import { useAuth } from '@/components/AuthProvider';
 import { apiCall, ApiResponse } from '@/lib/api'
 
 export function useApi() {
-  const { data: session } = useSession()
+  const { user, token } = useAuth()
 
   const makeApiCall = async <T = any>(
     endpoint: string,
     options: RequestInit = {}
   ): Promise<T> => {
-    if (!session?.accessToken) {
+    if (!token) {
       throw new Error('No authentication token available')
     }
 
-    return apiCall<T>(endpoint, session.accessToken, options)
+    return apiCall<T>(endpoint, token, options)
   }
 
   return {
     makeApiCall,
-    isAuthenticated: !!session?.accessToken,
-    user: session?.user,
+    isAuthenticated: !!token,
+    user: user,
   }
 }
 

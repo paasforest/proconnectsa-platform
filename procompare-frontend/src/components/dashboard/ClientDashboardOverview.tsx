@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useSession } from 'next-auth/react'
+import { useAuth } from '@/components/AuthProvider';
 import { useRouter } from 'next/navigation'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -39,20 +39,20 @@ interface ClientUser {
 }
 
 export default function ClientDashboardOverview() {
-  const { data: session } = useSession()
+  const { user, token } = useAuth()
   const router = useRouter()
   const [stats, setStats] = useState<ClientStats | null>(null)
   const [user, setUser] = useState<ClientUser | null>(null)
   const [loading, setLoading] = useState(true)
   
-  const authUser = session?.user
+  const authUser = user
 
   useEffect(() => {
     const fetchDashboardData = async () => {
-      if (!session?.accessToken || !authUser) return;
+      if (!token || !authUser) return;
       
       try {
-        apiClient.setToken(session.accessToken)
+        apiClient.setToken(token)
         const response = await apiClient.get('/api/client/dashboard/')
         setStats(response.stats)
         setUser(response.user)
@@ -68,7 +68,7 @@ export default function ClientDashboardOverview() {
     if (authUser && authUser.email && authUser.userType) {
       fetchDashboardData()
     }
-  }, [authUser, session?.accessToken])
+  }, [authUser, token])
 
   if (loading) {
     return (

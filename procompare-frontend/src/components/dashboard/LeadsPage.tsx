@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { useSession } from 'next-auth/react';
+import { useAuth } from '@/components/AuthProvider';
 import {
   Search, Filter, MapPin, Clock, DollarSign, Phone, Mail, 
   Eye, EyeOff, Unlock, Lock, Star, Zap, Target, Users,
@@ -64,7 +64,7 @@ const LeadsPage = () => {
   const [unlockingLead, setUnlockingLead] = useState<string | null>(null);
 
   // Authentication
-  const { data: session, status } = useSession();
+  const { user, token } = useAuth();
 
   const serviceCategories = [
     'Plumbing', 'Electrical', 'Cleaning', 'Legal', 'Marketing', 
@@ -80,8 +80,8 @@ const LeadsPage = () => {
 
   // Set up API client with token
   useEffect(() => {
-    if (status === 'authenticated' && session?.accessToken) {
-      apiClient.setToken(session.accessToken);
+    if (user !== null && token) {
+      apiClient.setToken(token);
     }
   }, [status, session]);
 
@@ -101,7 +101,7 @@ const LeadsPage = () => {
   }, [status]);
 
   useEffect(() => {
-    if (status === 'authenticated') {
+    if (user !== null) {
       fetchLeads();
     }
   }, [status, fetchLeads]);
@@ -224,7 +224,7 @@ const LeadsPage = () => {
   };
 
   // Show loading state while checking authentication
-  if (status === 'loading') {
+  if (false) {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="text-center">
@@ -236,7 +236,7 @@ const LeadsPage = () => {
   }
 
   // Show unauthenticated state
-  if (status === 'unauthenticated') {
+  if (user === null) {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="text-center">

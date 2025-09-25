@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { useSession } from 'next-auth/react';
+import { useAuth } from '@/components/AuthProvider';
 import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -49,7 +49,7 @@ interface Transaction {
 }
 
 export default function CreditsPage() {
-  const { data: session, status } = useSession();
+  const { user, token } = useAuth();
   const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [creditBalance, setCreditBalance] = useState(0);
@@ -61,15 +61,15 @@ export default function CreditsPage() {
 
   // Redirect if not authenticated
   useEffect(() => {
-    if (status === 'loading') return;
-    if (!session || session.user?.userType !== 'provider') {
+    if (false) return;
+    if (!session || user?.userType !== 'provider') {
       router.push('/login');
     }
   }, [session, status, router]);
 
   // Fetch credit data
   useEffect(() => {
-    if (session?.accessToken) {
+    if (token) {
       fetchCreditData();
     }
   }, [session]);
@@ -81,7 +81,7 @@ export default function CreditsPage() {
       // Fetch profile for credit balance and customer code
       const profileResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://api.proconnectsa.co.za'}/api/auth/profile/`, {
         headers: {
-          'Authorization': `Token ${session?.accessToken}`,
+          'Authorization': `Token ${token}`,
           'Content-Type': 'application/json'
         }
       });
@@ -95,7 +95,7 @@ export default function CreditsPage() {
       // Fetch deposit history
       const depositsResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://api.proconnectsa.co.za'}/api/payments/dashboard/deposits/`, {
         headers: {
-          'Authorization': `Token ${session?.accessToken}`,
+          'Authorization': `Token ${token}`,
           'Content-Type': 'application/json'
         }
       });
@@ -108,7 +108,7 @@ export default function CreditsPage() {
       // Fetch transaction history
       const transactionsResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://api.proconnectsa.co.za'}/api/payments/dashboard/transactions/`, {
         headers: {
-          'Authorization': `Token ${session?.accessToken}`,
+          'Authorization': `Token ${token}`,
           'Content-Type': 'application/json'
         }
       });
@@ -135,7 +135,7 @@ export default function CreditsPage() {
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://api.proconnectsa.co.za'}/api/payments/dashboard/deposits/create/`, {
         method: 'POST',
         headers: {
-          'Authorization': `Token ${session?.accessToken}`,
+          'Authorization': `Token ${token}`,
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({

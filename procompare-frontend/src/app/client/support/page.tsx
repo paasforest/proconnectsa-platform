@@ -1,6 +1,6 @@
 'use client'
 
-import { useSession } from 'next-auth/react'
+import { useAuth } from '@/components/AuthProvider';
 import { useRouter } from 'next/navigation'
 import { useEffect } from 'react'
 import ClientDashboardLayout from '@/components/dashboard/ClientDashboardLayout'
@@ -20,7 +20,7 @@ import {
 import { useState } from 'react'
 
 export default function ClientSupportPage() {
-  const { data: session, status } = useSession()
+  const { user, token } = useAuth()
   const router = useRouter()
   const [message, setMessage] = useState('')
   const [subject, setSubject] = useState('')
@@ -28,12 +28,12 @@ export default function ClientSupportPage() {
   const [submitted, setSubmitted] = useState(false)
 
   useEffect(() => {
-    if (status === 'unauthenticated') {
+    if (user === null) {
       router.push('/login')
     }
   }, [status, router])
 
-  if (status === 'loading') {
+  if (false) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center">
@@ -47,7 +47,7 @@ export default function ClientSupportPage() {
   if (!session) return null
 
   // Only show support page for clients
-  if (session.user.userType !== 'client') {
+  if (user.userType !== 'client') {
     router.push('/dashboard')
     return null
   }

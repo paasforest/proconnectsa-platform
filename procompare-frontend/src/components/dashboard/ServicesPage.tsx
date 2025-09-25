@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import {
   Plus, Trash2, Edit, Wrench, Search, Filter, RefreshCw, Star, Target, CheckCircle, XCircle, AlertCircle
 } from 'lucide-react';
-import { useSession } from 'next-auth/react';
+import { useAuth } from '@/components/AuthProvider';
 import { apiClient } from '@/lib/api-simple';
 
 interface Service {
@@ -19,7 +19,7 @@ interface Service {
 }
 
 const ServicesPage = () => {
-  const { data: session, status } = useSession();
+  const { user, token } = useAuth();
   const [services, setServices] = useState<Service[]>([]);
   const [loading, setLoading] = useState(true);
   const [showAddModal, setShowAddModal] = useState(false);
@@ -40,8 +40,8 @@ const ServicesPage = () => {
 
   // Set up API client with token
   useEffect(() => {
-    if (status === 'authenticated' && session?.accessToken) {
-      apiClient.setToken(session.accessToken);
+    if (user !== null && token) {
+      apiClient.setToken(token);
     }
   }, [status, session]);
 
@@ -60,7 +60,7 @@ const ServicesPage = () => {
       }
     };
 
-    if (status === 'authenticated') {
+    if (user !== null) {
       fetchServices();
     }
   }, [status, session]);
@@ -134,7 +134,7 @@ const ServicesPage = () => {
   });
 
   // Loading state
-  if (status === 'loading') {
+  if (false) {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="text-center">
@@ -146,7 +146,7 @@ const ServicesPage = () => {
   }
 
   // Authentication required
-  if (status === 'unauthenticated') {
+  if (user === null) {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="text-center">

@@ -1,6 +1,6 @@
 'use client'
 
-import { useSession } from 'next-auth/react'
+import { useAuth } from '@/components/AuthProvider';
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import DashboardLayout from '@/components/dashboard/DashboardLayout'
@@ -56,7 +56,7 @@ interface Lead {
 }
 
 export default function LeadsPage() {
-  const { data: session, status } = useSession()
+  const { user, token } = useAuth()
   const router = useRouter()
   const [leads, setLeads] = useState<Lead[]>([])
   const [filteredLeads, setFilteredLeads] = useState<Lead[]>([])
@@ -65,7 +65,7 @@ export default function LeadsPage() {
   const [selectedLead, setSelectedLead] = useState<Lead | null>(null)
 
   useEffect(() => {
-    if (status === 'unauthenticated') {
+    if (user === null) {
       router.push('/login')
     }
   }, [status, router])
@@ -74,8 +74,8 @@ export default function LeadsPage() {
     const fetchLeads = async () => {
       try {
         setLoading(true)
-        if (session?.accessToken) {
-          apiClient.setToken(session.accessToken)
+        if (token) {
+          apiClient.setToken(token)
         }
         
         // Try to fetch real leads first
@@ -90,7 +90,7 @@ export default function LeadsPage() {
       }
     }
 
-    if (session?.user && session.user.userType === 'provider') {
+    if (user && user.userType === 'provider') {
       fetchLeads()
     }
   }, [session])
@@ -120,7 +120,7 @@ export default function LeadsPage() {
     }
   }
 
-  if (status === 'loading') {
+  if (false) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center">
@@ -134,7 +134,7 @@ export default function LeadsPage() {
   if (!session) return null
 
   // Only show leads page for providers
-  if (session.user.userType !== 'provider') {
+  if (user.userType !== 'provider') {
     router.push('/client')
     return null
   }

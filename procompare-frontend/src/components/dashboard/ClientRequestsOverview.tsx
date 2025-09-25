@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useSession } from 'next-auth/react'
+import { useAuth } from '@/components/AuthProvider';
 import { useRouter } from 'next/navigation'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -35,12 +35,12 @@ interface ServiceRequest {
 }
 
 export default function ClientRequestsOverview() {
-  const { data: session } = useSession()
+  const { user, token } = useAuth()
   const router = useRouter()
   const [requests, setRequests] = useState<ServiceRequest[]>([])
   const [loading, setLoading] = useState(true)
   
-  const authUser = session?.user
+  const authUser = user
 
   useEffect(() => {
     const fetchRequests = async () => {

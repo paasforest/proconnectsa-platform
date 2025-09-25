@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { useSession } from 'next-auth/react'
+import { useAuth } from '@/components/AuthProvider';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -114,7 +114,7 @@ const subscriptionTiers: SubscriptionTier[] = [
 ]
 
 export default function InstantUpgrade({ currentTier, onUpgrade, loading = false }: InstantUpgradeProps) {
-  const { data: session } = useSession()
+  const { user, token } = useAuth()
   const [selectedTier, setSelectedTier] = useState<string | null>(null)
   const [upgrading, setUpgrading] = useState(false)
 

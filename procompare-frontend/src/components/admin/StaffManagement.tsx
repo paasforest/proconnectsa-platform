@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { useSession } from 'next-auth/react';
+import { useAuth } from '@/components/AuthProvider';
 import {
   Users, UserPlus, Edit, Trash2, Shield, Phone, Mail, 
   Calendar, Tag, CheckCircle, XCircle, Settings, BarChart3, X
@@ -55,7 +55,7 @@ interface NewStaffData {
 }
 
 const StaffManagement = () => {
-  const { data: session } = useSession();
+  const { user, token } = useAuth();
   const [staff, setStaff] = useState<SupportStaff[]>([]);
   const [loading, setLoading] = useState(true);
   const [showAddModal, setShowAddModal] = useState(false);
@@ -89,16 +89,16 @@ const StaffManagement = () => {
   const [errorMessage, setErrorMessage] = useState('');
 
   useEffect(() => {
-    if (session?.accessToken) {
+    if (token) {
       fetchStaff();
     }
-  }, [session?.accessToken]);
+  }, [token]);
 
   const fetchStaff = async () => {
     try {
       setLoading(true);
-      if (session?.accessToken) {
-        apiClient.setToken(session.accessToken);
+      if (token) {
+        apiClient.setToken(token);
       } else {
         return;
       }
@@ -114,8 +114,8 @@ const StaffManagement = () => {
   const handleAddStaff = async () => {
     try {
       // Ensure token is set
-      if (session?.accessToken) {
-        apiClient.setToken(session.accessToken);
+      if (token) {
+        apiClient.setToken(token);
       } else {
         setErrorMessage('Authentication required. Please refresh the page.');
         return;

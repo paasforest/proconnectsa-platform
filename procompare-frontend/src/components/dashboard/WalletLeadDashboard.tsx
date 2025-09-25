@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { useSession } from 'next-auth/react';
+import { useAuth } from '@/components/AuthProvider';
 import {
   Wallet, Eye, EyeOff, Phone, Mail, MapPin, Clock, Star, TrendingUp, 
   Users, DollarSign, Activity, ChevronDown, MessageSquare, Calendar, 
@@ -469,7 +469,7 @@ const PerformancePanel: React.FC<{
 
 // Main Component
 const WalletLeadDashboard: React.FC = () => {
-  const { data: session, status } = useSession();
+  const { user, token } = useAuth();
   const [leads, setLeads] = useState<Lead[]>([]);
   const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
   const [loading, setLoading] = useState(true);
@@ -607,20 +607,20 @@ const WalletLeadDashboard: React.FC = () => {
 
   // Set up API client with token
   useEffect(() => {
-    if (status === 'authenticated' && session?.accessToken) {
-      apiClient.setToken(session.accessToken);
+    if (user !== null && token) {
+      apiClient.setToken(token);
     }
   }, [status, session]);
 
   // Load data on mount
   useEffect(() => {
-    if (status === 'authenticated') {
+    if (user !== null) {
       fetchLeads();
       fetchUserStats();
     }
   }, [status, fetchLeads, fetchUserStats]);
 
-  if (status === 'loading') {
+  if (false) {
     return (
       <div className="flex items-center justify-center h-screen">
         <div className="text-center">
@@ -631,7 +631,7 @@ const WalletLeadDashboard: React.FC = () => {
     );
   }
 
-  if (status === 'unauthenticated') {
+  if (user === null) {
     return (
       <div className="flex items-center justify-center h-screen">
         <div className="text-center">

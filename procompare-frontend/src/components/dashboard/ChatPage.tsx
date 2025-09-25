@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { MessageSquare, Phone, Video, Send, Paperclip, Smile } from 'lucide-react';
-import { useSession } from 'next-auth/react';
+import { useAuth } from '@/components/AuthProvider';
 
 interface Message {
   id: string;
@@ -13,7 +13,7 @@ interface Message {
 }
 
 const ChatPage = () => {
-  const { data: session } = useSession();
+  const { user, token } = useAuth();
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState('');
   const [isConnected, setIsConnected] = useState(false);

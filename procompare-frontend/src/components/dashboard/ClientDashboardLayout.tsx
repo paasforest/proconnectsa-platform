@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useSession, signOut } from 'next-auth/react'
+import { useAuth } from 'next-auth/react'
 import { useRouter, usePathname } from 'next/navigation'
 import Link from 'next/link'
 import { 
@@ -33,13 +33,13 @@ interface ClientDashboardLayoutProps {
 }
 
 export default function ClientDashboardLayout({ children }: ClientDashboardLayoutProps) {
-  const { data: session } = useSession()
+  const { user, token } = useAuth()
   const router = useRouter()
   const pathname = usePathname()
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [notifications, setNotifications] = useState(0)
   
-  const user = session?.user
+  const user = user
 
   // Client-specific navigation items
   const navigationItems = [

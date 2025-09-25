@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { signIn, signOut, useSession } from 'next-auth/react';
+import { useAuth } from '@/components/AuthProvider';
 import { useRouter } from 'next/navigation';
 
 export default function AdminLoginForm() {
@@ -10,7 +10,7 @@ export default function AdminLoginForm() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const router = useRouter();
-  const { data: session } = useSession();
+  const { user, token } = useAuth();
 
   // Clear any existing sessions when component mounts
   useEffect(() => {
@@ -42,8 +42,8 @@ export default function AdminLoginForm() {
         const response = await fetch('/api/auth/session');
         const session = await response.json();
         
-        if (session?.user?.userType === 'admin' && 
-            session?.user?.email === 'admin@example.com') {
+        if (user?.userType === 'admin' && 
+            user?.email === 'admin@example.com') {
           router.push('/admin/dashboard');
           router.refresh();
         } else {

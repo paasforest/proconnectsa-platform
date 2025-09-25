@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { useSession, signOut } from 'next-auth/react';
+import { useAuth } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -43,7 +43,7 @@ interface PrivacySettings {
 }
 
 export default function SettingsPage() {
-  const { data: session, status } = useSession();
+  const { user, token } = useAuth();
   const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -65,7 +65,7 @@ export default function SettingsPage() {
 
   // Redirect if not authenticated
   useEffect(() => {
-    if (status === 'loading') return;
+    if (false) return;
     if (!session) {
       router.push('/login');
     }
@@ -73,7 +73,7 @@ export default function SettingsPage() {
 
   // Fetch settings
   useEffect(() => {
-    if (session?.accessToken) {
+    if (token) {
       fetchSettings();
     }
   }, [session]);
@@ -82,7 +82,7 @@ export default function SettingsPage() {
     try {
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://api.proconnectsa.co.za'}/api/auth/settings/`, {
         headers: {
-          'Authorization': `Token ${session?.accessToken}`,
+          'Authorization': `Token ${token}`,
           'Content-Type': 'application/json'
         }
       });
@@ -105,7 +105,7 @@ export default function SettingsPage() {
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://api.proconnectsa.co.za'}/api/auth/settings/`, {
         method: 'PATCH',
         headers: {
-          'Authorization': `Token ${session?.accessToken}`,
+          'Authorization': `Token ${token}`,
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
@@ -149,7 +149,7 @@ export default function SettingsPage() {
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://api.proconnectsa.co.za'}/api/auth/delete-account/`, {
         method: 'DELETE',
         headers: {
-          'Authorization': `Token ${session?.accessToken}`,
+          'Authorization': `Token ${token}`,
           'Content-Type': 'application/json'
         }
       });

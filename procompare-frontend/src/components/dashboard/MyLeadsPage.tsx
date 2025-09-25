@@ -7,7 +7,7 @@ import {
   Filter, Search, SortAsc, SortDesc, RefreshCw, ExternalLink
 } from 'lucide-react';
 import { apiClient } from '@/lib/api-simple';
-import { useSession } from 'next-auth/react';
+import { useAuth } from '@/components/AuthProvider';
 
 interface MyLead {
   id: string;
@@ -30,7 +30,7 @@ interface MyLead {
 }
 
 const MyLeadsPage = () => {
-  const { data: session } = useSession();
+  const { user, token } = useAuth();
   const [leads, setLeads] = useState<MyLead[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -41,8 +41,8 @@ const MyLeadsPage = () => {
     const fetchMyLeads = async () => {
       try {
         setLoading(true);
-        if (session?.accessToken) {
-          apiClient.setToken(session.accessToken);
+        if (token) {
+          apiClient.setToken(token);
         }
         // This would be a new API endpoint for purchased leads
         const response = await apiClient.get('/api/auth/my-leads/');
@@ -110,10 +110,10 @@ const MyLeadsPage = () => {
       }
     };
 
-    if (session?.accessToken) {
+    if (token) {
       fetchMyLeads();
     }
-  }, [session?.accessToken]);
+  }, [token]);
 
   const updateLeadStatus = async (leadId: string, newStatus: string) => {
     try {
