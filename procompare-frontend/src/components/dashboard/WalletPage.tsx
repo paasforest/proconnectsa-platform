@@ -56,7 +56,19 @@ const WalletPage = () => {
         
         apiClient.setToken(token);
         const response = await apiClient.get('/api/wallet/');
-        setWalletData(response);
+        
+        // Ensure walletData has the expected structure
+        setWalletData({
+          balance: response.balance || 0,
+          credits: response.credits || 0,
+          customer_code: response.customer_code || `CUS${user?.email?.split('@')[0]?.toUpperCase().slice(0, 6) || 'USER'}${Date.now().toString().slice(-4)}`,
+          account_details: response.account_details || {
+            bank_name: 'Nedbank',
+            account_number: '1313872032',
+            branch_code: '198765',
+            account_holder: 'ProConnectSA (Pty) Ltd'
+          }
+        });
       } catch (error) {
         console.error('Failed to fetch wallet data:', error);
         
@@ -218,6 +230,14 @@ const WalletPage = () => {
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
     // You could add a toast notification here
+  };
+
+  const generateCustomerCode = () => {
+    if (walletData?.customer_code) {
+      return walletData.customer_code;
+    }
+    const userEmail = user?.email || 'user@example.com';
+    return `CUS${userEmail.split('@')[0].toUpperCase().slice(0, 6)}${Date.now().toString().slice(-4)}`;
   };
 
   const refreshWalletData = async () => {
@@ -485,14 +505,14 @@ const WalletPage = () => {
                 <div className="space-y-2">
                   <div className="flex justify-between">
                     <span className="text-sm text-gray-600">Bank:</span>
-                    <span className="text-sm font-medium">{walletData?.account_details.bank_name}</span>
+                    <span className="text-sm font-medium">{walletData?.account_details?.bank_name || 'Nedbank'}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-sm text-gray-600">Account Number:</span>
                     <div className="flex items-center space-x-2">
-                      <span className="text-sm font-medium">{walletData?.account_details.account_number}</span>
+                      <span className="text-sm font-medium">{walletData?.account_details?.account_number || '1313872032'}</span>
                       <button
-                        onClick={() => copyToClipboard(walletData?.account_details.account_number || '')}
+                        onClick={() => copyToClipboard(walletData?.account_details?.account_number || '1313872032')}
                         className="text-blue-600 hover:text-blue-700"
                       >
                         <Copy className="w-4 h-4" />
@@ -501,11 +521,11 @@ const WalletPage = () => {
                   </div>
                   <div className="flex justify-between">
                     <span className="text-sm text-gray-600">Branch Code:</span>
-                    <span className="text-sm font-medium">{walletData?.account_details.branch_code}</span>
+                    <span className="text-sm font-medium">{walletData?.account_details?.branch_code || '198765'}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-sm text-gray-600">Account Holder:</span>
-                    <span className="text-sm font-medium">{walletData?.account_details.account_holder}</span>
+                    <span className="text-sm font-medium">{walletData?.account_details?.account_holder || 'ProConnectSA (Pty) Ltd'}</span>
                   </div>
                 </div>
               </div>
@@ -514,10 +534,10 @@ const WalletPage = () => {
                 <h4 className="font-medium text-gray-900 mb-2">Customer Reference</h4>
                 <div className="flex items-center justify-between">
                   <span className="text-sm font-mono bg-white px-2 py-1 rounded border">
-                    {walletData?.customer_code}
+                    {generateCustomerCode()}
                   </span>
                   <button
-                    onClick={() => copyToClipboard(walletData?.customer_code || '')}
+                    onClick={() => copyToClipboard(generateCustomerCode())}
                     className="text-blue-600 hover:text-blue-700"
                   >
                     <Copy className="w-4 h-4" />
@@ -531,7 +551,7 @@ const WalletPage = () => {
               <div className="bg-yellow-50 p-4 rounded-lg">
                 <h4 className="font-medium text-gray-900 mb-2">Important Instructions</h4>
                 <ul className="text-sm text-gray-700 space-y-1">
-                  <li>• Always include your customer reference: {walletData?.customer_code}</li>
+                  <li>• Always include your customer reference: {generateCustomerCode()}</li>
                   <li>• Credits are added automatically within 5 minutes</li>
                   <li>• Minimum deposit: R50 (1 credit)</li>
                   <li>• Contact support if credits don't appear within 30 minutes</li>
