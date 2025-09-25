@@ -195,14 +195,38 @@ export default function LeadGenerationForm({ onComplete, onCancel, preselectedCa
     resolver: zodResolver(leadGenerationSchema),
     mode: 'onChange',
     defaultValues: {
-      // Only set essential defaults, no auto-filled data
-      sms_updates: true,
-      email_updates: true,
+      // Set controlled defaults to prevent uncontrolled to controlled warnings
+      service_category: '',
+      service_type: '',
+      property_type: '',
+      title: '',
+      description: '',
+      urgency: '',
+      preferred_start_date: '',
+      preferred_time: '',
+      address: '',
+      suburb: '',
+      city: '',
+      postal_code: '',
+      access_instructions: '',
+      budget_range: '',
+      specific_budget: undefined,
       materials_provided: false,
       permits_required: false,
       insurance_required: false,
+      special_requirements: '',
+      preferred_communication: '',
       photos_attached: false,
-      previous_quotes: false
+      previous_quotes: false,
+      hiring_intent: '',
+      hiring_timeline: '',
+      research_purpose: '',
+      contact_name: '',
+      contact_phone: '',
+      contact_email: '',
+      preferred_contact_time: '',
+      sms_updates: true,
+      email_updates: true
     }
   })
 
@@ -258,6 +282,14 @@ export default function LeadGenerationForm({ onComplete, onCancel, preselectedCa
       console.error('Validation error:', error)
       return false
     }
+  }
+
+  // Debug function to help troubleshoot step validation
+  const debugCurrentStep = () => {
+    const currentValues = watch()
+    console.log('Current step:', currentStep)
+    console.log('Current values:', currentValues)
+    console.log('Is valid:', isCurrentStepValid())
   }
 
   const nextStep = () => {
@@ -445,7 +477,7 @@ export default function LeadGenerationForm({ onComplete, onCancel, preselectedCa
         
         <div className="mb-6">
           <label className="block text-sm font-medium mb-3">Property Type</label>
-          <Select onValueChange={(value) => setValue('property_type', value)} value={watch('property_type')}>
+          <Select onValueChange={(value) => setValue('property_type', value)} value={watch('property_type') || ''}>
             <SelectTrigger className="h-12 border-2 rounded-lg hover:border-emerald-300 focus:border-emerald-500 transition-colors">
               <SelectValue placeholder="Select property type" />
             </SelectTrigger>
@@ -563,7 +595,7 @@ export default function LeadGenerationForm({ onComplete, onCancel, preselectedCa
         
         <div>
           <label className="block text-sm font-medium mb-2">Preferred Time</label>
-          <Select onValueChange={(value) => setValue('preferred_time', value)} value={watch('preferred_time')}>
+          <Select onValueChange={(value) => setValue('preferred_time', value)} value={watch('preferred_time') || ''}>
             <SelectTrigger className="h-12 border-2 rounded-lg hover:border-emerald-300 focus:border-emerald-500 transition-colors">
               <SelectValue placeholder="Select time preference" />
             </SelectTrigger>
@@ -753,7 +785,7 @@ export default function LeadGenerationForm({ onComplete, onCancel, preselectedCa
       
       <div className="mb-6">
         <label className="block text-sm font-medium mb-3">Preferred Communication Method</label>
-        <Select onValueChange={(value) => setValue('preferred_communication', value)} value={watch('preferred_communication')}>
+        <Select onValueChange={(value) => setValue('preferred_communication', value)} value={watch('preferred_communication') || ''}>
           <SelectTrigger className="h-12 border-2 rounded-lg hover:border-emerald-300 focus:border-emerald-500 transition-colors">
             <SelectValue placeholder="Select communication preference" />
           </SelectTrigger>
@@ -804,7 +836,7 @@ export default function LeadGenerationForm({ onComplete, onCancel, preselectedCa
       
       <div>
         <label className="block text-sm font-medium mb-3">Are you ready to hire someone for this project?</label>
-        <RadioGroup onValueChange={(value) => setValue('hiring_intent', value)} value={watch('hiring_intent')} className="space-y-3">
+        <RadioGroup onValueChange={(value) => setValue('hiring_intent', value)} value={watch('hiring_intent') || ''} className="space-y-3">
           <div className="flex items-center space-x-3 p-3 border rounded-lg hover:bg-gray-50">
             <RadioGroupItem value="ready_to_hire" id="ready_to_hire" />
             <label htmlFor="ready_to_hire" className="flex-1 cursor-pointer">
@@ -844,7 +876,7 @@ export default function LeadGenerationForm({ onComplete, onCancel, preselectedCa
       
       <div>
         <label className="block text-sm font-medium mb-3">When do you plan to start this project?</label>
-        <RadioGroup onValueChange={(value) => setValue('hiring_timeline', value)} value={watch('hiring_timeline')} className="space-y-3">
+        <RadioGroup onValueChange={(value) => setValue('hiring_timeline', value)} value={watch('hiring_timeline') || ''} className="space-y-3">
           <div className="flex items-center space-x-3 p-3 border rounded-lg hover:bg-gray-50">
             <RadioGroupItem value="asap" id="asap" />
             <label htmlFor="asap" className="flex-1 cursor-pointer">
@@ -964,7 +996,7 @@ export default function LeadGenerationForm({ onComplete, onCancel, preselectedCa
             (required)
           </span>
         </label>
-        <Select onValueChange={(value) => setValue('preferred_contact_time', value)} value={watch('preferred_contact_time')}>
+        <Select onValueChange={(value) => setValue('preferred_contact_time', value)} value={watch('preferred_contact_time') || ''}>
           <SelectTrigger className="h-12 border-2 rounded-lg hover:border-emerald-300 focus:border-emerald-500 transition-colors">
             <SelectValue placeholder="Select preferred contact time" />
           </SelectTrigger>
@@ -1145,6 +1177,7 @@ export default function LeadGenerationForm({ onComplete, onCancel, preselectedCa
                     type="submit"
                     disabled={!isCurrentStepValid() || isSubmitting}
                     className="bg-green-600 hover:bg-green-700 disabled:bg-gray-300 disabled:cursor-not-allowed"
+                    onClick={debugCurrentStep}
                   >
                     {isSubmitting ? 'Submitting...' : 'Submit Request'}
                     <CheckCircle className="h-4 w-4 ml-2" />
