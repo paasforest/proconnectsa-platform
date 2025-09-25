@@ -64,20 +64,26 @@ export function withAuth<P extends object>(
       if (!isLoading) {
         if (!user) {
           // Not logged in, redirect to login
+          console.log('🔍 DEBUG - No user found, redirecting to login');
           router.push('/login');
           return;
         }
+
+        console.log('🔍 DEBUG - User found in withAuth:', user);
+        console.log('🔍 DEBUG - Allowed user types:', allowedUserTypes);
+        console.log('🔍 DEBUG - User type:', user.user_type);
 
         if (allowedUserTypes && !allowedUserTypes.includes(user.user_type)) {
           // Wrong user type, redirect to appropriate dashboard
           const correctDashboard = user.user_type === 'admin' ? '/admin/dashboard'
             : user.user_type === 'client' ? '/client'
             : '/provider-dashboard';
+          console.log('🔍 DEBUG - Wrong user type, redirecting to:', correctDashboard);
           router.push(correctDashboard);
           return;
         }
       }
-    }, [user, isLoading, router]);
+    }, [user, isLoading, router, allowedUserTypes]);
 
     if (isLoading) {
       return (

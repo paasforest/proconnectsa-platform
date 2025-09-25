@@ -71,9 +71,9 @@ export default function LoginPage() {
         console.log('🔍 DEBUG - Redirecting to:', dashboardPath);
         console.log('🔍 DEBUG - Expected redirect for service_provider:', redirectToDashboard('service_provider'));
         
-        // Add a small delay to ensure localStorage is set
+        // Use window.location.href for more reliable redirect
         setTimeout(() => {
-          router.push(dashboardPath);
+          window.location.href = dashboardPath;
         }, 100);
       } else {
         setError(data.message || 'Invalid email or password');
