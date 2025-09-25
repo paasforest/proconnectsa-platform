@@ -7,7 +7,7 @@ import {
   RefreshCw, AlertCircle, TrendingUp, DollarSign, Calendar
 } from 'lucide-react';
 import { apiClient } from '@/lib/api-simple';
-import { useSession } from 'next-auth/react';
+import { useAuth } from '@/components/AuthProvider';
 
 interface Transaction {
   id: string;
@@ -34,7 +34,7 @@ interface WalletData {
 }
 
 const WalletPage = () => {
-  const { data: session } = useSession();
+  const { user, token } = useAuth();
   const [walletData, setWalletData] = useState<WalletData | null>(null);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(true);
@@ -48,20 +48,20 @@ const WalletPage = () => {
         setLoading(true);
         
         // Check if user is authenticated
-        if (!session?.accessToken) {
+        if (!token) {
           console.warn('No access token found, user may not be authenticated');
           setLoading(false);
           return;
         }
         
-        apiClient.setToken(session.accessToken);
+        apiClient.setToken(token);
         const response = await apiClient.get('/api/wallet/');
         setWalletData(response);
       } catch (error) {
         console.error('Failed to fetch wallet data:', error);
         
         // Generate unique customer code based on user email
-        const userEmail = session?.user?.email || 'user@example.com';
+        const userEmail = user?.email || 'user@example.com';
         const customerCode = `CUS${userEmail.split('@')[0].toUpperCase().slice(0, 6)}${Date.now().toString().slice(-4)}`;
         
         setWalletData({
@@ -82,8 +82,8 @@ const WalletPage = () => {
 
     const fetchTransactions = async () => {
       try {
-        if (session?.accessToken) {
-          apiClient.setToken(session.accessToken);
+        if (token) {
+          apiClient.setToken(token);
         }
         const response = await apiClient.get('/api/wallet/transactions/');
         setTransactions(response.transactions || []);
@@ -136,18 +136,18 @@ const WalletPage = () => {
     };
 
     // Only fetch data if user is authenticated
-    if (session?.accessToken) {
+    if (token) {
       fetchWalletData();
       fetchTransactions();
     } else {
       setLoading(false);
     }
-  }, [session?.accessToken]);
+  }, [token]);
 
   const handleTopUp = async () => {
     try {
-      if (session?.accessToken) {
-        apiClient.setToken(session.accessToken);
+      if (token) {
+        apiClient.setToken(token);
       }
       const response = await apiClient.post('/api/wallet/top-up/', {
         amount: topUpAmount
@@ -222,8 +222,8 @@ const WalletPage = () => {
 
   const refreshWalletData = async () => {
     try {
-      if (session?.accessToken) {
-        apiClient.setToken(session.accessToken);
+      if (token) {
+        apiClient.setToken(token);
       }
       const [walletResponse, transactionsResponse] = await Promise.all([
         apiClient.get('/api/wallet/'),
