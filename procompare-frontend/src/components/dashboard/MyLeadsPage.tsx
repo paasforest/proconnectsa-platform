@@ -39,18 +39,23 @@ const MyLeadsPage = () => {
 
   useEffect(() => {
     const fetchMyLeads = async () => {
+      if (!user || !token) {
+        setLoading(false);
+        return;
+      }
+      
       try {
         setLoading(true);
-        if (token) {
-          apiClient.setToken(token);
-        }
-        // This would be a new API endpoint for purchased leads
-        const response = await apiClient.get('/api/auth/my-leads/');
-        setLeads(response.leads || []);
-      } catch (error) {
-        console.error('Failed to fetch my leads:', error);
-        // For now, show mock data
-        setLeads([
+        apiClient.setToken(token);
+        
+        // Try to fetch from API, fallback to mock data
+        try {
+          const response = await apiClient.get('/api/leads/wallet/available/');
+          setLeads(response.leads || []);
+        } catch (apiError) {
+          console.log('API not available, using mock data');
+          // For now, show mock data since API endpoint might not exist
+          setLeads([
           {
             id: '1',
             name: 'John Smith',
@@ -105,15 +110,19 @@ const MyLeadsPage = () => {
             last_contact: '2024-01-15T08:00:00Z'
           }
         ]);
+        }
+      } catch (error) {
+        console.error('Failed to fetch my leads:', error);
+        setLeads([]);
       } finally {
         setLoading(false);
       }
     };
 
-    if (token) {
+    if (user && token) {
       fetchMyLeads();
     }
-  }, [token]);
+  }, [user, token]);
 
   const updateLeadStatus = async (leadId: string, newStatus: string) => {
     try {

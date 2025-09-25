@@ -87,24 +87,25 @@ const LeadsPage = () => {
 
   // Fetch leads
   const fetchLeads = useCallback(async () => {
-    if (status !== 'authenticated') return;
+    if (!user || !token) return;
     
     try {
       setLoading(true);
       const response = await apiClient.get('/api/leads/wallet/available/');
       setLeads(response.leads || []);
     } catch (error) {
+      console.error('Error fetching leads:', error);
       setLeads([]);
     } finally {
       setLoading(false);
     }
-  }, [status]);
+  }, [user, token]);
 
   useEffect(() => {
-    if (user !== null) {
+    if (user && token) {
       fetchLeads();
     }
-  }, [status, fetchLeads]);
+  }, [user, token, fetchLeads]);
 
   // Unlock lead
   const handleUnlockLead = async (leadId: string) => {
