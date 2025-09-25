@@ -57,7 +57,7 @@ export default function RegisterPage() {
         password: formData.password,
         first_name: formData.first_name,
         last_name: formData.last_name,
-        user_type: formData.user_type,
+        user_type: formData.user_type as 'client' | 'service_provider',
         phone: formData.phone,
         city: formData.city,
         province: formData.province
