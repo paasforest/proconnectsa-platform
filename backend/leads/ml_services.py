@@ -555,39 +555,46 @@ class DynamicPricingMLService:
             return self._calculate_simple_price(lead, provider)
     
     def _calculate_simple_price(self, lead, provider):
-        """Fast fallback pricing calculation - REALISTIC SOUTH AFRICAN PRICING"""
-        # Much more affordable base pricing for SA market
-        base_price = 5  # R5 base - very affordable
+        """Fast fallback pricing calculation - REALISTIC CREDIT PRICING"""
+        # Base pricing in Rands (R50 = 1 credit)
+        base_price = 50  # R50 base = 1 credit
         
         multiplier = 1.0
         
-        # Reasonable urgency multipliers
+        # Urgency multipliers (based on lead urgency field)
         if lead.urgency == 'urgent':
-            multiplier = 2.0  # R10 max
-        elif lead.urgency == 'high':
-            multiplier = 1.5  # R7.50
-        elif lead.urgency == 'medium':
-            multiplier = 1.0  # R5
-        else:
-            multiplier = 0.8  # R4
+            multiplier = 2.0  # R100 = 2 credits
+        elif lead.urgency == 'this_week':
+            multiplier = 1.5  # R75 = 1.5 credits
+        elif lead.urgency == 'this_month':
+            multiplier = 1.2  # R60 = 1.2 credits
+        else:  # flexible
+            multiplier = 1.0  # R50 = 1 credit
         
-        # Quality multipliers
+        # Quality multipliers (verification score)
         if lead.verification_score > 80:
-            multiplier += 0.2  # +R1
+            multiplier += 0.5  # +R25 = +0.5 credits
         elif lead.verification_score > 60:
-            multiplier += 0.1  # +R0.50
+            multiplier += 0.2  # +R10 = +0.2 credits
         
-        # Budget multipliers
+        # Budget multipliers (higher budget = higher credit cost)
         if hasattr(lead, 'budget_range'):
             if 'over_50000' in str(lead.budget_range):
-                multiplier += 0.3  # +R1.50
+                multiplier += 0.8  # +R40 = +0.8 credits
             elif '15000_50000' in str(lead.budget_range):
-                multiplier += 0.2  # +R1
+                multiplier += 0.5  # +R25 = +0.5 credits
             elif '5000_15000' in str(lead.budget_range):
-                multiplier += 0.1  # +R0.50
+                multiplier += 0.2  # +R10 = +0.2 credits
         
-        # Cap the maximum price to be very reasonable
-        total_cost = min(int(base_price * multiplier), 12)  # Max R12
+        # High intent multiplier (ready to hire = more valuable)
+        if hasattr(lead, 'hiring_intent'):
+            if lead.hiring_intent == 'ready_to_hire':
+                multiplier += 0.5  # +R25 = +0.5 credits
+            elif lead.hiring_intent == 'planning_to_hire':
+                multiplier += 0.2  # +R10 = +0.2 credits
+        
+        # Cap the maximum price to be reasonable (max 3 credits = R150)
+        total_cost = min(int(base_price * multiplier), 150)  # Max R150 = 3 credits
         
         return {
             'price': total_cost,

@@ -237,7 +237,7 @@ function LeadsPage({ user }: { user: any }) {
                       </div>
                       <div className="flex items-center space-x-1 text-blue-600">
                         <CreditCard className="w-4 h-4" />
-                        <span className="font-medium">{lead.access_cost || 50} credits</span>
+                        <span className="font-medium">{lead.credits || 1} credits</span>
                       </div>
                     </div>
                     

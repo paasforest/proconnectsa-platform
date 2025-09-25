@@ -211,7 +211,8 @@ def calculate_ml_lead_pricing(lead):
         
         # Convert Rands to credits (R50 = 1 credit)
         price_in_rands = pricing_result.get('price', 50)
-        credits = max(1, int(price_in_rands / 50))
+        # Ensure minimum 1 credit, but allow fractional credits for better pricing
+        credits = max(1, round(price_in_rands / 50, 1))
         
         return credits
         
@@ -221,37 +222,27 @@ def calculate_ml_lead_pricing(lead):
         logger = logging.getLogger(__name__)
         logger.warning(f"ML pricing failed, using fallback: {str(e)}")
         
-        # Simple fallback pricing - much more realistic
-        base_credits = 1  # R50 base
+        # Simple fallback pricing - realistic credit pricing
+        base_credits = 1  # 1 credit = R50 base
         
-        # Service category multiplier
-        category_multipliers = {
-            'cleaning': 1.0,      # R50
-            'handyman': 1.0,      # R50
-            'painting': 1.0,      # R50
-            'plumbing': 1.0,      # R50
-            'electrical': 1.0,    # R50
-        }
+        # Service category multiplier (all categories same base price)
+        category_multiplier = 1.0
         
-        category_multiplier = category_multipliers.get(
-            lead.service_category.name.lower(), 1.0
-        )
-        
-        # Urgency multiplier
+        # Urgency multiplier (based on lead urgency)
         urgency_multipliers = {
-            'urgent': 1.2,        # R60
-            'this_week': 1.1,     # R55
-            'this_month': 1.0,    # R50
-            'flexible': 1.0       # R50
+            'urgent': 2.0,        # 2 credits = R100
+            'this_week': 1.5,     # 1.5 credits = R75
+            'this_month': 1.2,    # 1.2 credits = R60
+            'flexible': 1.0       # 1 credit = R50
         }
         
         urgency_multiplier = urgency_multipliers.get(lead.urgency, 1.0)
         
-        # Quality multiplier (very conservative)
-        verification_multiplier = 1 + (lead.verification_score / 200.0)  # Much more conservative
+        # Quality multiplier (verification score impact)
+        verification_multiplier = 1 + (lead.verification_score / 100.0)  # More impactful
         
         # High intent multiplier
-        high_intent_multiplier = 1.1 if lead.hiring_intent in ['ready_to_hire', 'planning_to_hire'] else 1.0
+        high_intent_multiplier = 1.5 if lead.hiring_intent == 'ready_to_hire' else 1.2 if lead.hiring_intent == 'planning_to_hire' else 1.0
         
         # Calculate final credits
         credits = base_credits * category_multiplier * urgency_multiplier * verification_multiplier * high_intent_multiplier
