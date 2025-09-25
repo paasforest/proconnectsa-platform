@@ -25,7 +25,7 @@ export class SimpleApiClient {
     }
 
     if (this.token) {
-      headers['Authorization'] = `Token ${this.token}`
+      (headers as any)['Authorization'] = `Token ${this.token}`
     }
 
     const url = `${this.baseURL}${endpoint}`

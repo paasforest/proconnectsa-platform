@@ -20,35 +20,41 @@ export interface LeadCreationData {
 
 export const createLead = async (data: LeadCreationData) => {
   try {
-    // Prepare data in multiple formats to ensure compatibility
+    // Map budget_range to budget field for API compatibility
+    const budgetMap = {
+      'under_1000': 500,
+      '1000_5000': 3000,
+      '5000_15000': 10000,
+      '15000_50000': 32500,
+      'over_50000': 75000,
+      'no_budget': 5000,
+      '0_1000': 500,
+      '5000_20000': 12500,
+      '20000_plus': 50000
+    };
+
+    // Prepare data in the format the API expects
     const payload = {
-      // Title variations
-      title: data.title || data.name || data.service_name,
-      name: data.title || data.name || data.service_name,
-      service_name: data.title || data.name || data.service_name,
+      // Required fields
+      title: data.title || data.name || data.service_name || 'Service Request',
+      description: data.description || data.details || 'Service description',
+      budget: data.budget || budgetMap[data.budget_range] || 5000,
+      category: data.category || data.service_category || '1',
+      location: data.location || data.city || 'Cape Town',
       
-      // Description variations
-      description: data.description || data.details,
-      details: data.description || data.details,
-      
-      // Budget variations
-      budget: data.budget || (data.budget_min && data.budget_max ? (data.budget_min + data.budget_max) / 2 : undefined),
+      // Optional fields
       budget_range: data.budget_range,
       budget_min: data.budget_min,
       budget_max: data.budget_max,
+      client_name: data.client_name || 'Anonymous Client',
+      client_email: data.client_email || 'client@example.com',
+      client_phone: data.client_phone || '+27123456789',
       
-      // Category variations
-      category: data.category || data.service_category,
-      service_category: data.category || data.service_category,
-      
-      // Location variations
-      location: data.location || data.city,
-      city: data.location || data.city,
-      
-      // Client info
-      client_name: data.client_name,
-      client_email: data.client_email,
-      client_phone: data.client_phone
+      // Additional fields that might be needed
+      urgency: data.urgency || 'medium',
+      hiring_intent: data.hiring_intent || 'ready_to_hire',
+      hiring_timeline: data.hiring_timeline || 'this_month',
+      source: data.source || 'website'
     };
 
     console.log('Sending lead creation request:', payload);
