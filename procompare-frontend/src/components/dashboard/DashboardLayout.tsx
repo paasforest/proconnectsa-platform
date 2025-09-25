@@ -72,10 +72,10 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
   // Fetch user stats
   useEffect(() => {
     const fetchUserStats = async () => {
-      if (!session?.accessToken) return;
+      if (!token) return;
       
       try {
-        apiClient.setToken(session.accessToken);
+        apiClient.setToken(token);
         const response = await apiClient.get('/api/auth/stats/');
         setUserStats(response);
       } catch (error) {
@@ -83,18 +83,18 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
       }
     };
 
-    if (session?.user) {
+    if (user) {
       fetchUserStats();
     }
-  }, [session]);
+  }, [user, token]);
 
   // Fetch user profile for personalization
   useEffect(() => {
     const fetchUserProfile = async () => {
-      if (!session?.accessToken) return;
+      if (!token) return;
       
       try {
-        apiClient.setToken(session.accessToken);
+        apiClient.setToken(token);
         const response = await apiClient.get('/api/auth/profile/');
         setUserProfile(response);
       } catch (error) {
@@ -102,18 +102,18 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
       }
     };
 
-    if (session?.user) {
+    if (user) {
       fetchUserProfile();
     }
-  }, [session]);
+  }, [user, token]);
 
   // Fetch notifications from API
   useEffect(() => {
     const fetchNotifications = async () => {
-      if (!session?.accessToken) return;
+      if (!token) return;
       
       try {
-        apiClient.setToken(session.accessToken);
+        apiClient.setToken(token);
         const response = await apiClient.get('/api/notifications/');
         setNotifications(response.results || response);
       } catch (error) {
@@ -121,20 +121,20 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
       }
     };
 
-    if (session?.accessToken) {
+    if (token) {
       fetchNotifications();
       const interval = setInterval(fetchNotifications, 30000);
       return () => clearInterval(interval);
     }
-  }, [session?.accessToken]);
+  }, [token]);
 
   // Fetch notification count
   useEffect(() => {
     const fetchNotificationCount = async () => {
-      if (!session?.accessToken) return;
+      if (!token) return;
       
       try {
-        apiClient.setToken(session.accessToken);
+        apiClient.setToken(token);
         const response = await apiClient.getNotificationCount();
         setNotificationCount((response as any).unread_count || 0);
       } catch (error) {
@@ -142,16 +142,16 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
       }
     };
 
-    if (session?.user) {
+    if (user) {
       fetchNotificationCount();
       const interval = setInterval(fetchNotificationCount, 10000);
       return () => clearInterval(interval);
     }
-  }, [session?.user, session?.accessToken]);
+  }, [user, token]);
 
   const handleLogout = async () => {
     try {
-      if (session?.accessToken) {
+      if (token) {
         try {
           await apiClient.logout();
         } catch (error) {
@@ -159,8 +159,7 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
         }
       }
       
-      apiClient.setToken(null);
-      await signOut({ callbackUrl: '/login' });
+      logout();
     } catch (error) {
       router.push('/login');
     }
@@ -338,7 +337,7 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
                   </div>
                   <div className="hidden sm:block">
                     <span className="text-sm font-medium text-gray-700">
-                      {userProfile?.business_name || `${userProfile?.first_name} ${userProfile?.last_name}` || session?.user?.email}
+                      {userProfile?.business_name || `${userProfile?.first_name} ${userProfile?.last_name}` || user?.email}
                     </span>
                     {userProfile?.business_name && (
                       <p className="text-xs text-gray-500">{userProfile.email}</p>
