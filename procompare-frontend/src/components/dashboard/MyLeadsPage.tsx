@@ -50,7 +50,7 @@ const MyLeadsPage = () => {
         
         // Try to fetch from API, fallback to mock data
         try {
-          const response = await apiClient.get('/api/leads/wallet/available/');
+          const response = await apiClient.get('/api/my-leads/');
           setLeads(response.data?.leads || response.leads || []);
         } catch (apiError) {
           console.log('API not available, using mock data');
