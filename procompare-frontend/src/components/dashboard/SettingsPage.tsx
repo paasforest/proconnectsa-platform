@@ -6,6 +6,7 @@ import {
   Camera, Upload, CheckCircle, AlertCircle
 } from 'lucide-react';
 import { apiClient } from '@/lib/api-simple';
+import { useAuth } from '@/components/AuthProvider';
 
 interface UserProfile {
   id: string;
@@ -25,18 +26,19 @@ interface UserProfile {
 }
 
 const SettingsPage = () => {
+  const { user } = useAuth();
   const [profile, setProfile] = useState<UserProfile>({
-    id: '',
-    email: '',
-    first_name: '',
-    last_name: '',
-    phone: '',
+    id: user?.id?.toString() || '',
+    email: user?.email || '',
+    first_name: user?.first_name || '',
+    last_name: user?.last_name || '',
+    phone: user?.phone || '',
     address: '',
-    city: '',
-    province: '',
+    city: user?.city || '',
+    province: user?.province || '',
     postal_code: '',
-    company_name: '',
-    business_type: '',
+    company_name: user?.business_name || '',
+    business_type: user?.primary_service || '',
     years_experience: 0,
     bio: ''
   });
@@ -60,29 +62,31 @@ const SettingsPage = () => {
         setProfile(response);
       } catch (error) {
         console.error('Failed to fetch profile:', error);
-        // Mock data for now
+        // Use user data from authentication instead of hardcoded data
         setProfile({
-          id: '1',
-          email: 'test@example.com',
-          first_name: 'John',
-          last_name: 'Doe',
-          phone: '+27 82 123 4567',
-          address: '123 Main Street',
-          city: 'Cape Town',
-          province: 'Western Cape',
-          postal_code: '8001',
-          company_name: 'Doe Plumbing Services',
-          business_type: 'Plumbing',
-          years_experience: 5,
-          bio: 'Experienced plumber with 5+ years in residential and commercial work.'
+          id: user?.id?.toString() || '',
+          email: user?.email || '',
+          first_name: user?.first_name || '',
+          last_name: user?.last_name || '',
+          phone: user?.phone || '',
+          address: '',
+          city: user?.city || '',
+          province: user?.province || '',
+          postal_code: '',
+          company_name: user?.business_name || '',
+          business_type: user?.primary_service || '',
+          years_experience: 0,
+          bio: ''
         });
       } finally {
         setLoading(false);
       }
     };
 
-    fetchProfile();
-  }, []);
+    if (user) {
+      fetchProfile();
+    }
+  }, [user]);
 
   const handleSaveProfile = async () => {
     try {

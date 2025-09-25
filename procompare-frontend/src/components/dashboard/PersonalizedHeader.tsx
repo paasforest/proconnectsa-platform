@@ -55,11 +55,12 @@ export default function PersonalizedHeader({
 
   const fetchProviderStats = async () => {
     try {
-      // Use the Flask API directly without authentication for now
+      // Use the Flask API with authentication
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://api.proconnectsa.co.za'}/api/auth/profile/`, {
         method: 'GET',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          ...(token && { 'Authorization': `Bearer ${token}` })
         }
       });
 
@@ -69,59 +70,59 @@ export default function PersonalizedHeader({
         if (data.data && data.data.provider_profile) {
           setStats(data.data.provider_profile);
         } else {
-          // Fallback to mock data if API doesn't return expected structure
+          // Use user data from authentication instead of hardcoded data
           setStats({
-            business_name: 'Tshepo Plumbing Services',
-            service_categories: ['PLUMBING', 'WATER_HEATER_REPAIR'],
-            service_areas: ['Sandton', 'Rosebank', 'Johannesburg'],
-            average_rating: 4.6,
-            total_reviews: 89,
-            response_time_hours: 3,
-            job_completion_rate: 92,
-            leads_claimed_this_month: 8,
-            monthly_lead_limit: 20,
-            subscription_tier: 'premium',
-            credit_balance: 156,
-            customer_code: 'PC12345678',
-            verification_status: 'verified'
+            business_name: user?.business_name || `${user?.first_name} ${user?.last_name}` || 'Your Business',
+            service_categories: user?.primary_service ? [user.primary_service.toUpperCase()] : ['GENERAL'],
+            service_areas: user?.city ? [user.city] : ['Your Area'],
+            average_rating: 0,
+            total_reviews: 0,
+            response_time_hours: 24,
+            job_completion_rate: 0,
+            leads_claimed_this_month: 0,
+            monthly_lead_limit: 10,
+            subscription_tier: 'basic',
+            credit_balance: user?.wallet_balance || 0,
+            customer_code: `PC${user?.id || '00000000'}`,
+            verification_status: 'pending'
           });
         }
       } else {
         console.error('Profile API error:', response.status, response.statusText);
-        // Use fallback data
+        // Use user data from authentication instead of hardcoded data
         setStats({
-          business_name: 'Tshepo Plumbing Services',
-          service_categories: ['PLUMBING', 'WATER_HEATER_REPAIR'],
-          service_areas: ['Sandton', 'Rosebank', 'Johannesburg'],
-          average_rating: 4.6,
-          total_reviews: 89,
-          response_time_hours: 3,
-          job_completion_rate: 92,
-          leads_claimed_this_month: 8,
-          monthly_lead_limit: 20,
-          subscription_tier: 'premium',
-          credit_balance: 156,
-          customer_code: 'PC12345678',
-          verification_status: 'verified'
+          business_name: user?.business_name || `${user?.first_name} ${user?.last_name}` || 'Your Business',
+          service_categories: user?.primary_service ? [user.primary_service.toUpperCase()] : ['GENERAL'],
+          service_areas: user?.city ? [user.city] : ['Your Area'],
+          average_rating: 0,
+          total_reviews: 0,
+          response_time_hours: 24,
+          job_completion_rate: 0,
+          leads_claimed_this_month: 0,
+          monthly_lead_limit: 10,
+          subscription_tier: 'basic',
+          credit_balance: user?.wallet_balance || 0,
+          customer_code: `PC${user?.id || '00000000'}`,
+          verification_status: 'pending'
         });
       }
     } catch (error) {
       console.error('Error fetching provider stats:', error);
-      // Use fallback data on error
+      // Use user data from authentication instead of hardcoded data
       setStats({
-        business_name: 'Tshepo Plumbing Services',
-        service_categories: ['PLUMBING', 'WATER_HEATER_REPAIR'],
-        service_areas: ['Sandton', 'Rosebank', 'Johannesburg'],
-        average_rating: 4.6,
-        total_reviews: 89,
-        response_time_hours: 3,
-        job_completion_rate: 92,
-        leads_claimed_this_month: 8,
-        monthly_lead_limit: 20,
-        subscription_tier: 'premium',
-        credit_balance: 156,
-        customer_code: 'PC12345678',
-        verification_status: 'verified'
+        business_name: user?.business_name || `${user?.first_name} ${user?.last_name}` || 'Your Business',
+        service_categories: user?.primary_service ? [user.primary_service.toUpperCase()] : ['GENERAL'],
+        service_areas: user?.city ? [user.city] : ['Your Area'],
+        average_rating: 0,
+        total_reviews: 0,
+        response_time_hours: 24,
+        job_completion_rate: 0,
+        leads_claimed_this_month: 0,
+        monthly_lead_limit: 10,
+        subscription_tier: 'basic',
+        credit_balance: user?.wallet_balance || 0,
+        customer_code: `PC${user?.id || '00000000'}`,
+        verification_status: 'pending'
       });
     } finally {
       setLoading(false);
@@ -129,9 +130,11 @@ export default function PersonalizedHeader({
   };
 
   useEffect(() => {
-    // Always fetch provider stats when component mounts
-    fetchProviderStats();
-  }, []);
+    // Fetch provider stats when component mounts or user changes
+    if (user) {
+      fetchProviderStats();
+    }
+  }, [user]);
 
   const getSubscriptionColor = (tier: string) => {
     switch (tier) {
