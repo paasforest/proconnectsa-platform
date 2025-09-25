@@ -59,12 +59,19 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, min_length=8)
     password_confirm = serializers.CharField(write_only=True)
     
+    # Provider-specific fields
+    business_name = serializers.CharField(write_only=True, required=False)
+    primary_service = serializers.CharField(write_only=True, required=False)
+    years_experience = serializers.CharField(write_only=True, required=False)
+    service_description = serializers.CharField(write_only=True, required=False)
+    
     class Meta:
         model = User
         fields = [
             'username', 'email', 'password', 'password_confirm',
             'first_name', 'last_name', 'user_type', 'phone',
-            'city', 'suburb'
+            'city', 'suburb', 'business_name', 'primary_service',
+            'years_experience', 'service_description'
         ]
     
     def validate(self, attrs):
@@ -75,9 +82,63 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         validated_data.pop('password_confirm')
         password = validated_data.pop('password')
+        
+        # Extract provider-specific data
+        business_name = validated_data.pop('business_name', None)
+        primary_service = validated_data.pop('primary_service', None)
+        years_experience = validated_data.pop('years_experience', None)
+        service_description = validated_data.pop('service_description', None)
+        
         user = User.objects.create_user(**validated_data)
         user.set_password(password)
         user.save()
+        
+        # Create ProviderProfile if user is a service provider
+        if user.user_type == 'service_provider':
+            from .models import ProviderProfile
+            
+            # Map service names to slugs
+            service_slug_mapping = {
+                'Plumbing': 'plumbing',
+                'Electrical': 'electrical',
+                'HVAC': 'hvac',
+                'Carpentry': 'carpentry',
+                'Painting': 'painting',
+                'Roofing': 'roofing',
+                'Flooring': 'flooring',
+                'Landscaping': 'landscaping',
+                'Cleaning': 'cleaning',
+                'Moving': 'moving',
+                'Appliance Repair': 'appliance-repair',
+                'Handyman': 'handyman',
+                'Pool Maintenance': 'pool-maintenance',
+                'Security': 'security',
+                'IT Support': 'it-support',
+                'Web Design': 'web-design',
+                'Marketing': 'marketing',
+                'Accounting': 'accounting',
+                'Legal': 'legal',
+                'Consulting': 'consulting',
+                'Other': 'other'
+            }
+            
+            # Convert primary service to slug
+            service_categories = []
+            if primary_service and primary_service in service_slug_mapping:
+                service_categories.append(service_slug_mapping[primary_service])
+            
+            ProviderProfile.objects.create(
+                user=user,
+                business_name=business_name or f"{user.first_name} {user.last_name}'s Business",
+                business_address=f"{user.city}, {user.suburb}" if user.city and user.suburb else "Address not provided",
+                service_areas=[user.city] if user.city else [],
+                service_categories=service_categories,
+                verification_status='pending',
+                subscription_tier='pay_as_you_go',
+                bio=service_description or f"Professional {primary_service or 'service'} provider",
+                years_experience=int(years_experience) if years_experience and years_experience.isdigit() else None
+            )
+        
         return user
 
 

@@ -199,8 +199,9 @@ export default function RegisterPage() {
     }
 
     try {
-      // Prepare data for API - only send basic data that backend expects
+      // Prepare data for API - include provider-specific data
       const apiData = {
+        username: formData.email, // Use email as username
         email: formData.email,
         password: formData.password,
         first_name: formData.first_name,
@@ -208,18 +209,17 @@ export default function RegisterPage() {
         user_type: formData.user_type,
         phone: getFullPhoneNumber(),
         city: formData.city,
-        province: formData.province
+        suburb: formData.province // Map province to suburb
       };
 
-      // Log additional provider data for future use
+      // Add provider-specific data if user is a service provider
       if (formData.user_type === 'service_provider') {
-        console.log('Additional provider data collected:', {
-          business_name: formData.business_name,
-          primary_service: formData.primary_service,
-          years_experience: formData.years_experience,
-          service_description: formData.service_description
-        });
+        apiData.business_name = formData.business_name;
+        apiData.primary_service = formData.primary_service;
+        apiData.years_experience = formData.years_experience;
+        apiData.service_description = formData.service_description;
       }
+
 
       // Direct API call to Flask backend
       const response = await fetch('https://api.proconnectsa.co.za/api/register/', {
