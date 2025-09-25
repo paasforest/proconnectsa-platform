@@ -47,7 +47,7 @@ def available_leads(request):
         provider_service_categories = request.user.provider_profile.service_categories or []
     
     leads = Lead.objects.filter(
-        status='verified',  # Only verified leads (NOT assigned ones)
+        status='active',  # Changed from 'verified' to 'active' to match actual lead status
         is_available=True,
         expires_at__gt=timezone.now(),
         service_category__id__in=provider_service_categories  # ENFORCE SERVICE MATCHING

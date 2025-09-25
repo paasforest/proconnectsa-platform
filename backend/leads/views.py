@@ -443,7 +443,7 @@ def available_leads_view(request):
         # Get available leads that are not already claimed by this provider
         leads = Lead.objects.filter(
             is_available=True,
-            status='verified',
+            status='active',  # Changed from 'verified' to 'active' to match actual lead status
             expires_at__gt=timezone.now()
         ).exclude(
             # Exclude leads already claimed by this provider
