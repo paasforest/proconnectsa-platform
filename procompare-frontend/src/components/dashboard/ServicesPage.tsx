@@ -43,36 +43,37 @@ const ServicesPage = () => {
     if (user !== null && token) {
       apiClient.setToken(token);
     }
-  }, [status, session]);
+  }, [user, token]);
 
   useEffect(() => {
     const fetchServices = async () => {
-      if (status !== 'authenticated') return;
+      if (!user || !token) return;
       
       try {
         setLoading(true);
-        const response = await apiClient.get('/api/services/');
-        setServices(response.services || []);
+        const response = await apiClient.get('/api/auth/services/');
+        setServices(response.services || response || []);
       } catch (error) {
+        console.error('Failed to fetch services:', error);
         setServices([]);
       } finally {
         setLoading(false);
       }
     };
 
-    if (user !== null) {
+    if (user && token) {
       fetchServices();
     }
-  }, [status, session]);
+  }, [user, token]);
 
   const handleAddService = async () => {
-    if (status !== 'authenticated') {
+    if (!user || !token) {
       alert('Please log in to add services');
       return;
     }
     
     try {
-      const response = await apiClient.post('/api/services/', newService);
+      const response = await apiClient.post('/api/auth/services/', newService);
       
       if (response.success) {
         // Show success message
@@ -93,7 +94,7 @@ const ServicesPage = () => {
 
   const handleUpdateService = async (serviceId: string, updates: Partial<Service>) => {
     try {
-      const response = await apiClient.put(`/api/services/${serviceId}/`, updates);
+      const response = await apiClient.put(`/api/auth/services/${serviceId}/`, updates);
       setServices(services.map(service => 
         service.id === serviceId ? { ...service, ...response.service } : service
       ));
@@ -108,7 +109,7 @@ const ServicesPage = () => {
     if (!confirm('Are you sure you want to delete this service?')) return;
     
     try {
-      await apiClient.delete(`/api/services/${serviceId}/`);
+      await apiClient.delete(`/api/auth/services/${serviceId}/delete/`);
       setServices(services.filter(service => service.id !== serviceId));
     } catch (error) {
       console.error('Failed to delete service:', error);
@@ -255,10 +256,12 @@ const ServicesPage = () => {
 
             <button
               onClick={() => setShowAddModal(true)}
-              className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+              disabled={true}
+              className="flex items-center px-4 py-2 bg-gray-400 text-white rounded-lg cursor-not-allowed"
+              title="Services feature coming soon"
             >
               <Plus className="w-4 h-4 mr-2" />
-              Add Service
+              Add Service (Coming Soon)
             </button>
 
             <button
@@ -285,14 +288,28 @@ const ServicesPage = () => {
       ) : filteredServices.length === 0 ? (
         <div className="text-center py-12">
           <Wrench className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-          <h3 className="text-lg font-medium text-gray-900 mb-2">No services found</h3>
-          <p className="text-gray-600 mb-4">Add your first service to start receiving leads</p>
-          <button
-            onClick={() => setShowAddModal(true)}
-            className="text-blue-600 hover:text-blue-700 font-medium"
-          >
-            Add your first service
-          </button>
+          <h3 className="text-lg font-medium text-gray-900 mb-2">
+            {loading ? 'Loading services...' : 'Services feature coming soon!'}
+          </h3>
+          <p className="text-gray-600 mb-4">
+            {loading 
+              ? 'Please wait while we load your services...'
+              : 'The services management feature is currently being updated. You can still receive leads based on your profile information.'
+            }
+          </p>
+          {!loading && (
+            <div className="space-y-2">
+              <p className="text-sm text-gray-500">
+                In the meantime, make sure your profile is complete to receive relevant leads.
+              </p>
+              <button
+                onClick={() => window.location.href = '/dashboard/settings'}
+                className="text-blue-600 hover:text-blue-700 font-medium"
+              >
+                Complete Your Profile
+              </button>
+            </div>
+          )}
         </div>
       ) : (
         <div className="space-y-4">
