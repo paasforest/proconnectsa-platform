@@ -29,12 +29,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     // Load user from localStorage on mount
+    console.log('🔍 DEBUG - AuthProvider: Loading user from localStorage');
     const savedUser = getUserFromStorage();
     const savedToken = getTokenFromStorage();
+    
+    console.log('🔍 DEBUG - AuthProvider: Saved user:', savedUser);
+    console.log('🔍 DEBUG - AuthProvider: Saved token:', savedToken);
     
     setUser(savedUser);
     setToken(savedToken);
     setIsLoading(false);
+    
+    console.log('🔍 DEBUG - AuthProvider: Loading complete');
   }, []);
 
   const logout = () => {

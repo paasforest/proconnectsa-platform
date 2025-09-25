@@ -71,10 +71,9 @@ export default function LoginPage() {
         console.log('🔍 DEBUG - Redirecting to:', dashboardPath);
         console.log('🔍 DEBUG - Expected redirect for service_provider:', redirectToDashboard('service_provider'));
         
-        // Use window.location.href for more reliable redirect
-        setTimeout(() => {
-          window.location.href = dashboardPath;
-        }, 100);
+        // Force immediate redirect
+        console.log('🔍 DEBUG - About to redirect to:', dashboardPath);
+        window.location.replace(dashboardPath);
       } else {
         setError(data.message || 'Invalid email or password');
       }
