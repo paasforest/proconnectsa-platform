@@ -161,9 +161,9 @@ const WalletPage = () => {
           ...prev,
           balance: prev?.balance || 1250.00,
           credits: prev?.credits || 25,
-          account_details: response.data.account_details,
-          customer_code: response.data.customer_code,
-          instructions: response.data.instructions
+          account_details: response.account_details,
+          customer_code: response.customer_code,
+          instructions: response.instructions
         }));
         // Refresh wallet data without reloading the page
         setTimeout(() => {
@@ -174,7 +174,7 @@ const WalletPage = () => {
       console.error('Failed to initiate top-up:', error);
       
       // Generate unique customer code based on user email
-      const userEmail = session?.user?.email || 'user@example.com';
+      const userEmail = user?.email || 'user@example.com';
       const customerCode = `CUS${userEmail.split('@')[0].toUpperCase().slice(0, 6)}${Date.now().toString().slice(-4)}`;
       
       // Mock response when backend is not available
