@@ -2,18 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import ErrorBoundary from '@/components/ErrorBoundary';
-
-// Safe API client - handles undefined responses
-const safeApiCall = async (apiFunction: () => Promise<any>) => {
-  try {
-    const response = await apiFunction();
-    return response || { success: false, data: null };
-  } catch (error) {
-    console.error('API call failed:', error);
-    return { success: false, error: error.message, data: null };
-  }
-};
 
 interface UserStats {
   active_leads?: number;
@@ -29,19 +17,28 @@ interface WalletData {
   currency?: string;
 }
 
-function DashboardContent() {
-  const [stats, setStats] = useState<UserStats>({});
-  const [wallet, setWallet] = useState<WalletData>({});
+export default function DashboardPage() {
+  const [stats, setStats] = useState<UserStats>({
+    active_leads: 0,
+    completed_leads: 0,
+    pending_leads: 0,
+    credit_balance: 0,
+    total_earnings: 0,
+    conversion_rate: 0
+  });
+  
+  const [wallet, setWallet] = useState<WalletData>({
+    balance: 0,
+    currency: 'ZAR'
+  });
+  
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   
   const router = useRouter();
 
   useEffect(() => {
-    // Only run on client side to avoid hydration issues
-    if (typeof window !== 'undefined') {
-      loadDashboardData();
-    }
+    loadDashboardData();
   }, []);
 
   const loadDashboardData = async () => {
@@ -49,50 +46,52 @@ function DashboardContent() {
       setLoading(true);
       setError('');
       
-      // Test if we can reach the API
-      const healthCheck = await fetch('https://api.proconnectsa.co.za/api/', {
+      // Test API connection first
+      const healthResponse = await fetch('https://api.proconnectsa.co.za/api/', {
         method: 'GET',
         headers: { 'Content-Type': 'application/json' }
       });
       
-      if (!healthCheck.ok) {
+      if (!healthResponse.ok) {
         throw new Error('API server is not responding');
       }
       
-      // Load stats safely
-      const statsResponse = await safeApiCall(async () => {
-        const response = await fetch('https://api.proconnectsa.co.za/api/auth/stats/', {
-          method: 'GET',
-          headers: { 'Content-Type': 'application/json' }
-        });
-        return response.json();
+      // Load stats
+      const statsResponse = await fetch('https://api.proconnectsa.co.za/api/auth/stats/', {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' }
       });
 
-      // Load wallet safely
-      const walletResponse = await safeApiCall(async () => {
-        const response = await fetch('https://api.proconnectsa.co.za/api/wallet/', {
-          method: 'GET',
-          headers: { 'Content-Type': 'application/json' }
-        });
-        return response.json();
+      // Load wallet
+      const walletResponse = await fetch('https://api.proconnectsa.co.za/api/wallet/', {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' }
       });
 
-      // Set data with defaults
-      setStats({
-        active_leads: 0,
-        completed_leads: 0,
-        pending_leads: 0,
-        credit_balance: 0,
-        total_earnings: 0,
-        conversion_rate: 0,
-        ...statsResponse?.data
-      });
+      // Parse responses safely
+      if (statsResponse.ok) {
+        const statsData = await statsResponse.json();
+        if (statsData.success && statsData.data) {
+          setStats({
+            active_leads: statsData.data.active_leads || 0,
+            completed_leads: statsData.data.completed_leads || 0,
+            pending_leads: statsData.data.pending_leads || 0,
+            credit_balance: statsData.data.credit_balance || 0,
+            total_earnings: statsData.data.total_earnings || 0,
+            conversion_rate: statsData.data.conversion_rate || 0
+          });
+        }
+      }
 
-      setWallet({
-        balance: 0,
-        currency: 'ZAR',
-        ...walletResponse?.data
-      });
+      if (walletResponse.ok) {
+        const walletData = await walletResponse.json();
+        if (walletData.success && walletData.data) {
+          setWallet({
+            balance: walletData.data.balance || 0,
+            currency: walletData.data.currency || 'ZAR'
+          });
+        }
+      }
 
     } catch (err: any) {
       console.error('Dashboard load error:', err);
@@ -104,7 +103,7 @@ function DashboardContent() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center">
           <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-indigo-600 mx-auto"></div>
           <p className="mt-4 text-gray-600">Loading dashboard...</p>
@@ -113,47 +112,34 @@ function DashboardContent() {
     );
   }
 
-  if (error) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center max-w-md">
-          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-            <h3 className="font-bold">Dashboard Error</h3>
-            <p>{error}</p>
-          </div>
-          <button 
-            onClick={loadDashboardData}
-            className="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700"
-          >
-            Try Again
-          </button>
-          <div className="mt-4">
-            <button
-              onClick={() => router.push('/login')}
-              className="text-indigo-600 hover:text-indigo-800 underline"
-            >
-              Go to Login
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {error && (
+          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6">
+            <div className="flex justify-between items-center">
+              <span>{error}</span>
+              <button 
+                onClick={loadDashboardData}
+                className="text-red-800 underline hover:no-underline"
+              >
+                Retry
+              </button>
+            </div>
+          </div>
+        )}
+
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
           <p className="text-gray-600">Welcome back to ProConnectSA</p>
         </div>
 
-        {/* Stats Grid - All values have safe defaults */}
+        {/* Stats Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           <div className="bg-white p-6 rounded-lg shadow">
             <h3 className="text-sm font-medium text-gray-500">Wallet Balance</h3>
             <p className="text-2xl font-bold text-green-600">
-              {wallet.currency || 'ZAR'} {(wallet.balance || 0).toFixed(2)}
+              {wallet.currency} {(wallet.balance || 0).toFixed(2)}
             </p>
           </div>
 
@@ -204,33 +190,26 @@ function DashboardContent() {
 
           <div className="bg-white p-6 rounded-lg shadow">
             <h3 className="text-lg font-semibold mb-4">Recent Activity</h3>
-            <p className="text-gray-500">No recent activity to display</p>
+            <p className="text-gray-500 text-sm">
+              Dashboard is connected to your Flask API backend.
+            </p>
           </div>
 
           <div className="bg-white p-6 rounded-lg shadow">
             <h3 className="text-lg font-semibold mb-4">Account Status</h3>
             <div className="space-y-2">
               <div className="flex justify-between">
-                <span className="text-gray-600">Account Type:</span>
-                <span className="font-medium">Active</span>
+                <span className="text-gray-600">Status:</span>
+                <span className="text-green-600 font-medium">Active</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-gray-600">Status:</span>
-                <span className="text-green-600 font-medium">Online</span>
+                <span className="text-gray-600">Backend:</span>
+                <span className="text-blue-600 font-medium">Connected</span>
               </div>
             </div>
           </div>
         </div>
       </div>
     </div>
-  );
-}
-
-// Export wrapped in ErrorBoundary
-export default function DashboardPage() {
-  return (
-    <ErrorBoundary>
-      <DashboardContent />
-    </ErrorBoundary>
   );
 }
