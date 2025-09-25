@@ -55,15 +55,6 @@ const nextConfig: NextConfig = {
   experimental: {
     optimizeCss: false, // Disable CSS optimization to avoid critters issues
     optimizePackageImports: ['lucide-react', '@radix-ui/react-icons'],
-    // Speed up development builds
-    turbo: {
-      rules: {
-        '*.svg': {
-          loaders: ['@svgr/webpack'],
-          as: '*.js',
-        },
-      },
-    },
   },
 
   // Development optimizations
@@ -86,16 +77,14 @@ const nextConfig: NextConfig = {
   
   // ESLint configuration for build
   eslint: {
-    // Warning: This allows production builds to successfully complete even if
-    // your project has ESLint errors. Remove this once linting issues are resolved.
-    ignoreDuringBuilds: true,
+    // Only ignore during builds if there are critical issues
+    ignoreDuringBuilds: false,
   },
 
   // TypeScript configuration for build
   typescript: {
-    // Warning: This allows production builds to successfully complete even if
-    // your project has TypeScript errors. Remove this once type issues are resolved.
-    ignoreBuildErrors: true,
+    // Only ignore build errors if there are critical issues
+    ignoreBuildErrors: false,
   },
 };
 
