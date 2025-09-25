@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { useSession, signOut } from 'next-auth/react';
+import { useAuth } from '@/components/AuthProvider';
 import { useRouter, usePathname } from 'next/navigation';
 import {
   LayoutDashboard, Users, ShoppingCart, Wallet, Settings, 
@@ -46,7 +46,7 @@ interface Notification {
 }
 
 const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
-  const { data: session } = useSession();
+  const { user, token, logout } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -372,12 +372,12 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
         </div>
 
         {/* Personalized Header for Providers */}
-        {session?.user?.userType === 'provider' && (
+        {user?.user_type === 'service_provider' && (
           <PersonalizedHeader
             onRefresh={() => {
               // Refresh user stats and profile
-              if (session?.accessToken) {
-                apiClient.setToken(session.accessToken);
+              if (token) {
+                apiClient.setToken(token);
                 // Trigger a refresh of the data
                 window.location.reload();
               }

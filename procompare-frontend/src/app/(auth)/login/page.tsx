@@ -69,6 +69,7 @@ export default function LoginPage() {
         // Route to appropriate dashboard based on user type
         const dashboardPath = redirectToDashboard(userType);
         console.log('🔍 DEBUG - Redirecting to:', dashboardPath);
+        console.log('🔍 DEBUG - Expected redirect for service_provider:', redirectToDashboard('service_provider'));
         
         // Add a small delay to ensure localStorage is set
         setTimeout(() => {

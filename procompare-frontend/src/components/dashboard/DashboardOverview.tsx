@@ -7,7 +7,7 @@ import {
   ArrowUpRight, ArrowDownRight, Eye, Star, CheckCircle, Wrench
 } from 'lucide-react';
 import { apiClient } from '@/lib/api-simple';
-import { useSession } from 'next-auth/react';
+import { useAuth } from '@/components/AuthProvider';
 import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -53,16 +53,16 @@ const DashboardOverview = () => {
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
-  const { data: session } = useSession();
+  const { user, token } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
     const fetchDashboardData = async () => {
-      if (!session?.accessToken) return;
+      if (!token) return;
       
       try {
         setLoading(true);
-        apiClient.setToken(session.accessToken);
+        apiClient.setToken(token);
         
         const [statsResponse, profileResponse] = await Promise.all([
           apiClient.get('/api/auth/stats/'),
@@ -78,10 +78,10 @@ const DashboardOverview = () => {
       }
     };
 
-    if (session?.user) {
+    if (user) {
       fetchDashboardData();
     }
-  }, [session]);
+  }, [user, token]);
 
   if (loading) {
     return (
