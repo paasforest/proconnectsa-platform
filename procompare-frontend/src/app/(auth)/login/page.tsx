@@ -62,13 +62,18 @@ export default function LoginPage() {
         
         // Get user type from response
         const userType = data.data.user?.user_type;
-        console.log('User type:', userType);
+        console.log('🔍 DEBUG - Full user data:', data.data.user);
+        console.log('🔍 DEBUG - User type:', userType);
+        console.log('🔍 DEBUG - User type type:', typeof userType);
         
         // Route to appropriate dashboard based on user type
         const dashboardPath = redirectToDashboard(userType);
-        console.log('Redirecting to:', dashboardPath);
+        console.log('🔍 DEBUG - Redirecting to:', dashboardPath);
         
-        router.push(dashboardPath);
+        // Add a small delay to ensure localStorage is set
+        setTimeout(() => {
+          router.push(dashboardPath);
+        }, 100);
       } else {
         setError(data.message || 'Invalid email or password');
       }

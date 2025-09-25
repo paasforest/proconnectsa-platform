@@ -62,8 +62,13 @@ export function withAuth<P extends object>(
 
     useEffect(() => {
       if (!isLoading) {
+        console.log('🔍 withAuth DEBUG - User:', user);
+        console.log('🔍 withAuth DEBUG - Allowed user types:', allowedUserTypes);
+        console.log('🔍 withAuth DEBUG - Current path:', window.location.pathname);
+        
         if (!user) {
           // Not logged in, redirect to login
+          console.log('🔍 withAuth DEBUG - No user, redirecting to login');
           router.push('/login');
           return;
         }
@@ -73,9 +78,12 @@ export function withAuth<P extends object>(
           const correctDashboard = user.user_type === 'admin' ? '/admin/dashboard'
             : user.user_type === 'client' ? '/client'
             : '/provider-dashboard';
+          console.log('🔍 withAuth DEBUG - Wrong user type, redirecting to:', correctDashboard);
           router.push(correctDashboard);
           return;
         }
+        
+        console.log('🔍 withAuth DEBUG - User type matches, rendering component');
       }
     }, [user, isLoading, router]);
 
