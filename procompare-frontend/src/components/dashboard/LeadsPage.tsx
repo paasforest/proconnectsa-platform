@@ -92,7 +92,7 @@ const LeadsPage = () => {
     try {
       setLoading(true);
       const response = await apiClient.get('/api/leads/wallet/available/');
-      setLeads(response.leads || []);
+      setLeads(response.data?.leads || response.leads || []);
     } catch (error) {
       console.error('Error fetching leads:', error);
       setLeads([]);

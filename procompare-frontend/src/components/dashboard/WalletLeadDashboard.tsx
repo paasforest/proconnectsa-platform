@@ -483,7 +483,7 @@ const WalletLeadDashboard: React.FC = () => {
     try {
       setLoading(true);
       const response = await apiClient.get('/api/leads/wallet/available/');
-      setLeads(response.leads || []);
+      setLeads(response.data?.leads || response.leads || []);
     } catch (error) {
       addNotification('error', 'Failed to load leads', 'Please try again later.');
     } finally {

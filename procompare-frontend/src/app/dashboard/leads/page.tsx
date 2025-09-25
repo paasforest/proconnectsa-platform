@@ -70,7 +70,7 @@ function LeadsPage({ user }: { user: any }) {
         
         // Fetch real leads from API
         const response = await apiClient.get('/api/leads/wallet/available/')
-        const leadsData = response.leads || response || []
+        const leadsData = response.data?.leads || response.leads || response || []
         
         // For new providers or providers with no service categories, show empty state
         setLeads(leadsData)
