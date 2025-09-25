@@ -42,6 +42,24 @@ const WalletPage = () => {
   const [topUpAmount, setTopUpAmount] = useState(500);
   const [showBankingDetails, setShowBankingDetails] = useState(false);
 
+  // Generate a stable customer code that never changes for the same user
+  const generateStableCustomerCode = (user: any) => {
+    const userEmail = user?.email || 'user@example.com';
+    const userId = user?.id || user?.email || 'default';
+    
+    // Create a hash from user ID to ensure consistency
+    let hash = 0;
+    for (let i = 0; i < userId.length; i++) {
+      const char = userId.charCodeAt(i);
+      hash = ((hash << 5) - hash) + char;
+      hash = hash & hash; // Convert to 32-bit integer
+    }
+    
+    // Use absolute value and take last 4 digits for consistency
+    const stableNumber = Math.abs(hash).toString().slice(-4);
+    return `CUS${userEmail.split('@')[0].toUpperCase().slice(0, 6)}${stableNumber}`;
+  };
+
   useEffect(() => {
     const fetchWalletData = async () => {
       try {
@@ -61,7 +79,7 @@ const WalletPage = () => {
         setWalletData({
           balance: response.balance || 0,
           credits: response.credits || 0,
-          customer_code: response.customer_code || `CUS${user?.email?.split('@')[0]?.toUpperCase().slice(0, 6) || 'USER'}${Date.now().toString().slice(-4)}`,
+          customer_code: response.customer_code || generateStableCustomerCode(user),
           account_details: response.account_details || {
             bank_name: 'Nedbank',
             account_number: '1313872032',
@@ -72,9 +90,8 @@ const WalletPage = () => {
       } catch (error) {
         console.error('Failed to fetch wallet data:', error);
         
-        // Generate unique customer code based on user email
-        const userEmail = user?.email || 'user@example.com';
-        const customerCode = `CUS${userEmail.split('@')[0].toUpperCase().slice(0, 6)}${Date.now().toString().slice(-4)}`;
+        // Generate stable customer code based on user
+        const customerCode = generateStableCustomerCode(user);
         
         setWalletData({
           balance: 1250.00,
@@ -185,9 +202,8 @@ const WalletPage = () => {
     } catch (error) {
       console.error('Failed to initiate top-up:', error);
       
-      // Generate unique customer code based on user email
-      const userEmail = user?.email || 'user@example.com';
-      const customerCode = `CUS${userEmail.split('@')[0].toUpperCase().slice(0, 6)}${Date.now().toString().slice(-4)}`;
+      // Generate stable customer code based on user
+      const customerCode = generateStableCustomerCode(user);
       
       // Mock response when backend is not available
       const mockResponse = {
@@ -236,8 +252,9 @@ const WalletPage = () => {
     if (walletData?.customer_code) {
       return walletData.customer_code;
     }
-    const userEmail = user?.email || 'user@example.com';
-    return `CUS${userEmail.split('@')[0].toUpperCase().slice(0, 6)}${Date.now().toString().slice(-4)}`;
+    
+    // Use the stable customer code generation
+    return generateStableCustomerCode(user);
   };
 
   const refreshWalletData = async () => {
