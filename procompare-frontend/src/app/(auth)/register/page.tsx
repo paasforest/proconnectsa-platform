@@ -18,6 +18,54 @@ const provinces = [
   'Limpopo', 'Mpumalanga', 'Northern Cape', 'North West'
 ];
 
+// South African area codes
+const areaCodes = [
+  { code: '+27', name: 'South Africa (+27)' },
+  { code: '+2711', name: 'Johannesburg (011)' },
+  { code: '+2712', name: 'Pretoria (012)' },
+  { code: '+2713', name: 'Mpumalanga (013)' },
+  { code: '+2714', name: 'Rustenburg (014)' },
+  { code: '+2715', name: 'Polokwane (015)' },
+  { code: '+2716', name: 'Nelspruit (016)' },
+  { code: '+2717', name: 'Ermelo (017)' },
+  { code: '+2718', name: 'Potchefstroom (018)' },
+  { code: '+2721', name: 'Cape Town (021)' },
+  { code: '+2722', name: 'Malmesbury (022)' },
+  { code: '+2723', name: 'Worcester (023)' },
+  { code: '+2724', name: 'Kimberley (024)' },
+  { code: '+2725', name: 'Port Elizabeth (025)' },
+  { code: '+2727', name: 'East London (027)' },
+  { code: '+2728', name: 'George (028)' },
+  { code: '+2731', name: 'Durban (031)' },
+  { code: '+2732', name: 'Pietermaritzburg (032)' },
+  { code: '+2733', name: 'Newcastle (033)' },
+  { code: '+2734', name: 'Ladysmith (034)' },
+  { code: '+2735', name: 'Dundee (035)' },
+  { code: '+2736', name: 'Glencoe (036)' },
+  { code: '+2737', name: 'Hluhluwe (037)' },
+  { code: '+2738', name: 'Richards Bay (038)' },
+  { code: '+2739', name: 'Port Shepstone (039)' },
+  { code: '+2740', name: 'Umtata (040)' },
+  { code: '+2741', name: 'Queenstown (041)' },
+  { code: '+2742', name: 'Grahamstown (042)' },
+  { code: '+2743', name: 'Port Alfred (043)' },
+  { code: '+2744', name: 'Graaff-Reinet (044)' },
+  { code: '+2745', name: 'Uitenhage (045)' },
+  { code: '+2746', name: 'Grahamstown (046)' },
+  { code: '+2747', name: 'Alice (047)' },
+  { code: '+2748', name: 'Butterworth (048)' },
+  { code: '+2749', name: 'Cofimvaba (049)' },
+  { code: '+2751', name: 'Bloemfontein (051)' },
+  { code: '+2752', name: 'Thaba Nchu (052)' },
+  { code: '+2753', name: 'Bethlehem (053)' },
+  { code: '+2754', name: 'Welkom (054)' },
+  { code: '+2755', name: 'Kroonstad (055)' },
+  { code: '+2756', name: 'Parys (056)' },
+  { code: '+2757', name: 'Bothaville (057)' },
+  { code: '+2758', name: 'Ventersburg (058)' },
+  { code: '+2759', name: 'Sasolburg (059)' }
+];
+
 // Experience levels
 const experienceLevels = [
   'Less than 1 year', '1-2 years', '3-5 years', '6-10 years', '11-20 years', '20+ years'
@@ -33,7 +81,8 @@ export default function RegisterPage() {
     first_name: '',
     last_name: '',
     user_type: 'client',
-    phone: '',
+    area_code: '+27',
+    phone_number: '',
     city: '',
     province: '',
     
@@ -116,6 +165,12 @@ export default function RegisterPage() {
     }
   };
 
+  // Combine area code and phone number for backend
+  const getFullPhoneNumber = () => {
+    if (!formData.phone_number) return '';
+    return `${formData.area_code}${formData.phone_number}`;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -150,7 +205,7 @@ export default function RegisterPage() {
         first_name: formData.first_name,
         last_name: formData.last_name,
         user_type: formData.user_type,
-        phone: formData.phone,
+        phone: getFullPhoneNumber(),
         city: formData.city,
         province: formData.province
       };
@@ -300,34 +355,51 @@ export default function RegisterPage() {
         />
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Phone (Optional)
-          </label>
-          <input
-            name="phone"
-            type="tel"
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
-            placeholder="Phone number"
-            value={formData.phone}
-            onChange={handleChange}
-          />
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-2">
+          Phone Number (Optional)
+        </label>
+        <div className="flex gap-2">
+          <div className="w-1/3">
+            <select
+              name="area_code"
+              className="w-full px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors text-sm"
+              value={formData.area_code}
+              onChange={handleChange}
+            >
+              {areaCodes.map((area) => (
+                <option key={area.code} value={area.code}>{area.name}</option>
+              ))}
+            </select>
+          </div>
+          <div className="w-2/3">
+            <input
+              name="phone_number"
+              type="tel"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
+              placeholder="e.g., 123456789"
+              value={formData.phone_number}
+              onChange={handleChange}
+            />
+          </div>
         </div>
-        
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            City (Optional)
-          </label>
-          <input
-            name="city"
-            type="text"
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
-            placeholder="City"
-            value={formData.city}
-            onChange={handleChange}
-          />
-        </div>
+        <p className="text-xs text-gray-500 mt-1">
+          Full number: {getFullPhoneNumber() || 'Not provided'}
+        </p>
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-2">
+          City (Optional)
+        </label>
+        <input
+          name="city"
+          type="text"
+          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
+          placeholder="City"
+          value={formData.city}
+          onChange={handleChange}
+        />
       </div>
     </div>
   );
