@@ -39,13 +39,11 @@ interface ClientUser {
 }
 
 export default function ClientDashboardOverview() {
-  const { user, token } = useAuth()
+  const { user: authUser, token } = useAuth()
   const router = useRouter()
   const [stats, setStats] = useState<ClientStats | null>(null)
   const [user, setUser] = useState<ClientUser | null>(null)
   const [loading, setLoading] = useState(true)
-  
-  const authUser = user
 
   useEffect(() => {
     const fetchDashboardData = async () => {

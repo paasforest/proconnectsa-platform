@@ -27,14 +27,13 @@ export default function NotificationCenter() {
   useEffect(() => {
     const fetchNotifications = async () => {
       try {
-        // Get session token from NextAuth
-        const { getSession } = await import('next-auth/react')
-        const session = await getSession()
+        // Get token from custom auth
+        const token = localStorage.getItem('token')
         
-        if (session?.accessToken) {
+        if (token) {
           const response = await fetch('/api/notifications/', {
             headers: {
-              'Authorization': `Token ${session.accessToken}`,
+              'Authorization': `Token ${token}`,
               'Content-Type': 'application/json'
             }
           })

@@ -44,10 +44,10 @@ export default function ClientSupportPage() {
     )
   }
 
-  if (!session) return null
+  if (!user) return null
 
   // Only show support page for clients
-  if (user.userType !== 'client') {
+  if (user.user_type !== 'client') {
     router.push('/dashboard')
     return null
   }

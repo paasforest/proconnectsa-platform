@@ -80,7 +80,7 @@ const SupportPage = () => {
     if (user) {
       fetchTickets();
     }
-  }, [session]);
+  }, [user, token]);
 
   const handleCreateTicket = async () => {
     if (!token) return;

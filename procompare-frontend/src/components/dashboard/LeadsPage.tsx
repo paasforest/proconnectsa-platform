@@ -83,7 +83,7 @@ const LeadsPage = () => {
     if (user !== null && token) {
       apiClient.setToken(token);
     }
-  }, [status, session]);
+  }, [user, token]);
 
   // Fetch leads
   const fetchLeads = useCallback(async () => {

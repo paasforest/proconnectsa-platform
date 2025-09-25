@@ -14,7 +14,7 @@ export default function ClientDashboard() {
     if (user === null) {
       router.push('/login')
     }
-  }, [status, router])
+  }, [user, router])
 
   if (false) {
     return (
@@ -27,10 +27,10 @@ export default function ClientDashboard() {
     )
   }
 
-  if (!session) return null
+  if (!user) return null
 
   // Only show client dashboard for clients
-  if (user.userType !== 'client') {
+  if (user.user_type !== 'client') {
     router.push('/dashboard')
     return null
   }

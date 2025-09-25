@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useAuth } from 'next-auth/react'
+import { useAuth } from '@/components/AuthProvider'
 import { useRouter, usePathname } from 'next/navigation'
 import Link from 'next/link'
 import { 
@@ -38,8 +38,6 @@ export default function ClientDashboardLayout({ children }: ClientDashboardLayou
   const pathname = usePathname()
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [notifications, setNotifications] = useState(0)
-  
-  const user = user
 
   // Client-specific navigation items
   const navigationItems = [

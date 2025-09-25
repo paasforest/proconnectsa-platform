@@ -25,7 +25,7 @@ const ChatPage = () => {
 
   // Initialize WebSocket connection
   useEffect(() => {
-    const token = (session as any)?.accessToken || (session as any)?.token;
+    const token = localStorage.getItem('token');
     if (!token) return;
 
     // Only add welcome message once
@@ -127,7 +127,7 @@ const ChatPage = () => {
       welcomeMessageAdded.current = false;
       messageIds.current.clear();
     };
-  }, [(session as any)?.accessToken, (session as any)?.token]); // Only depend on token values, not entire session
+  }, []); // Only run once on mount
 
   const handleSendMessage = () => {
     if (newMessage.trim() && wsRef.current && isConnected) {
