@@ -126,13 +126,19 @@ export default function RequestQuotePage() {
       // Submit to API using public endpoint
       const response = await apiClient.createPublicLead(leadData)
       
-      console.log('Lead submitted successfully:', response)
+      console.log('✅ Lead submitted successfully:', response)
       setFormSubmitted(true)
-      toast.success('Your request has been submitted successfully! We\'ll match you with the best providers.')
+      toast.success('🎉 Quote Request Submitted Successfully!', {
+        description: 'We\'ll match you with the best providers and you\'ll receive quotes within 24 hours.',
+        duration: 6000
+      })
     } catch (error) {
-      console.error('Error submitting lead:', error)
-      console.error('Error details:', (error as any).response?.data || (error as Error).message)
-      toast.error('Failed to submit your request. Please try again or contact support.')
+      console.error('❌ Error submitting lead:', error)
+      console.error('❌ Error details:', (error as any).response?.data || (error as Error).message)
+      toast.error('❌ Submission Failed', {
+        description: 'There was an error submitting your request. Please try again or contact support.',
+        duration: 6000
+      })
     }
   }
 

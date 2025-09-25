@@ -329,6 +329,7 @@ export default function LeadGenerationForm({ onComplete, onCancel, preselectedCa
   }
 
   const onSubmit = async (data: LeadGenerationForm) => {
+    console.log('🚀 FORM SUBMISSION STARTED:', data)
     setIsSubmitting(true)
     
     try {
@@ -342,29 +343,37 @@ export default function LeadGenerationForm({ onComplete, onCancel, preselectedCa
         status: 'active'
       }
       
+      console.log('📤 ENRICHED DATA:', enrichedData)
+      
       // Show immediate feedback
       toast.loading('Submitting your quote request...', { id: 'submit-toast' })
       
       // Call the parent component's onComplete function
+      console.log('📞 CALLING onComplete...')
       await onComplete(enrichedData)
+      console.log('✅ onComplete completed successfully')
       
       // Mark as submitted
       setIsSubmitted(true)
+      console.log('✅ Form marked as submitted')
       
       // Update the loading toast to success
       toast.success('Quote request submitted successfully! 🎉', { 
         id: 'submit-toast',
-        description: 'You\'ll receive quotes from verified professionals within 24 hours.'
+        description: 'You\'ll receive quotes from verified professionals within 24 hours.',
+        duration: 5000
       })
       
     } catch (error) {
-      console.error('Error in form submission:', error)
+      console.error('❌ Error in form submission:', error)
       toast.error('Submission failed', {
         id: 'submit-toast',
-        description: 'There was an error submitting your request. Please try again.'
+        description: 'There was an error submitting your request. Please try again.',
+        duration: 5000
       })
     } finally {
       setIsSubmitting(false)
+      console.log('🏁 Form submission process completed')
     }
   }
 
@@ -1103,40 +1112,62 @@ export default function LeadGenerationForm({ onComplete, onCancel, preselectedCa
       <div className="max-w-4xl mx-auto p-6">
         <Card>
           <CardContent className="text-center py-16">
-            <CheckCircle className="h-16 w-16 text-green-500 mx-auto mb-6" />
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">
-              Quote Request Submitted! 🎉
+            <div className="animate-bounce">
+              <CheckCircle className="h-20 w-20 text-green-500 mx-auto mb-6" />
+            </div>
+            <h2 className="text-4xl font-bold text-gray-900 mb-4">
+              🎉 Quote Request Submitted Successfully!
             </h2>
             <p className="text-xl text-gray-600 mb-6">
-              Thank you for choosing ProConnectSA. We're now matching you with verified professionals.
+              Thank you for choosing ProConnectSA! We're now matching you with verified professionals in your area.
             </p>
+            
             <div className="bg-green-50 border border-green-200 rounded-lg p-6 mb-8">
-              <h3 className="font-bold text-green-800 mb-2">What happens next?</h3>
-              <ul className="text-left text-green-700 space-y-2">
+              <h3 className="font-bold text-green-800 mb-4 text-lg">What happens next?</h3>
+              <ul className="text-left text-green-700 space-y-3">
                 <li className="flex items-center">
-                  <CheckCircle className="h-4 w-4 mr-2" />
-                  You'll receive quotes within 24 hours
+                  <CheckCircle className="h-5 w-5 mr-3 text-green-600" />
+                  <span>You'll receive quotes within 24 hours</span>
                 </li>
                 <li className="flex items-center">
-                  <CheckCircle className="h-4 w-4 mr-2" />
-                  All providers are verified and insured
+                  <CheckCircle className="h-5 w-5 mr-3 text-green-600" />
+                  <span>All providers are verified and insured</span>
                 </li>
                 <li className="flex items-center">
-                  <CheckCircle className="h-4 w-4 mr-2" />
-                  Compare quotes and choose the best fit
+                  <CheckCircle className="h-5 w-5 mr-3 text-green-600" />
+                  <span>Compare quotes and choose the best fit</span>
                 </li>
                 <li className="flex items-center">
-                  <CheckCircle className="h-4 w-4 mr-2" />
-                  Get your project completed professionally
+                  <CheckCircle className="h-5 w-5 mr-3 text-green-600" />
+                  <span>Get your project completed professionally</span>
                 </li>
               </ul>
             </div>
-            <Button
-              onClick={onCancel}
-              className="bg-emerald-600 hover:bg-emerald-700"
-            >
-              Back to Homepage
-            </Button>
+
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-8">
+              <p className="text-blue-800">
+                <strong>📧 Check your email</strong> - We've sent you a confirmation and will keep you updated on your quotes.
+              </p>
+            </div>
+            
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Button
+                onClick={onCancel}
+                className="bg-emerald-600 hover:bg-emerald-700 px-8 py-3"
+              >
+                Back to Homepage
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setIsSubmitted(false)
+                  setCurrentStep(1)
+                }}
+                className="px-8 py-3"
+              >
+                Submit Another Request
+              </Button>
+            </div>
           </CardContent>
         </Card>
       </div>
