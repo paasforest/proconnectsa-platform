@@ -1,11 +1,11 @@
 'use client';
 
-import { useState, useEffect, Suspense } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { redirectToDashboard } from '@/lib/auth-utils';
 
-// Separate component that uses useSearchParams
-function LoginContent() {
+export default function LoginPage() {
   const [formData, setFormData] = useState({
     email: '',
     password: ''
@@ -16,9 +16,8 @@ function LoginContent() {
   
   const router = useRouter();
 
-  // Remove useSearchParams for now to avoid Next.js 15 issues
   useEffect(() => {
-    // Check for URL message manually
+    // Check for URL message
     if (typeof window !== 'undefined') {
       const urlParams = new URLSearchParams(window.location.search);
       const urlMessage = urlParams.get('message');
@@ -40,17 +39,7 @@ function LoginContent() {
         return;
       }
 
-      console.log('Testing API connection...');
-      const testResponse = await fetch('https://api.proconnectsa.co.za/api/', {
-        method: 'GET',
-        headers: { 'Content-Type': 'application/json' }
-      });
-
-      if (!testResponse.ok) {
-        throw new Error('Cannot connect to API server');
-      }
-
-      console.log('API connection successful, attempting login...');
+      console.log('Attempting login...');
       
       const loginResponse = await fetch('https://api.proconnectsa.co.za/api/login/', {
         method: 'POST',
@@ -67,19 +56,25 @@ function LoginContent() {
       console.log('Login response:', data);
 
       if (data.success && data.data?.token) {
-        if (typeof window !== 'undefined') {
-          localStorage.setItem('token', data.data.token);
-          localStorage.setItem('user', JSON.stringify(data.data.user));
-        }
+        // Store authentication data
+        localStorage.setItem('token', data.data.token);
+        localStorage.setItem('user', JSON.stringify(data.data.user));
         
-        console.log('Login successful, redirecting to dashboard...');
-        router.push('/dashboard');
+        // Get user type from response
+        const userType = data.data.user?.user_type;
+        console.log('User type:', userType);
+        
+        // Route to appropriate dashboard based on user type
+        const dashboardPath = redirectToDashboard(userType);
+        console.log('Redirecting to:', dashboardPath);
+        
+        router.push(dashboardPath);
       } else {
         setError(data.message || 'Invalid email or password');
       }
     } catch (err: any) {
       console.error('Login error:', err);
-      setError(err.message || 'Login failed. Please check your internet connection and try again.');
+      setError('Login failed. Please check your connection and try again.');
     } finally {
       setLoading(false);
     }
@@ -144,17 +139,7 @@ function LoginContent() {
               disabled={loading}
               className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {loading ? (
-                <span className="flex items-center">
-                  <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                  </svg>
-                  Signing in...
-                </span>
-              ) : (
-                'Sign in'
-              )}
+              {loading ? 'Signing in...' : 'Sign in'}
             </button>
           </div>
 
@@ -163,19 +148,18 @@ function LoginContent() {
               Don't have an account? Sign up
             </Link>
             
+            {/* Test Credentials */}
             <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded text-xs">
               <p className="font-medium text-yellow-800 mb-1">Test Credentials:</p>
-              <p className="text-yellow-700">Email: admin@proconnectsa.co.za</p>
-              <p className="text-yellow-700">Password: admin123</p>
+              <div className="space-y-1">
+                <p className="text-yellow-700"><strong>Admin:</strong> admin@proconnectsa.co.za / admin123</p>
+                <p className="text-yellow-700"><strong>Client:</strong> Register as client</p>
+                <p className="text-yellow-700"><strong>Provider:</strong> Register as service_provider</p>
+              </div>
             </div>
           </div>
         </form>
       </div>
     </div>
   );
-}
-
-// Main page component - no Suspense needed since we removed useSearchParams
-export default function LoginPage() {
-  return <LoginContent />;
 }

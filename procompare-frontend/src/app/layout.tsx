@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Providers } from "@/components/providers/Providers";
 import { Toaster } from "@/components/ui/sonner";
 import ErrorBoundary from "@/components/ErrorBoundary";
+import { AuthProvider } from "@/components/AuthProvider";
 import "./globals.css";
 
 // Use system fonts instead of Google Fonts to avoid network issues
@@ -58,10 +59,12 @@ export default function RootLayout({
     <html lang="en" className={inter.variable}>
       <body className="font-sans antialiased">
         <ErrorBoundary>
-          <Providers>
-            {children}
-            <Toaster />
-          </Providers>
+          <AuthProvider>
+            <Providers>
+              {children}
+              <Toaster />
+            </Providers>
+          </AuthProvider>
         </ErrorBoundary>
       </body>
     </html>

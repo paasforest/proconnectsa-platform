@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { withAuth } from '@/components/AuthProvider';
 
 interface UserStats {
   active_leads?: number;
@@ -17,7 +18,7 @@ interface WalletData {
   currency?: string;
 }
 
-export default function DashboardPage() {
+function DashboardPage({ user }: { user: any }) {
   const [stats, setStats] = useState<UserStats>({
     active_leads: 0,
     completed_leads: 0,
@@ -213,3 +214,5 @@ export default function DashboardPage() {
     </div>
   );
 }
+
+export default withAuth(DashboardPage);
