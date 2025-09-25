@@ -68,13 +68,17 @@ function LeadsPage({ user }: { user: any }) {
       try {
         setLoading(true)
         
-        // Try to fetch real leads first
-        const response = await apiClient.get('/api/leads/available/')
-        setLeads(response.leads || response || [])
+        // Fetch real leads from API
+        const response = await apiClient.get('/api/leads/wallet/available/')
+        const leadsData = response.leads || response || []
+        
+        // For new providers or providers with no service categories, show empty state
+        setLeads(leadsData)
+        
       } catch (error) {
         console.error('Failed to fetch leads:', error)
-        // Fallback to mock data
-        setLeads(getMockLeads())
+        // For new providers, show empty state instead of mock data
+        setLeads([])
       } finally {
         setLoading(false)
       }
@@ -236,19 +240,28 @@ function LeadsPage({ user }: { user: any }) {
           ) : (
             <div className="col-span-full text-center py-12">
               <Target className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 mb-2">No leads found</h3>
+              <h3 className="text-lg font-medium text-gray-900 mb-2">
+                {searchTerm ? 'No leads found' : 'Welcome to your leads dashboard!'}
+              </h3>
               <p className="text-gray-600 mb-4">
                 {searchTerm 
                   ? 'Try adjusting your search criteria'
-                  : 'No leads are available at the moment'
+                  : 'Complete your profile and add your service categories to start receiving leads'
                 }
               </p>
-              {searchTerm && (
+              {searchTerm ? (
                 <Button 
                   variant="outline" 
                   onClick={() => setSearchTerm('')}
                 >
                   Clear Search
+                </Button>
+              ) : (
+                <Button 
+                  onClick={() => router.push('/dashboard/settings')}
+                  className="bg-blue-600 hover:bg-blue-700"
+                >
+                  Complete Your Profile
                 </Button>
               )}
             </div>

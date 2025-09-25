@@ -429,13 +429,48 @@ def create_public_lead(request):
 
 
 @api_view(['GET'])
-@permission_classes([AllowAny])
+@permission_classes([IsAuthenticated])
 def available_leads_view(request):
-    """Get available leads for providers (legacy endpoint)"""
-    # For now, allow public access to test the frontend
-    leads = Lead.objects.filter(is_available=True)[:20]  # Limit to 20 leads
-    serializer = LeadSerializer(leads, many=True)
-    return Response(serializer.data)
+    """Get available leads for authenticated providers only"""
+    # Only allow providers to access leads
+    if not request.user.is_authenticated or request.user.user_type != 'service_provider':
+        return Response(
+            {'error': 'Only authenticated service providers can view leads'}, 
+            status=status.HTTP_403_FORBIDDEN
+        )
+    
+    try:
+        # Get available leads that are not already claimed by this provider
+        leads = Lead.objects.filter(
+            is_available=True,
+            status='verified',
+            expires_at__gt=timezone.now()
+        ).exclude(
+            # Exclude leads already claimed by this provider
+            assignments__provider=request.user
+        ).order_by('-created_at')[:20]
+        
+        # For new providers, return empty list to show clean dashboard
+        if not request.user.provider_profile or not hasattr(request.user.provider_profile, 'service_categories'):
+            return Response({'leads': []})
+        
+        # Filter by provider's service categories
+        provider_categories = request.user.provider_profile.service_categories.all()
+        if provider_categories.exists():
+            leads = leads.filter(service_category__in=provider_categories)
+        else:
+            # New provider with no service categories - return empty
+            return Response({'leads': []})
+        
+        serializer = LeadSerializer(leads, many=True)
+        return Response({'leads': serializer.data})
+        
+    except Exception as e:
+        logger.error(f"Error fetching available leads: {str(e)}")
+        return Response(
+            {'error': 'Failed to fetch available leads'}, 
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
 
 
 @api_view(['POST'])

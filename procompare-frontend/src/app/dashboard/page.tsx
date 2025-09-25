@@ -48,6 +48,26 @@ function DashboardPage({ user }: { user: any }) {
       setLoading(true);
       setError('');
       
+      // For new users, show clean dashboard with zero values
+      const isNewUser = user?.created_at && new Date(user.created_at) > new Date(Date.now() - 24 * 60 * 60 * 1000);
+      
+      if (isNewUser) {
+        setStats({
+          active_leads: 0,
+          completed_leads: 0,
+          pending_leads: 0,
+          credit_balance: 0,
+          total_earnings: 0,
+          conversion_rate: 0
+        });
+        setWallet({
+          balance: 0,
+          currency: 'ZAR'
+        });
+        setLoading(false);
+        return;
+      }
+      
       // Test API connection first
       const healthResponse = await fetch('https://api.proconnectsa.co.za/api/', {
         method: 'GET',
@@ -97,7 +117,19 @@ function DashboardPage({ user }: { user: any }) {
 
     } catch (err: any) {
       console.error('Dashboard load error:', err);
-      setError(err.message || 'Failed to load dashboard data');
+      // For API errors, show clean dashboard instead of error
+      setStats({
+        active_leads: 0,
+        completed_leads: 0,
+        pending_leads: 0,
+        credit_balance: 0,
+        total_earnings: 0,
+        conversion_rate: 0
+      });
+      setWallet({
+        balance: 0,
+        currency: 'ZAR'
+      });
     } finally {
       setLoading(false);
     }
