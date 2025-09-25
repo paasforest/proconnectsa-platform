@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from 'react';
-import { useSession, signOut } from 'next-auth/react';
+import { useAuth } from '@/components/AuthProvider';
 import {
   LayoutDashboard, MessageSquare, Users, DollarSign, Wrench, 
   Settings, BarChart3, Bell, LogOut, Menu, X
@@ -14,7 +14,7 @@ import AdminSupportDashboard from './AdminSupportDashboard';
 type DashboardView = 'overview' | 'support' | 'staff' | 'finance' | 'technical' | 'settings';
 
 const AdminDashboard = () => {
-  const { data: session } = useSession();
+  const { user, logout } = useAuth();
   const [currentView, setCurrentView] = useState<DashboardView>('overview');
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
@@ -95,7 +95,7 @@ const Sidebar = ({ navigation, currentView, setCurrentView }: {
   currentView: DashboardView;
   setCurrentView: (view: DashboardView) => void;
 }) => {
-  const { data: session } = useSession();
+  const { user, logout } = useAuth();
 
   return (
     <div className="flex-1 flex flex-col min-h-0 border-r border-gray-200 bg-white">
@@ -133,13 +133,13 @@ const Sidebar = ({ navigation, currentView, setCurrentView }: {
             <div className="flex-shrink-0">
               <div className="h-8 w-8 rounded-full bg-gray-300 flex items-center justify-center">
                 <span className="text-sm font-medium text-gray-700">
-                  {(session?.user?.name || 'A').charAt(0).toUpperCase()}
+                  {(user?.first_name || 'A').charAt(0).toUpperCase()}
                 </span>
               </div>
             </div>
             <div className="ml-3">
               <p className="text-sm font-medium text-gray-700">
-                {session?.user?.name || 'Admin User'}
+                {user ? `${user.first_name} ${user.last_name}` : 'Admin User'}
               </p>
               <p className="text-xs font-medium text-gray-500">
                 Administrator
@@ -147,7 +147,7 @@ const Sidebar = ({ navigation, currentView, setCurrentView }: {
             </div>
           </div>
           <button
-            onClick={() => signOut({ callbackUrl: '/admin' })}
+            onClick={() => logout()}
             className="p-2 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100"
             title="Logout"
           >
