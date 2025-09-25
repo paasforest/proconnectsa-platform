@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import Link from "next/link"
-import { useAuth } from "next-auth/react"
+import { useAuth } from "@/components/AuthProvider"
 import { Button } from "@/components/ui/button"
 import { 
   DropdownMenu, 
@@ -58,7 +58,7 @@ export function ClientHeader() {
         <div className="hidden md:flex items-center space-x-4">
           {false ? (
             <div className="h-9 w-20 bg-muted animate-pulse rounded-md" />
-          ) : session ? (
+          ) : user ? (
             <div className="flex items-center space-x-4">
               {/* Notifications */}
               <Button variant="ghost" size="icon" className="relative">
@@ -148,7 +148,7 @@ export function ClientHeader() {
               </Link>
             </nav>
             
-            {session ? (
+            {user ? (
               <div className="pt-4 border-t space-y-2">
                 <div className="flex items-center space-x-2 text-sm">
                   <User className="h-4 w-4" />
