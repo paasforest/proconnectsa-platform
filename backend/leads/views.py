@@ -462,6 +462,20 @@ def available_leads_view(request):
             # New provider with no service categories - return empty
             return Response({'leads': []})
         
+        # Apply geographical filtering based on provider's service areas
+        provider_service_areas = getattr(request.user.provider_profile, 'service_areas', [])
+        if provider_service_areas:
+            from django.db.models import Q
+            geographical_filter = Q()
+            for area in provider_service_areas:
+                area_lower = area.lower()
+                geographical_filter |= (
+                    Q(location_suburb__icontains=area_lower) |
+                    Q(location_city__icontains=area_lower) |
+                    Q(location_address__icontains=area_lower)
+                )
+            leads = leads.filter(geographical_filter)
+        
         serializer = LeadSerializer(leads, many=True)
         return Response({'leads': serializer.data})
         

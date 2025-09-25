@@ -41,17 +41,33 @@ def available_leads(request):
     
     # Get available leads from database - BARK-STYLE FLOW
     # Filter for verified leads that are available and not expired
-    # SECURITY: Only show leads for services this provider offers
+    # SECURITY: Only show leads for services this provider offers AND locations they serve
     provider_service_categories = []
+    provider_service_areas = []
     if hasattr(request.user, 'provider_profile'):
         provider_service_categories = request.user.provider_profile.service_categories or []
+        provider_service_areas = request.user.provider_profile.service_areas or []
     
+    # Start with service category filtering
     leads = Lead.objects.filter(
         status='active',  # Changed from 'verified' to 'active' to match actual lead status
         is_available=True,
         expires_at__gt=timezone.now(),
         service_category__id__in=provider_service_categories  # ENFORCE SERVICE MATCHING
     ).select_related('client', 'service_category').order_by('-created_at')[:20]
+    
+    # Apply geographical filtering if provider has service areas defined
+    if provider_service_areas:
+        from django.db.models import Q
+        geographical_filter = Q()
+        for area in provider_service_areas:
+            area_lower = area.lower()
+            geographical_filter |= (
+                Q(location_suburb__icontains=area_lower) |
+                Q(location_city__icontains=area_lower) |
+                Q(location_address__icontains=area_lower)
+            )
+        leads = leads.filter(geographical_filter)
     
     # Convert leads to frontend format
     leads_data = []
