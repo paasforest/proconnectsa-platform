@@ -172,3 +172,4 @@ export interface CreateLeadData {
 export interface TopUpData {
   amount: number;
 }
+
