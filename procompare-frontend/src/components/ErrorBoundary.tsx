@@ -37,18 +37,16 @@ class ErrorBoundary extends React.Component<
             </div>
             <button
               onClick={() => this.setState({ hasError: false })}
-              className="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700"
+              className="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700 mr-2"
             >
               Try again
             </button>
-            <div className="mt-4">
-              <button
-                onClick={() => window.location.reload()}
-                className="text-indigo-600 hover:text-indigo-800 underline"
-              >
-                Reload page
-              </button>
-            </div>
+            <button
+              onClick={() => window.location.reload()}
+              className="text-indigo-600 hover:text-indigo-800 underline"
+            >
+              Reload page
+            </button>
           </div>
         </div>
       );
@@ -59,4 +57,3 @@ class ErrorBoundary extends React.Component<
 }
 
 export default ErrorBoundary;
-

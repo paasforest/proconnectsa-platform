@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import apiClient from '@/lib/api-client'; // Adjust path as needed
 import Link from 'next/link';
 
 export default function RegisterPage() {
@@ -12,7 +11,7 @@ export default function RegisterPage() {
     password_confirm: '',
     first_name: '',
     last_name: '',
-    user_type: 'client', // Default to client
+    user_type: 'client',
     phone: '',
     city: '',
     province: ''
@@ -51,26 +50,33 @@ export default function RegisterPage() {
     }
 
     try {
-      // Call your Flask backend
-      const response = await apiClient.register({
-        email: formData.email,
-        password: formData.password,
-        first_name: formData.first_name,
-        last_name: formData.last_name,
-        user_type: formData.user_type as 'client' | 'service_provider',
-        phone: formData.phone,
-        city: formData.city,
-        province: formData.province
+      // Direct API call to Flask backend
+      const response = await fetch('https://api.proconnectsa.co.za/api/register/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: formData.email,
+          password: formData.password,
+          first_name: formData.first_name,
+          last_name: formData.last_name,
+          user_type: formData.user_type,
+          phone: formData.phone,
+          city: formData.city,
+          province: formData.province
+        })
       });
 
-      if (response.success) {
-        setSuccess(response.message || 'Registration successful!');
-        // Redirect to login after 2 seconds
+      const data = await response.json();
+
+      if (data.success) {
+        setSuccess(data.message || 'Registration successful!');
         setTimeout(() => {
           router.push('/login?message=Registration successful, please login');
         }, 2000);
       } else {
-        setError(response.message || 'Registration failed');
+        setError(data.message || 'Registration failed');
       }
     } catch (err: any) {
       setError(err.message || 'Registration failed. Please try again.');
@@ -109,9 +115,7 @@ export default function RegisterPage() {
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label htmlFor="first_name" className="sr-only">First Name</label>
               <input
-                id="first_name"
                 name="first_name"
                 type="text"
                 required
@@ -123,9 +127,7 @@ export default function RegisterPage() {
             </div>
             
             <div>
-              <label htmlFor="last_name" className="sr-only">Last Name</label>
               <input
-                id="last_name"
                 name="last_name"
                 type="text"
                 required
@@ -138,9 +140,7 @@ export default function RegisterPage() {
           </div>
 
           <div>
-            <label htmlFor="email" className="sr-only">Email address</label>
             <input
-              id="email"
               name="email"
               type="email"
               required
@@ -152,9 +152,7 @@ export default function RegisterPage() {
           </div>
 
           <div>
-            <label htmlFor="user_type" className="sr-only">Account Type</label>
             <select
-              id="user_type"
               name="user_type"
               required
               className="relative block w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
@@ -167,9 +165,7 @@ export default function RegisterPage() {
           </div>
 
           <div>
-            <label htmlFor="password" className="sr-only">Password</label>
             <input
-              id="password"
               name="password"
               type="password"
               required
@@ -181,9 +177,7 @@ export default function RegisterPage() {
           </div>
 
           <div>
-            <label htmlFor="password_confirm" className="sr-only">Confirm Password</label>
             <input
-              id="password_confirm"
               name="password_confirm"
               type="password"
               required
@@ -197,7 +191,6 @@ export default function RegisterPage() {
           <div className="grid grid-cols-2 gap-4">
             <div>
               <input
-                id="phone"
                 name="phone"
                 type="tel"
                 className="relative block w-full px-3 py-2 border border-gray-300 rounded-md placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
@@ -209,7 +202,6 @@ export default function RegisterPage() {
             
             <div>
               <input
-                id="city"
                 name="city"
                 type="text"
                 className="relative block w-full px-3 py-2 border border-gray-300 rounded-md placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
