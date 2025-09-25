@@ -122,7 +122,8 @@ class LeadCreateSerializer(serializers.ModelSerializer):
             'latitude', 'longitude', 'budget_range', 'urgency',
             'preferred_contact_time', 'additional_requirements',
             'hiring_intent', 'hiring_timeline', 'research_purpose',
-            'source', 'utm_source', 'utm_medium', 'utm_campaign'
+            'source', 'utm_source', 'utm_medium', 'utm_campaign',
+            'status', 'verification_score', 'verified_at'
         ]
     
     def create(self, validated_data):
