@@ -69,10 +69,74 @@ const DashboardOverview = () => {
           apiClient.get('/api/auth/profile/')
         ]);
         
-        setStats(statsResponse);
-        setProfile(profileResponse);
+        // Check if this is a new user by looking at user data
+        const isNewUser = user?.created_at && new Date(user.created_at) > new Date(Date.now() - 24 * 60 * 60 * 1000); // Created within last 24 hours
+        
+        if (isNewUser || !statsResponse?.data) {
+          // Show clean data for new users
+          setStats({
+            total_leads: 0,
+            active_leads: 0,
+            completed_jobs: 0,
+            total_revenue: 0,
+            average_rating: 0,
+            response_rate: 0,
+            conversion_rate: 0,
+            profile_views: 0,
+            credit_balance: user?.wallet_balance || 0,
+            recent_leads: []
+          });
+        } else {
+          // Use API data for existing users
+          setStats({
+            total_leads: statsResponse.data.total_leads || 0,
+            active_leads: statsResponse.data.active_leads || 0,
+            completed_jobs: statsResponse.data.completed_leads || 0,
+            total_revenue: statsResponse.data.total_earnings || 0,
+            average_rating: 0,
+            response_rate: 0,
+            conversion_rate: statsResponse.data.conversion_rate || 0,
+            profile_views: 0,
+            credit_balance: statsResponse.data.credit_balance || user?.wallet_balance || 0,
+            recent_leads: []
+          });
+        }
+        
+        setProfile(profileResponse?.data || {
+          id: user?.id?.toString() || '',
+          email: user?.email || '',
+          first_name: user?.first_name || '',
+          last_name: user?.last_name || '',
+          phone: user?.phone || '',
+          city: user?.city || '',
+          province: user?.province || '',
+          subscription_tier: 'basic'
+        });
       } catch (error) {
-        // Handle error silently or show user-friendly message
+        console.error('Error fetching dashboard data:', error);
+        // Show clean data for new users on error
+        setStats({
+          total_leads: 0,
+          active_leads: 0,
+          completed_jobs: 0,
+          total_revenue: 0,
+          average_rating: 0,
+          response_rate: 0,
+          conversion_rate: 0,
+          profile_views: 0,
+          credit_balance: user?.wallet_balance || 0,
+          recent_leads: []
+        });
+        setProfile({
+          id: user?.id?.toString() || '',
+          email: user?.email || '',
+          first_name: user?.first_name || '',
+          last_name: user?.last_name || '',
+          phone: user?.phone || '',
+          city: user?.city || '',
+          province: user?.province || '',
+          subscription_tier: 'basic'
+        });
       } finally {
         setLoading(false);
       }
@@ -178,9 +242,23 @@ const DashboardOverview = () => {
         <h1 className="text-2xl font-bold text-gray-900">
           Dashboard Overview
         </h1>
-        <p className="text-gray-600 mt-2">
-          Here's what's happening with your leads and business performance.
-        </p>
+        {user?.created_at && new Date(user.created_at) > new Date(Date.now() - 24 * 60 * 60 * 1000) ? (
+          <div className="mt-2 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+            <h2 className="text-lg font-semibold text-blue-900 mb-2">🎉 Welcome to ProConnectSA!</h2>
+            <p className="text-blue-800 mb-2">
+              You're all set up! Start by browsing available leads and building your reputation.
+            </p>
+            <div className="text-sm text-blue-700">
+              <p>• You have <strong>{user?.wallet_balance || 0} credits</strong> to get started</p>
+              <p>• Complete your profile to attract more clients</p>
+              <p>• Respond quickly to leads to build your rating</p>
+            </div>
+          </div>
+        ) : (
+          <p className="text-gray-600 mt-2">
+            Here's what's happening with your leads and business performance.
+          </p>
+        )}
         {profile?.location && (
           <p className="text-sm text-gray-500 mt-1">
             📍 Serving {profile.location} • {profile.subscription_tier} Plan

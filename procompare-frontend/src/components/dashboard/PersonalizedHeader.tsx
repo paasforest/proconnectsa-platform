@@ -70,59 +70,68 @@ export default function PersonalizedHeader({
         if (data.data && data.data.provider_profile) {
           setStats(data.data.provider_profile);
         } else {
-          // Use user data from authentication instead of hardcoded data
+          // Check if this is a new user
+          const isNewUser = user?.created_at && new Date(user.created_at) > new Date(Date.now() - 24 * 60 * 60 * 1000);
+          
+          // Use user data from authentication with clean data for new users
           setStats({
             business_name: user?.business_name || `${user?.first_name} ${user?.last_name}` || 'Your Business',
             service_categories: user?.primary_service ? [user.primary_service.toUpperCase()] : ['GENERAL'],
             service_areas: user?.city ? [user.city] : ['Your Area'],
             average_rating: 0,
             total_reviews: 0,
-            response_time_hours: 24,
+            response_time_hours: isNewUser ? 0 : 24,
             job_completion_rate: 0,
             leads_claimed_this_month: 0,
-            monthly_lead_limit: 10,
+            monthly_lead_limit: isNewUser ? 5 : 10, // Lower limit for new users
             subscription_tier: 'basic',
             credit_balance: user?.wallet_balance || 0,
             customer_code: `PC${user?.id || '00000000'}`,
-            verification_status: 'pending'
+            verification_status: isNewUser ? 'pending' : 'verified'
           });
         }
       } else {
         console.error('Profile API error:', response.status, response.statusText);
-        // Use user data from authentication instead of hardcoded data
+        // Check if this is a new user
+        const isNewUser = user?.created_at && new Date(user.created_at) > new Date(Date.now() - 24 * 60 * 60 * 1000);
+        
+        // Use user data from authentication with clean data for new users
         setStats({
           business_name: user?.business_name || `${user?.first_name} ${user?.last_name}` || 'Your Business',
           service_categories: user?.primary_service ? [user.primary_service.toUpperCase()] : ['GENERAL'],
           service_areas: user?.city ? [user.city] : ['Your Area'],
           average_rating: 0,
           total_reviews: 0,
-          response_time_hours: 24,
+          response_time_hours: isNewUser ? 0 : 24,
           job_completion_rate: 0,
           leads_claimed_this_month: 0,
-          monthly_lead_limit: 10,
+          monthly_lead_limit: isNewUser ? 5 : 10,
           subscription_tier: 'basic',
           credit_balance: user?.wallet_balance || 0,
           customer_code: `PC${user?.id || '00000000'}`,
-          verification_status: 'pending'
+          verification_status: isNewUser ? 'pending' : 'verified'
         });
       }
     } catch (error) {
       console.error('Error fetching provider stats:', error);
-      // Use user data from authentication instead of hardcoded data
+      // Check if this is a new user
+      const isNewUser = user?.created_at && new Date(user.created_at) > new Date(Date.now() - 24 * 60 * 60 * 1000);
+      
+      // Use user data from authentication with clean data for new users
       setStats({
         business_name: user?.business_name || `${user?.first_name} ${user?.last_name}` || 'Your Business',
         service_categories: user?.primary_service ? [user.primary_service.toUpperCase()] : ['GENERAL'],
         service_areas: user?.city ? [user.city] : ['Your Area'],
         average_rating: 0,
         total_reviews: 0,
-        response_time_hours: 24,
+        response_time_hours: isNewUser ? 0 : 24,
         job_completion_rate: 0,
         leads_claimed_this_month: 0,
-        monthly_lead_limit: 10,
+        monthly_lead_limit: isNewUser ? 5 : 10,
         subscription_tier: 'basic',
         credit_balance: user?.wallet_balance || 0,
         customer_code: `PC${user?.id || '00000000'}`,
-        verification_status: 'pending'
+        verification_status: isNewUser ? 'pending' : 'verified'
       });
     } finally {
       setLoading(false);
