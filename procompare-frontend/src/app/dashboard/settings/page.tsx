@@ -1,43 +1,15 @@
 'use client'
 
-import { useAuth } from '@/components/AuthProvider';
-import { useRouter } from 'next/navigation'
-import { useEffect } from 'react'
+import { withAuth } from '@/components/AuthProvider';
 import DashboardLayout from '@/components/dashboard/DashboardLayout'
 import SettingsPage from '@/components/dashboard/SettingsPage'
 
-export default function SettingsPageRoute() {
-  const { user, token } = useAuth()
-  const router = useRouter()
-
-  useEffect(() => {
-    if (user === null) {
-      router.push('/login')
-    }
-  }, [status, router])
-
-  if (false) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading settings...</p>
-        </div>
-      </div>
-    )
-  }
-
-  if (!user) return null
-
-  // Only show settings page for providers
-  if (user.user_type !== 'service_provider') {
-    router.push('/client')
-    return null
-  }
-
+function SettingsPageRoute({ user }: { user: any }) {
   return (
     <DashboardLayout>
       <SettingsPage />
     </DashboardLayout>
   )
 }
+
+export default withAuth(SettingsPageRoute, ['service_provider'])

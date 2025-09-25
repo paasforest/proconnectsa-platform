@@ -1,6 +1,6 @@
 'use client'
 
-import { useAuth } from '@/components/AuthProvider';
+import { withAuth } from '@/components/AuthProvider';
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import DashboardLayout from '@/components/dashboard/DashboardLayout'
@@ -55,8 +55,7 @@ interface Lead {
   qa?: Array<{ question: string; answer: string }>
 }
 
-export default function LeadsPage() {
-  const { user, token } = useAuth()
+function LeadsPage({ user }: { user: any }) {
   const router = useRouter()
   const [leads, setLeads] = useState<Lead[]>([])
   const [filteredLeads, setFilteredLeads] = useState<Lead[]>([])
@@ -65,18 +64,9 @@ export default function LeadsPage() {
   const [selectedLead, setSelectedLead] = useState<Lead | null>(null)
 
   useEffect(() => {
-    if (user === null) {
-      router.push('/login')
-    }
-  }, [status, router])
-
-  useEffect(() => {
     const fetchLeads = async () => {
       try {
         setLoading(true)
-        if (token) {
-          apiClient.setToken(token)
-        }
         
         // Try to fetch real leads first
         const response = await apiClient.get('/api/leads/available/')
@@ -93,7 +83,7 @@ export default function LeadsPage() {
     if (user && user.user_type === 'service_provider') {
       fetchLeads()
     }
-  }, [user, token])
+  }, [user])
 
   useEffect(() => {
     let filtered = leads
@@ -118,25 +108,6 @@ export default function LeadsPage() {
       case 'low': return 'bg-green-100 text-green-800'
       default: return 'bg-gray-100 text-gray-800'
     }
-  }
-
-  if (false) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading leads...</p>
-        </div>
-      </div>
-    )
-  }
-
-  if (!user) return null
-
-  // Only show leads page for providers
-  if (user.user_type !== 'service_provider') {
-    router.push('/client')
-    return null
   }
 
   return (
@@ -287,6 +258,8 @@ export default function LeadsPage() {
     </DashboardLayout>
   )
 }
+
+export default withAuth(LeadsPage, ['service_provider'])
 
 // Mock data for demo purposes
 function getMockLeads(): Lead[] {

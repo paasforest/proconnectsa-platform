@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { withAuth } from '@/components/AuthProvider';
+import DashboardLayout from '@/components/dashboard/DashboardLayout';
 
 interface UserStats {
   active_leads?: number;
@@ -114,8 +115,9 @@ function DashboardPage({ user }: { user: any }) {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <DashboardLayout>
+      <div className="py-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {error && (
           <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6">
             <div className="flex justify-between items-center">
@@ -211,8 +213,8 @@ function DashboardPage({ user }: { user: any }) {
           </div>
         </div>
       </div>
-    </div>
+    </DashboardLayout>
   );
 }
 
-export default withAuth(DashboardPage);
+export default withAuth(DashboardPage, ['service_provider']);

@@ -1,6 +1,6 @@
 'use client'
 
-import { useAuth } from '@/components/AuthProvider';
+import { withAuth } from '@/components/AuthProvider';
 import { useRouter } from 'next/navigation'
 import { useEffect } from 'react'
 import DashboardLayout from '@/components/dashboard/DashboardLayout'
@@ -19,38 +19,12 @@ import {
 } from 'lucide-react'
 import { useState } from 'react'
 
-export default function ProviderSupportPage() {
-  const { user, token } = useAuth()
+function ProviderSupportPage({ user }: { user: any }) {
   const router = useRouter()
   const [message, setMessage] = useState('')
   const [subject, setSubject] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitted, setSubmitted] = useState(false)
-
-  useEffect(() => {
-    if (user === null) {
-      router.push('/login')
-    }
-  }, [status, router])
-
-  if (false) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading...</p>
-        </div>
-      </div>
-    )
-  }
-
-  if (!user) return null
-
-  // Only show support page for providers
-  if (user.user_type !== 'service_provider') {
-    router.push('/client')
-    return null
-  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -261,6 +235,8 @@ export default function ProviderSupportPage() {
     </DashboardLayout>
   )
 }
+
+export default withAuth(ProviderSupportPage, ['service_provider'])
 
 
 
