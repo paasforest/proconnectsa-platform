@@ -127,7 +127,7 @@ export default function RequestQuotePage() {
       const response = await apiClient.createPublicLead(leadData)
       
       console.log('✅ Lead submitted successfully:', response)
-      setFormSubmitted(true)
+      // Don't set formSubmitted here - let the form handle its own success state
       toast.success('🎉 Quote Request Submitted Successfully!', {
         description: 'We\'ll match you with the best providers and you\'ll receive quotes within 24 hours.',
         duration: 6000

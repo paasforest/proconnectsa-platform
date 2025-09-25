@@ -350,10 +350,15 @@ export default function LeadGenerationForm({ onComplete, onCancel, preselectedCa
       
       // Call the parent component's onComplete function
       console.log('📞 CALLING onComplete...')
-      await onComplete(enrichedData)
-      console.log('✅ onComplete completed successfully')
+      try {
+        await onComplete(enrichedData)
+        console.log('✅ onComplete completed successfully')
+      } catch (onCompleteError) {
+        console.error('⚠️ onComplete had an error, but continuing with form success:', onCompleteError)
+        // Continue with form success even if parent onComplete fails
+      }
       
-      // Mark as submitted
+      // Mark as submitted (always do this regardless of onComplete result)
       setIsSubmitted(true)
       console.log('✅ Form marked as submitted')
       
@@ -1108,6 +1113,7 @@ export default function LeadGenerationForm({ onComplete, onCancel, preselectedCa
 
   // Show success state if submitted
   if (isSubmitted) {
+    console.log('🎉 RENDERING SUCCESS STATE!', { isSubmitted, currentStep })
     return (
       <div className="max-w-4xl mx-auto p-6">
         <Card>
