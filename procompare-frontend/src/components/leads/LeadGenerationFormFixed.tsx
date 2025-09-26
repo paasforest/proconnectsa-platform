@@ -77,17 +77,11 @@ const URGENCY_OPTIONS = [
   { value: 'flexible', label: "I'm flexible", color: 'bg-blue-500' }
 ]
 
-interface LeadGenerationFormProps {
-  onComplete?: (data: any) => void
-  onCancel?: () => void
-  preselectedCategory?: string | null
-}
-
-export default function LeadGenerationForm({ onComplete, onCancel, preselectedCategory }: LeadGenerationFormProps) {
+export default function LeadGenerationFormFixed() {
   const [currentStep, setCurrentStep] = useState(1)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [formData, setFormData] = useState<LeadFormData>({
-    service_category: preselectedCategory || '',
+    service_category: '',
     service_type: '',
     location: '',
     urgency: '',
@@ -189,18 +183,13 @@ export default function LeadGenerationForm({ onComplete, onCancel, preselectedCa
         const result = await response.json()
         console.log('✅ Lead created successfully:', result)
         
-        // Call the onComplete callback if provided
-        if (onComplete) {
-          onComplete(result)
-        }
-        
         // Success! Show confirmation or redirect
         alert('Thank you! We\'re connecting you with qualified professionals.')
         
         // Reset form
         setCurrentStep(1)
         setFormData({
-          service_category: preselectedCategory || '',
+          service_category: '',
           service_type: '',
           location: '',
           urgency: '',
@@ -579,26 +568,15 @@ export default function LeadGenerationForm({ onComplete, onCancel, preselectedCa
 
           {/* Navigation Buttons */}
           <div className="bg-gray-50 px-8 py-6 flex justify-between items-center">
-            <div className="flex items-center space-x-4">
-              {onCancel && (
-                <button
-                  type="button"
-                  onClick={onCancel}
-                  className="flex items-center px-4 py-2 text-gray-600 hover:text-gray-800"
-                >
-                  Cancel
-                </button>
-              )}
-              <button
-                type="button"
-                onClick={prevStep}
-                disabled={currentStep === 1}
-                className="flex items-center px-4 py-2 text-gray-600 hover:text-gray-800 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                <ChevronLeft className="w-4 h-4 mr-1" />
-                Previous
-              </button>
-            </div>
+            <button
+              type="button"
+              onClick={prevStep}
+              disabled={currentStep === 1}
+              className="flex items-center px-4 py-2 text-gray-600 hover:text-gray-800 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <ChevronLeft className="w-4 h-4 mr-1" />
+              Previous
+            </button>
 
             <div className="text-sm text-gray-500">
               Step {currentStep} of 3
