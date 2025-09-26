@@ -12,7 +12,6 @@ export function middleware(request: NextRequest) {
     "/how-it-works",
     "/services",
     "/providers",
-    "/about",
     "/contact",
     "/privacy",
     "/terms",

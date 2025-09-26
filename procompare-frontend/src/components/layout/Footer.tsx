@@ -38,27 +38,27 @@ export function Footer() {
             <h3 className="font-semibold">Services</h3>
             <ul className="space-y-2 text-sm">
               <li>
-                <Link href="/services/plumbing" className="text-muted-foreground hover:text-foreground transition-colors">
+                <Link href="/request-quote/plumbing" className="text-muted-foreground hover:text-foreground transition-colors">
                   Plumbing
                 </Link>
               </li>
               <li>
-                <Link href="/services/electrical" className="text-muted-foreground hover:text-foreground transition-colors">
+                <Link href="/request-quote/electrical" className="text-muted-foreground hover:text-foreground transition-colors">
                   Electrical
                 </Link>
               </li>
               <li>
-                <Link href="/services/painting" className="text-muted-foreground hover:text-foreground transition-colors">
+                <Link href="/request-quote/painting" className="text-muted-foreground hover:text-foreground transition-colors">
                   Painting
                 </Link>
               </li>
               <li>
-                <Link href="/services/cleaning" className="text-muted-foreground hover:text-foreground transition-colors">
+                <Link href="/request-quote/cleaning" className="text-muted-foreground hover:text-foreground transition-colors">
                   Cleaning
                 </Link>
               </li>
               <li>
-                <Link href="/services/gardening" className="text-muted-foreground hover:text-foreground transition-colors">
+                <Link href="/request-quote/gardening" className="text-muted-foreground hover:text-foreground transition-colors">
                   Gardening
                 </Link>
               </li>
@@ -70,7 +70,7 @@ export function Footer() {
             <h3 className="font-semibold">Company</h3>
             <ul className="space-y-2 text-sm">
               <li>
-                <Link href="/about" className="text-muted-foreground hover:text-foreground transition-colors">
+                <Link href="/how-it-works" className="text-muted-foreground hover:text-foreground transition-colors">
                   About Us
                 </Link>
               </li>
