@@ -135,7 +135,7 @@ export default function LeadGenerationForm({ onComplete, onCancel, preselectedCa
     }
   }
 
-  // Transform form data to backend format
+  // Transform form data to backend format for public endpoint
   const transformToBackendFormat = (data: LeadFormData) => {
     const selectedCategory = SERVICE_CATEGORIES[data.service_category as keyof typeof SERVICE_CATEGORIES]
     
@@ -151,6 +151,11 @@ export default function LeadGenerationForm({ onComplete, onCancel, preselectedCa
       urgency: data.urgency,
       preferred_contact_time: data.preferred_contact_method || 'anytime',
       additional_requirements: data.special_requirements || '',
+      
+      // Client contact details for public endpoint
+      client_name: data.contact_name,
+      client_email: data.contact_email,
+      client_phone: data.contact_phone,
       
       // Optional fields
       hiring_intent: 'ready-to-hire', // Default value
@@ -175,12 +180,11 @@ export default function LeadGenerationForm({ onComplete, onCancel, preselectedCa
       
       console.log('📤 Submitting lead (backend format):', backendData)
       
-      // Submit to your API
-      const response = await fetch('/api/leads/create/', {
+      // Submit to public API endpoint (no authentication required)
+      const response = await fetch('/api/leads/create-public/', {
         method: 'POST',
         headers: { 
-          'Content-Type': 'application/json',
-          'Authorization': `Token ${localStorage.getItem('authToken')}` // Add auth token
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify(backendData)
       })
