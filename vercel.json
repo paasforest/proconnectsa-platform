@@ -1,14 +1,15 @@
 {
-  "buildCommand": "cd procompare-frontend && npm run build",
+  "buildCommand": "cd procompare-frontend && npm ci && npm run build",
   "outputDirectory": "procompare-frontend/.next",
-  "installCommand": "cd procompare-frontend && npm install",
+  "installCommand": "cd procompare-frontend && npm ci",
   "devCommand": "cd procompare-frontend && npm run dev",
   "framework": "nextjs",
+  "rootDirectory": "procompare-frontend",
   "env": {
     "NEXT_PUBLIC_API_URL": "https://api.proconnectsa.co.za",
     "NEXT_PUBLIC_FRONTEND_URL": "https://www.proconnectsa.co.za",
     "NEXTAUTH_SECRET": "proconnectsa-nextauth-secret-key-2024-production-at-least-32-chars-long",
     "NEXTAUTH_URL": "https://www.proconnectsa.co.za",
-    "FORCE_REBUILD": "2025-09-25-12:00"
+    "FORCE_REBUILD": "2025-09-26-14:30"
   }
 }
