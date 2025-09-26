@@ -13,8 +13,6 @@ export function middleware(request: NextRequest) {
     "/services",
     "/providers",
     "/contact",
-    "/privacy",
-    "/terms",
     "/request-quote",
     "/business-services",
     "/register-provider",

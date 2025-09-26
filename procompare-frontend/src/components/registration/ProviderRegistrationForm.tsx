@@ -968,7 +968,7 @@ export default function ProviderRegistrationForm({ onComplete, onCancel }: Provi
           <Checkbox {...register('terms_accepted')} />
           <div className="text-sm">
             <span>I accept the </span>
-            <a href="/terms" className="text-blue-600 hover:underline">Terms and Conditions</a>
+            <a href="/how-it-works" className="text-blue-600 hover:underline">Terms and Conditions</a>
             <span> and agree to be bound by them</span>
           </div>
         </div>
@@ -980,7 +980,7 @@ export default function ProviderRegistrationForm({ onComplete, onCancel }: Provi
           <Checkbox {...register('privacy_accepted')} />
           <div className="text-sm">
             <span>I accept the </span>
-            <a href="/privacy" className="text-blue-600 hover:underline">Privacy Policy</a>
+            <a href="/how-it-works" className="text-blue-600 hover:underline">Privacy Policy</a>
             <span> and consent to the processing of my personal data</span>
           </div>
         </div>

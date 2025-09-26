@@ -596,7 +596,7 @@ export default function RegisterPage() {
               className="mt-1 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500"
             />
             <span className="text-sm text-gray-700">
-              I have read and agree to the <a href="/terms" className="text-emerald-600 hover:underline">Terms of Service</a>
+              I have read and agree to the <a href="/how-it-works" className="text-emerald-600 hover:underline">Terms of Service</a>
             </span>
           </label>
           
@@ -610,7 +610,7 @@ export default function RegisterPage() {
               className="mt-1 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500"
             />
             <span className="text-sm text-gray-700">
-              I have read and agree to the <a href="/privacy" className="text-emerald-600 hover:underline">Privacy Policy</a>
+              I have read and agree to the <a href="/how-it-works" className="text-emerald-600 hover:underline">Privacy Policy</a>
             </span>
           </label>
         </div>

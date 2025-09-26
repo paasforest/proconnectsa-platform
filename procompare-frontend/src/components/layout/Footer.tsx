@@ -85,13 +85,13 @@ export function Footer() {
                 </Link>
               </li>
               <li>
-                <Link href="/careers" className="text-muted-foreground hover:text-foreground transition-colors">
-                  Careers
+                <Link href="/providers" className="text-muted-foreground hover:text-foreground transition-colors">
+                  Join as Provider
                 </Link>
               </li>
               <li>
-                <Link href="/blog" className="text-muted-foreground hover:text-foreground transition-colors">
-                  Blog
+                <Link href="/how-it-works" className="text-muted-foreground hover:text-foreground transition-colors">
+                  How it Works
                 </Link>
               </li>
             </ul>
@@ -129,14 +129,11 @@ export function Footer() {
               © 2024 ProConnectSA. All rights reserved.
             </div>
             <div className="flex space-x-6 text-sm">
-              <Link href="/privacy" className="text-muted-foreground hover:text-foreground transition-colors">
-                Privacy Policy
+              <Link href="/how-it-works" className="text-muted-foreground hover:text-foreground transition-colors">
+                How it Works
               </Link>
-              <Link href="/terms" className="text-muted-foreground hover:text-foreground transition-colors">
-                Terms of Service
-              </Link>
-              <Link href="/cookies" className="text-muted-foreground hover:text-foreground transition-colors">
-                Cookie Policy
+              <Link href="/providers" className="text-muted-foreground hover:text-foreground transition-colors">
+                For Providers
               </Link>
             </div>
           </div>

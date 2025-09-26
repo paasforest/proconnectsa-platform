@@ -895,9 +895,8 @@ const Homepage = () => {
                 © 2025 ProConnectSA. All rights reserved. | Proudly South African 🇿🇦
               </div>
               <div className="flex space-x-6 text-gray-400">
-                <button onClick={() => router.push('/privacy')} className="hover:text-white transition-colors">Privacy Policy</button>
-                <button onClick={() => router.push('/terms')} className="hover:text-white transition-colors">Terms of Service</button>
-                <button onClick={() => router.push('/cookies')} className="hover:text-white transition-colors">Cookie Policy</button>
+                <button onClick={() => router.push('/how-it-works')} className="hover:text-white transition-colors">How it Works</button>
+                <button onClick={() => router.push('/providers')} className="hover:text-white transition-colors">For Providers</button>
               </div>
             </div>
             
