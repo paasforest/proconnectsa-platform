@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo, useCallback } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -34,6 +34,8 @@ import {
 import { toast } from 'sonner'
 import { FraudPreventionService } from '@/lib/fraudPrevention'
 import LeadVerification from './LeadVerification'
+import { debug } from '@/lib/debug'
+import { FormErrorBoundary } from '@/components/FormErrorBoundary'
 
 // Lead generation schema with comprehensive validation
 const leadGenerationSchema = z.object({
@@ -258,8 +260,8 @@ export default function LeadGenerationForm({ onComplete, onCancel, preselectedCa
     }
   }, [preselectedCategory, setValue])
 
-  // Check if current step is valid
-  const isCurrentStepValid = () => {
+  // Check if current step is valid - memoized to prevent unnecessary re-renders
+  const isCurrentStepValid = useMemo(() => {
     try {
       switch (currentStep) {
         case 1:
@@ -300,36 +302,55 @@ export default function LeadGenerationForm({ onComplete, onCancel, preselectedCa
       console.error('Validation error:', error)
       return false
     }
-  }
+  }, [currentStep, currentValues])
 
-  // Debug function to help troubleshoot step validation
-  const debugCurrentStep = () => {
-    console.log('=== FORM DEBUG ===')
-    console.log('Current step:', currentStep)
-    console.log('Current values:', currentValues)
-    console.log('Is valid:', isCurrentStepValid())
-    console.log('Step 7 validation details:')
-    console.log('- contact_name:', getStringValue('contact_name'), 'length:', getStringValue('contact_name').length)
-    console.log('- contact_phone:', getStringValue('contact_phone'), 'length:', getStringValue('contact_phone').length)
-    console.log('- contact_email:', getStringValue('contact_email'), 'has @:', getStringValue('contact_email').includes('@'))
-    console.log('- preferred_contact_time:', getStringValue('preferred_contact_time'))
-    console.log('==================')
-  }
+  // Debug function with proper rate limiting and environment controls
+  const debugCurrentStep = useCallback(() => {
+    debug.throttled('form-step-debug', () => {
+      debug.step(currentStep, {
+        values: currentValues,
+        isValid: isCurrentStepValid,
+        validationDetails: {
+          contact_name: {
+            value: getStringValue('contact_name'),
+            length: getStringValue('contact_name').length,
+            valid: getStringValue('contact_name').length >= 2
+          },
+          contact_phone: {
+            value: getStringValue('contact_phone'),
+            length: getStringValue('contact_phone').length,
+            valid: getStringValue('contact_phone').length >= 10
+          },
+          contact_email: {
+            value: getStringValue('contact_email'),
+            hasAt: getStringValue('contact_email').includes('@'),
+            valid: getStringValue('contact_email').includes('@')
+          },
+          preferred_contact_time: {
+            value: getStringValue('preferred_contact_time'),
+            valid: !!getStringValue('preferred_contact_time')
+          }
+        }
+      });
+    }, 2000); // Only log every 2 seconds max
+  }, [currentStep, currentValues, isCurrentStepValid])
 
-  const nextStep = () => {
-    if (currentStep < totalSteps && isCurrentStepValid()) {
+  const nextStep = useCallback(() => {
+    if (currentStep < totalSteps && isCurrentStepValid) {
       setCurrentStep(currentStep + 1)
     }
-  }
+  }, [currentStep, isCurrentStepValid])
 
-  const prevStep = () => {
+  const prevStep = useCallback(() => {
     if (currentStep > 1) {
       setCurrentStep(currentStep - 1)
     }
-  }
+  }, [currentStep])
 
   const onSubmit = async (data: LeadGenerationForm) => {
-    console.log('🚀 FORM SUBMISSION STARTED:', data)
+    debug.performance.start('form-submission');
+    debug.form('Form submission started', { step: currentStep, data });
+    
     setIsSubmitting(true)
     
     try {
@@ -343,24 +364,22 @@ export default function LeadGenerationForm({ onComplete, onCancel, preselectedCa
         status: 'active'
       }
       
-      console.log('📤 ENRICHED DATA:', enrichedData)
+      debug.form('Enriched data prepared', enrichedData);
       
       // Show immediate feedback
       toast.loading('Submitting your quote request...', { id: 'submit-toast' })
       
       // Call the parent component's onComplete function
-      console.log('📞 CALLING onComplete...')
       try {
         await onComplete(enrichedData)
-        console.log('✅ onComplete completed successfully')
+        debug.submission(enrichedData, true);
       } catch (onCompleteError) {
-        console.error('⚠️ onComplete had an error, but continuing with form success:', onCompleteError)
+        debug.error(onCompleteError as Error, 'onComplete callback');
         // Continue with form success even if parent onComplete fails
       }
       
       // Mark as submitted (always do this regardless of onComplete result)
       setIsSubmitted(true)
-      console.log('✅ Form marked as submitted')
       
       // Update the loading toast to success
       toast.success('Quote request submitted successfully! 🎉', { 
@@ -370,7 +389,7 @@ export default function LeadGenerationForm({ onComplete, onCancel, preselectedCa
       })
       
     } catch (error) {
-      console.error('❌ Error in form submission:', error)
+      debug.error(error as Error, 'form submission');
       toast.error('Submission failed', {
         id: 'submit-toast',
         description: 'There was an error submitting your request. Please try again.',
@@ -378,7 +397,7 @@ export default function LeadGenerationForm({ onComplete, onCancel, preselectedCa
       })
     } finally {
       setIsSubmitting(false)
-      console.log('🏁 Form submission process completed')
+      debug.performance.end('form-submission');
     }
   }
 
@@ -1113,7 +1132,7 @@ export default function LeadGenerationForm({ onComplete, onCancel, preselectedCa
 
   // Show success state if submitted
   if (isSubmitted) {
-    console.log('🎉 RENDERING SUCCESS STATE!', { isSubmitted, currentStep })
+    debug.form('Rendering success state', { isSubmitted, currentStep });
     return (
       <div className="max-w-4xl mx-auto p-6">
         <Card>
@@ -1181,75 +1200,76 @@ export default function LeadGenerationForm({ onComplete, onCancel, preselectedCa
   }
 
   return (
-    <div className="max-w-4xl mx-auto p-6">
-      <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <div>
-              <CardTitle className="text-2xl font-bold">Request a Quote</CardTitle>
-              <CardDescription>
-                Tell us about your project and we'll match you with the best providers
-              </CardDescription>
+    <FormErrorBoundary>
+      <div className="max-w-4xl mx-auto p-6">
+        <Card>
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle className="text-2xl font-bold">Request a Quote</CardTitle>
+                <CardDescription>
+                  Tell us about your project and we'll match you with the best providers
+                </CardDescription>
+              </div>
+              <Badge variant="outline">Step {currentStep} of {totalSteps}</Badge>
             </div>
-            <Badge variant="outline">Step {currentStep} of {totalSteps}</Badge>
-          </div>
-          
-          <div className="mt-4">
-            <Progress value={(currentStep / totalSteps) * 100} className="h-2" />
-          </div>
-        </CardHeader>
-        
-        <CardContent>
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-            {renderCurrentStep()}
             
-            <div className="flex justify-between pt-6 border-t">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={prevStep}
-                disabled={currentStep === 1}
-              >
-                <ArrowLeft className="h-4 w-4 mr-2" />
-                Previous
-              </Button>
+            <div className="mt-4">
+              <Progress value={(currentStep / totalSteps) * 100} className="h-2" />
+            </div>
+          </CardHeader>
+          
+          <CardContent>
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+              {renderCurrentStep()}
               
-              <div className="flex space-x-2">
+              <div className="flex justify-between pt-6 border-t">
                 <Button
                   type="button"
                   variant="outline"
-                  onClick={onCancel}
+                  onClick={prevStep}
+                  disabled={currentStep === 1}
                 >
-                  Cancel
+                  <ArrowLeft className="h-4 w-4 mr-2" />
+                  Previous
                 </Button>
                 
-                {currentStep < totalSteps ? (
+                <div className="flex space-x-2">
                   <Button
                     type="button"
-                    onClick={nextStep}
-                    disabled={!isCurrentStepValid()}
-                    className="bg-emerald-600 hover:bg-emerald-700 disabled:bg-gray-300 disabled:cursor-not-allowed"
+                    variant="outline"
+                    onClick={onCancel}
                   >
-                    Next
-                    <ArrowRight className="h-4 w-4 ml-2" />
+                    Cancel
                   </Button>
-                ) : (
-                  <Button
-                    type="submit"
-                    disabled={!isCurrentStepValid() || isSubmitting}
-                    className="bg-green-600 hover:bg-green-700 disabled:bg-gray-300 disabled:cursor-not-allowed"
-                    onClick={debugCurrentStep}
-                  >
-                    {isSubmitting ? 'Submitting...' : 'Submit Request'}
-                    <CheckCircle className="h-4 w-4 ml-2" />
-                  </Button>
-                )}
+                  
+                  {currentStep < totalSteps ? (
+                    <Button
+                      type="button"
+                      onClick={nextStep}
+                      disabled={!isCurrentStepValid}
+                      className="bg-emerald-600 hover:bg-emerald-700 disabled:bg-gray-300 disabled:cursor-not-allowed"
+                    >
+                      Next
+                      <ArrowRight className="h-4 w-4 ml-2" />
+                    </Button>
+                  ) : (
+                    <Button
+                      type="submit"
+                      disabled={!isCurrentStepValid || isSubmitting}
+                      className="bg-green-600 hover:bg-green-700 disabled:bg-gray-300 disabled:cursor-not-allowed"
+                    >
+                      {isSubmitting ? 'Submitting...' : 'Submit Request'}
+                      <CheckCircle className="h-4 w-4 ml-2" />
+                    </Button>
+                  )}
+                </div>
               </div>
-            </div>
-          </form>
-        </CardContent>
-      </Card>
-    </div>
+            </form>
+          </CardContent>
+        </Card>
+      </div>
+    </FormErrorBoundary>
   )
 }
 
