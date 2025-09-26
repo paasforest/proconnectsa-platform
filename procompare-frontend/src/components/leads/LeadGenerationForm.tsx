@@ -180,8 +180,8 @@ export default function LeadGenerationForm({ onComplete, onCancel, preselectedCa
       
       console.log('📤 Submitting lead (backend format):', backendData)
       
-      // Submit to public API endpoint (no authentication required)
-      const response = await fetch('/api/leads/create-public/', {
+        // Submit to Django backend public API endpoint (no authentication required)
+        const response = await fetch('https://api.proconnectsa.co.za/api/leads/create-public/', {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json'
