@@ -167,13 +167,13 @@ export default function LeadGenerationForm({ onComplete, onCancel, preselectedCa
       location_city: data.location,    // Use location as city
       budget_range: budgetMapping[data.budget_range] || 'no_budget',
       urgency: urgencyMapping[data.urgency] || 'flexible',
-      preferred_contact_time: data.preferred_contact_method || 'anytime',
-      additional_requirements: data.special_requirements || '',
       
-      // Client contact details for public endpoint
+      // Client contact information (required by Django backend)
       client_name: data.contact_name,
       client_email: data.contact_email,
       client_phone: data.contact_phone,
+      preferred_contact_time: data.preferred_contact_method || 'anytime',
+      additional_requirements: data.special_requirements || '',
       
       // Optional fields (Django format)
       hiring_intent: data.hiring_intent || 'ready_to_hire',
