@@ -158,8 +158,8 @@ export default function LeadGenerationForm({ onComplete, onCancel, preselectedCa
     }
     
     return {
-      // Required Flask server fields
-      service_category: data.service_category,
+      // Required Flask server fields (string format)
+      service_category: data.service_category, // This should be the string key like 'home-improvement'
       service_type: data.service_type,
       location: data.location,
       urgency: urgencyMapping[data.urgency] || 'flexible',
@@ -169,11 +169,6 @@ export default function LeadGenerationForm({ onComplete, onCancel, preselectedCa
       contact_name: data.contact_name,
       contact_phone: data.contact_phone,
       contact_email: data.contact_email,
-      
-      // Optional fields (Django format)
-      hiring_intent: data.hiring_intent || 'ready_to_hire',
-      hiring_timeline: data.hiring_timeline || 'this_month',
-      research_purpose: '',
       
       // Metadata
       source: 'website',
