@@ -12,7 +12,7 @@ export async function POST(request: NextRequest) {
     console.log('🔍 Checking Django backend connectivity...');
     
         try {
-          const healthCheck = await fetch('http://128.140.123.48:8000/health/', {
+          const healthCheck = await fetch('http://localhost:8000/health/', {
             method: 'GET',
             headers: {
               'Content-Type': 'application/json',
@@ -43,9 +43,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Forward to Django backend on Hetzner server
+    // Forward to local Django backend
     console.log('📤 Forwarding to Django backend...');
-    const backendResponse = await fetch('http://128.140.123.48:8000/api/leads/create-public/', {
+    const backendResponse = await fetch('http://localhost:8000/api/leads/create-public/', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
