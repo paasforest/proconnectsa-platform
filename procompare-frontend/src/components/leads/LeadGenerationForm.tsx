@@ -139,7 +139,7 @@ export default function LeadGenerationForm({ onComplete, onCancel, preselectedCa
   const transformToBackendFormat = (data: LeadFormData) => {
     const selectedCategory = SERVICE_CATEGORIES[data.service_category as keyof typeof SERVICE_CATEGORIES]
     
-    // Map urgency to Django choices
+    // Map urgency to Flask server format
     const urgencyMapping: { [key: string]: string } = {
       'urgent': 'urgent',
       'this-week': 'this_week',
@@ -147,33 +147,28 @@ export default function LeadGenerationForm({ onComplete, onCancel, preselectedCa
       'flexible': 'flexible'
     }
 
-    // Map budget to Django choices
+    // Map budget to Flask server format
     const budgetMapping: { [key: string]: string } = {
-      'Under R500': 'under_1000',
-      'R500 - R1,500': 'under_1000',
-      'R1,500 - R5,000': '1000_5000',
-      'R5,000 - R15,000': '5000_15000',
-      'R15,000 - R50,000': '15000_50000',
-      'Over R50,000': 'over_50000'
+      'Under R500': 'Under R500',
+      'R500 - R1,500': 'R500 - R1,500',
+      'R1,500 - R5,000': 'R1,500 - R5,000',
+      'R5,000 - R15,000': 'R5,000 - R15,000',
+      'R15,000 - R50,000': 'R15,000 - R50,000',
+      'Over R50,000': 'Over R50,000'
     }
     
     return {
-      // Required Django backend fields
-      service_category_id: selectedCategory?.backendId || 1,
-      title: data.project_title,
-      description: data.project_description,
-      location_address: data.location, // Use location as address
-      location_suburb: data.location,  // Use location as suburb
-      location_city: data.location,    // Use location as city
-      budget_range: budgetMapping[data.budget_range] || 'no_budget',
+      // Required Flask server fields
+      service_category: data.service_category,
+      service_type: data.service_type,
+      location: data.location,
       urgency: urgencyMapping[data.urgency] || 'flexible',
-      
-      // Client contact information (required by Django backend)
-      client_name: data.contact_name,
-      client_email: data.contact_email,
-      client_phone: data.contact_phone,
-      preferred_contact_time: data.preferred_contact_method || 'anytime',
-      additional_requirements: data.special_requirements || '',
+      project_title: data.project_title,
+      project_description: data.project_description,
+      budget_range: budgetMapping[data.budget_range] || 'No budget specified',
+      contact_name: data.contact_name,
+      contact_phone: data.contact_phone,
+      contact_email: data.contact_email,
       
       // Optional fields (Django format)
       hiring_intent: data.hiring_intent || 'ready_to_hire',
