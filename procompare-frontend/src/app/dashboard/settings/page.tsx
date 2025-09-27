@@ -12,4 +12,4 @@ function SettingsPageRoute({ user }: { user: any }) {
   )
 }
 
-export default withAuth(SettingsPageRoute, ['service_provider'])
+export default withAuth(SettingsPageRoute, ['provider', 'service_provider'])

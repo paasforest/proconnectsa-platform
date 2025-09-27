@@ -236,7 +236,7 @@ function ProviderSupportPage({ user }: { user: any }) {
   )
 }
 
-export default withAuth(ProviderSupportPage, ['service_provider'])
+export default withAuth(ProviderSupportPage, ['provider', 'service_provider'])
 
 
 

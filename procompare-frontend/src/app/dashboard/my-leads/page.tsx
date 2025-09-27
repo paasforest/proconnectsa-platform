@@ -12,4 +12,4 @@ function MyLeadsPageRoute({ user }: { user: any }) {
   )
 }
 
-export default withAuth(MyLeadsPageRoute, ['service_provider'])
+export default withAuth(MyLeadsPageRoute, ['provider', 'service_provider'])

@@ -12,4 +12,4 @@ function WalletPageRoute({ user }: { user: any }) {
   )
 }
 
-export default withAuth(WalletPageRoute, ['service_provider'])
+export default withAuth(WalletPageRoute, ['provider', 'service_provider'])

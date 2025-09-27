@@ -250,4 +250,4 @@ function DashboardPage({ user }: { user: any }) {
   );
 }
 
-export default withAuth(DashboardPage, ['service_provider']);
+export default withAuth(DashboardPage, ['provider', 'service_provider']);

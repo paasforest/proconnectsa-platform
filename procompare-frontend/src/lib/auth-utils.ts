@@ -4,7 +4,7 @@ export interface User {
   email: string;
   first_name: string;
   last_name: string;
-  user_type: 'admin' | 'client' | 'service_provider';
+  user_type: 'admin' | 'client' | 'provider' | 'service_provider';
   credits?: number;
   wallet_balance?: number;
 }
@@ -43,6 +43,7 @@ export const redirectToDashboard = (userType: string) => {
       return '/admin/dashboard';
     case 'client':
       return '/client'; 
+    case 'provider':
     case 'service_provider':
       return '/provider-dashboard'; // Service providers use the provider dashboard with DashboardLayout
     default:

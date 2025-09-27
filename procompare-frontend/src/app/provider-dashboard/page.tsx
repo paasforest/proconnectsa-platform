@@ -13,4 +13,4 @@ function ProviderDashboardPage({ user }: { user: any }) {
   );
 }
 
-export default withAuth(ProviderDashboardPage, ['service_provider']);
+export default withAuth(ProviderDashboardPage, ['provider', 'service_provider']);

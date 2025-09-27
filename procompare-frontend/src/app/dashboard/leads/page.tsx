@@ -332,7 +332,7 @@ function LeadsPage({ user }: { user: any }) {
   )
 }
 
-export default withAuth(LeadsPage, ['service_provider'])
+export default withAuth(LeadsPage, ['provider', 'service_provider'])
 
 // Mock data for demo purposes
 function getMockLeads(): Lead[] {

@@ -12,4 +12,4 @@ function ChatPageRoute({ user }: { user: any }) {
   )
 }
 
-export default withAuth(ChatPageRoute, ['service_provider'])
+export default withAuth(ChatPageRoute, ['provider', 'service_provider'])
