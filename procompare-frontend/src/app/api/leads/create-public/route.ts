@@ -48,11 +48,11 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Forward to Flask backend (environment-aware URL)
-    console.log('📤 Forwarding to Flask backend...');
-    const backendUrl = process.env.NODE_ENV === 'production' 
-      ? 'http://128.140.123.48:8000' 
-      : 'http://localhost:5000';
+        // Forward to Django backend (environment-aware URL)
+        console.log('📤 Forwarding to Django backend...');
+        const backendUrl = process.env.NODE_ENV === 'production' 
+          ? 'http://128.140.123.48:8000' 
+          : 'http://localhost:8000';
     
     const backendResponse = await fetch(`${backendUrl}/api/leads/create-public/`, {
       method: 'POST',
@@ -62,26 +62,26 @@ export async function POST(request: NextRequest) {
       body: JSON.stringify(leadData),
     });
 
-    console.log('🔗 Django response status:', backendResponse.status);
-    console.log('🔗 Django response headers:', Object.fromEntries(backendResponse.headers.entries()));
+        console.log('🔗 Django response status:', backendResponse.status);
+        console.log('🔗 Django response headers:', Object.fromEntries(backendResponse.headers.entries()));
 
-    if (!backendResponse.ok) {
-      const errorText = await backendResponse.text();
-      console.error('❌ Django error response:', errorText);
+        if (!backendResponse.ok) {
+          const errorText = await backendResponse.text();
+          console.error('❌ Django error response:', errorText);
 
-      return NextResponse.json(
-        {
-          error: 'Failed to create lead in backend',
-          status: backendResponse.status,
-          details: errorText,
-          leadData: leadData
-        },
-        { status: backendResponse.status }
-      );
-    }
+          return NextResponse.json(
+            {
+              error: 'Failed to create lead in Django backend',
+              status: backendResponse.status,
+              details: errorText,
+              leadData: leadData
+            },
+            { status: backendResponse.status }
+          );
+        }
 
-    const result = await backendResponse.json();
-    console.log('✅ Django success response:', JSON.stringify(result, null, 2));
+        const result = await backendResponse.json();
+        console.log('✅ Django success response:', JSON.stringify(result, null, 2));
 
     return NextResponse.json(result, { status: 201 });
 
