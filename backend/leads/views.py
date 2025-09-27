@@ -429,7 +429,7 @@ def create_public_lead(request):
 
 
 @api_view(['GET'])
-@permission_classes([IsAuthenticated])
+@permission_classes([permissions.IsAuthenticated])
 def available_leads_view(request):
     """Get available leads for authenticated providers using ML-based intelligent filtering"""
     # Only allow providers to access leads

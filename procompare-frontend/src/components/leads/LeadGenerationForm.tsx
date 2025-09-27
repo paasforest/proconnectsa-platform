@@ -198,8 +198,8 @@ export default function LeadGenerationForm({ onComplete, onCancel, preselectedCa
       
       console.log('📤 Submitting lead (backend format):', backendData)
       
-        // Submit to Django backend (fixed and working)
-        const response = await fetch('http://localhost:8000/api/leads/create-public/', {
+        // Submit to Next.js API route (which proxies to Django backend)
+        const response = await fetch('/api/leads/create-public/', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'

@@ -3,12 +3,12 @@ import { NextRequest, NextResponse } from 'next/server';
 export async function POST(request: NextRequest) {
   try {
     console.log('🎯 API Route: Received POST request to create-public');
-    
+
     const leadData = await request.json();
     console.log('📥 Received lead data:', leadData);
-    
-    // Forward directly to your Django backend
-    const backendResponse = await fetch('https://api.proconnectsa.co.za/api/leads/create-public/', {
+
+    // Forward to local Django backend (your "Flask server")
+    const backendResponse = await fetch('http://localhost:8000/api/leads/create-public/', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -21,12 +21,12 @@ export async function POST(request: NextRequest) {
     if (!backendResponse.ok) {
       const errorText = await backendResponse.text();
       console.error('❌ Django error:', errorText);
-      
+
       return NextResponse.json(
-        { 
+        {
           error: 'Failed to create lead in backend',
           status: backendResponse.status,
-          details: errorText 
+          details: errorText
         },
         { status: backendResponse.status }
       );
@@ -34,16 +34,16 @@ export async function POST(request: NextRequest) {
 
     const result = await backendResponse.json();
     console.log('✅ Django success:', result);
-    
+
     return NextResponse.json(result, { status: 201 });
-    
+
   } catch (error) {
     console.error('❌ API Route error:', error);
-    
+
     return NextResponse.json(
-      { 
+      {
         error: 'Internal server error',
-        message: error.message 
+        message: error.message
       },
       { status: 500 }
     );
