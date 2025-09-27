@@ -180,14 +180,14 @@ export default function LeadGenerationForm({ onComplete, onCancel, preselectedCa
       
       console.log('📤 Submitting lead (backend format):', backendData)
       
-        // Submit to Next.js API route which forwards to Django backend
-        const response = await fetch('/api/leads/create-public/', {
-        method: 'POST',
-        headers: { 
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(backendData)
-      })
+        // Submit directly to Flask server
+        const response = await fetch('http://localhost:5000/api/leads/create-public/', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(backendData)
+        })
 
       if (response.ok) {
         const result = await response.json()
