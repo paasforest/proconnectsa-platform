@@ -188,6 +188,8 @@ export default function LeadGenerationForm({ onComplete, onCancel, preselectedCa
       
       console.log('📤 Submitting lead (backend format):', JSON.stringify(backendData, null, 2))
       console.log('🔍 Form data being sent:', JSON.stringify(formData, null, 2))
+      console.log('🔍 Raw form data keys:', Object.keys(formData))
+      console.log('🔍 Backend data keys:', Object.keys(backendData))
       
         // Submit to Next.js API route (which proxies to Django backend)
         console.log('🌐 Making request to /api/leads/create-public/')
@@ -240,7 +242,11 @@ export default function LeadGenerationForm({ onComplete, onCancel, preselectedCa
       }
     } catch (error) {
       console.error('Submission error:', error)
-      alert('Something went wrong. Please try again.')
+      console.error('Error details:', error.message)
+      
+      // Show more specific error message
+      const errorMessage = error.message || 'Something went wrong. Please try again.'
+      alert(`Error: ${errorMessage}`)
     } finally {
       setIsSubmitting(false)
     }
