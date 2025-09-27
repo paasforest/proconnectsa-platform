@@ -1,5 +1,5 @@
 from rest_framework import generics, status, permissions
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from django.utils import timezone
 try:
     from ratelimit.decorators import ratelimit

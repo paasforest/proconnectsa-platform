@@ -135,20 +135,38 @@ export default function LeadGenerationForm({ onComplete, onCancel, preselectedCa
     }
   }
 
-  // Transform form data to backend format for public endpoint
+  // Transform form data to Django backend format
   const transformToBackendFormat = (data: LeadFormData) => {
     const selectedCategory = SERVICE_CATEGORIES[data.service_category as keyof typeof SERVICE_CATEGORIES]
     
+    // Map urgency to Django choices
+    const urgencyMapping: { [key: string]: string } = {
+      'urgent': 'urgent',
+      'this-week': 'this_week',
+      'this-month': 'this_month',
+      'flexible': 'flexible'
+    }
+
+    // Map budget to Django choices
+    const budgetMapping: { [key: string]: string } = {
+      'Under R500': 'under_1000',
+      'R500 - R1,500': 'under_1000',
+      'R1,500 - R5,000': '1000_5000',
+      'R5,000 - R15,000': '5000_15000',
+      'R15,000 - R50,000': '15000_50000',
+      'Over R50,000': 'over_50000'
+    }
+    
     return {
-      // Required backend fields
+      // Required Django backend fields
       service_category_id: selectedCategory?.backendId || 1,
       title: data.project_title,
       description: data.project_description,
       location_address: data.location, // Use location as address
       location_suburb: data.location,  // Use location as suburb
       location_city: data.location,    // Use location as city
-      budget_range: data.budget_range,
-      urgency: data.urgency,
+      budget_range: budgetMapping[data.budget_range] || 'no_budget',
+      urgency: urgencyMapping[data.urgency] || 'flexible',
       preferred_contact_time: data.preferred_contact_method || 'anytime',
       additional_requirements: data.special_requirements || '',
       
@@ -157,9 +175,9 @@ export default function LeadGenerationForm({ onComplete, onCancel, preselectedCa
       client_email: data.contact_email,
       client_phone: data.contact_phone,
       
-      // Optional fields
-      hiring_intent: 'ready-to-hire', // Default value
-      hiring_timeline: 'within-month', // Default value
+      // Optional fields (Django format)
+      hiring_intent: data.hiring_intent || 'ready_to_hire',
+      hiring_timeline: data.hiring_timeline || 'this_month',
       research_purpose: '',
       
       // Metadata
@@ -180,8 +198,8 @@ export default function LeadGenerationForm({ onComplete, onCancel, preselectedCa
       
       console.log('📤 Submitting lead (backend format):', backendData)
       
-        // Submit directly to Flask server
-        const response = await fetch('http://localhost:5000/api/leads/create-public/', {
+        // Submit to Django backend (fixed and working)
+        const response = await fetch('http://localhost:8000/api/leads/create-public/', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
