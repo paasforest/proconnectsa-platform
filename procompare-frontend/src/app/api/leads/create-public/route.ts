@@ -14,7 +14,7 @@ export async function POST(request: NextRequest) {
         try {
           // Use external IP for production, localhost for development
           const backendUrl = process.env.NODE_ENV === 'production' 
-            ? 'http://128.140.123.48:8000' 
+            ? 'http://128.140.123.48:5000' 
             : 'http://localhost:8000';
           
           const healthCheck = await fetch(`${backendUrl}/health/`, {
@@ -48,10 +48,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Forward to Django backend (environment-aware URL)
-    console.log('📤 Forwarding to Django backend...');
+    // Forward to Flask backend (environment-aware URL)
+    console.log('📤 Forwarding to Flask backend...');
     const backendUrl = process.env.NODE_ENV === 'production' 
-      ? 'http://128.140.123.48:8000' 
+      ? 'http://128.140.123.48:5000' 
       : 'http://localhost:8000';
     
     const backendResponse = await fetch(`${backendUrl}/api/leads/create-public/`, {
