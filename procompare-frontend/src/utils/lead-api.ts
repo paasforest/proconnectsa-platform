@@ -33,33 +33,24 @@ export const createLead = async (data: LeadCreationData) => {
       '20000_plus': 50000
     };
 
-    // Prepare data in the format the API expects
+    // Prepare data in Flask server format
     const payload = {
-      // Required fields
-      title: data.title || data.name || data.service_name || 'Service Request',
-      description: data.description || data.details || 'Service description',
-      budget: data.budget || budgetMap[data.budget_range] || 5000,
-      category: data.category || data.service_category || '1',
+      // Required Flask server fields
+      service_category: data.category || data.service_category || 'home-improvement',
+      service_type: data.title || data.name || data.service_name || 'General Service',
       location: data.location || data.city || 'Cape Town',
-      
-      // Optional fields
-      budget_range: data.budget_range,
-      budget_min: data.budget_min,
-      budget_max: data.budget_max,
-      client_name: data.client_name || 'Anonymous Client',
-      client_email: data.client_email || 'client@example.com',
-      client_phone: data.client_phone || '+27123456789',
-      
-      // Additional fields that might be needed
-      urgency: data.urgency || 'medium',
-      hiring_intent: data.hiring_intent || 'ready_to_hire',
-      hiring_timeline: data.hiring_timeline || 'this_month',
-      source: data.source || 'website'
+      urgency: data.urgency === 'medium' ? 'this_month' : (data.urgency || 'flexible'),
+      project_title: data.title || data.name || data.service_name || 'Service Request',
+      project_description: data.description || data.details || 'Service description',
+      budget_range: data.budget_range || 'R1,500 - R5,000',
+      contact_name: data.client_name || 'Anonymous Client',
+      contact_phone: data.client_phone || '+27123456789',
+      contact_email: data.client_email || 'client@example.com'
     };
 
     console.log('Sending lead creation request:', payload);
 
-    const response = await fetch('https://api.proconnectsa.co.za/api/leads/', {
+    const response = await fetch('/api/leads/create-public/', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
