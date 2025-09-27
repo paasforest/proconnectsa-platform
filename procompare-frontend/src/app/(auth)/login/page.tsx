@@ -55,14 +55,14 @@ export default function LoginPage() {
       const data = await loginResponse.json();
       console.log('Login response:', data);
 
-      if (data.success && data.data?.token) {
+      if (data.success && data.token) {
         // Store authentication data
-        localStorage.setItem('token', data.data.token);
-        localStorage.setItem('user', JSON.stringify(data.data.user));
+        localStorage.setItem('token', data.token);
+        localStorage.setItem('user', JSON.stringify(data.user));
         
         // Get user type from response
-        const userType = data.data.user?.user_type;
-        console.log('🔍 DEBUG - Full user data:', data.data.user);
+        const userType = data.user?.user_type;
+        console.log('🔍 DEBUG - Full user data:', data.user);
         console.log('🔍 DEBUG - User type:', userType);
         console.log('🔍 DEBUG - User type type:', typeof userType);
         
