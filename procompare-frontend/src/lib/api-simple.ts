@@ -111,27 +111,40 @@ export class SimpleApiClient {
   }
 
   async createPublicLead(leadData: any) {
-    // Use the unified lead creation approach
-    const { createLead } = await import('@/utils/lead-api');
-    
-    // Map the leadData to the unified format with proper defaults
-    const unifiedData = {
-      title: leadData.title || leadData.project_title || 'Service Request',
-      description: leadData.description || leadData.project_description || 'Service description',
-      budget_range: leadData.budget_range || 'R1,500 - R5,000',
-      category: leadData.service_category_id?.toString() || leadData.service_category || 'home-improvement',
+    // Map the leadData to Flask server format with proper defaults
+    const flaskData = {
+      service_category: leadData.service_category_id === 1 ? 'home-improvement' : 
+                       leadData.service_category_id === 2 ? 'cleaning' :
+                       leadData.service_category_id === 3 ? 'automotive' : 'home-improvement',
+      service_type: leadData.title || leadData.project_title || 'General Service',
       location: leadData.location || leadData.location_address || leadData.location_suburb || leadData.location_city || 'Cape Town',
-      client_name: leadData.client_name || leadData.contact_name || 'Anonymous Client',
-      client_email: leadData.client_email || leadData.contact_email || 'client@example.com',
-      client_phone: leadData.client_phone || leadData.contact_phone || '+27123456789',
-      // Additional fields that might be needed
       urgency: leadData.urgency || 'flexible',
-      hiring_intent: leadData.hiring_intent || 'ready_to_hire',
-      hiring_timeline: leadData.hiring_timeline || 'this_month',
-      source: leadData.source || 'website'
+      project_title: leadData.title || leadData.project_title || 'Service Request',
+      project_description: leadData.description || leadData.project_description || 'Service description',
+      budget_range: leadData.budget_range || 'R1,500 - R5,000',
+      contact_name: leadData.client_name || leadData.contact_name || 'Anonymous Client',
+      contact_phone: leadData.client_phone || leadData.contact_phone || '+27123456789',
+      contact_email: leadData.client_email || leadData.contact_email || 'client@example.com'
     };
+
+    console.log('🚀 Creating lead via Flask backend:', flaskData);
+
+    // Call Flask backend directly via Next.js API route
+    const response = await fetch('/api/leads/create-public/', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(flaskData),
+    });
+
+    const result = await response.json();
     
-    return createLead(unifiedData);
+    if (!response.ok) {
+      throw new Error(result.message || `HTTP error! status: ${response.status}`);
+    }
+
+    return result;
   }
 
   async getLeads(params?: any) {
