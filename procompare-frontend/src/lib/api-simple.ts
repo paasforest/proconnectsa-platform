@@ -114,20 +114,20 @@ export class SimpleApiClient {
     // Use the unified lead creation approach
     const { createLead } = await import('@/utils/lead-api');
     
-    // Map the leadData to the unified format
+    // Map the leadData to the unified format with proper defaults
     const unifiedData = {
-      title: leadData.title,
-      description: leadData.description,
-      budget_range: leadData.budget_range,
-      category: leadData.service_category_id?.toString(),
-      location: `${leadData.location_address || ''}, ${leadData.location_suburb || ''}, ${leadData.location_city || ''}`.replace(/,\s*,/g, ',').replace(/^,\s*|,\s*$/g, ''),
-      client_name: leadData.client_name,
-      client_email: leadData.client_email,
-      client_phone: leadData.client_phone,
+      title: leadData.title || leadData.project_title || 'Service Request',
+      description: leadData.description || leadData.project_description || 'Service description',
+      budget_range: leadData.budget_range || 'R1,500 - R5,000',
+      category: leadData.service_category_id?.toString() || leadData.service_category || 'home-improvement',
+      location: leadData.location || leadData.location_address || leadData.location_suburb || leadData.location_city || 'Cape Town',
+      client_name: leadData.client_name || leadData.contact_name || 'Anonymous Client',
+      client_email: leadData.client_email || leadData.contact_email || 'client@example.com',
+      client_phone: leadData.client_phone || leadData.contact_phone || '+27123456789',
       // Additional fields that might be needed
-      urgency: leadData.urgency,
-      hiring_intent: leadData.hiring_intent,
-      hiring_timeline: leadData.hiring_timeline,
+      urgency: leadData.urgency || 'flexible',
+      hiring_intent: leadData.hiring_intent || 'ready_to_hire',
+      hiring_timeline: leadData.hiring_timeline || 'this_month',
       source: leadData.source || 'website'
     };
     
