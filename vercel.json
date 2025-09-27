@@ -10,6 +10,6 @@
     "NEXT_PUBLIC_FRONTEND_URL": "https://www.proconnectsa.co.za",
     "NEXTAUTH_SECRET": "proconnectsa-nextauth-secret-key-2024-production-at-least-32-chars-long",
     "NEXTAUTH_URL": "https://www.proconnectsa.co.za",
-    "FORCE_REBUILD": "2025-09-27-08:40"
+    "FORCE_REBUILD": "2025-09-27-09:25"
   }
 }
