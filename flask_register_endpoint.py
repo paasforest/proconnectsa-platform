@@ -318,7 +318,7 @@ if __name__ == '__main__':
     print("  GET  /health/ - Health check")
     print("  GET  / - Home")
     
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    app.run(host='0.0.0.0', port=8000, debug=True)
 
 
 
