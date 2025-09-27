@@ -196,9 +196,11 @@ export default function LeadGenerationForm({ onComplete, onCancel, preselectedCa
       // Transform data to backend format
       const backendData = transformToBackendFormat(formData)
       
-      console.log('📤 Submitting lead (backend format):', backendData)
+      console.log('📤 Submitting lead (backend format):', JSON.stringify(backendData, null, 2))
+      console.log('🔍 Form data being sent:', JSON.stringify(formData, null, 2))
       
         // Submit to Next.js API route (which proxies to Django backend)
+        console.log('🌐 Making request to /api/leads/create-public/')
         const response = await fetch('/api/leads/create-public/', {
           method: 'POST',
           headers: {
@@ -206,6 +208,8 @@ export default function LeadGenerationForm({ onComplete, onCancel, preselectedCa
           },
           body: JSON.stringify(backendData)
         })
+        
+        console.log('📡 Response received:', response.status, response.statusText)
 
       if (response.ok) {
         const result = await response.json()
@@ -239,8 +243,10 @@ export default function LeadGenerationForm({ onComplete, onCancel, preselectedCa
         })
       } else {
         const errorData = await response.json()
-        console.error('❌ Submission failed:', errorData)
-        throw new Error(errorData.detail || 'Submission failed')
+        console.error('❌ Submission failed:', JSON.stringify(errorData, null, 2))
+        console.error('❌ Response status:', response.status)
+        console.error('❌ Response headers:', Object.fromEntries(response.headers.entries()))
+        throw new Error(`Submission failed: ${response.status} - ${errorData.error || errorData.message || errorData.detail || 'Unknown error'}`)
       }
     } catch (error) {
       console.error('Submission error:', error)
