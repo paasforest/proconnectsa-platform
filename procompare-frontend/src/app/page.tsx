@@ -942,7 +942,6 @@ const Homepage = () => {
           </div>
           <div className="p-6">
             <LeadGenerationForm
-              onComplete={undefined}
               onCancel={handleLeadFormCancel}
               preselectedCategory={selectedCategory}
             />
