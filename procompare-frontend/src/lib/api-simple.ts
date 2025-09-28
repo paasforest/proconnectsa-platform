@@ -36,11 +36,19 @@ export class SimpleApiClient {
         headers,
       })
 
+      const data = await response.json()
+
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`)
+        const error = new Error(`HTTP error! status: ${response.status}`)
+        // Attach response data to error for better error handling
+        ;(error as any).response = {
+          status: response.status,
+          statusText: response.statusText,
+          data: data
+        }
+        throw error
       }
 
-      const data = await response.json()
       return data as T
     } catch (error) {
       throw error
