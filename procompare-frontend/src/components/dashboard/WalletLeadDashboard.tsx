@@ -370,6 +370,9 @@ const WalletLeadDashboard = () => {
         
         console.log('✅ Lead purchased successfully:', response);
         showNotification(`Lead purchased successfully! ${response.credits_deducted || lead.credit_cost} credits deducted.`, 'success');
+        
+        // Refresh user stats to update credit balance
+        fetchUserStats();
       } else {
         console.error('❌ Purchase failed:', response);
         showNotification(`Purchase failed: ${response.error || 'Unknown error'}`, 'error');
