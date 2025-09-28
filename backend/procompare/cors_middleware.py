@@ -38,11 +38,11 @@ class CustomCorsMiddleware(MiddlewareMixin):
                 response['Access-Control-Allow-Methods'] = 'DELETE, GET, OPTIONS, PATCH, POST, PUT'
                 response['Access-Control-Max-Age'] = '86400'
             else:
-                # For any other origin, allow it (for development)
-                response['Access-Control-Allow-Origin'] = '*'
-                response['Access-Control-Allow-Headers'] = 'accept, accept-encoding, authorization, content-type, dnt, origin, user-agent, x-csrftoken, x-requested-with'
-                response['Access-Control-Allow-Methods'] = 'DELETE, GET, OPTIONS, PATCH, POST, PUT'
-                response['Access-Control-Max-Age'] = '86400'
+                # SECURITY: Block unauthorized origins
+                print(f"CustomCorsMiddleware: BLOCKING unauthorized origin: {origin}")
+                response['Access-Control-Allow-Origin'] = 'null'  # Block unauthorized origins
+                response.status_code = 403  # Forbidden
+                return response
         
         # Handle preflight requests
         if request.method == 'OPTIONS':
