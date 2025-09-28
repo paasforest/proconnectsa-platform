@@ -79,6 +79,26 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("Passwords don't match")
         return attrs
     
+    def _parse_years_experience(self, years_str):
+        """Parse years of experience string to integer"""
+        if not years_str:
+            return None
+        
+        # Handle different formats
+        if isinstance(years_str, int):
+            return years_str
+        
+        # Handle string formats like "3-5 years", "1-2 years", etc.
+        if isinstance(years_str, str):
+            # Extract numbers from strings like "3-5 years"
+            import re
+            numbers = re.findall(r'\d+', years_str)
+            if numbers:
+                # Take the first number as minimum experience
+                return int(numbers[0])
+        
+        return None
+    
     def create(self, validated_data):
         validated_data.pop('password_confirm')
         password = validated_data.pop('password')
@@ -94,7 +114,7 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         user.save()
         
         # Create ProviderProfile if user is a service provider
-        if user.user_type == 'service_provider':
+        if user.user_type == 'provider':
             from .models import ProviderProfile
             
             # Map service names to slugs
@@ -136,7 +156,7 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
                 verification_status='pending',
                 subscription_tier='pay_as_you_go',
                 bio=service_description or f"Professional {primary_service or 'service'} provider",
-                years_experience=int(years_experience) if years_experience and years_experience.isdigit() else None
+                years_experience=self._parse_years_experience(years_experience) if years_experience else None
             )
         
         return user
