@@ -4,66 +4,11 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
-// Service categories for providers
+// Service categories for ML matching
 const serviceCategories = [
-  'Plumbing', 'Electrical', 'HVAC', 'Carpentry', 'Painting', 'Roofing',
-  'Flooring', 'Landscaping', 'Cleaning', 'Moving', 'Appliance Repair',
-  'Handyman', 'Pool Maintenance', 'Security', 'IT Support', 'Web Design',
-  'Marketing', 'Accounting', 'Legal', 'Consulting', 'Other'
-];
-
-// South African provinces
-const provinces = [
-  'Gauteng', 'Western Cape', 'KwaZulu-Natal', 'Eastern Cape', 'Free State',
-  'Limpopo', 'Mpumalanga', 'Northern Cape', 'North West'
-];
-
-// South African area codes
-const areaCodes = [
-  { code: '+27', name: 'South Africa (+27)' },
-  { code: '+2711', name: 'Johannesburg (011)' },
-  { code: '+2712', name: 'Pretoria (012)' },
-  { code: '+2713', name: 'Mpumalanga (013)' },
-  { code: '+2714', name: 'Rustenburg (014)' },
-  { code: '+2715', name: 'Polokwane (015)' },
-  { code: '+2716', name: 'Nelspruit (016)' },
-  { code: '+2717', name: 'Ermelo (017)' },
-  { code: '+2718', name: 'Potchefstroom (018)' },
-  { code: '+2721', name: 'Cape Town (021)' },
-  { code: '+2722', name: 'Malmesbury (022)' },
-  { code: '+2723', name: 'Worcester (023)' },
-  { code: '+2724', name: 'Kimberley (024)' },
-  { code: '+2725', name: 'Port Elizabeth (025)' },
-  { code: '+2727', name: 'East London (027)' },
-  { code: '+2728', name: 'George (028)' },
-  { code: '+2731', name: 'Durban (031)' },
-  { code: '+2732', name: 'Pietermaritzburg (032)' },
-  { code: '+2733', name: 'Newcastle (033)' },
-  { code: '+2734', name: 'Ladysmith (034)' },
-  { code: '+2735', name: 'Dundee (035)' },
-  { code: '+2736', name: 'Glencoe (036)' },
-  { code: '+2737', name: 'Hluhluwe (037)' },
-  { code: '+2738', name: 'Richards Bay (038)' },
-  { code: '+2739', name: 'Port Shepstone (039)' },
-  { code: '+2740', name: 'Umtata (040)' },
-  { code: '+2741', name: 'Queenstown (041)' },
-  { code: '+2742', name: 'Grahamstown (042)' },
-  { code: '+2743', name: 'Port Alfred (043)' },
-  { code: '+2744', name: 'Graaff-Reinet (044)' },
-  { code: '+2745', name: 'Uitenhage (045)' },
-  { code: '+2746', name: 'Grahamstown (046)' },
-  { code: '+2747', name: 'Alice (047)' },
-  { code: '+2748', name: 'Butterworth (048)' },
-  { code: '+2749', name: 'Cofimvaba (049)' },
-  { code: '+2751', name: 'Bloemfontein (051)' },
-  { code: '+2752', name: 'Thaba Nchu (052)' },
-  { code: '+2753', name: 'Bethlehem (053)' },
-  { code: '+2754', name: 'Welkom (054)' },
-  { code: '+2755', name: 'Kroonstad (055)' },
-  { code: '+2756', name: 'Parys (056)' },
-  { code: '+2757', name: 'Bothaville (057)' },
-  { code: '+2758', name: 'Ventersburg (058)' },
-  { code: '+2759', name: 'Sasolburg (059)' }
+  'Cleaning', 'Electrical', 'Plumbing', 'Painting', 'Carpentry', 
+  'Gardening', 'Handyman', 'Roofing', 'Flooring', 'Tiling',
+  'Appliance Repair', 'HVAC', 'Security', 'Landscaping', 'Pool Maintenance'
 ];
 
 // Experience levels
@@ -71,10 +16,35 @@ const experienceLevels = [
   'Less than 1 year', '1-2 years', '3-5 years', '6-10 years', '11-20 years', '20+ years'
 ];
 
+// South African area codes
+const areaCodes = [
+  { code: '+27', name: 'South Africa (+27)' },
+  { code: '+2711', name: 'Johannesburg (+2711)' },
+  { code: '+2721', name: 'Cape Town (+2721)' },
+  { code: '+2731', name: 'Durban (+2731)' },
+  { code: '+2712', name: 'Pretoria (+2712)' },
+  { code: '+2741', name: 'Port Elizabeth (+2741)' },
+  { code: '+2751', name: 'Bloemfontein (+2751)' }
+];
+
+// South African provinces
+const provinces = [
+  'Western Cape', 'Gauteng', 'KwaZulu-Natal', 'Eastern Cape', 
+  'Free State', 'Limpopo', 'Mpumalanga', 'Northern Cape', 'North West'
+];
+
+// Major South African cities for service areas
+const majorCities = [
+  'Cape Town', 'Johannesburg', 'Durban', 'Pretoria', 'Port Elizabeth', 
+  'Bloemfontein', 'East London', 'Pietermaritzburg', 'Nelspruit', 
+  'Polokwane', 'Kimberley', 'Rustenburg', 'Welkom', 'Potchefstroom'
+];
+
 export default function RegisterPage() {
+  const router = useRouter();
   const [currentStep, setCurrentStep] = useState(1);
   const [formData, setFormData] = useState({
-    // Basic info (supported by backend)
+    // Basic info
     email: '',
     password: '',
     password_confirm: '',
@@ -110,171 +80,151 @@ export default function RegisterPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
-  
-  const router = useRouter();
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value, type } = e.target;
     
     if (type === 'checkbox') {
       const checked = (e.target as HTMLInputElement).checked;
-      setFormData({
-        ...formData,
+      setFormData(prev => ({
+        ...prev,
         [name]: checked
-      });
-    } else if (name === 'secondary_services' || name === 'service_areas') {
-      // Handle multi-select arrays
-      const currentArray = formData[name as keyof typeof formData] as string[];
-      const newArray = currentArray.includes(value)
-        ? currentArray.filter(item => item !== value)
-        : [...currentArray, value];
-      
-      setFormData({
-        ...formData,
-        [name]: newArray
-      });
+      }));
     } else {
-      setFormData({
-        ...formData,
+      setFormData(prev => ({
+        ...prev,
         [name]: value
-      });
-    }
-
-    // Debug logging
-    if (name === 'user_type') {
-      console.log('User type changed to:', value);
-      console.log('Current step:', currentStep);
-      console.log('Total steps:', getTotalSteps());
+      }));
     }
   };
 
-  const nextStep = () => {
-    if (currentStep < getTotalSteps()) {
-      setCurrentStep(currentStep + 1);
-    }
-  };
-
-  const prevStep = () => {
-    if (currentStep > 1) {
-      setCurrentStep(currentStep - 1);
-    }
-  };
-
-  const getTotalSteps = () => {
-    return formData.user_type === 'provider' ? 2 : 1;
-  };
-
-  const isStepValid = (step: number) => {
-    switch (step) {
-      case 1:
-        return formData.first_name && formData.last_name && formData.email && 
-               formData.password && formData.password_confirm && formData.user_type;
-      case 2:
-        return formData.business_name && formData.primary_service && 
-               formData.city && formData.province && formData.phone_number && 
-               formData.terms_accepted && formData.privacy_accepted;
-      default:
-        return true;
-    }
-  };
-
-  // Combine area code and phone number for backend
   const getFullPhoneNumber = () => {
-    if (!formData.phone_number) return '';
-    return `${formData.area_code}${formData.phone_number}`;
+    if (formData.area_code && formData.phone_number) {
+      return `${formData.area_code}${formData.phone_number}`;
+    }
+    return '';
+  };
+
+  const validateStep1 = () => {
+    if (!formData.first_name || !formData.last_name || !formData.email || !formData.password || !formData.password_confirm) {
+      setError('Please fill in all required fields');
+      return false;
+    }
+    if (formData.password !== formData.password_confirm) {
+      setError('Passwords do not match');
+      return false;
+    }
+    if (formData.password.length < 6) {
+      setError('Password must be at least 6 characters long');
+      return false;
+    }
+    if (!formData.city || !formData.suburb || !formData.province) {
+      setError('Please provide your location information');
+      return false;
+    }
+    return true;
+  };
+
+  const validateStep2 = () => {
+    if (formData.user_type === 'provider') {
+      if (!formData.business_name || !formData.primary_service || !formData.service_description) {
+        setError('Please fill in all required provider fields');
+        return false;
+      }
+      if (formData.service_categories.length === 0) {
+        setError('Please select at least one service category');
+        return false;
+      }
+      if (formData.service_areas.length === 0) {
+        setError('Please select at least one service area');
+        return false;
+      }
+    }
+    if (!formData.terms_accepted || !formData.privacy_accepted) {
+      setError('Please accept the terms and conditions');
+      return false;
+    }
+    return true;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    // If not on final step, go to next step
-    if (currentStep < getTotalSteps()) {
-      nextStep();
+    setError('');
+    setSuccess('');
+
+    if (!validateStep1() || !validateStep2()) {
       return;
     }
 
     setLoading(true);
-    setError('');
-    setSuccess('');
-
-    // Client-side validation
-    if (formData.password !== formData.password_confirm) {
-      setError('Passwords do not match');
-      setLoading(false);
-      return;
-    }
-
-    if (formData.password.length < 6) {
-      setError('Password must be at least 6 characters long');
-      setLoading(false);
-      return;
-    }
 
     try {
-      // Prepare data for API - include provider-specific data
+      // Prepare data for API
       const apiData = {
-        username: formData.email, // Use email as username
+        username: formData.email,
         email: formData.email,
         password: formData.password,
-        password_confirm: formData.password_confirm, // Add password confirmation
+        password_confirm: formData.password_confirm,
         first_name: formData.first_name,
         last_name: formData.last_name,
         user_type: formData.user_type,
-        phone: getFullPhoneNumber(),
+        phone: getFullPhoneNumber() || null,
         city: formData.city,
         suburb: formData.suburb,
         latitude: formData.latitude ? parseFloat(formData.latitude) : null,
         longitude: formData.longitude ? parseFloat(formData.longitude) : null
       };
 
-      // Add provider-specific data if user is a service provider
+      // Add provider-specific data for ML services
       if (formData.user_type === 'provider') {
-        apiData.business_name = formData.business_name;
-        apiData.business_address = formData.business_address;
-        apiData.business_phone = getFullPhoneNumber();
-        apiData.business_email = formData.business_email;
-        apiData.primary_service = formData.primary_service;
-        apiData.service_categories = formData.service_categories;
-        apiData.service_areas = formData.service_areas;
-        apiData.max_travel_distance = parseInt(formData.max_travel_distance.toString());
-        apiData.years_experience = formData.years_experience;
-        apiData.service_description = formData.service_description;
-        apiData.hourly_rate_min = formData.hourly_rate_min ? parseFloat(formData.hourly_rate_min) : null;
-        apiData.hourly_rate_max = formData.hourly_rate_max ? parseFloat(formData.hourly_rate_max) : null;
-        apiData.minimum_job_value = formData.minimum_job_value ? parseFloat(formData.minimum_job_value) : null;
+        Object.assign(apiData, {
+          business_name: formData.business_name,
+          business_address: formData.business_address,
+          business_phone: getFullPhoneNumber() || null,
+          business_email: formData.business_email || formData.email,
+          primary_service: formData.primary_service,
+          service_categories: formData.service_categories,
+          service_areas: formData.service_areas,
+          max_travel_distance: parseInt(formData.max_travel_distance.toString()),
+          years_experience: formData.years_experience,
+          service_description: formData.service_description,
+          hourly_rate_min: formData.hourly_rate_min ? parseFloat(formData.hourly_rate_min) : null,
+          hourly_rate_max: formData.hourly_rate_max ? parseFloat(formData.hourly_rate_max) : null,
+          minimum_job_value: formData.minimum_job_value ? parseFloat(formData.minimum_job_value) : null
+        });
       }
 
+      console.log('🚀 Sending registration data:', apiData);
 
-      // Direct API call to Flask backend
       const response = await fetch('https://api.proconnectsa.co.za/api/register/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(apiData)
+        body: JSON.stringify(apiData),
       });
 
       const data = await response.json();
 
       if (response.ok) {
-        setSuccess(data.message || 'Registration successful!');
+        setSuccess('Registration successful! Redirecting to login...');
         setTimeout(() => {
-          router.push('/login?message=Registration successful, please login');
+          router.push('/login');
         }, 2000);
       } else {
-        // Handle validation errors from backend
+        console.error('Registration error:', data);
         if (data.errors) {
-          const errorMessages = Object.entries(data.errors).map(([field, messages]) => {
-            return `${field}: ${Array.isArray(messages) ? messages.join(', ') : messages}`;
-          }).join('\n');
-          setError(`Registration failed:\n${errorMessages}`);
+          const errorMessages = Object.values(data.errors).flat();
+          setError(errorMessages.join(', '));
+        } else if (data.error) {
+          setError(data.error);
         } else {
-          setError(data.message || data.detail || 'Registration failed');
+          setError('Registration failed. Please try again.');
         }
       }
-    } catch (err: any) {
-      console.error('Registration error:', err);
-      setError(err.message || 'Registration failed. Please try again.');
+    } catch (error) {
+      console.error('Registration error:', error);
+      setError('Network error. Please check your connection and try again.');
     } finally {
       setLoading(false);
     }
@@ -287,14 +237,14 @@ export default function RegisterPage() {
           Create your account
         </h2>
         <p className="text-gray-600">
-          Join ProConnectSA today
+          Join ProConnectSA Lead Marketplace
         </p>
       </div>
 
       <div className="grid grid-cols-2 gap-4">
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            First Name
+            First Name *
           </label>
           <input
             name="first_name"
@@ -309,7 +259,7 @@ export default function RegisterPage() {
         
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            Last Name
+            Last Name *
           </label>
           <input
             name="last_name"
@@ -325,178 +275,84 @@ export default function RegisterPage() {
 
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-2">
-          Email Address
+          Email Address *
         </label>
         <input
           name="email"
           type="email"
           required
           className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
-          placeholder="Enter your email"
+          placeholder="your@email.com"
           value={formData.email}
           onChange={handleChange}
         />
       </div>
 
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
-          Account Type
-        </label>
-        <select
-          name="user_type"
-          required
-          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
-          value={formData.user_type}
-          onChange={handleChange}
-        >
-          <option value="client">Client (Looking for services)</option>
-          <option value="provider">Service Provider (Offering services)</option>
-        </select>
-        {formData.user_type === 'provider' && (
-          <p className="text-sm text-emerald-600 mt-2">
-            ✓ Service providers will be asked additional questions in the next step
-          </p>
-        )}
-      </div>
-
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
-          Password
-        </label>
-        <input
-          name="password"
-          type="password"
-          required
-          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
-          placeholder="Password (min 6 characters)"
-          value={formData.password}
-          onChange={handleChange}
-        />
-      </div>
-
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
-          Confirm Password
-        </label>
-        <input
-          name="password_confirm"
-          type="password"
-          required
-          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
-          placeholder="Confirm Password"
-          value={formData.password_confirm}
-          onChange={handleChange}
-        />
-      </div>
-
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
-          Phone Number (Optional)
-        </label>
-        <div className="flex gap-2">
-          <div className="w-1/3">
-            <select
-              name="area_code"
-              className="w-full px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors text-sm"
-              value={formData.area_code}
-              onChange={handleChange}
-            >
-              {areaCodes.map((area) => (
-                <option key={area.code} value={area.code}>{area.name}</option>
-              ))}
-            </select>
-          </div>
-          <div className="w-2/3">
-            <input
-              name="phone_number"
-              type="tel"
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
-              placeholder="e.g., 123456789"
-              value={formData.phone_number}
-              onChange={handleChange}
-            />
-          </div>
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Password *
+          </label>
+          <input
+            name="password"
+            type="password"
+            required
+            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
+            placeholder="Password (min 6 characters)"
+            value={formData.password}
+            onChange={handleChange}
+          />
         </div>
-        <p className="text-xs text-gray-500 mt-1">
-          Full number: {getFullPhoneNumber() || 'Not provided'}
-        </p>
+        
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Confirm Password *
+          </label>
+          <input
+            name="password_confirm"
+            type="password"
+            required
+            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
+            placeholder="Confirm Password"
+            value={formData.password_confirm}
+            onChange={handleChange}
+          />
+        </div>
       </div>
 
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-2">
-          City (Optional)
+          Account Type *
         </label>
-        <input
-          name="city"
-          type="text"
-          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
-          placeholder="City"
-          value={formData.city}
-          onChange={handleChange}
-        />
-      </div>
-    </div>
-  );
-
-  const renderStep2 = () => (
-    <div className="space-y-6">
-      <div className="text-center mb-8">
-        <h2 className="text-2xl font-bold text-gray-900 mb-2">
-          Service Provider Details
-        </h2>
-        <p className="text-gray-600">
-          Tell us about your services
-        </p>
-      </div>
-
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
-          Business Name
-        </label>
-        <input
-          name="business_name"
-          type="text"
-          required
-          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
-          placeholder="Your business name"
-          value={formData.business_name}
-          onChange={handleChange}
-        />
-      </div>
-
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
-          Primary Service
-        </label>
-        <select
-          name="primary_service"
-          required
-          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
-          value={formData.primary_service}
-          onChange={handleChange}
-        >
-          <option value="">Select primary service</option>
-          {serviceCategories.map((category) => (
-            <option key={category} value={category}>{category}</option>
-          ))}
-        </select>
-      </div>
-
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
-          Years of Experience
-        </label>
-        <select
-          name="years_experience"
-          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
-          value={formData.years_experience}
-          onChange={handleChange}
-        >
-          <option value="">Select experience level</option>
-          {experienceLevels.map((level) => (
-            <option key={level} value={level}>{level}</option>
-          ))}
-        </select>
+        <div className="grid grid-cols-2 gap-4">
+          <button
+            type="button"
+            onClick={() => setFormData({...formData, user_type: 'client'})}
+            className={`p-4 border-2 rounded-lg text-center transition-colors ${
+              formData.user_type === 'client'
+                ? 'border-emerald-500 bg-emerald-50 text-emerald-700'
+                : 'border-gray-300 hover:border-gray-400'
+            }`}
+          >
+            <div className="text-2xl mb-2">👤</div>
+            <div className="font-medium">Client</div>
+            <div className="text-sm text-gray-600">Looking for services</div>
+          </button>
+          
+          <button
+            type="button"
+            onClick={() => setFormData({...formData, user_type: 'provider'})}
+            className={`p-4 border-2 rounded-lg text-center transition-colors ${
+              formData.user_type === 'provider'
+                ? 'border-emerald-500 bg-emerald-50 text-emerald-700'
+                : 'border-gray-300 hover:border-gray-400'
+            }`}
+          >
+            <div className="text-2xl mb-2">🔧</div>
+            <div className="font-medium">Service Provider</div>
+            <div className="text-sm text-gray-600">Offering services</div>
+          </button>
+        </div>
       </div>
 
       <div>
@@ -535,7 +391,7 @@ export default function RegisterPage() {
       <div className="grid grid-cols-2 gap-4">
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            City
+            City *
           </label>
           <input
             name="city"
@@ -550,72 +406,311 @@ export default function RegisterPage() {
         
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            Province
+            Suburb *
           </label>
-          <select
-            name="province"
+          <input
+            name="suburb"
+            type="text"
             required
             className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
-            value={formData.province}
+            placeholder="Suburb"
+            value={formData.suburb}
             onChange={handleChange}
-          >
-            <option value="">Select province</option>
-            {provinces.map((province) => (
-              <option key={province} value={province}>{province}</option>
-            ))}
-          </select>
+          />
         </div>
       </div>
 
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-2">
-          Service Description
+          Province *
         </label>
-        <textarea
-          name="service_description"
-          rows={3}
+        <select
+          name="province"
+          required
           className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
-          placeholder="Briefly describe your services"
-          value={formData.service_description}
+          value={formData.province}
           onChange={handleChange}
-        />
+        >
+          <option value="">Select province</option>
+          {provinces.map((province) => (
+            <option key={province} value={province}>{province}</option>
+          ))}
+        </select>
+      </div>
+    </div>
+  );
+
+  const renderStep2 = () => (
+    <div className="space-y-6">
+      <div className="text-center mb-8">
+        <h2 className="text-2xl font-bold text-gray-900 mb-2">
+          Service Provider Details
+        </h2>
+        <p className="text-gray-600">
+          Complete your profile for ML-powered lead matching
+        </p>
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            City
-          </label>
-          <input
-            name="city"
-            type="text"
-            required
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
-            placeholder="City"
-            value={formData.city}
-            onChange={handleChange}
-          />
-        </div>
+      {/* Business Information */}
+      <div className="bg-gray-50 p-4 rounded-lg">
+        <h3 className="text-lg font-semibold text-gray-800 mb-4">Business Information</h3>
         
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            Province
+            Business Name *
           </label>
-          <select
-            name="province"
+          <input
+            name="business_name"
+            type="text"
             required
             className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
-            value={formData.province}
+            placeholder="Your business name"
+            value={formData.business_name}
             onChange={handleChange}
-          >
-            <option value="">Select province</option>
-            {provinces.map((province) => (
-              <option key={province} value={province}>{province}</option>
-            ))}
-          </select>
+          />
+        </div>
+
+        <div className="mt-4">
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Business Address *
+          </label>
+          <textarea
+            name="business_address"
+            rows={2}
+            required
+            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
+            placeholder="Full business address"
+            value={formData.business_address}
+            onChange={handleChange}
+          />
+        </div>
+
+        <div className="grid grid-cols-2 gap-4 mt-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Business Phone
+            </label>
+            <input
+              name="business_phone"
+              type="tel"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
+              placeholder="Business phone number"
+              value={formData.business_phone}
+              onChange={handleChange}
+            />
+          </div>
+          
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Business Email
+            </label>
+            <input
+              name="business_email"
+              type="email"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
+              placeholder="Business email"
+              value={formData.business_email}
+              onChange={handleChange}
+            />
+          </div>
         </div>
       </div>
 
+      {/* Service Information */}
+      <div className="bg-blue-50 p-4 rounded-lg">
+        <h3 className="text-lg font-semibold text-gray-800 mb-4">Service Information</h3>
+        
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Primary Service *
+          </label>
+          <select
+            name="primary_service"
+            required
+            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
+            value={formData.primary_service}
+            onChange={handleChange}
+          >
+            <option value="">Select primary service</option>
+            {serviceCategories.map((category) => (
+              <option key={category} value={category}>{category}</option>
+            ))}
+          </select>
+        </div>
+
+        <div className="mt-4">
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Service Categories * (Select all that apply)
+          </label>
+          <div className="grid grid-cols-2 gap-2">
+            {serviceCategories.map((category) => (
+              <label key={category} className="flex items-center">
+                <input
+                  type="checkbox"
+                  value={category}
+                  checked={formData.service_categories.includes(category)}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    if (e.target.checked) {
+                      setFormData({
+                        ...formData,
+                        service_categories: [...formData.service_categories, value]
+                      });
+                    } else {
+                      setFormData({
+                        ...formData,
+                        service_categories: formData.service_categories.filter(c => c !== value)
+                      });
+                    }
+                  }}
+                  className="mr-2"
+                />
+                <span className="text-sm">{category}</span>
+              </label>
+            ))}
+          </div>
+        </div>
+
+        <div className="mt-4">
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Service Areas * (Where do you provide services?)
+          </label>
+          <div className="grid grid-cols-2 gap-2">
+            {majorCities.map((area) => (
+              <label key={area} className="flex items-center">
+                <input
+                  type="checkbox"
+                  value={area}
+                  checked={formData.service_areas.includes(area)}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    if (e.target.checked) {
+                      setFormData({
+                        ...formData,
+                        service_areas: [...formData.service_areas, value]
+                      });
+                    } else {
+                      setFormData({
+                        ...formData,
+                        service_areas: formData.service_areas.filter(a => a !== value)
+                      });
+                    }
+                  }}
+                  className="mr-2"
+                />
+                <span className="text-sm">{area}</span>
+              </label>
+            ))}
+          </div>
+        </div>
+
+        <div className="mt-4">
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Maximum Travel Distance (km) *
+          </label>
+          <select
+            name="max_travel_distance"
+            required
+            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
+            value={formData.max_travel_distance}
+            onChange={handleChange}
+          >
+            <option value="10">10 km</option>
+            <option value="20">20 km</option>
+            <option value="30">30 km</option>
+            <option value="50">50 km</option>
+            <option value="100">100 km</option>
+            <option value="200">200+ km</option>
+          </select>
+        </div>
+
+        <div className="mt-4">
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Years of Experience *
+          </label>
+          <select
+            name="years_experience"
+            required
+            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
+            value={formData.years_experience}
+            onChange={handleChange}
+          >
+            <option value="">Select experience level</option>
+            {experienceLevels.map((level) => (
+              <option key={level} value={level}>{level}</option>
+            ))}
+          </select>
+        </div>
+
+        <div className="mt-4">
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Service Description *
+          </label>
+          <textarea
+            name="service_description"
+            rows={3}
+            required
+            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
+            placeholder="Describe your services and expertise"
+            value={formData.service_description}
+            onChange={handleChange}
+          />
+        </div>
+      </div>
+
+      {/* Pricing Information */}
+      <div className="bg-green-50 p-4 rounded-lg">
+        <h3 className="text-lg font-semibold text-gray-800 mb-4">Pricing Information</h3>
+        
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Hourly Rate (Min) - R
+            </label>
+            <input
+              name="hourly_rate_min"
+              type="number"
+              step="0.01"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
+              placeholder="150.00"
+              value={formData.hourly_rate_min}
+              onChange={handleChange}
+            />
+          </div>
+          
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Hourly Rate (Max) - R
+            </label>
+            <input
+              name="hourly_rate_max"
+              type="number"
+              step="0.01"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
+              placeholder="300.00"
+              value={formData.hourly_rate_max}
+              onChange={handleChange}
+            />
+          </div>
+        </div>
+
+        <div className="mt-4">
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Minimum Job Value - R
+          </label>
+          <input
+            name="minimum_job_value"
+            type="number"
+            step="0.01"
+            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
+            placeholder="500.00"
+            value={formData.minimum_job_value}
+            onChange={handleChange}
+          />
+        </div>
+      </div>
+
+      {/* Terms and Conditions */}
       <div className="space-y-4">
         <h3 className="text-lg font-medium text-gray-900">Terms & Conditions</h3>
         <div className="space-y-3">
@@ -651,143 +746,102 @@ export default function RegisterPage() {
     </div>
   );
 
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-emerald-50">
-      <div className="flex min-h-screen">
-        {/* Left Side - Branding */}
-        <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-emerald-600 to-blue-600 relative overflow-hidden">
-          <div className="absolute inset-0 bg-black/10"></div>
-          <div className="relative z-10 flex flex-col justify-center px-12 py-20">
-            <div className="mb-8">
-              <div className="flex items-center space-x-3 mb-6">
-                <div className="h-12 w-12 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
-                  <span className="text-white font-bold text-2xl">P</span>
-                </div>
-                <span className="text-white font-bold text-3xl">ProConnectSA</span>
+    <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+      <div className="sm:mx-auto sm:w-full sm:max-w-md">
+        <div className="text-center">
+          <h1 className="text-3xl font-bold text-gray-900">ProConnectSA</h1>
+          <p className="mt-2 text-sm text-gray-600">
+            Lead Marketplace - Find and Purchase Qualified Leads
+          </p>
+        </div>
+      </div>
+
+      <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
+        <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
+          {/* Progress indicator */}
+          <div className="mb-8">
+            <div className="flex items-center justify-center space-x-4">
+              <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
+                currentStep >= 1 ? 'bg-emerald-500 text-white' : 'bg-gray-300 text-gray-600'
+              }`}>
+                1
               </div>
-              <h1 className="text-4xl font-bold text-white mb-4">
-                Join ProConnectSA
-              </h1>
-              <p className="text-xl text-emerald-100 leading-relaxed">
-                Connect with South Africa's best service providers or offer your services to quality clients.
-              </p>
+              <div className={`w-16 h-1 ${currentStep >= 2 ? 'bg-emerald-500' : 'bg-gray-300'}`}></div>
+              <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
+                currentStep >= 2 ? 'bg-emerald-500 text-white' : 'bg-gray-300 text-gray-600'
+              }`}>
+                2
+              </div>
             </div>
-            
-            <div className="space-y-4">
-              <div className="flex items-center space-x-3">
-                <div className="h-8 w-8 rounded-lg bg-white/20 flex items-center justify-center">
-                  <span className="text-white text-sm">✓</span>
-                </div>
-                <span className="text-emerald-100">Free to Join</span>
-              </div>
-              <div className="flex items-center space-x-3">
-                <div className="h-8 w-8 rounded-lg bg-white/20 flex items-center justify-center">
-                  <span className="text-white text-sm">✓</span>
-                </div>
-                <span className="text-emerald-100">Verified Members</span>
-              </div>
-              <div className="flex items-center space-x-3">
-                <div className="h-8 w-8 rounded-lg bg-white/20 flex items-center justify-center">
-                  <span className="text-white text-sm">✓</span>
-                </div>
-                <span className="text-emerald-100">Secure Platform</span>
-              </div>
+            <div className="flex justify-between mt-2 text-xs text-gray-500">
+              <span>Basic Info</span>
+              <span>{formData.user_type === 'provider' ? 'Provider Details' : 'Complete'}</span>
             </div>
           </div>
-        </div>
 
-        {/* Right Side - Register Form */}
-        <div className="flex-1 flex items-center justify-center px-4 sm:px-6 lg:px-8">
-          <div className="w-full max-w-2xl">
-            {/* Mobile Logo */}
-            <div className="lg:hidden text-center mb-8">
-              <div className="flex items-center justify-center space-x-3 mb-4">
-                <div className="h-10 w-10 rounded-lg bg-emerald-600 flex items-center justify-center">
-                  <span className="text-white font-bold text-xl">P</span>
-                </div>
-                <span className="text-2xl font-bold text-gray-900">ProConnectSA</span>
-              </div>
+          {/* Error and Success Messages */}
+          {error && (
+            <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+              <p className="text-sm text-red-600">{error}</p>
             </div>
+          )}
 
-            <div className="bg-white rounded-2xl shadow-2xl p-8 border-0">
-              {/* Progress Bar */}
-              {getTotalSteps() > 1 && (
-                <div className="mb-8">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm font-medium text-gray-700">
-                      Step {currentStep} of {getTotalSteps()}
-                    </span>
-                    <span className="text-sm text-gray-500">
-                      {Math.round((currentStep / getTotalSteps()) * 100)}% Complete
-                    </span>
-                  </div>
-                  <div className="w-full bg-gray-200 rounded-full h-2">
-                    <div 
-                      className="bg-emerald-600 h-2 rounded-full transition-all duration-300"
-                      style={{ width: `${(currentStep / getTotalSteps()) * 100}%` }}
-                    ></div>
-                  </div>
-                </div>
-              )}
+          {success && (
+            <div className="mb-4 p-4 bg-green-50 border border-green-200 rounded-lg">
+              <p className="text-sm text-green-600">{success}</p>
+            </div>
+          )}
 
-              {error && (
-                <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6">
-                  {error}
-                </div>
+          <form onSubmit={handleSubmit} className="space-y-6">
+            {currentStep === 1 && renderStep1()}
+            {currentStep === 2 && renderStep2()}
+
+            {/* Navigation buttons */}
+            <div className="flex justify-between">
+              {currentStep > 1 && (
+                <button
+                  type="button"
+                  onClick={() => setCurrentStep(currentStep - 1)}
+                  className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                >
+                  Previous
+                </button>
               )}
               
-              {success && (
-                <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg mb-6 flex items-center">
-                  <span className="text-green-600 mr-2">✓</span>
-                  {success}
-                </div>
-              )}
-
-              <form onSubmit={handleSubmit}>
-                {currentStep === 1 && renderStep1()}
-                {currentStep === 2 && renderStep2()}
-
-                <div className="flex justify-between mt-8">
-                  {currentStep > 1 ? (
-                    <button
-                      type="button"
-                      onClick={prevStep}
-                      className="px-6 py-3 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
-                    >
-                      Previous
-                    </button>
-                  ) : (
-                    <div></div>
-                  )}
-
+              <div className="ml-auto">
+                {currentStep < 2 && formData.user_type === 'provider' ? (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (validateStep1()) {
+                        setCurrentStep(2);
+                      }
+                    }}
+                    className="px-6 py-2 text-sm font-medium text-white bg-emerald-600 rounded-lg hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                  >
+                    Next
+                  </button>
+                ) : (
                   <button
                     type="submit"
-                    disabled={loading || !isStepValid(currentStep)}
-                    className="px-6 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
+                    disabled={loading}
+                    className="px-6 py-2 text-sm font-medium text-white bg-emerald-600 rounded-lg hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    {loading ? (
-                      <div className="flex items-center">
-                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                        {currentStep === getTotalSteps() ? 'Creating Account...' : 'Loading...'}
-                      </div>
-                    ) : (
-                      currentStep === getTotalSteps() ? 'Create Account' : 
-                      formData.user_type === 'provider' ? 'Continue to Provider Details' : 'Next'
-                    )}
+                    {loading ? 'Creating Account...' : 'Create Account'}
                   </button>
-                </div>
-              </form>
-
-              <div className="text-center mt-6">
-                <p className="text-sm text-gray-600">
-                  Already have an account?{' '}
-                  <Link href="/login" className="font-medium text-emerald-600 hover:text-emerald-500 transition-colors">
-                    Sign in here
-                  </Link>
-                </p>
+                )}
               </div>
             </div>
+          </form>
+
+          <div className="mt-6 text-center">
+            <p className="text-sm text-gray-600">
+              Already have an account?{' '}
+              <Link href="/login" className="font-medium text-emerald-600 hover:text-emerald-500">
+                Sign in here
+              </Link>
+            </p>
           </div>
         </div>
       </div>
