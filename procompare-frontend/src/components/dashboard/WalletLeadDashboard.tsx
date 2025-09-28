@@ -389,13 +389,25 @@ const WalletLeadDashboard = () => {
   };
 
   const formatTimeAgo = (dateString) => {
+    if (!dateString) return 'Unknown time';
+    
     const now = new Date();
     const posted = new Date(dateString);
-    const diffInHours = Math.floor((now - posted) / (1000 * 60 * 60));
     
-    if (diffInHours < 1) return 'Just posted';
-    if (diffInHours < 24) return `${diffInHours}h ago`;
-    return `${Math.floor(diffInHours / 24)}d ago`;
+    // Check if date is valid
+    if (isNaN(posted.getTime())) return 'Invalid date';
+    
+    const diffMs = now.getTime() - posted.getTime();
+    const diffMinutes = Math.floor(diffMs / (1000 * 60));
+    const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+    
+    if (diffMinutes < 1) return 'Just now';
+    if (diffMinutes < 60) return `${diffMinutes}m ago`;
+    if (diffHours < 24) return `${diffHours}h ago`;
+    if (diffDays < 7) return `${diffDays}d ago`;
+    if (diffDays < 30) return `${Math.floor(diffDays / 7)}w ago`;
+    return `${Math.floor(diffDays / 30)}mo ago`;
   };
 
   if (loading) {
