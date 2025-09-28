@@ -60,7 +60,7 @@ export default function PersonalizedHeader({
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
-          ...(token && { 'Authorization': `Bearer ${token}` })
+          ...(token && { 'Authorization': `Token ${token}` })
         }
       });
 

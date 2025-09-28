@@ -45,7 +45,7 @@ export function CreditPurchaseModal({
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
+            'Authorization': `Token ${localStorage.getItem('accessToken')}`
           },
           body: JSON.stringify({
             amount: creditCost,

@@ -64,16 +64,16 @@ urlpatterns = [
     path('provider-stats/', views.ProviderStatsView.as_view(), name='provider-stats'),
     
     # Wallet system endpoints
-    path('api/wallet/balance/', wallet_views.wallet_balance, name='wallet_balance'),
-    path('api/wallet/deposit-reference/', wallet_views.generate_deposit_reference, name='deposit_reference'),
-    path('api/leads/<str:lead_id>/unlock/', wallet_views.unlock_lead, name='unlock_lead'),
+    path('wallet/balance/', wallet_views.wallet_balance, name='wallet_balance'),
+    path('wallet/deposit-reference/', wallet_views.generate_deposit_reference, name='deposit_reference'),
+    path('leads/<str:lead_id>/unlock/', wallet_views.unlock_lead, name='unlock_lead'),
     
     # Extended Wallet APIs
-    path('api/wallet/', wallet_views_extended.wallet_details, name='wallet_details'),
-    path('api/wallet/transactions/', wallet_views_extended.wallet_transactions, name='wallet_transactions'),
-    path('api/wallet/top-up/', wallet_views_extended.wallet_top_up, name='wallet_top_up'),
-    path('api/wallet/add-credits/', wallet_views_extended.manual_credit_addition, name='manual_credit_addition'),
-    path('api/wallet/reconcile/', wallet_views_extended.trigger_reconciliation, name='trigger_reconciliation'),
+    path('wallet/', wallet_views_extended.wallet_details, name='wallet_details'),
+    path('wallet/transactions/', wallet_views_extended.wallet_transactions, name='wallet_transactions'),
+    path('wallet/top-up/', wallet_views_extended.wallet_top_up, name='wallet_top_up'),
+    path('wallet/add-credits/', wallet_views_extended.manual_credit_addition, name='manual_credit_addition'),
+    path('wallet/reconcile/', wallet_views_extended.trigger_reconciliation, name='trigger_reconciliation'),
     
     # Client Dashboard APIs
     path('client/dashboard/', client_views.client_dashboard_stats, name='client_dashboard_stats'),
