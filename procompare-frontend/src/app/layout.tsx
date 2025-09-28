@@ -13,7 +13,7 @@ const inter = {
 
 export const metadata: Metadata = {
   title: "ProConnectSA Lead Marketplace - Find and Purchase Qualified Leads",
-  description: "Find and purchase qualified leads from South Africa's most trusted service marketplace. Access high-quality leads that are verified, qualified, and ready to convert.",
+  description: "ProConnectSA Lead Marketplace - Find and purchase qualified leads from South Africa's most trusted service marketplace. Access high-quality leads that are verified, qualified, and ready to convert.",
   keywords: "lead marketplace, qualified leads, South Africa, service providers, lead generation, ProConnectSA, business leads",
   authors: [{ name: "ProConnectSA Team" }],
   creator: "ProConnectSA",
@@ -26,7 +26,7 @@ export const metadata: Metadata = {
   metadataBase: new URL("https://proconnectsa.co.za"),
   openGraph: {
     title: "ProConnectSA Lead Marketplace - Find and Purchase Qualified Leads",
-    description: "Find and purchase qualified leads from South Africa's most trusted service marketplace. Access high-quality leads that are verified, qualified, and ready to convert.",
+    description: "ProConnectSA Lead Marketplace - Find and purchase qualified leads from South Africa's most trusted service marketplace. Access high-quality leads that are verified, qualified, and ready to convert.",
     url: "https://proconnectsa.co.za",
     siteName: "ProConnectSA",
     locale: "en_ZA",

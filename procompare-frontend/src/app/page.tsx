@@ -383,12 +383,12 @@ const Homepage = () => {
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
             <h1 className={`text-5xl md:text-7xl font-bold text-gray-900 mb-6 transition-all duration-1000 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
-              Find and Purchase{' '}
+              ProConnectSA{' '}
               <span className="bg-gradient-to-r from-emerald-600 to-blue-600 bg-clip-text text-transparent">
-                Qualified Leads
+                Lead Marketplace
               </span>
               <br />
-              <span className="text-4xl md:text-5xl">ProConnectSA Lead Marketplace</span>
+              <span className="text-4xl md:text-5xl">Find and Purchase Qualified Leads</span>
             </h1>
             <p className={`text-xl text-gray-600 mb-12 max-w-2xl mx-auto transition-all duration-1000 delay-200 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
               Access high-quality leads from South Africa's most trusted service marketplace. All verified, qualified, and ready to convert.
