@@ -3,6 +3,7 @@ from django.contrib.auth import authenticate
 from django.contrib.auth.password_validation import validate_password
 from .models import User, ProviderProfile, JobCategory, LeadClaim, MLPricingFactor
 from backend.leads.models import Lead
+from .input_validation import InputValidator
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -95,9 +96,57 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
             'years_experience', 'service_description', 'hourly_rate_min', 'hourly_rate_max', 'minimum_job_value'
         ]
     
+    def validate_email(self, value):
+        """Enhanced email validation"""
+        try:
+            return InputValidator.validate_email(value)
+        except Exception as e:
+            raise serializers.ValidationError(str(e))
+    
+    def validate_password(self, value):
+        """Enhanced password validation"""
+        try:
+            return InputValidator.validate_password(value)
+        except Exception as e:
+            raise serializers.ValidationError(str(e))
+    
+    def validate_phone(self, value):
+        """Enhanced phone validation"""
+        if not value:
+            return None
+        try:
+            return InputValidator.validate_phone(value)
+        except Exception as e:
+            raise serializers.ValidationError(str(e))
+    
+    def validate_business_name(self, value):
+        """Enhanced business name validation"""
+        if not value:
+            return value
+        try:
+            return InputValidator.validate_business_name(value)
+        except Exception as e:
+            raise serializers.ValidationError(str(e))
+    
     def validate(self, attrs):
         if attrs['password'] != attrs['password_confirm']:
             raise serializers.ValidationError("Passwords don't match")
+        
+        # Validate location data
+        if 'city' in attrs or 'suburb' in attrs:
+            try:
+                city, suburb, address = InputValidator.validate_location_data(
+                    attrs.get('city'),
+                    attrs.get('suburb'), 
+                    attrs.get('business_address')
+                )
+                attrs['city'] = city
+                attrs['suburb'] = suburb
+                if 'business_address' in attrs:
+                    attrs['business_address'] = address
+            except Exception as e:
+                raise serializers.ValidationError(str(e))
+        
         return attrs
     
     def _parse_years_experience(self, years_str):

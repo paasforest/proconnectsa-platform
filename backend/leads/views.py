@@ -1,5 +1,6 @@
 from rest_framework import generics, status, permissions
 from rest_framework.permissions import AllowAny, IsAuthenticated
+from backend.users.api_key_auth import PublicAPIKeyAuthentication
 from django.utils import timezone
 try:
     from ratelimit.decorators import ratelimit
@@ -321,7 +322,7 @@ def submit_quote(request, assignment_id):
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
-@ratelimit(key='ip', rate='5/m', block=True)
+@ratelimit(key='ip', rate='20/h', block=True)  # 20 lead creations per hour
 def create_public_lead(request):
     """Create a lead without authentication (public endpoint)"""
     from django.contrib.auth import get_user_model
