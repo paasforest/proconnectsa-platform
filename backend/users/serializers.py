@@ -233,8 +233,11 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
             ProviderProfile.objects.create(
                 user=user,
                 business_name=business_name or f"{user.first_name} {user.last_name}'s Business",
+                business_registration="Not provided",  # Required field
+                license_number="Not provided",  # Required field
+                vat_number="Not provided",  # Required field
                 business_address=business_address or f"{user.city}, {user.suburb}" if user.city and user.suburb else "Address not provided",
-                business_phone=business_phone or user.phone,
+                business_phone=business_phone or user.phone or "+27123456789",
                 business_email=business_email or user.email,
                 service_areas=service_areas or ([user.city] if user.city else []),
                 service_categories=service_categories,
@@ -242,10 +245,11 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
                 verification_status='pending',
                 subscription_tier='pay_as_you_go',
                 bio=service_description or f"Professional {primary_service or 'service'} provider",
+                profile_image="",  # Required field - empty string for now
                 years_experience=self._parse_years_experience(years_experience) if years_experience else None,
                 hourly_rate_min=hourly_rate_min,
                 hourly_rate_max=hourly_rate_max,
-                minimum_job_value=minimum_job_value
+                minimum_job_value=minimum_job_value or 100.00
             )
         
         return user
