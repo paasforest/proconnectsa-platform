@@ -113,7 +113,7 @@ const LeadsPage = () => {
       setUnlockingLead(leadId);
       
       // Use the correct wallet unlock endpoint
-      const response = await apiClient.post(`/api/auth/api/leads/${leadId}/unlock/`);
+      const response = await apiClient.post(`/api/leads/${leadId}/purchase/`);
       
       // Update the lead in the list
       setLeads(prevLeads => 
@@ -134,12 +134,10 @@ const LeadsPage = () => {
       let errorMessage = 'Failed to unlock lead. Please try again.';
       
       if (error.response?.data) {
-        if (error.response.data.user_friendly) {
-          errorMessage = error.response.data.message || error.response.data.error;
+        if (error.response.data.error) {
+          errorMessage = error.response.data.error;
         } else if (error.response.data.message) {
           errorMessage = error.response.data.message;
-        } else if (error.response.data.error) {
-          errorMessage = error.response.data.error;
         }
       }
       

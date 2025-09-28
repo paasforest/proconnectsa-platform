@@ -339,7 +339,7 @@ const WalletLeadDashboard = () => {
       // All leads should be real API leads now, no sample data simulation
       
       // For real leads, use the actual API
-      const response = await apiClient.post(`/api/api/leads/${leadId}/unlock/`);
+      const response = await apiClient.post(`/api/leads/${leadId}/purchase/`);
       console.log('📡 API Response:', response);
       
       if (response.success || response.data?.success) {
@@ -348,6 +348,8 @@ const WalletLeadDashboard = () => {
         // Update credits from API response
         if (response.remaining_credits !== undefined) {
           setUserCredits(response.remaining_credits);
+        } else if (response.credits_deducted !== undefined) {
+          setUserCredits(prev => prev - response.credits_deducted);
         } else {
           setUserCredits(prev => prev - lead.credit_cost);
         }
@@ -360,20 +362,29 @@ const WalletLeadDashboard = () => {
                 status: 'unlocked', 
                 isUnlocked: true,
                 current_responses: l.current_responses + 1,
-                contact_info: response.contact_info || l.contact_info
+                contact_info: response.unlocked_data || l.contact_info
               }
             : l
         ));
         
         console.log('✅ Lead purchased successfully:', response);
-        showNotification(`Lead purchased successfully! ${lead.credit_cost} credits deducted.`, 'success');
+        showNotification(`Lead purchased successfully! ${response.credits_deducted || lead.credit_cost} credits deducted.`, 'success');
       } else {
         console.error('❌ Purchase failed:', response);
         showNotification(`Purchase failed: ${response.error || 'Unknown error'}`, 'error');
       }
     } catch (error) {
       console.error('❌ Error purchasing lead:', error);
-      showNotification(`Purchase failed: ${error.message || 'Network error'}`, 'error');
+      
+      // Show specific error message from API
+      let errorMessage = 'Purchase failed. Please try again.';
+      if (error.response?.data?.error) {
+        errorMessage = error.response.data.error;
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+      
+      showNotification(errorMessage, 'error');
     }
   };
 
