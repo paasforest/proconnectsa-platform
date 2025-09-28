@@ -1,13 +1,16 @@
 from django.db.models.signals import post_save
 from django.dispatch import receiver
-from .models import User, ProviderProfile
+from .models import User, ProviderProfile, Wallet
 from backend.notifications.models import Notification
 
 
 @receiver(post_save, sender=User)
 def create_welcome_notification(sender, instance, created, **kwargs):
-    """Create welcome notification for new users"""
+    """Create welcome notification and wallet for new users"""
     if created:
+        # Create wallet for new user
+        Wallet.objects.get_or_create(user=instance)
+        
         Notification.create_for_user(
             user=instance,
             notification_type='system_update',

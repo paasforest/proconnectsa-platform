@@ -8,7 +8,7 @@ from django.utils import timezone
 from django_ratelimit.decorators import ratelimit
 from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
-from .models import User, ProviderProfile, JobCategory, LeadClaim
+from .models import User, ProviderProfile, JobCategory, LeadClaim, Wallet
 from backend.leads.models import Lead
 from .serializers import (
     UserSerializer, UserRegistrationSerializer, UserLoginSerializer,
@@ -622,9 +622,12 @@ def dashboard_stats(request):
             expires_at__gt=timezone.now()
         ).count()
         
+        # Use Wallet.credits for consistent credit display across all endpoints
+        wallet, created = Wallet.objects.get_or_create(user=request.user)
+        
         stats = {
             'tier': provider_profile.subscription_tier,
-            'credits': provider_profile.credit_balance,
+            'credits': wallet.credits,  # Use wallet credits instead of provider profile
             'monthly_allocation': provider_profile.get_monthly_lead_limit(),
             'leads_used_this_month': provider_profile.leads_used_this_month,
             'remaining_allocation': max(0, provider_profile.get_monthly_lead_limit() - provider_profile.leads_used_this_month),

@@ -93,9 +93,10 @@ const WalletPage = () => {
         // Generate stable customer code based on user
         const customerCode = generateStableCustomerCode(user);
         
+        // For new providers or API errors, show clean data with 0 balance
         setWalletData({
-          balance: 1250.00,
-          credits: 25,
+          balance: 0.00,
+          credits: 0,
           customer_code: customerCode,
           account_details: {
             bank_name: 'Nedbank',

@@ -239,14 +239,10 @@ const WalletLeadDashboard = () => {
         setSelectedLead(transformedLeads[0]);
         console.log('✅ Leads loaded:', transformedLeads.length); // Debug log
       } else {
-        console.log('⚠️ No leads found in response, using sample data'); // Debug log
-        // Apply ML pricing to sample leads
-        const leadsWithMLPricing = sampleLeads.map(lead => ({
-          ...lead,
-          credit_cost: calculateMLPricing(lead)
-        }));
-        setLeads(leadsWithMLPricing);
-        setSelectedLead(leadsWithMLPricing[0]);
+        console.log('⚠️ No leads found in response, showing empty state for new provider'); // Debug log
+        // For new providers, show empty state instead of sample data
+        setLeads([]);
+        setSelectedLead(null);
       }
       
       // Set credits from wallet data
@@ -256,13 +252,9 @@ const WalletLeadDashboard = () => {
       }
     } catch (error) {
       console.error('❌ Error fetching leads:', error);
-      // Fallback to sample data with ML pricing
-      const leadsWithMLPricing = sampleLeads.map(lead => ({
-        ...lead,
-        credit_cost: calculateMLPricing(lead)
-      }));
-      setLeads(leadsWithMLPricing);
-      setSelectedLead(leadsWithMLPricing[0]);
+      // For errors, show empty state instead of sample data
+      setLeads([]);
+      setSelectedLead(null);
     }
   }, [token]);
 
@@ -271,16 +263,19 @@ const WalletLeadDashboard = () => {
     
     try {
       apiClient.setToken(token);
-      const response = await apiClient.get('/api/auth/stats/');
+      // Use wallet endpoint for consistent credit data
+      const response = await apiClient.get('/api/wallet/');
       
-      console.log('🔍 Stats Response:', response); // Debug log
+      console.log('🔍 Wallet Response:', response); // Debug log
       
-      // Handle different response structures for credits
-      const credits = response.credits || response.data?.credits || response.wallet?.credits || 0;
+      // Get credits from wallet data consistently
+      const credits = response.credits || response.data?.credits || 0;
       setUserCredits(credits);
-      console.log('✅ Credits loaded:', credits); // Debug log
+      console.log('✅ Credits loaded from wallet:', credits); // Debug log
     } catch (error) {
-      console.error('❌ Error fetching user stats:', error);
+      console.error('❌ Error fetching wallet data:', error);
+      // For new users or errors, start with 0 credits
+      setUserCredits(0);
     }
   }, [token]);
 
@@ -341,38 +336,7 @@ const WalletLeadDashboard = () => {
       console.log('🔄 Sending purchase request to API...');
       apiClient.setToken(token);
       
-      // For sample leads, simulate a successful purchase
-      if (lead.id <= 4) { // Sample lead IDs are 1-4
-        console.log('🎭 Simulating purchase for sample lead');
-        
-        // Simulate API response
-        const mockResponse = {
-          success: true,
-          credits_spent: lead.credit_cost,
-          remaining_credits: userCredits - lead.credit_cost,
-          contact_info: lead.hidden_details
-        };
-        
-        setPurchasedLeads(prev => new Set([...prev, leadId]));
-        setUserCredits(mockResponse.remaining_credits);
-        
-        // Update lead status
-        setLeads(prev => prev.map(l => 
-          l.id === leadId 
-            ? { 
-                ...l, 
-                status: 'unlocked', 
-                isUnlocked: true,
-                current_responses: l.current_responses + 1,
-                contact_info: mockResponse.contact_info
-              }
-            : l
-        ));
-        
-        console.log('✅ Sample lead purchased successfully:', mockResponse);
-        showNotification(`Lead purchased successfully! ${lead.credit_cost} credits deducted.`, 'success');
-        return;
-      }
+      // All leads should be real API leads now, no sample data simulation
       
       // For real leads, use the actual API
       const response = await apiClient.post(`/api/api/leads/${leadId}/unlock/`);
@@ -501,8 +465,19 @@ const WalletLeadDashboard = () => {
                 <p className="text-sm text-gray-600">Click any lead to view details</p>
               </div>
               
-              <div className="max-h-[calc(100vh-300px)] overflow-y-auto">
-                {leads.map((lead) => (
+                <div className="max-h-[calc(100vh-300px)] overflow-y-auto">
+                  {leads.length === 0 ? (
+                    <div className="p-8 text-center text-gray-500">
+                      <Users className="h-12 w-12 mx-auto mb-4 text-gray-400" />
+                      <h3 className="text-lg font-medium text-gray-900 mb-2">No Leads Available</h3>
+                      <p className="text-sm text-gray-500">
+                        There are currently no leads available in your service categories.
+                        <br />
+                        Check back later or contact support if you need assistance.
+                      </p>
+                    </div>
+                  ) : (
+                    leads.map((lead) => (
                   <div
                     key={lead.id}
                     className={`p-4 border-b border-gray-100 cursor-pointer hover:bg-gray-50 transition-all ${
@@ -565,8 +540,9 @@ const WalletLeadDashboard = () => {
                       )}
                     </div>
                   </div>
-                ))}
-              </div>
+                  ))
+                  )}
+                </div>
             </div>
           </div>
 
