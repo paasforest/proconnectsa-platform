@@ -478,13 +478,13 @@ const WalletLeadDashboard = () => {
                     </div>
                   ) : (
                     leads.map((lead) => (
-                  <div
-                    key={lead.id}
-                    className={`p-4 border-b border-gray-100 cursor-pointer hover:bg-gray-50 transition-all ${
-                      selectedLead?.id === lead.id ? 'bg-blue-50 border-l-4 border-l-blue-500' : ''
-                    }`}
-                    onClick={() => setSelectedLead(lead)}
-                  >
+                      <div
+                        key={lead.id}
+                        className={`p-4 border-b border-gray-100 cursor-pointer hover:bg-gray-50 transition-all ${
+                          selectedLead?.id === lead.id ? 'bg-blue-50 border-l-4 border-l-blue-500' : ''
+                        }`}
+                        onClick={() => setSelectedLead(lead)}
+                      >
                     <div className="flex justify-between items-start mb-2">
                       <h3 className="font-semibold text-gray-900 text-sm line-clamp-2">
                         {lead.title}
@@ -538,9 +538,10 @@ const WalletLeadDashboard = () => {
                           ✓ Purchased - Contact details unlocked
                         </div>
                       )}
+                      </div>
                     </div>
-                  </div>
-                  ))
+                    ))
+                  )}
                 </div>
             </div>
           </div>
