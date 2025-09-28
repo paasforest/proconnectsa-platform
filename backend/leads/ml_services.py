@@ -549,120 +549,108 @@ class DynamicPricingMLService:
             return self._calculate_simple_price(lead, provider)
         
         try:
-            return self.calculate_optimal_credit_cost(lead, provider)
+            # ML pricing returns credits directly
+            credits = self.calculate_optimal_credit_cost(lead, provider)
+            return {
+                'price': credits,
+                'reasoning': f"ML pricing: {credits} credits based on lead characteristics",
+                'base_price': 50,
+                'multiplier': credits
+            }
         except Exception as e:
             logger.warning(f"ML pricing failed, using fallback: {str(e)}")
             return self._calculate_simple_price(lead, provider)
     
     def _calculate_simple_price(self, lead, provider):
         """Fast fallback pricing calculation - REALISTIC CREDIT PRICING"""
-        # Base pricing in Rands (R50 = 1 credit)
-        base_price = 50  # R50 base = 1 credit
+        # Base pricing: 1 credit (R50 = 1 credit)
+        base_credits = 1  # 1 credit = R50
         
         multiplier = 1.0
         
         # Urgency multipliers (based on lead urgency field)
         if lead.urgency == 'urgent':
-            multiplier = 2.0  # R100 = 2 credits
+            multiplier = 2.0  # 2 credits = R100
         elif lead.urgency == 'this_week':
-            multiplier = 1.5  # R75 = 1.5 credits
+            multiplier = 1.5  # 1.5 credits = R75
         elif lead.urgency == 'this_month':
-            multiplier = 1.2  # R60 = 1.2 credits
+            multiplier = 1.2  # 1.2 credits = R60
         else:  # flexible
-            multiplier = 1.0  # R50 = 1 credit
+            multiplier = 1.0  # 1 credit = R50
         
         # Quality multipliers (verification score)
         if lead.verification_score > 80:
-            multiplier += 0.5  # +R25 = +0.5 credits
+            multiplier += 0.5  # +0.5 credits = +R25
         elif lead.verification_score > 60:
-            multiplier += 0.2  # +R10 = +0.2 credits
+            multiplier += 0.2  # +0.2 credits = +R10
         
         # Budget multipliers (higher budget = higher credit cost)
         if hasattr(lead, 'budget_range'):
             if 'over_50000' in str(lead.budget_range):
-                multiplier += 0.8  # +R40 = +0.8 credits
+                multiplier += 0.8  # +0.8 credits = +R40
             elif '15000_50000' in str(lead.budget_range):
-                multiplier += 0.5  # +R25 = +0.5 credits
+                multiplier += 0.5  # +0.5 credits = +R25
             elif '5000_15000' in str(lead.budget_range):
-                multiplier += 0.2  # +R10 = +0.2 credits
+                multiplier += 0.2  # +0.2 credits = +R10
         
         # High intent multiplier (ready to hire = more valuable)
         if hasattr(lead, 'hiring_intent'):
             if lead.hiring_intent == 'ready_to_hire':
-                multiplier += 0.5  # +R25 = +0.5 credits
+                multiplier += 0.5  # +0.5 credits = +R25
             elif lead.hiring_intent == 'planning_to_hire':
-                multiplier += 0.2  # +R10 = +0.2 credits
+                multiplier += 0.2  # +0.2 credits = +R10
         
         # Cap the maximum price to be reasonable (max 3 credits = R150)
-        total_cost = min(int(base_price * multiplier), 150)  # Max R150 = 3 credits
+        total_credits = min(int(base_credits * multiplier), 3)  # Max 3 credits = R150
         
         return {
-            'price': total_cost,
-            'reasoning': f"Base: R{base_price} × {multiplier:.1f} (urgency: {lead.urgency}, quality: {lead.verification_score})",
-            'base_price': base_price,
+            'price': total_credits,
+            'reasoning': f"Base: {base_credits} credit × {multiplier:.1f} (urgency: {lead.urgency}, quality: {lead.verification_score})",
+            'base_price': 50,  # R50 per credit
             'multiplier': multiplier
         }
 
     def calculate_optimal_credit_cost(self, lead, provider):
-        """Calculate optimal credit cost using ML"""
+        """Calculate optimal credit cost using ML - REASONABLE PRICING"""
         try:
-            # Base features
-            features = {
-                'lead_quality': lead.verification_score,
-                'budget_value': self._get_budget_value(lead.budget_range),
-                'urgency': self._get_urgency_score(lead.urgency),
-                'intent': self._get_intent_score(lead.hiring_intent),
-                'provider_rating': float(provider.provider_profile.average_rating),
-                'provider_credits': provider.provider_profile.credit_balance,
-                'subscription_tier': self._get_subscription_score(provider.provider_profile.subscription_tier),
-                'hour_of_day': datetime.now().hour,
-                'day_of_week': datetime.now().weekday(),
-            }
+            # Start with base cost of 1 credit (R50)
+            base_cost = 1.0
             
-            # Market demand features (simplified)
-            features['market_demand'] = self._get_market_demand(lead.service_category.slug)
-            features['competition_level'] = self._get_competition_level(lead.location_city)
-            
-            # Calculate base cost
-            base_cost = 1
-            
-            # Quality multiplier
-            if lead.verification_score > 80:
-                base_cost += 1
-            elif lead.verification_score > 60:
-                base_cost += 0.5
-            
-            # Intent multiplier
-            if lead.hiring_intent == 'ready_to_hire':
-                base_cost += 1
-            elif lead.hiring_intent == 'planning_to_hire':
-                base_cost += 0.5
-            
-            # Urgency multiplier
+            # Urgency multiplier (most important factor)
             if lead.urgency == 'urgent':
-                base_cost += 1
+                base_cost += 1.0  # +1 credit for urgent
             elif lead.urgency == 'this_week':
-                base_cost += 0.5
+                base_cost += 0.5  # +0.5 credit for this week
+            elif lead.urgency == 'this_month':
+                base_cost += 0.2  # +0.2 credit for this month
             
-            # Budget multiplier
+            # Quality multiplier (verification score)
+            if lead.verification_score > 80:
+                base_cost += 0.5  # +0.5 credit for high quality
+            elif lead.verification_score > 60:
+                base_cost += 0.2  # +0.2 credit for medium quality
+            
+            # Budget multiplier (higher budget = slightly more expensive)
             if lead.budget_range in ['15000_50000', 'over_50000']:
-                base_cost += 1
+                base_cost += 0.5  # +0.5 credit for high budget
             elif lead.budget_range == '5000_15000':
-                base_cost += 0.5
+                base_cost += 0.2  # +0.2 credit for medium budget
+            
+            # Service category multiplier (cleaning = base, electrical = more)
+            service_multiplier = self._get_service_multiplier(lead.service_category.slug)
+            base_cost *= service_multiplier
             
             # Provider tier discount
             if provider.provider_profile.subscription_tier == 'enterprise':
                 base_cost *= 0.8
-            elif provider.provider_profile.subscription_tier == 'premium':
+            elif provider.provider_profile.subscription_tier == 'pro':
                 base_cost *= 0.9
             
-            # Service category multiplier (building jobs cost more)
-            service_multiplier = self._get_service_multiplier(lead.service_category.slug)
-            base_cost *= service_multiplier
+            # Clamp to reasonable range: 1-3 credits (R50-R150)
+            final_cost = max(1, min(3, int(round(base_cost))))
             
-            # Clamp credit cost to reasonable range (1-15 credits = R50-R750)
-            clamped = max(1, min(15, int(round(base_cost))))
-            return clamped
+            logger.info(f"💰 ML Pricing: base=1, final={final_cost} credits (urgency={lead.urgency}, quality={lead.verification_score}, budget={lead.budget_range})")
+            return final_cost
             
         except Exception as e:
             logger.error(f"Error calculating optimal pricing: {str(e)}")
