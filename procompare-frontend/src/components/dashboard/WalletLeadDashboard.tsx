@@ -27,7 +27,7 @@ const WalletLeadDashboard = () => {
       timeline: "Within 1 month",
       created_at: "2024-01-20T10:30:00Z",
       client_name: "Sarah M.", // Partially hidden
-      credit_cost: 8,
+      credit_cost: 0, // Will be set by ML pricing
       max_providers: 5,
       current_responses: 2,
       lead_status: "active",
@@ -59,7 +59,7 @@ const WalletLeadDashboard = () => {
       timeline: "Within 2 months",
       created_at: "2024-01-19T14:20:00Z",
       client_name: "Michael K.",
-      credit_cost: 6,
+      credit_cost: 0, // Will be set by ML pricing
       max_providers: 4,
       current_responses: 1,
       lead_status: "active",
@@ -91,7 +91,7 @@ const WalletLeadDashboard = () => {
       timeline: "Immediate",
       created_at: "2024-01-21T08:15:00Z",
       client_name: "Jennifer L.",
-      credit_cost: 5,
+      credit_cost: 0, // Will be set by ML pricing
       max_providers: 3,
       current_responses: 3,
       lead_status: "limited",
@@ -123,7 +123,7 @@ const WalletLeadDashboard = () => {
       timeline: "Within 3 months",
       created_at: "2024-01-18T16:45:00Z",
       client_name: "David W.",
-      credit_cost: 10,
+      credit_cost: 0, // Will be set by ML pricing
       max_providers: 6,
       current_responses: 0,
       lead_status: "active",
@@ -144,6 +144,41 @@ const WalletLeadDashboard = () => {
       }
     }
   ];
+
+  // Function to calculate ML-based pricing for sample leads
+  const calculateMLPricing = (lead) => {
+    // Simulate ML pricing based on lead characteristics
+    let basePrice = 1; // Base 1 credit
+    
+    // Urgency multiplier
+    if (lead.urgency === 'urgent') basePrice *= 1.5;
+    else if (lead.urgency === 'medium') basePrice *= 1.2;
+    
+    // Budget multiplier (higher budget = higher price)
+    const budgetMatch = lead.budget_range.match(/R(\d+),?(\d+)?/);
+    if (budgetMatch) {
+      const budget = parseInt(budgetMatch[1] + (budgetMatch[2] || '000'));
+      if (budget > 50000) basePrice *= 1.8;
+      else if (budget > 25000) basePrice *= 1.5;
+      else if (budget > 10000) basePrice *= 1.2;
+    }
+    
+    // Service category multiplier
+    const categoryMultipliers = {
+      'Home Renovation': 1.5,
+      'Electrical Services': 1.3,
+      'Plumbing': 1.4,
+      'Landscaping': 1.2
+    };
+    basePrice *= categoryMultipliers[lead.service_category.name] || 1.0;
+    
+    // Client rating multiplier
+    if (lead.client_rating >= 4.8) basePrice *= 1.2;
+    else if (lead.client_rating >= 4.5) basePrice *= 1.1;
+    
+    // Round to nearest 0.5 and ensure minimum 1 credit
+    return Math.max(1, Math.round(basePrice * 2) / 2);
+  };
 
   const fetchLeads = useCallback(async () => {
     if (!token) return;
@@ -198,8 +233,13 @@ const WalletLeadDashboard = () => {
         console.log('✅ Leads loaded:', transformedLeads.length); // Debug log
       } else {
         console.log('⚠️ No leads found in response, using sample data'); // Debug log
-        setLeads(sampleLeads);
-        setSelectedLead(sampleLeads[0]);
+        // Apply ML pricing to sample leads
+        const leadsWithMLPricing = sampleLeads.map(lead => ({
+          ...lead,
+          credit_cost: calculateMLPricing(lead)
+        }));
+        setLeads(leadsWithMLPricing);
+        setSelectedLead(leadsWithMLPricing[0]);
       }
       
       // Set credits from wallet data
@@ -209,9 +249,13 @@ const WalletLeadDashboard = () => {
       }
     } catch (error) {
       console.error('❌ Error fetching leads:', error);
-      // Fallback to sample data
-      setLeads(sampleLeads);
-      setSelectedLead(sampleLeads[0]);
+      // Fallback to sample data with ML pricing
+      const leadsWithMLPricing = sampleLeads.map(lead => ({
+        ...lead,
+        credit_cost: calculateMLPricing(lead)
+      }));
+      setLeads(leadsWithMLPricing);
+      setSelectedLead(leadsWithMLPricing[0]);
     }
   }, [token]);
 
@@ -267,39 +311,98 @@ const WalletLeadDashboard = () => {
 
   const purchaseLead = async (leadId) => {
     const lead = leads.find(l => l.id === leadId);
-    if (canPurchaseLead(lead)) {
-      try {
-        apiClient.setToken(token);
-        const response = await apiClient.post(`/api/api/leads/${leadId}/unlock/`);
+    console.log('🛒 Attempting to purchase lead:', leadId, 'Lead:', lead);
+    
+    if (!lead) {
+      console.error('❌ Lead not found:', leadId);
+      alert('Lead not found. Please refresh the page.');
+      return;
+    }
+    
+    if (!canPurchaseLead(lead)) {
+      console.error('❌ Cannot purchase lead:', {
+        alreadyPurchased: purchasedLeads.has(leadId),
+        insufficientCredits: userCredits < lead.credit_cost,
+        leadFull: lead.current_responses >= lead.max_providers,
+        leadClosed: lead.lead_status === 'closed'
+      });
+      alert(`Cannot purchase this lead. You need ${lead.credit_cost} credits and have ${userCredits}.`);
+      return;
+    }
+    
+    try {
+      console.log('🔄 Sending purchase request to API...');
+      apiClient.setToken(token);
+      
+      // For sample leads, simulate a successful purchase
+      if (lead.id <= 4) { // Sample lead IDs are 1-4
+        console.log('🎭 Simulating purchase for sample lead');
         
-        if (response.success || response.data?.success) {
-          setPurchasedLeads(prev => new Set([...prev, leadId]));
-          
-          // Update credits from API response
-          if (response.remaining_credits !== undefined) {
-            setUserCredits(response.remaining_credits);
-          } else {
-            setUserCredits(prev => prev - lead.credit_cost);
-          }
-          
-          // Update lead status
-          setLeads(prev => prev.map(l => 
-            l.id === leadId 
-              ? { 
-                  ...l, 
-                  status: 'unlocked', 
-                  isUnlocked: true,
-                  // Update contact info if provided
-                  contact_info: response.contact_info || l.contact_info
-                }
-              : l
-          ));
-          
-          console.log('✅ Lead purchased successfully:', response);
-        }
-      } catch (error) {
-        console.error('Error purchasing lead:', error);
+        // Simulate API response
+        const mockResponse = {
+          success: true,
+          credits_spent: lead.credit_cost,
+          remaining_credits: userCredits - lead.credit_cost,
+          contact_info: lead.hidden_details
+        };
+        
+        setPurchasedLeads(prev => new Set([...prev, leadId]));
+        setUserCredits(mockResponse.remaining_credits);
+        
+        // Update lead status
+        setLeads(prev => prev.map(l => 
+          l.id === leadId 
+            ? { 
+                ...l, 
+                status: 'unlocked', 
+                isUnlocked: true,
+                current_responses: l.current_responses + 1,
+                contact_info: mockResponse.contact_info
+              }
+            : l
+        ));
+        
+        console.log('✅ Sample lead purchased successfully:', mockResponse);
+        alert(`Lead purchased successfully! ${lead.credit_cost} credits deducted.`);
+        return;
       }
+      
+      // For real leads, use the actual API
+      const response = await apiClient.post(`/api/api/leads/${leadId}/unlock/`);
+      console.log('📡 API Response:', response);
+      
+      if (response.success || response.data?.success) {
+        setPurchasedLeads(prev => new Set([...prev, leadId]));
+        
+        // Update credits from API response
+        if (response.remaining_credits !== undefined) {
+          setUserCredits(response.remaining_credits);
+        } else {
+          setUserCredits(prev => prev - lead.credit_cost);
+        }
+        
+        // Update lead status
+        setLeads(prev => prev.map(l => 
+          l.id === leadId 
+            ? { 
+                ...l, 
+                status: 'unlocked', 
+                isUnlocked: true,
+                current_responses: l.current_responses + 1,
+                contact_info: response.contact_info || l.contact_info
+              }
+            : l
+        ));
+        
+        console.log('✅ Lead purchased successfully:', response);
+        alert(`Lead purchased successfully! ${lead.credit_cost} credits deducted.`);
+      } else {
+        console.error('❌ Purchase failed:', response);
+        alert(`Purchase failed: ${response.error || 'Unknown error'}`);
+      }
+    } catch (error) {
+      console.error('❌ Error purchasing lead:', error);
+      alert(`Purchase failed: ${error.message || 'Network error'}`);
     }
   };
 
