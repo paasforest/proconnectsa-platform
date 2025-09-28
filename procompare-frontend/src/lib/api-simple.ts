@@ -119,17 +119,68 @@ export class SimpleApiClient {
   }
 
   async createPublicLead(leadData: any) {
+    // Map service category slug/name to ID
+    const serviceCategoryMapping: { [key: string]: number } = {
+      'cleaning': 1,
+      'plumbing': 2,
+      'electrical': 3,
+      'hvac': 4,
+      'carpentry': 5,
+      'painting': 6,
+      'roofing': 7,
+      'flooring': 8,
+      'landscaping': 9,
+      'moving': 10,
+      'appliance-repair': 11,
+      'handyman': 12,
+      'pool-maintenance': 13,
+      'security': 14,
+      'it-support': 15,
+      'web-design': 16,
+      'marketing': 17,
+      'accounting': 18,
+      'legal': 19,
+      'consulting': 20,
+      'other': 21
+    };
+
+    // Convert budget range format from "R500 - R1,500" to "500_1500"
+    const convertBudgetRange = (budgetStr: string): string => {
+      if (!budgetStr) return '1000_5000';
+      
+      // Remove "R" and spaces, then convert to underscore format
+      const cleaned = budgetStr.replace(/[R\s-]/g, '');
+      const numbers = cleaned.match(/\d+/g);
+      
+      if (numbers && numbers.length >= 2) {
+        const min = parseInt(numbers[0]);
+        const max = parseInt(numbers[1]);
+        
+        // Map to valid choices
+        if (min < 1000) return 'under_1000';
+        if (min >= 1000 && max <= 5000) return '1000_5000';
+        if (min >= 5000 && max <= 15000) return '5000_15000';
+        if (min >= 15000 && max <= 50000) return '15000_50000';
+        if (min >= 50000) return 'over_50000';
+      }
+      
+      return '1000_5000'; // default
+    };
+
     // Map the leadData to Django backend format with correct field values
     const djangoData = {
-      service_category_id: leadData.service_category_id || 1,
+      service_category_id: leadData.service_category_id || 
+                          serviceCategoryMapping[leadData.service_category] || 
+                          serviceCategoryMapping[leadData.service_type] || 
+                          1,
       title: leadData.title || leadData.project_title || 'Service Request',
       description: leadData.description || leadData.project_description || 'Service description',
       location_address: leadData.location_address || leadData.location || 'Address not provided',
       location_suburb: leadData.location_suburb || 'Suburb not specified',
-      location_city: leadData.location_city || 'Cape Town',
+      location_city: leadData.location_city || leadData.location || 'Cape Town',
       latitude: leadData.latitude || null,
       longitude: leadData.longitude || null,
-      budget_range: leadData.budget_range || '1000_5000',
+      budget_range: convertBudgetRange(leadData.budget_range),
       urgency: leadData.urgency || 'flexible',
       preferred_contact_time: leadData.preferred_contact_time || 'morning',
       additional_requirements: leadData.additional_requirements || '',
