@@ -204,6 +204,7 @@ export default function RegisterPage() {
         username: formData.email, // Use email as username
         email: formData.email,
         password: formData.password,
+        password_confirm: formData.password_confirm, // Add password confirmation
         first_name: formData.first_name,
         last_name: formData.last_name,
         user_type: formData.user_type,
@@ -232,15 +233,24 @@ export default function RegisterPage() {
 
       const data = await response.json();
 
-      if (data.success) {
+      if (response.ok) {
         setSuccess(data.message || 'Registration successful!');
         setTimeout(() => {
           router.push('/login?message=Registration successful, please login');
         }, 2000);
       } else {
-        setError(data.message || 'Registration failed');
+        // Handle validation errors from backend
+        if (data.errors) {
+          const errorMessages = Object.entries(data.errors).map(([field, messages]) => {
+            return `${field}: ${Array.isArray(messages) ? messages.join(', ') : messages}`;
+          }).join('\n');
+          setError(`Registration failed:\n${errorMessages}`);
+        } else {
+          setError(data.message || data.detail || 'Registration failed');
+        }
       }
     } catch (err: any) {
+      console.error('Registration error:', err);
       setError(err.message || 'Registration failed. Please try again.');
     } finally {
       setLoading(false);
