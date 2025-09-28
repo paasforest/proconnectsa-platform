@@ -195,10 +195,10 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
             </div>
             <div className="ml-3">
               <h1 className="text-lg font-semibold text-gray-900">
-                {userProfile?.business_name || 'Lead Marketplace'}
+                ProConnectSA
               </h1>
               <p className="text-xs text-gray-500">
-                Professional Dashboard
+                Lead Marketplace
               </p>
             </div>
           </div>
