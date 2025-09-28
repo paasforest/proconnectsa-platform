@@ -165,8 +165,8 @@ function DashboardPage({ user }: { user: any }) {
           )}
 
           <div className="mb-8">
-            <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
-            <p className="text-gray-600">Welcome back to ProConnectSA</p>
+            <h1 className="text-3xl font-bold text-gray-900">Professional Dashboard</h1>
+            <p className="text-gray-600">Welcome back to your Lead Marketplace</p>
           </div>
 
           {/* Stats Grid */}
@@ -203,31 +203,33 @@ function DashboardPage({ user }: { user: any }) {
           {/* Quick Actions */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="bg-white p-6 rounded-lg shadow">
-              <h3 className="text-lg font-semibold mb-4">Quick Actions</h3>
+              <h3 className="text-lg font-semibold mb-4">Lead Marketplace</h3>
               <div className="space-y-3">
-                <button 
-                  onClick={() => router.push('/dashboard/wallet')}
-                  className="w-full text-left p-3 bg-green-50 rounded-lg hover:bg-green-100 transition-colors"
-                >
-                  <div className="font-medium text-green-800">Top Up Wallet</div>
-                  <div className="text-sm text-green-600">Add credits to your account</div>
-                </button>
-                
                 <button 
                   onClick={() => router.push('/dashboard/leads-dashboard')}
                   className="w-full text-left p-3 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors"
                 >
-                  <div className="font-medium text-blue-800">Browse Leads</div>
-                  <div className="text-sm text-blue-600">Find new opportunities</div>
+                  <div className="font-medium text-blue-800">Browse Available Leads</div>
+                  <div className="text-sm text-blue-600">Find qualified leads to purchase</div>
+                </button>
+                
+                <button 
+                  onClick={() => router.push('/dashboard/wallet')}
+                  className="w-full text-left p-3 bg-green-50 rounded-lg hover:bg-green-100 transition-colors"
+                >
+                  <div className="font-medium text-green-800">Top Up Credits</div>
+                  <div className="text-sm text-green-600">Add credits to purchase leads</div>
                 </button>
               </div>
             </div>
 
             <div className="bg-white p-6 rounded-lg shadow">
-              <h3 className="text-lg font-semibold mb-4">Recent Activity</h3>
-              <p className="text-gray-500 text-sm">
-                Dashboard is connected to your Flask API backend.
-              </p>
+              <h3 className="text-lg font-semibold mb-4">Your Activity</h3>
+              <div className="space-y-2">
+                <p className="text-gray-500 text-sm">• Last lead purchased: 2 hours ago</p>
+                <p className="text-gray-500 text-sm">• Credits remaining: {stats.credit_balance || 0}</p>
+                <p className="text-gray-500 text-sm">• Conversion rate: {stats.conversion_rate || 0}%</p>
+              </div>
             </div>
 
             <div className="bg-white p-6 rounded-lg shadow">

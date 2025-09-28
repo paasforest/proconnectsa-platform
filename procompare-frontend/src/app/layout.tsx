@@ -12,9 +12,9 @@ const inter = {
 };
 
 export const metadata: Metadata = {
-  title: "ProConnectSA - Connect with Verified Service Providers",
-  description: "Find and connect with verified service providers across South Africa. Get quotes, read reviews, and hire the best professionals for your home and business needs.",
-  keywords: "service providers, South Africa, home services, business services, verified professionals, quotes, reviews, ProConnectSA",
+  title: "ProConnectSA Lead Marketplace - Find and Purchase Qualified Leads",
+  description: "Find and purchase qualified leads from South Africa's most trusted service marketplace. Access high-quality leads that are verified, qualified, and ready to convert.",
+  keywords: "lead marketplace, qualified leads, South Africa, service providers, lead generation, ProConnectSA, business leads",
   authors: [{ name: "ProConnectSA Team" }],
   creator: "ProConnectSA",
   publisher: "ProConnectSA",
@@ -25,8 +25,8 @@ export const metadata: Metadata = {
   },
   metadataBase: new URL("https://proconnectsa.co.za"),
   openGraph: {
-    title: "ProConnectSA - Connect with Verified Service Providers",
-    description: "Find and connect with verified service providers across South Africa. Get quotes, read reviews, and hire the best professionals.",
+    title: "ProConnectSA Lead Marketplace - Find and Purchase Qualified Leads",
+    description: "Find and purchase qualified leads from South Africa's most trusted service marketplace. Access high-quality leads that are verified, qualified, and ready to convert.",
     url: "https://proconnectsa.co.za",
     siteName: "ProConnectSA",
     locale: "en_ZA",

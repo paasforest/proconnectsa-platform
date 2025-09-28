@@ -60,10 +60,10 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
   // Navigation items
   const navigationItems = [
     { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard, current: pathname === '/dashboard' },
-    { name: 'Leads', href: '/dashboard/leads-dashboard', icon: Target, current: pathname === '/dashboard/leads-dashboard' },
-    { name: 'My Leads', href: '/dashboard/my-leads', icon: ShoppingCart, current: pathname === '/dashboard/my-leads' },
+    { name: 'Lead Marketplace', href: '/dashboard/leads-dashboard', icon: Target, current: pathname === '/dashboard/leads-dashboard' },
+    { name: 'My Purchased Leads', href: '/dashboard/my-leads', icon: ShoppingCart, current: pathname === '/dashboard/my-leads' },
     { name: 'Chat', href: '/dashboard/chat', icon: MessageSquare, current: pathname === '/dashboard/chat' },
-    { name: 'Wallet', href: '/dashboard/wallet', icon: Wallet, current: pathname === '/dashboard/wallet' },
+    { name: 'Credits & Wallet', href: '/dashboard/wallet', icon: Wallet, current: pathname === '/dashboard/wallet' },
     { name: 'Services', href: '/dashboard/services', icon: Wrench, current: pathname === '/dashboard/services' },
     { name: 'Settings', href: '/dashboard/settings', icon: Settings, current: pathname === '/dashboard/settings' },
     { name: 'Support', href: '/dashboard/support', icon: HelpCircle, current: pathname === '/dashboard/support' },
@@ -195,10 +195,10 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
             </div>
             <div className="ml-3">
               <h1 className="text-lg font-semibold text-gray-900">
-                {userProfile?.business_name || 'ProConnectSA'}
+                {userProfile?.business_name || 'Lead Marketplace'}
               </h1>
               <p className="text-xs text-gray-500">
-                {userProfile?.subscription_tier || 'Professional'} Dashboard
+                Professional Dashboard
               </p>
             </div>
           </div>
