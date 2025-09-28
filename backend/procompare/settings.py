@@ -244,8 +244,8 @@ CORS_ALLOWED_ORIGIN_REGEXES = [
     r"^https://.*-proconnectsa.*\.vercel\.app$",  # Vercel branch deployments
 ]
 
-# Temporarily allow all origins for debugging (REMOVE IN PRODUCTION)
-CORS_ALLOW_ALL_ORIGINS = True
+# SECURITY: Only allow specific origins
+CORS_ALLOW_ALL_ORIGINS = False
 
 # CORS headers
 CORS_ALLOW_HEADERS = [
@@ -259,6 +259,20 @@ CORS_ALLOW_HEADERS = [
     'x-csrftoken',
     'x-requested-with',
 ]
+
+# Rate limiting configuration
+RATELIMIT_USE_CACHE = 'default'
+RATELIMIT_VIEW = 'backend.procompare.views.rate_limit_exceeded'
+
+# Rate limiting settings for different endpoints
+RATELIMIT_SETTINGS = {
+    'api/auth/login/': '10/m',  # 10 login attempts per minute
+    'api/auth/register/': '5/m',  # 5 registrations per minute
+    'api/leads/create-public/': '20/h',  # 20 lead creations per hour
+    'api/leads/': '100/h',  # 100 lead requests per hour
+    'api/wallet/': '200/h',  # 200 wallet requests per hour
+    'default': '1000/h',  # Default: 1000 requests per hour per IP
+}
 
 # Security settings
 SECURE_BROWSER_XSS_FILTER = True
