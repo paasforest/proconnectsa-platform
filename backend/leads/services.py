@@ -29,6 +29,21 @@ class LeadAssignmentService:
         self.enhanced_scorer = EnhancedLeadScorer()
         self.client_behavior_ml = ClientBehaviorML()
     
+    def _mask_client_name(self, name):
+        """Mask client name for privacy"""
+        if not name or name == 'Anonymous Client':
+            return 'Anonymous Client'
+        
+        parts = name.strip().split()
+        if len(parts) == 1:
+            # Single name - show first letter + asterisks
+            return f"{parts[0][0]}***"
+        elif len(parts) >= 2:
+            # Multiple names - show first letter of each + asterisks
+            return f"{parts[0][0]}. {parts[-1][0]}***"
+        else:
+            return "Anonymous Client"
+    
     def assign_lead_to_providers(self, lead_id):
         """
         Assign a verified lead to relevant providers based on:
