@@ -27,6 +27,7 @@ class UserRegistrationView(generics.CreateAPIView):
     serializer_class = UserRegistrationSerializer
     permission_classes = [permissions.AllowAny]
     
+    @ratelimit(key='ip', rate='5/m', method='POST', block=True)
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -56,6 +57,7 @@ class UserLoginView(generics.GenericAPIView):
     serializer_class = UserLoginSerializer
     permission_classes = [permissions.AllowAny]
     
+    @ratelimit(key='ip', rate='10/m', method='POST', block=True)
     def post(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         
