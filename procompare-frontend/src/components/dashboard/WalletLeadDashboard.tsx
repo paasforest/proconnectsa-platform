@@ -168,7 +168,10 @@ const WalletLeadDashboard = () => {
                   <span className="font-semibold text-green-700">{userCredits} Credits</span>
                 </div>
               </div>
-              <button className="text-gray-500 hover:text-gray-700">
+              <button 
+                onClick={() => window.open('/dashboard/wallet', '_blank')}
+                className="text-blue-600 hover:text-blue-700 font-medium"
+              >
                 Buy More Credits
               </button>
             </div>
@@ -455,7 +458,10 @@ const WalletLeadDashboard = () => {
                           You need {selectedLead.credits || selectedLead.credit_cost || 1} credits
                         </p>
                       </div>
-                      <button className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 transition-colors font-semibold">
+                      <button 
+                        onClick={() => window.open('/dashboard/wallet', '_blank')}
+                        className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 transition-colors font-semibold"
+                      >
                         Buy More Credits
                       </button>
                     </div>
