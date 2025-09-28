@@ -365,7 +365,7 @@ class JobCategorySerializer(serializers.ModelSerializer):
 
 class LeadSerializer(serializers.ModelSerializer):
     """Serializer for Lead model"""
-    category_name = serializers.CharField(source='category.name', read_only=True)
+    category_name = serializers.CharField(source='service_category.name', read_only=True)
     is_available = serializers.SerializerMethodField()
     remaining_slots = serializers.SerializerMethodField()
     client_name = serializers.CharField(source='client.get_full_name', read_only=True)
@@ -373,8 +373,8 @@ class LeadSerializer(serializers.ModelSerializer):
     class Meta:
         model = Lead
         fields = [
-            'id', 'title', 'description', 'category', 'category_name',
-            'location', 'urgency', 'budget_min', 'budget_max',
+            'id', 'title', 'description', 'service_category', 'category_name',
+            'location_address', 'urgency', 'budget_range',
             'base_price', 'ml_multiplier', 'final_price', 'status',
             'max_providers', 'assigned_providers_count', 'is_available', 'remaining_slots',
             'client', 'client_name', 'client_phone', 'client_email',

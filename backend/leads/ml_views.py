@@ -7,8 +7,10 @@ from rest_framework.response import Response
 from rest_framework import status, permissions
 from django.db.models import Count, Avg, Q
 from django.utils import timezone
+from django.views.decorators.csrf import csrf_exempt
+from django.conf import settings
 from datetime import timedelta
-from .models import Lead, LeadAssignment
+from .models import Lead, LeadAssignment, LeadAccess
 from .ml_services import LeadQualityMLService, LeadConversionMLService, LeadAccessControlMLService
 from backend.notifications.consumers import NotificationConsumer
 import logging
@@ -730,98 +732,120 @@ def lead_preview_view(request, lead_id):
 
 @api_view(['POST'])
 @permission_classes([permissions.IsAuthenticated])
+@csrf_exempt
 def purchase_lead_access_view(request, lead_id):
-    """Purchase access to a lead with ML-informed decision"""
+    """
+    Purchase access to a lead with proper business logic validation
+    """
     try:
-        from backend.users.models import ProviderProfile
+        logger.info(f"🛒 Purchase attempt: User {request.user.id} for Lead {lead_id}")
         
-        # Ensure user is a provider
-        if request.user.user_type != 'provider':
-            return Response(
-                {'error': 'Only providers can purchase lead access'}, 
-                status=status.HTTP_403_FORBIDDEN
-            )
-        
+        # Step 1: Get the lead
         try:
-            lead = Lead.objects.get(id=lead_id, status__in=['verified', 'assigned'])
-            provider_profile = request.user.provider_profile
+            lead = Lead.objects.get(id=lead_id)
+            logger.info(f"📋 Lead found: {lead.title} (Category: {lead.service_category})")
         except Lead.DoesNotExist:
-            return Response(
-                {'error': 'Lead not found or not available'}, 
-                status=status.HTTP_404_NOT_FOUND
-            )
-        
-        # Use ML access control to handle the purchase
-        ml_service = LeadAccessControlMLService()
-        result = ml_service.consume_lead_access(provider_profile, lead)
-        
-        if result['success']:
-            # Track A/B testing events
-            from .ab_testing import ABTestFramework
-            ABTestFramework.track_event(
-                str(request.user.id),
-                'lead_scoring_ml_vs_rules',
-                'credit_purchase',
-                result.get('additional_cost', 0)
-            )
-            
-            # Create lead assignment if not exists
-            from backend.leads.models import LeadAssignment
-            assignment, created = LeadAssignment.objects.get_or_create(
-                lead=lead,
-                provider=request.user,
-                defaults={
-                    'assigned_at': timezone.now(),
-                    'credit_cost': 1 if result['credit_used'] else 0,
-                    'status': 'assigned'
-                }
-            )
-            
-            # Increment Bark-style responses count for competition tracking
-            if created:  # Only increment if this is a new purchase
-                lead.increment_responses_count()
-            
-            # Send real-time update to other providers
-            NotificationConsumer.send_lead_update(
-                provider_ids=[request.user.id],
-                lead_id=str(lead.id),
-                status='purchased',
-                message='Lead access granted'
-            )
-            
+            logger.error(f"❌ Lead {lead_id} not found")
             return Response({
-                'success': True,
-                'message': result['message'],
-                'lead_access_granted': True,
-                'credit_used': result['credit_used'],
-                'remaining_leads': result['remaining_leads'],
-                'lead_details': {
-                    'id': str(lead.id),
-                    'title': lead.title,
-                    'description': lead.description,
-                    'client_name': f"{lead.client.first_name} {lead.client.last_name}",
-                    'client_phone': getattr(lead.client, 'phone', 'Not provided'),
-                    'client_email': lead.client.email,
-                    'location_address': lead.location_address,
-                    'budget_range': lead.budget_range,
-                    'urgency': lead.urgency,
-                    'created_at': lead.created_at.isoformat()
-                }
-            })
-        else:
+                'error': 'Lead not found',
+                'code': 'LEAD_NOT_FOUND'
+            }, status=status.HTTP_404_NOT_FOUND)
+
+        # Step 2: Check if already purchased
+        from backend.leads.models import LeadAccess
+        existing_access = LeadAccess.objects.filter(
+            provider=request.user,
+            lead=lead
+        ).first()
+        
+        if existing_access:
+            logger.warning(f"⚠️ User {request.user.id} already has access to lead {lead_id}")
             return Response({
-                'success': False,
-                'message': result['message'],
-                'remaining_leads': result['remaining_leads'],
-                'credit_used': result['credit_used']
+                'error': 'You have already purchased access to this lead',
+                'code': 'ALREADY_PURCHASED',
+                'access_granted_at': existing_access.unlocked_at.isoformat()
+            }, status=status.HTTP_409_CONFLICT)
+
+        # Step 3: Validate business rules
+        validation_result = validate_purchase_rules(request.user, lead)
+        if not validation_result['valid']:
+            logger.error(f"❌ Business rule validation failed: {validation_result['reason']}")
+            return Response({
+                'error': validation_result['reason'],
+                'code': validation_result['code'],
+                'details': validation_result.get('details', {})
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        # Step 4: Check user credits
+        provider_profile = request.user.provider_profile
+        credit_cost = calculate_lead_credit_cost(lead)
+        
+        if provider_profile.credit_balance < credit_cost:
+            logger.error(f"💰 Insufficient credits: User has {provider_profile.credit_balance}, needs {credit_cost}")
+            return Response({
+                'error': f'Insufficient credits. You need {credit_cost} credits but have {provider_profile.credit_balance}',
+                'code': 'INSUFFICIENT_CREDITS',
+                'required_credits': credit_cost,
+                'available_credits': provider_profile.credit_balance
             }, status=status.HTTP_402_PAYMENT_REQUIRED)
+
+        # Step 5: Check lead availability
+        max_providers = getattr(lead, 'max_providers', 5)  # Default to 5
+        current_access_count = LeadAccess.objects.filter(lead=lead).count()
         
+        if current_access_count >= max_providers:
+            logger.error(f"👥 Lead at capacity: {current_access_count}/{max_providers} providers")
+            return Response({
+                'error': 'This lead has reached maximum number of providers',
+                'code': 'LEAD_AT_CAPACITY',
+                'current_providers': current_access_count,
+                'max_providers': max_providers
+            }, status=status.HTTP_410_GONE)
+
+        # Step 6: Process the purchase (atomic transaction)
+        from django.db import transaction
+        
+        with transaction.atomic():
+            # Deduct credits first
+            provider_profile.credit_balance -= credit_cost
+            provider_profile.save()
+            logger.info(f"💳 Deducted {credit_cost} credits from user {request.user.id}")
+            
+            # Create lead access
+            lead_access = LeadAccess.objects.create(
+                provider=request.user,
+                lead=lead,
+                credit_cost=credit_cost
+            )
+            logger.info(f"✅ Lead access granted: ID {lead_access.id}")
+            
+            # Update lead response count
+            lead.assigned_providers_count = LeadAccess.objects.filter(lead=lead).count()
+            lead.save()
+
+        # Step 7: Return success response with unlocked data
+        return Response({
+            'success': True,
+            'message': 'Lead access purchased successfully',
+            'lead_access_id': str(lead_access.id),
+            'credits_deducted': credit_cost,
+            'remaining_credits': provider_profile.credit_balance,
+            'unlocked_data': {
+                'client_name': f"{lead.client.first_name} {lead.client.last_name}",
+                'client_phone': getattr(lead.client, 'phone', 'Not provided'),
+                'client_email': lead.client.email,
+                'location_address': lead.location_address,
+                'additional_details': lead.additional_requirements
+            }
+        }, status=status.HTTP_201_CREATED)
+
     except Exception as e:
-        logger.error(f"Error purchasing lead access: {str(e)}")
-        return Response(
-            {'error': 'Failed to purchase lead access'}, 
-            status=status.HTTP_500_INTERNAL_SERVER_ERROR
-        )
+        logger.error(f"💥 Unexpected error in purchase_lead_access: {str(e)}", exc_info=True)
+        return Response({
+            'error': 'An unexpected error occurred during purchase',
+            'code': 'INTERNAL_ERROR',
+            'message': str(e) if settings.DEBUG else 'Please try again later'
+        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 @api_view(['GET'])
@@ -1104,4 +1128,88 @@ def ml_model_performance_view(request):
             {'error': 'Failed to generate model performance data'}, 
             status=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
+
+
+def validate_purchase_rules(user, lead):
+    """
+    Validate all business rules for lead purchase
+    """
+    logger.info(f"🔍 Validating purchase rules for user {user.id} and lead {lead.id}")
+    
+    # Rule 1: Check service category match
+    if hasattr(user, 'provider_profile'):
+        user_categories = user.provider_profile.service_categories
+        user_category_names = [cat.lower() for cat in user_categories]
+        lead_category_name = lead.service_category.slug.lower()
+        
+        logger.info(f"👤 User categories: {user_category_names}")
+        logger.info(f"📋 Lead category: {lead_category_name}")
+        
+        if lead_category_name not in user_category_names:
+            return {
+                'valid': False,
+                'reason': f'This lead is for {lead.service_category.name} services. Your profile is set up for: {", ".join([cat.title() for cat in user_categories])}',
+                'code': 'CATEGORY_MISMATCH',
+                'details': {
+                    'lead_category': lead.service_category.name,
+                    'user_categories': [cat.title() for cat in user_categories]
+                }
+            }
+    
+    # Rule 2: Check if lead is still active
+    if hasattr(lead, 'status') and lead.status in ['closed', 'expired']:
+        return {
+            'valid': False,
+            'reason': f'This lead is no longer available (status: {lead.status})',
+            'code': 'LEAD_INACTIVE'
+        }
+    
+    # Rule 3: Check user account status
+    if not user.is_active:
+        return {
+            'valid': False,
+            'reason': 'Your account is not active',
+            'code': 'ACCOUNT_INACTIVE'
+        }
+    
+    # Rule 4: Check if user is a provider
+    if user.user_type != 'provider':
+        return {
+            'valid': False,
+            'reason': 'Only providers can purchase leads',
+            'code': 'NOT_A_PROVIDER'
+        }
+    
+    logger.info("✅ All validation rules passed")
+    return {'valid': True}
+
+
+def calculate_lead_credit_cost(lead):
+    """
+    Calculate credit cost based on lead properties
+    """
+    base_cost = 1  # Base cost: 1 credit (R50)
+    
+    # Adjust based on budget range
+    budget_multipliers = {
+        'under_1000': 1.0,
+        '1000_5000': 1.0,
+        '5000_15000': 1.5,
+        '15000_50000': 2.0,
+        'over_50000': 2.5
+    }
+    
+    multiplier = budget_multipliers.get(lead.budget_range, 1.0)
+    
+    # Adjust based on urgency
+    if hasattr(lead, 'urgency'):
+        if lead.urgency == 'this_week':
+            multiplier *= 1.3
+        elif lead.urgency == 'this_month':
+            multiplier *= 1.1
+    
+    final_cost = int(base_cost * multiplier)
+    logger.info(f"💰 Credit cost calculation: base={base_cost}, multiplier={multiplier}, final={final_cost}")
+    
+    return final_cost
 
