@@ -761,9 +761,10 @@ def purchase_lead_access_view(request, lead_id):
         if existing_access:
             logger.warning(f"⚠️ User {request.user.id} already has access to lead {lead_id}")
             return Response({
-                'error': 'You have already purchased access to this lead',
+                'error': 'You have already purchased this lead! Check your "My Purchased Leads" section to view the contact details.',
                 'code': 'ALREADY_PURCHASED',
-                'access_granted_at': existing_access.unlocked_at.isoformat()
+                'access_granted_at': existing_access.unlocked_at.isoformat(),
+                'help_text': 'This lead is already in your purchased leads. You can find it in your dashboard under "My Purchased Leads".'
             }, status=status.HTTP_409_CONFLICT)
 
         # Step 3: Validate business rules
@@ -783,10 +784,11 @@ def purchase_lead_access_view(request, lead_id):
         if provider_profile.credit_balance < credit_cost:
             logger.error(f"💰 Insufficient credits: User has {provider_profile.credit_balance}, needs {credit_cost}")
             return Response({
-                'error': f'Insufficient credits. You need {credit_cost} credits but have {provider_profile.credit_balance}',
+                'error': f'Not enough credits! This lead costs {credit_cost} credits but you only have {provider_profile.credit_balance} credits. Add more credits to your wallet to purchase this lead.',
                 'code': 'INSUFFICIENT_CREDITS',
                 'required_credits': credit_cost,
-                'available_credits': provider_profile.credit_balance
+                'available_credits': provider_profile.credit_balance,
+                'help_text': f'You need {credit_cost - provider_profile.credit_balance} more credits. Go to your wallet to add credits or purchase a credit package.'
             }, status=status.HTTP_402_PAYMENT_REQUIRED)
 
         # Step 5: Check lead availability
@@ -796,10 +798,11 @@ def purchase_lead_access_view(request, lead_id):
         if current_access_count >= max_providers:
             logger.error(f"👥 Lead at capacity: {current_access_count}/{max_providers} providers")
             return Response({
-                'error': 'This lead has reached maximum number of providers',
+                'error': 'This lead is no longer available! The maximum number of providers have already purchased this lead. Look for other similar leads in your dashboard.',
                 'code': 'LEAD_AT_CAPACITY',
                 'current_providers': current_access_count,
-                'max_providers': max_providers
+                'max_providers': max_providers,
+                'help_text': 'This lead has reached its limit of providers. Check for other similar leads in your dashboard or try again later for new leads.'
             }, status=status.HTTP_410_GONE)
 
         # Step 6: Process the purchase (atomic transaction)
@@ -1148,12 +1151,13 @@ def validate_purchase_rules(user, lead):
         if lead_category_name not in user_category_names:
             return {
                 'valid': False,
-                'reason': f'This lead is for {lead.service_category.name} services. Your profile is set up for: {", ".join([cat.title() for cat in user_categories])}',
+                'reason': f'This lead is for {lead.service_category.name} services, but your profile is set up for {", ".join([cat.title() for cat in user_categories])} services. To purchase this lead, you need to add {lead.service_category.name} to your service categories in your profile settings.',
                 'code': 'CATEGORY_MISMATCH',
                 'details': {
                     'lead_category': lead.service_category.name,
                     'user_categories': [cat.title() for cat in user_categories]
-                }
+                },
+                'help_text': f'Go to your profile settings and add "{lead.service_category.name}" to your service categories to purchase this type of lead.'
             }
     
     # Rule 2: ML-based location validation
@@ -1181,12 +1185,13 @@ def validate_purchase_rules(user, lead):
         if not (city_match or suburb_match or province_match):
             return {
                 'valid': False,
-                'reason': f'This lead is located in {lead.location_city}, {lead.location_suburb}. You can only purchase leads in your service areas: {", ".join(user.provider_profile.service_areas or [])}',
+                'reason': f'This lead is in {lead.location_city}, {lead.location_suburb}, but you only service {", ".join(user.provider_profile.service_areas or [])}. To purchase this lead, you need to add {lead.location_city} to your service areas in your profile settings.',
                 'code': 'LOCATION_MISMATCH',
                 'details': {
                     'lead_location': f"{lead.location_city}, {lead.location_suburb}",
                     'provider_service_areas': user.provider_profile.service_areas or []
-                }
+                },
+                'help_text': f'Go to your profile settings and add "{lead.location_city}" to your service areas to purchase leads from this location.'
             }
     
     # Rule 3: Check if lead is still active
