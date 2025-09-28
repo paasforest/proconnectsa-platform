@@ -180,8 +180,8 @@ const WalletLeadDashboard = () => {
                 <div className="flex items-center space-x-2">
                   <DollarSign className="h-5 w-5 text-green-600" />
                   <span className="font-semibold text-green-700">{userCredits} Credits</span>
-                </div>
-              </div>
+            </div>
+          </div>
               <button 
                 onClick={() => window.open('/dashboard/wallet', '_blank')}
                 className="text-blue-600 hover:text-blue-700 font-medium"
@@ -194,22 +194,22 @@ const WalletLeadDashboard = () => {
       </header>
 
       <div className="max-w-7xl mx-auto px-6 py-8">
-        <div className="grid grid-cols-12 gap-8 min-h-[calc(100vh-200px)]">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 min-h-[calc(100vh-200px)]">
           
           {/* LEFT PANEL: Leads List */}
-          <div className="col-span-4 space-y-4">
+          <div className="lg:col-span-4 space-y-4">
             <div className="bg-white rounded-lg shadow-sm">
               <div className="p-4 border-b border-gray-200">
                 <h2 className="text-lg font-semibold text-gray-900">
                   Available Leads ({leads.length})
                 </h2>
                 <p className="text-sm text-gray-600">Click any lead to view details</p>
-              </div>
+          </div>
               
               <div className="max-h-[calc(100vh-300px)] overflow-y-auto">
                 {leads.map((lead) => (
                   <div
-                    key={lead.id}
+                  key={lead.id}
                     className={`p-4 border-b border-gray-100 cursor-pointer hover:bg-gray-50 transition-all ${
                       selectedLead?.id === lead.id ? 'bg-blue-50 border-l-4 border-l-blue-500' : ''
                     }`}
@@ -223,9 +223,9 @@ const WalletLeadDashboard = () => {
                         <span className={`px-2 py-1 rounded-full text-xs font-medium border ${getUrgencyColor(lead.urgency || 'medium')}`}>
                           {lead.urgency || 'medium'}
                         </span>
-                      </div>
-                    </div>
-                    
+            </div>
+        </div>
+
                     <p className="text-sm text-gray-600 line-clamp-2 mb-3">
                       {lead.details || lead.masked_details || lead.description || 'Service details available after purchase'}
                     </p>
@@ -234,8 +234,8 @@ const WalletLeadDashboard = () => {
                       <div className="flex items-center text-xs text-gray-500">
                         <MapPin className="h-3 w-3 mr-1" />
                         <span>{lead.masked_location || lead.location || 'Location hidden'}</span>
-                      </div>
-                      
+        </div>
+
                       <div className="flex items-center justify-between text-xs">
                         <div className="flex items-center text-green-600">
                           <DollarSign className="h-3 w-3 mr-1" />
@@ -243,9 +243,9 @@ const WalletLeadDashboard = () => {
                         </div>
                         <div className="flex items-center text-blue-600">
                           <span className="font-medium">{lead.credits || lead.credit_cost || 1} credits</span>
-                        </div>
-                      </div>
-                      
+        </div>
+      </div>
+
                       <div className="flex items-center justify-between text-xs text-gray-500">
                         <div className="flex items-center">
                           <Clock className="h-3 w-3 mr-1" />
@@ -255,8 +255,8 @@ const WalletLeadDashboard = () => {
                           <Users className="h-3 w-3 mr-1" />
                           <span>{lead.responses_count || 0} responses</span>
                         </div>
-                      </div>
-                      
+              </div>
+
                       {purchasedLeads.has(lead.id) && (
                         <div className="px-2 py-1 rounded text-xs font-medium bg-green-100 text-green-700 border border-green-200">
                           ✓ Purchased - Contact details unlocked
@@ -270,7 +270,7 @@ const WalletLeadDashboard = () => {
           </div>
 
           {/* CENTER PANEL: Lead Details */}
-          <div className="col-span-5">
+          <div className="lg:col-span-5">
             {selectedLead ? (
               <div className="bg-white rounded-lg shadow-sm h-full flex flex-col">
                 <div className="p-6 border-b border-gray-200">
@@ -287,7 +287,7 @@ const WalletLeadDashboard = () => {
                           <Clock className="h-4 w-4 mr-1" />
                           <span>{formatTimeAgo(selectedLead.timeAgo || selectedLead.lastActivity || selectedLead.created_at)}</span>
                         </div>
-                      </div>
+                    </div>
                     </div>
                     <div className="flex items-center space-x-2">
                       <span className={`px-3 py-1 rounded-full text-sm font-medium border ${getUrgencyColor(selectedLead.urgency || 'medium')}`}>
@@ -296,7 +296,7 @@ const WalletLeadDashboard = () => {
                     </div>
                   </div>
                 </div>
-                
+
                 <div className="flex-1 p-6 overflow-y-auto space-y-6">
                   {/* Project Description */}
                   <div>
@@ -328,7 +328,7 @@ const WalletLeadDashboard = () => {
                             Exact address hidden until purchased
                           </div>
                         )}
-                      </div>
+                </div>
                     </div>
                     
                     <div>
@@ -416,7 +416,7 @@ const WalletLeadDashboard = () => {
           </div>
 
           {/* RIGHT PANEL: Purchase Actions */}
-          <div className="col-span-3">
+          <div className="lg:col-span-3">
             {selectedLead ? (
               <div className="bg-white rounded-lg shadow-sm p-6 sticky top-8">
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">
@@ -519,8 +519,12 @@ const WalletLeadDashboard = () => {
                 </div>
               </div>
             ) : (
-              <div className="bg-white rounded-lg shadow-sm p-6 text-center text-gray-500">
-                <p>Select a lead to see purchase options</p>
+              <div className="bg-white rounded-lg shadow-sm p-6 text-center text-gray-500 sticky top-8">
+                <div className="flex flex-col items-center justify-center h-64">
+                  <Lock className="h-12 w-12 text-gray-400 mb-4" />
+                  <p className="text-lg font-medium text-gray-900 mb-2">Select a Lead</p>
+                  <p className="text-sm text-gray-500">Choose a lead from the list to see purchase options</p>
+                </div>
               </div>
             )}
           </div>
