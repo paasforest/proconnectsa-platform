@@ -84,13 +84,25 @@ export default function RegisterPage() {
     area_code: '+27',
     phone_number: '',
     city: '',
+    suburb: '',
     province: '',
+    latitude: '',
+    longitude: '',
     
-    // Additional provider info (for future use)
+    // Provider info for ML services
     business_name: '',
+    business_address: '',
+    business_phone: '',
+    business_email: '',
     primary_service: '',
+    service_categories: [] as string[],
+    service_areas: [] as string[],
+    max_travel_distance: 30,
     years_experience: '',
     service_description: '',
+    hourly_rate_min: '',
+    hourly_rate_max: '',
+    minimum_job_value: '',
     terms_accepted: false,
     privacy_accepted: false
   });
@@ -210,15 +222,26 @@ export default function RegisterPage() {
         user_type: formData.user_type,
         phone: getFullPhoneNumber(),
         city: formData.city,
-        suburb: formData.province // Map province to suburb
+        suburb: formData.suburb,
+        latitude: formData.latitude ? parseFloat(formData.latitude) : null,
+        longitude: formData.longitude ? parseFloat(formData.longitude) : null
       };
 
       // Add provider-specific data if user is a service provider
       if (formData.user_type === 'provider') {
         apiData.business_name = formData.business_name;
+        apiData.business_address = formData.business_address;
+        apiData.business_phone = getFullPhoneNumber();
+        apiData.business_email = formData.business_email;
         apiData.primary_service = formData.primary_service;
+        apiData.service_categories = formData.service_categories;
+        apiData.service_areas = formData.service_areas;
+        apiData.max_travel_distance = parseInt(formData.max_travel_distance.toString());
         apiData.years_experience = formData.years_experience;
         apiData.service_description = formData.service_description;
+        apiData.hourly_rate_min = formData.hourly_rate_min ? parseFloat(formData.hourly_rate_min) : null;
+        apiData.hourly_rate_max = formData.hourly_rate_max ? parseFloat(formData.hourly_rate_max) : null;
+        apiData.minimum_job_value = formData.minimum_job_value ? parseFloat(formData.minimum_job_value) : null;
       }
 
 

@@ -59,19 +59,40 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, min_length=8)
     password_confirm = serializers.CharField(write_only=True)
     
-    # Provider-specific fields
+    # Provider-specific fields for ML services
     business_name = serializers.CharField(write_only=True, required=False)
+    business_address = serializers.CharField(write_only=True, required=False)
+    business_phone = serializers.CharField(write_only=True, required=False)
+    business_email = serializers.EmailField(write_only=True, required=False)
     primary_service = serializers.CharField(write_only=True, required=False)
+    service_categories = serializers.ListField(
+        child=serializers.CharField(), 
+        write_only=True, 
+        required=False,
+        default=list
+    )
+    service_areas = serializers.ListField(
+        child=serializers.CharField(), 
+        write_only=True, 
+        required=False,
+        default=list
+    )
+    max_travel_distance = serializers.IntegerField(write_only=True, required=False, default=30)
     years_experience = serializers.CharField(write_only=True, required=False)
     service_description = serializers.CharField(write_only=True, required=False)
+    hourly_rate_min = serializers.DecimalField(write_only=True, required=False, max_digits=8, decimal_places=2)
+    hourly_rate_max = serializers.DecimalField(write_only=True, required=False, max_digits=8, decimal_places=2)
+    minimum_job_value = serializers.DecimalField(write_only=True, required=False, max_digits=8, decimal_places=2)
     
     class Meta:
         model = User
         fields = [
             'username', 'email', 'password', 'password_confirm',
             'first_name', 'last_name', 'user_type', 'phone',
-            'city', 'suburb', 'business_name', 'primary_service',
-            'years_experience', 'service_description'
+            'city', 'suburb', 'latitude', 'longitude',
+            'business_name', 'business_address', 'business_phone', 'business_email',
+            'primary_service', 'service_categories', 'service_areas', 'max_travel_distance',
+            'years_experience', 'service_description', 'hourly_rate_min', 'hourly_rate_max', 'minimum_job_value'
         ]
     
     def validate(self, attrs):
@@ -103,11 +124,24 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         validated_data.pop('password_confirm')
         password = validated_data.pop('password')
         
-        # Extract provider-specific data
+        # Handle empty phone numbers
+        if 'phone' in validated_data and validated_data['phone'] == '':
+            validated_data['phone'] = None
+        
+        # Extract provider-specific data for ML services
         business_name = validated_data.pop('business_name', None)
+        business_address = validated_data.pop('business_address', None)
+        business_phone = validated_data.pop('business_phone', None)
+        business_email = validated_data.pop('business_email', None)
         primary_service = validated_data.pop('primary_service', None)
+        service_categories = validated_data.pop('service_categories', [])
+        service_areas = validated_data.pop('service_areas', [])
+        max_travel_distance = validated_data.pop('max_travel_distance', 30)
         years_experience = validated_data.pop('years_experience', None)
         service_description = validated_data.pop('service_description', None)
+        hourly_rate_min = validated_data.pop('hourly_rate_min', None)
+        hourly_rate_max = validated_data.pop('hourly_rate_max', None)
+        minimum_job_value = validated_data.pop('minimum_job_value', None)
         
         user = User.objects.create_user(**validated_data)
         user.set_password(password)
@@ -150,13 +184,19 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
             ProviderProfile.objects.create(
                 user=user,
                 business_name=business_name or f"{user.first_name} {user.last_name}'s Business",
-                business_address=f"{user.city}, {user.suburb}" if user.city and user.suburb else "Address not provided",
-                service_areas=[user.city] if user.city else [],
+                business_address=business_address or f"{user.city}, {user.suburb}" if user.city and user.suburb else "Address not provided",
+                business_phone=business_phone or user.phone,
+                business_email=business_email or user.email,
+                service_areas=service_areas or ([user.city] if user.city else []),
                 service_categories=service_categories,
+                max_travel_distance=max_travel_distance,
                 verification_status='pending',
                 subscription_tier='pay_as_you_go',
                 bio=service_description or f"Professional {primary_service or 'service'} provider",
-                years_experience=self._parse_years_experience(years_experience) if years_experience else None
+                years_experience=self._parse_years_experience(years_experience) if years_experience else None,
+                hourly_rate_min=hourly_rate_min,
+                hourly_rate_max=hourly_rate_max,
+                minimum_job_value=minimum_job_value
             )
         
         return user
