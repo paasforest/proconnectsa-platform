@@ -148,13 +148,15 @@ export class SimpleApiClient {
     const convertBudgetRange = (budgetStr: string): string => {
       if (!budgetStr) return '1000_5000';
       
-      // Remove "R" and spaces, then convert to underscore format
-      const cleaned = budgetStr.replace(/[R\s-]/g, '');
-      const numbers = cleaned.match(/\d+/g);
+      // Extract numbers from budget string, handling commas
+      const numbers = budgetStr.match(/\d+(?:,\d{3})*/g);
       
       if (numbers && numbers.length >= 2) {
-        const min = parseInt(numbers[0]);
-        const max = parseInt(numbers[1]);
+        // Remove commas and parse
+        const min = parseInt(numbers[0].replace(/,/g, ''));
+        const max = parseInt(numbers[1].replace(/,/g, ''));
+        
+        console.log(`Budget conversion: "${budgetStr}" -> min: ${min}, max: ${max}`);
         
         // Map to valid choices
         if (min < 1000) return 'under_1000';
