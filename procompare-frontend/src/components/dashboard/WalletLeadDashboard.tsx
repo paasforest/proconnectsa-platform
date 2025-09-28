@@ -2,9 +2,11 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { Clock, MapPin, DollarSign, Users, Eye, Lock, CheckCircle, AlertCircle, Star, Calendar, Phone, Mail, User } from 'lucide-react';
 import { useAuth } from '@/components/AuthProvider';
 import { apiClient } from '@/lib/api-simple';
+import { useRouter } from 'next/navigation';
 
 const WalletLeadDashboard = () => {
   const { user, token } = useAuth();
+  const router = useRouter();
   const [leads, setLeads] = useState([]);
   const [selectedLead, setSelectedLead] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -340,7 +342,7 @@ const WalletLeadDashboard = () => {
                 </div>
               </div>
               <button 
-                onClick={() => window.open('/dashboard/wallet', '_blank')}
+                onClick={() => router.push('/dashboard/wallet')}
                 className="text-blue-600 hover:text-blue-700 font-medium"
               >
                 Buy More Credits
@@ -661,7 +663,7 @@ const WalletLeadDashboard = () => {
                         </p>
                       </div>
                       <button 
-                        onClick={() => window.open('/dashboard/wallet', '_blank')}
+                        onClick={() => router.push('/dashboard/wallet')}
                         className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 transition-colors font-semibold"
                       >
                         Buy More Credits
