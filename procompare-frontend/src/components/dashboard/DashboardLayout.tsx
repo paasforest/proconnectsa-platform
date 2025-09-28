@@ -371,7 +371,7 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
         </div>
 
         {/* Personalized Header for Providers */}
-        {user?.user_type === 'service_provider' && (
+        {user?.user_type === 'provider' && (
           <PersonalizedHeader
             onRefresh={() => {
               // Refresh user stats and profile

@@ -11,7 +11,7 @@ export interface User {
   email: string;
   first_name: string;
   last_name: string;
-  user_type: 'client' | 'service_provider' | 'admin';
+  user_type: 'client' | 'provider' | 'admin';
   phone?: string;
   city?: string;
   province?: string;
@@ -146,7 +146,7 @@ export interface RegisterData {
   password: string;
   first_name: string;
   last_name: string;
-  user_type: 'client' | 'service_provider';
+  user_type: 'client' | 'provider';
   phone?: string;
   city?: string;
   province?: string;

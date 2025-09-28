@@ -29,7 +29,7 @@ export default function ProviderDashboard() {
 
   if (!user) return null
 
-  if (user.user_type !== 'service_provider') {
+  if (user.user_type !== 'provider') {
     router.push('/client')
     return null
   }

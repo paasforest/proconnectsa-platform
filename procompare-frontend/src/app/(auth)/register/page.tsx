@@ -149,7 +149,7 @@ export default function RegisterPage() {
   };
 
   const getTotalSteps = () => {
-    return formData.user_type === 'service_provider' ? 2 : 1;
+    return formData.user_type === 'provider' ? 2 : 1;
   };
 
   const isStepValid = (step: number) => {
@@ -214,7 +214,7 @@ export default function RegisterPage() {
       };
 
       // Add provider-specific data if user is a service provider
-      if (formData.user_type === 'service_provider') {
+      if (formData.user_type === 'provider') {
         apiData.business_name = formData.business_name;
         apiData.primary_service = formData.primary_service;
         apiData.years_experience = formData.years_experience;
@@ -327,9 +327,9 @@ export default function RegisterPage() {
           onChange={handleChange}
         >
           <option value="client">Client (Looking for services)</option>
-          <option value="service_provider">Service Provider (Offering services)</option>
+          <option value="provider">Service Provider (Offering services)</option>
         </select>
-        {formData.user_type === 'service_provider' && (
+        {formData.user_type === 'provider' && (
           <p className="text-sm text-emerald-600 mt-2">
             ✓ Service providers will be asked additional questions in the next step
           </p>
@@ -750,7 +750,7 @@ export default function RegisterPage() {
                       </div>
                     ) : (
                       currentStep === getTotalSteps() ? 'Create Account' : 
-                      formData.user_type === 'service_provider' ? 'Continue to Provider Details' : 'Next'
+                      formData.user_type === 'provider' ? 'Continue to Provider Details' : 'Next'
                     )}
                   </button>
                 </div>
