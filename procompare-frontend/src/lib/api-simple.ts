@@ -111,40 +111,36 @@ export class SimpleApiClient {
   }
 
   async createPublicLead(leadData: any) {
-    // Map the leadData to Flask server format with proper defaults
-    const flaskData = {
-      service_category: leadData.service_category_id === 1 ? 'home-improvement' : 
-                       leadData.service_category_id === 2 ? 'cleaning' :
-                       leadData.service_category_id === 3 ? 'automotive' : 'home-improvement',
-      service_type: leadData.title || leadData.project_title || 'General Service',
-      location: leadData.location || leadData.location_address || leadData.location_suburb || leadData.location_city || 'Cape Town',
+    // Map the leadData to Django backend format with correct field values
+    const djangoData = {
+      service_category_id: leadData.service_category_id || 1,
+      title: leadData.title || leadData.project_title || 'Service Request',
+      description: leadData.description || leadData.project_description || 'Service description',
+      location_address: leadData.location_address || leadData.location || 'Address not provided',
+      location_suburb: leadData.location_suburb || 'Suburb not specified',
+      location_city: leadData.location_city || 'Cape Town',
+      latitude: leadData.latitude || null,
+      longitude: leadData.longitude || null,
+      budget_range: leadData.budget_range || '1000_5000',
       urgency: leadData.urgency || 'flexible',
-      project_title: leadData.title || leadData.project_title || 'Service Request',
-      project_description: leadData.description || leadData.project_description || 'Service description',
-      budget_range: leadData.budget_range || 'R1,500 - R5,000',
-      contact_name: leadData.client_name || leadData.contact_name || 'Anonymous Client',
-      contact_phone: leadData.client_phone || leadData.contact_phone || '+27123456789',
-      contact_email: leadData.client_email || leadData.contact_email || 'client@example.com'
+      preferred_contact_time: leadData.preferred_contact_time || 'morning',
+      additional_requirements: leadData.additional_requirements || '',
+      hiring_intent: leadData.hiring_intent || 'ready_to_hire',
+      hiring_timeline: leadData.hiring_timeline || 'asap',
+      research_purpose: leadData.research_purpose || '',
+      source: leadData.source || 'website',
+      client_name: leadData.client_name || leadData.contact_name || 'Anonymous Client',
+      client_email: leadData.client_email || leadData.contact_email || 'client@example.com',
+      client_phone: leadData.client_phone || leadData.contact_phone || '+27123456789'
     };
 
-    console.log('🚀 Creating lead via Flask backend:', flaskData);
+    console.log('🚀 Creating lead via Django backend:', djangoData);
 
-    // Call Flask backend directly via Next.js API route
-    const response = await fetch('/api/leads/create-public/', {
+    // Call Django backend directly
+    return this.request('/api/leads/create-public/', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(flaskData),
+      body: JSON.stringify(djangoData),
     });
-
-    const result = await response.json();
-    
-    if (!response.ok) {
-      throw new Error(result.message || `HTTP error! status: ${response.status}`);
-    }
-
-    return result;
   }
 
   async getLeads(params?: any) {
