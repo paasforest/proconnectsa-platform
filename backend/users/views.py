@@ -198,16 +198,17 @@ def user_stats_view(request):
     
     if user.is_provider and hasattr(user, 'provider_profile'):
         profile = user.provider_profile
-        # Get wallet credits
-        wallet_credits = 0
-        if hasattr(user, 'wallet'):
-            wallet_credits = user.wallet.credits
+        # Get payment account balance
+        cash_balance = 0.00
+        if hasattr(user, 'payment_account'):
+            cash_balance = float(user.payment_account.balance)
         
         stats.update({
             'verification_status': profile.verification_status,
             'subscription_tier': profile.subscription_tier,
             'subscription_active': profile.is_subscription_active,
-            'credit_balance': wallet_credits,  # Use actual wallet credits
+            'credit_balance': profile.credit_balance,  # Use provider profile credits
+            'cash_balance': cash_balance,  # Add cash balance
             'monthly_lead_limit': profile.monthly_lead_limit,
             'leads_used_this_month': profile.leads_used_this_month,
             'average_rating': profile.average_rating,

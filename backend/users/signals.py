@@ -1,15 +1,19 @@
 from django.db.models.signals import post_save
 from django.dispatch import receiver
-from .models import User, ProviderProfile, Wallet
+from .models import User, ProviderProfile
+from backend.payments.models import PaymentAccount
 from backend.notifications.models import Notification
 
 
 @receiver(post_save, sender=User)
 def create_welcome_notification(sender, instance, created, **kwargs):
-    """Create welcome notification and wallet for new users"""
+    """Create welcome notification and payment account for new users"""
     if created:
-        # Create wallet for new user
-        Wallet.objects.get_or_create(user=instance)
+        # Create payment account for new user
+        PaymentAccount.objects.get_or_create(
+            user=instance,
+            defaults={'balance': 0.00}
+        )
         
         Notification.create_for_user(
             user=instance,
