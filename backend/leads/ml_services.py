@@ -773,7 +773,7 @@ class DynamicPricingMLService:
             if provider and hasattr(provider, 'provider_profile'):
                 provider_tier = provider.provider_profile.subscription_tier
             
-            base_price = base_prices.get(provider_tier, 5)
+            base_price = base_prices.get(provider_tier, 50)
             
             # Debug: Log tier and base price
             logger.info(f"Dynamic pricing: tier={provider_tier}, base_price={base_price}")
@@ -917,7 +917,7 @@ class DynamicPricingMLService:
             if provider and hasattr(provider, 'provider_profile'):
                 provider_tier = provider.provider_profile.subscription_tier
             
-            base_price = base_prices.get(provider_tier, 5)
+            base_price = base_prices.get(provider_tier, 50)
             
             # Batch calculate common multipliers (much faster than individual calculations)
             time_multiplier = self._calculate_time_multiplier()
