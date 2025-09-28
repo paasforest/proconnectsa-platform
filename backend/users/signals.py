@@ -1,13 +1,13 @@
 from django.db.models.signals import post_save
 from django.dispatch import receiver
-from .models import User, ProviderProfile
+from .models import User, ProviderProfile, Wallet
 from backend.payments.models import PaymentAccount
 from backend.notifications.models import Notification
 
 
 @receiver(post_save, sender=User)
 def create_welcome_notification(sender, instance, created, **kwargs):
-    """Create welcome notification and payment account for new users"""
+    """Create welcome notification, payment account, and wallet for new users"""
     if created:
         # Create payment account for new user
         PaymentAccount.objects.get_or_create(
@@ -15,11 +15,20 @@ def create_welcome_notification(sender, instance, created, **kwargs):
             defaults={'balance': 0.00}
         )
         
+        # Create wallet for new user (for credits system)
+        Wallet.objects.get_or_create(
+            user=instance,
+            defaults={
+                'balance': 0.00,
+                'credits': 0
+            }
+        )
+        
         Notification.create_for_user(
             user=instance,
             notification_type='system_update',
-            title='Welcome to ProCompare!',
-            message=f'Welcome {instance.first_name}! Your account has been created successfully.',
+            title='Welcome to ProConnectSA!',
+            message=f'Welcome {instance.first_name}! Your account has been created successfully. You can now start purchasing leads.',
             priority='medium'
         )
 
