@@ -34,6 +34,8 @@ interface Lead {
   estimatedValue?: string;
   timeline?: string;
   isUnlocked?: boolean;
+  views_count?: number;
+  responses_count?: number;
 }
 
 interface FilterOptions {
