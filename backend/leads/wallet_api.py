@@ -119,52 +119,105 @@ def available_leads(request):
                 )
             leads = leads.filter(geographical_filter)
     
-    # Convert leads to frontend format
+    # Convert leads to frontend format using integrated ML services
     leads_data = []
     for lead in leads:
-        # Calculate ML-based pricing
-        credits_cost = calculate_ml_lead_pricing(lead)
-        
-        # Check if already unlocked by this user
-        is_unlocked = LeadUnlock.objects.filter(
-            user=request.user,
-            lead_id=str(lead.id)
-        ).exists()
-        
-        lead_data = {
-            'id': str(lead.id),
-            'name': f"{lead.client.first_name} {lead.client.last_name}".strip() or lead.client.email,
-            'masked_name': f"{lead.client.first_name[0] if lead.client.first_name else 'U'}. {lead.client.last_name[0] if lead.client.last_name else 'U'}.",
-            'location': lead.location_address,
-            'masked_location': f"{lead.location_suburb}, {lead.location_city}",
-            'timeAgo': format_time_ago(lead.created_at),
-            'service': f"{lead.service_category.name} • {lead.title}",
-            'credits': credits_cost,
-            'verifiedPhone': getattr(lead, 'is_sms_verified', False),
-            'highIntent': lead.hiring_intent in ['ready_to_hire', 'planning_to_hire'],
-            'email': lead.client.email,
-            'phone': getattr(lead.client, 'phone', ''),
-            'masked_phone': mask_phone(getattr(lead.client, 'phone', '')),
-            'budget': get_budget_display(lead.budget_range),
-            'urgency': map_urgency_level(lead.urgency),
-            'status': 'new',
-            'rating': 4.5,  # Default rating
-            'lastActivity': format_time_ago(lead.created_at),
-            'category': get_category_type(lead),
-            'email_available': True,
-            'jobSize': get_job_size(lead),
-            'competitorCount': 0,  # Will be calculated by ML
-            'leadScore': lead.verification_score / 10.0,  # Convert to 0-10 scale
-            'estimatedValue': get_estimated_value(lead.budget_range),
-            'timeline': get_timeline_display(lead.hiring_timeline),
-            'previousHires': 0,  # Will be calculated by ML
-            'isUnlocked': is_unlocked,
-            'details': lead.description,
-            'masked_details': mask_text_content(lead.description) if not is_unlocked else lead.description,
-            'views_count': getattr(lead, 'views_count', 0),
-            'responses_count': getattr(lead, 'responses_count', 0)
-        }
-        leads_data.append(lead_data)
+        try:
+            # Use integrated ML pricing service
+            from .ml_services import DynamicPricingMLService
+            pricing_service = DynamicPricingMLService()
+            pricing_result = pricing_service.calculate_dynamic_lead_price(lead, request.user)
+            credits_cost = max(1, round(pricing_result.get('price', 50) / 50, 1))  # R50 = 1 credit
+            
+            # Check if already unlocked by this user using LeadAccess model
+            from .models import LeadAccess
+            is_unlocked = LeadAccess.objects.filter(
+                provider=request.user,
+                lead=lead,
+                is_active=True
+            ).exists()
+            
+            # Use LeadAssignmentService for proper data formatting
+            from .services import LeadAssignmentService
+            assignment_service = LeadAssignmentService()
+            
+            lead_data = {
+                'id': str(lead.id),
+                'name': f"{lead.client.first_name} {lead.client.last_name}".strip() or lead.client.email if lead.client else 'Anonymous Client',
+                'masked_name': assignment_service._mask_client_name(f"{lead.client.first_name} {lead.client.last_name}".strip() if lead.client else 'Anonymous Client'),
+                'location': f"{lead.location_address}, {lead.location_city}" if lead.location_address else lead.location_city,
+                'masked_location': f"{lead.location_suburb}, {lead.location_city}",
+                'timeAgo': format_time_ago(lead.created_at),
+                'service': f"{lead.service_category.name} • {lead.title}",
+                'credits': credits_cost,
+                'verifiedPhone': getattr(lead, 'is_sms_verified', False),
+                'highIntent': lead.hiring_intent in ['ready_to_hire', 'planning_to_hire'],
+                'email': lead.client.email if lead.client else None,
+                'phone': getattr(lead.client, 'phone', '') if lead.client else '',
+                'masked_phone': mask_phone(getattr(lead.client, 'phone', '')) if lead.client else '***-***-****',
+                'budget': get_budget_display(lead.budget_range),
+                'urgency': map_urgency_level(lead.urgency),
+                'status': 'new',
+                'rating': 4.5,  # Can be enhanced with ML-based client rating
+                'lastActivity': format_time_ago(lead.created_at),
+                'category': get_category_type(lead),
+                'email_available': bool(lead.client.email if lead.client else False),
+                'jobSize': get_job_size(lead),
+                'competitorCount': 0,  # Will be calculated by ML
+                'leadScore': lead.verification_score / 10.0 if lead.verification_score else 7.5,  # Convert to 0-10 scale
+                'estimatedValue': get_estimated_value(lead.budget_range),
+                'timeline': get_timeline_display(lead.hiring_timeline),
+                'previousHires': 0,  # Will be calculated by ML
+                'isUnlocked': is_unlocked,
+                'details': lead.description,
+                'masked_details': mask_text_content(lead.description) if not is_unlocked else lead.description,
+                'views_count': getattr(lead, 'views_count', 0),
+                'responses_count': getattr(lead, 'responses_count', 0)
+            }
+            leads_data.append(lead_data)
+            
+        except Exception as e:
+            logger.error(f"Error processing lead {lead.id} with ML services: {str(e)}")
+            # Fallback to simple processing
+            try:
+                credits_cost = max(1, round(50 / 50, 1))  # R50 = 1 credit fallback
+                lead_data = {
+                    'id': str(lead.id),
+                    'name': f"{lead.client.first_name} {lead.client.last_name}".strip() or lead.client.email if lead.client else 'Anonymous Client',
+                    'masked_name': 'A. C.',
+                    'location': lead.location_city or 'Location hidden',
+                    'masked_location': lead.location_city or 'Location hidden',
+                    'timeAgo': 'Recently posted',
+                    'service': f"{lead.service_category.name} • {lead.title}",
+                    'credits': credits_cost,
+                    'verifiedPhone': False,
+                    'highIntent': False,
+                    'email': None,
+                    'phone': None,
+                    'masked_phone': '***-***-****',
+                    'budget': lead.budget_range or 'Budget available',
+                    'urgency': lead.urgency or 'medium',
+                    'status': 'new',
+                    'rating': 4.5,
+                    'lastActivity': 'Recently posted',
+                    'category': 'residential',
+                    'email_available': False,
+                    'jobSize': 'medium',
+                    'competitorCount': 0,
+                    'leadScore': lead.verification_score / 10.0 if lead.verification_score else 7.5,
+                    'estimatedValue': lead.budget_range or 'R5,000 - R15,000',
+                    'timeline': lead.hiring_timeline or 'Flexible',
+                    'previousHires': 0,
+                    'isUnlocked': False,
+                    'details': lead.description,
+                    'masked_details': lead.description,
+                    'views_count': 0,
+                    'responses_count': 0
+                }
+                leads_data.append(lead_data)
+            except Exception as fallback_error:
+                logger.error(f"Fallback processing also failed for lead {lead.id}: {str(fallback_error)}")
+                continue
     
     return Response({
         'leads': leads_data,

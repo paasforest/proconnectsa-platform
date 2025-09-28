@@ -146,7 +146,7 @@ def unlock_lead(request, lead_id):
         
         # Get lead details and pricing from ML service
         # For now, using static pricing - replace with ML service
-        credits_required = get_lead_credits_cost(lead_id)
+        credits_required = get_lead_credits_cost(lead_id, request.user)
         
         # Validate sufficient credits
         if wallet.credits < credits_required:
@@ -184,13 +184,22 @@ def unlock_lead(request, lead_id):
             # Get full contact information (mock data for now)
             full_contact_info = get_full_contact_info(lead_id)
             
-            # Create unlock record
+            # Create unlock record using both models for compatibility
             lead_unlock = LeadUnlock.objects.create(
                 user=request.user,
                 lead_id=lead_id,
                 credits_spent=credits_required,
                 transaction=unlock_transaction,
                 full_contact_data=full_contact_info
+            )
+            
+            # Also create LeadAccess record for the new integrated system
+            from backend.leads.models import LeadAccess
+            lead_access = LeadAccess.objects.create(
+                lead=lead,
+                provider=request.user,
+                credit_cost=credits_required,
+                is_active=True
             )
             
             # Update LeadAssignment status to 'purchased' for the new dashboard
@@ -269,16 +278,25 @@ def unlock_lead(request, lead_id):
         return Response({'error': 'Unlock failed. Please try again.'}, status=500)
 
 
-def get_lead_credits_cost(lead_id):
+def get_lead_credits_cost(lead_id, provider=None):
     """
     Get credits required for lead unlock using ML pricing
     """
     try:
         from backend.leads.models import Lead
-        from backend.leads.wallet_api import calculate_ml_lead_pricing
+        from backend.leads.ml_services import DynamicPricingMLService
         
         lead = Lead.objects.get(id=lead_id)
-        return calculate_ml_lead_pricing(lead)
+        
+        # Use the integrated ML pricing service
+        pricing_service = DynamicPricingMLService()
+        pricing_result = pricing_service.calculate_dynamic_lead_price(lead, provider)
+        
+        # Convert Rands to credits (R50 = 1 credit)
+        price_in_rands = pricing_result.get('price', 50)
+        credits = max(1, round(price_in_rands / 50, 1))
+        
+        return credits
     except Lead.DoesNotExist:
         # Fallback to default pricing
         return 8  # Default 8 credits

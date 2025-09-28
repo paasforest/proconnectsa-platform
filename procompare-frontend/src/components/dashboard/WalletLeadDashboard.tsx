@@ -12,6 +12,13 @@ const WalletLeadDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [userCredits, setUserCredits] = useState(100);
   const [purchasedLeads, setPurchasedLeads] = useState(new Set());
+  const [notification, setNotification] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
+
+  // Helper function to show notifications
+  const showNotification = (message: string, type: 'success' | 'error' = 'success') => {
+    setNotification({ message, type });
+    setTimeout(() => setNotification(null), 4000); // Auto-hide after 4 seconds
+  };
 
   // Sample leads data (replace with API call)
   const sampleLeads = [
@@ -315,7 +322,7 @@ const WalletLeadDashboard = () => {
     
     if (!lead) {
       console.error('❌ Lead not found:', leadId);
-      alert('Lead not found. Please refresh the page.');
+      showNotification('Lead not found. Please refresh the page.', 'error');
       return;
     }
     
@@ -326,7 +333,7 @@ const WalletLeadDashboard = () => {
         leadFull: lead.current_responses >= lead.max_providers,
         leadClosed: lead.lead_status === 'closed'
       });
-      alert(`Cannot purchase this lead. You need ${lead.credit_cost} credits and have ${userCredits}.`);
+      showNotification(`Cannot purchase this lead. You need ${lead.credit_cost} credits and have ${userCredits}.`, 'error');
       return;
     }
     
@@ -363,7 +370,7 @@ const WalletLeadDashboard = () => {
         ));
         
         console.log('✅ Sample lead purchased successfully:', mockResponse);
-        alert(`Lead purchased successfully! ${lead.credit_cost} credits deducted.`);
+        showNotification(`Lead purchased successfully! ${lead.credit_cost} credits deducted.`, 'success');
         return;
       }
       
@@ -395,14 +402,14 @@ const WalletLeadDashboard = () => {
         ));
         
         console.log('✅ Lead purchased successfully:', response);
-        alert(`Lead purchased successfully! ${lead.credit_cost} credits deducted.`);
+        showNotification(`Lead purchased successfully! ${lead.credit_cost} credits deducted.`, 'success');
       } else {
         console.error('❌ Purchase failed:', response);
-        alert(`Purchase failed: ${response.error || 'Unknown error'}`);
+        showNotification(`Purchase failed: ${response.error || 'Unknown error'}`, 'error');
       }
     } catch (error) {
       console.error('❌ Error purchasing lead:', error);
-      alert(`Purchase failed: ${error.message || 'Network error'}`);
+      showNotification(`Purchase failed: ${error.message || 'Network error'}`, 'error');
     }
   };
 
@@ -454,6 +461,32 @@ const WalletLeadDashboard = () => {
           </div>
         </div>
       </header>
+
+      {/* Notification */}
+      {notification && (
+        <div className={`fixed top-4 right-4 z-50 max-w-sm p-4 rounded-lg shadow-lg transition-all duration-300 ${
+          notification.type === 'success' 
+            ? 'bg-green-50 border border-green-200 text-green-800' 
+            : 'bg-red-50 border border-red-200 text-red-800'
+        }`}>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center">
+              {notification.type === 'success' ? (
+                <CheckCircle className="h-5 w-5 text-green-600 mr-2" />
+              ) : (
+                <AlertCircle className="h-5 w-5 text-red-600 mr-2" />
+              )}
+              <span className="font-medium">{notification.message}</span>
+            </div>
+            <button 
+              onClick={() => setNotification(null)}
+              className="ml-4 text-gray-400 hover:text-gray-600"
+            >
+              ×
+            </button>
+          </div>
+        </div>
+      )}
 
       <div className="max-w-7xl mx-auto px-6 py-8">
         <div className="grid grid-cols-12 gap-8 min-h-[calc(100vh-200px)]">
