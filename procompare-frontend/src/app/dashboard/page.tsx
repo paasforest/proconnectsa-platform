@@ -166,7 +166,7 @@ function DashboardPage({ user }: { user: any }) {
 
           <div className="mb-8">
             <h1 className="text-3xl font-bold text-gray-900">ProConnectSA</h1>
-            <p className="text-gray-600">Welcome back to your Lead Marketplace</p>
+            <p className="text-gray-600">Welcome back to your Lead Marketplace, {userProfile?.business_name || 'Professional'}</p>
           </div>
 
           {/* Stats Grid */}
