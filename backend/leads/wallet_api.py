@@ -32,7 +32,7 @@ def available_leads(request):
     Uses ML services for both pricing calculation AND intelligent filtering
     """
     from backend.leads.models import Lead
-    from backend.leads.services import LeadFilteringService
+    # LeadFilteringService import removed - using direct filtering
     from django.utils import timezone
     from datetime import timedelta
     import uuid
@@ -50,15 +50,38 @@ def available_leads(request):
         # - Geographical proximity with ML
         # - Lead quality preferences
         # - Provider availability and preferences
-        leads = LeadFilteringService.get_filtered_leads_for_provider(
-            provider=request.user,
-            filters={
-                'status': 'active',  # Match actual lead status
-                'is_available': True,
-                'expires_at__gt': timezone.now(),
-                'limit': 20
-            }
-        )
+        # Direct lead filtering (replacing broken LeadFilteringService)
+        profile = request.user.provider_profile
+        
+        # Base query
+        leads = Lead.objects.filter(
+            status='verified',
+            service_category__id__in=profile.service_categories,
+            is_available=True,
+            expires_at__gt=timezone.now()
+        ).select_related('service_category', 'client')
+        
+        # Apply geographical filter
+        if profile.service_areas:
+            from django.db.models import Q
+            service_area_filter = Q()
+            for area in profile.service_areas:
+                service_area_filter |= (
+                    Q(location_suburb__icontains=area) |
+                    Q(location_city__icontains=area)
+                )
+            leads = leads.filter(service_area_filter)
+        
+        # Exclude already assigned leads
+        from backend.leads.models import LeadAssignment
+        assigned_lead_ids = LeadAssignment.objects.filter(
+            provider=request.user
+        ).values_list('lead_id', flat=True)
+        
+        leads = leads.exclude(id__in=assigned_lead_ids)
+        
+        # Order by priority and apply limit
+        leads = leads.order_by('-verification_score', '-created_at')[:20]
         
         logger.info(f"ML filtering returned {leads.count()} leads for provider {request.user.id}")
         
@@ -77,7 +100,7 @@ def available_leads(request):
         
         # Basic service category filtering
         leads = Lead.objects.filter(
-            status='active',
+            status='verified',
             is_available=True,
             expires_at__gt=timezone.now(),
             service_category__id__in=provider_service_categories

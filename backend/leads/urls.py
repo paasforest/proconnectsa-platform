@@ -61,6 +61,9 @@ urlpatterns = [
     path('wallet/available/', wallet_api.available_leads, name='wallet-available-leads'),
     path('wallet/unlocked/', wallet_api.unlocked_leads, name='wallet-unlocked-leads'),
     
+    # Enterprise-grade lead filtering endpoints
+    path('enterprise/wallet/available/', views.enterprise_wallet_available, name='enterprise-wallet-available'),
+    
 ]
 
 

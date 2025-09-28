@@ -480,26 +480,34 @@ const WalletLeadDashboard: React.FC = () => {
 
   // Fetch leads
   const fetchLeads = useCallback(async () => {
+    if (!token) return;
+    
     try {
       setLoading(true);
+      apiClient.setToken(token);
       const response = await apiClient.get('/api/leads/wallet/available/');
       setLeads(response.data?.leads || response.leads || []);
     } catch (error) {
+      console.error('Error fetching leads:', error);
       addNotification('error', 'Failed to load leads', 'Please try again later.');
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [token]);
 
   // Fetch user stats
   const fetchUserStats = useCallback(async () => {
+    if (!token) return;
+    
     try {
+      apiClient.setToken(token);
       const response = await apiClient.get('/api/auth/stats/');
       setUserStats(response);
     } catch (error) {
+      console.error('Error fetching user stats:', error);
       // Handle error silently
     }
-  }, []);
+  }, [token]);
 
   // Fetch deposit instructions
   const fetchDepositInstructions = useCallback(async () => {
@@ -614,11 +622,11 @@ const WalletLeadDashboard: React.FC = () => {
 
   // Load data on mount
   useEffect(() => {
-    if (user !== null) {
+    if (user !== null && token) {
       fetchLeads();
       fetchUserStats();
     }
-  }, [status, fetchLeads, fetchUserStats]);
+  }, [user, token, fetchLeads, fetchUserStats]);
 
   if (false) {
     return (

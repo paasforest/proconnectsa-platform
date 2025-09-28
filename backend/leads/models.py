@@ -197,13 +197,16 @@ class Lead(models.Model):
     expires_at = models.DateTimeField(null=True, blank=True)
     
     class Meta:
-        ordering = ['-created_at']
+        ordering = ['-verification_score', '-created_at']
         indexes = [
+            models.Index(fields=['status', 'service_category_id']),
+            models.Index(fields=['location_city', 'status']),
+            models.Index(fields=['verification_score', 'created_at']),
             models.Index(fields=['status', 'created_at']),
-            models.Index(fields=['service_category', 'location_city']),
+            models.Index(fields=['service_category_id', 'location_city']),
             models.Index(fields=['client', 'created_at']),
-            models.Index(fields=['verification_score', 'status']),
             models.Index(fields=['expires_at']),
+            models.Index(fields=['is_available', 'status']),
         ]
     
     def __str__(self):

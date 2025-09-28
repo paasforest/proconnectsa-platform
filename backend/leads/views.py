@@ -573,3 +573,287 @@ def track_lead_view(request, lead_id):
                 {'error': 'Failed to track view'}, 
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
+
+
+# Enterprise Lead Filtering Service
+class EnterpriseLeadFilteringService:
+    """
+    Enterprise-grade lead filtering with proper query management,
+    caching, and error handling.
+    """
+    
+    def __init__(self):
+        self.cache_timeout = 300  # 5 minutes
+    
+    def get_leads_for_provider(self, provider_id: int, limit: int = 20) -> dict:
+        """
+        Main entry point for getting filtered leads for a provider.
+        Returns structured response with metadata.
+        """
+        try:
+            # 1. Validate and get provider
+            provider = self._get_validated_provider(provider_id)
+            if not provider:
+                return self._error_response("Provider not found or invalid")
+            
+            # 2. Build and execute query (no caching for now to avoid complexity)
+            leads_queryset = self._build_leads_query(provider)
+            leads_data = self._execute_and_serialize_query(leads_queryset, limit)
+            
+            # 3. Prepare response
+            response = {
+                'success': True,
+                'leads': leads_data,
+                'count': len(leads_data),
+                'provider_id': provider_id,
+                'provider_credits': provider.provider_profile.credit_balance,
+                'filters_applied': self._get_filter_summary(provider),
+                'timestamp': timezone.now().isoformat()
+            }
+            
+            logger.info(f"Successfully filtered {len(leads_data)} leads for provider {provider_id}")
+            return response
+            
+        except Exception as e:
+            logger.error(f"EnterpriseLeadFilteringService error for provider {provider_id}: {str(e)}")
+            return self._error_response(f"Service error: {str(e)}")
+    
+    def _get_validated_provider(self, provider_id: int):
+        """Validate provider exists and has necessary permissions/credits."""
+        try:
+            provider = User.objects.select_related('provider_profile').get(
+                id=provider_id,
+                user_type='provider',
+                is_active=True
+            )
+            
+            # Check if provider profile exists and is verified
+            if not hasattr(provider, 'provider_profile'):
+                logger.warning(f"Provider {provider_id} has no provider profile")
+                return None
+                
+            profile = provider.provider_profile
+            
+            # Check verification status
+            if profile.verification_status != 'verified':
+                logger.warning(f"Provider {provider_id} not verified")
+                return None
+            
+            # Check credits
+            if profile.credit_balance <= 0:
+                logger.warning(f"Provider {provider_id} has no credits")
+                return None
+                
+            return provider
+            
+        except User.DoesNotExist:
+            logger.warning(f"Provider {provider_id} not found")
+            return None
+    
+    def _build_leads_query(self, provider):
+        """
+        Build the leads query with proper filter ordering to avoid slice errors.
+        This is the core method that must avoid Django ORM slice issues.
+        """
+        profile = provider.provider_profile
+        
+        # Start with base queryset - NO slicing here
+        base_query = Lead.objects.filter(
+            status='verified',
+            is_available=True,
+            expires_at__gt=timezone.now()
+        )
+        
+        # Apply filters step by step, ensuring no slicing until the end
+        filtered_query = base_query
+        
+        # Service category filter
+        if profile.service_categories:
+            filtered_query = filtered_query.filter(
+                service_category_id__in=profile.service_categories
+            )
+        
+        # Geographic filter
+        if profile.service_areas:
+            service_area_filter = Q()
+            for area in profile.service_areas:
+                service_area_filter |= (
+                    Q(location_city__icontains=area) |
+                    Q(location_suburb__icontains=area)
+                )
+            filtered_query = filtered_query.filter(service_area_filter)
+        
+        # Lead quality filter (optional)
+        filtered_query = filtered_query.filter(verification_score__gte=40)
+        
+        # Add select_related for performance
+        filtered_query = filtered_query.select_related('service_category', 'client')
+        
+        # Order by - this must happen BEFORE any slicing
+        ordered_query = filtered_query.order_by('-verification_score', '-created_at')
+        
+        return ordered_query
+    
+    def _execute_and_serialize_query(self, queryset, limit: int) -> list:
+        """Execute query and serialize results safely."""
+        try:
+            # Apply limit here - this is where slicing happens
+            leads = list(queryset[:limit])
+            
+            # Serialize to dictionaries
+            serialized_leads = []
+            for lead in leads:
+                serialized_leads.append({
+                    'id': str(lead.id),
+                    'title': lead.title,
+                    'description': lead.description[:200] + '...' if len(lead.description) > 200 else lead.description,
+                    'service_category': {
+                        'id': lead.service_category.id,
+                        'name': lead.service_category.name,
+                        'slug': lead.service_category.slug
+                    },
+                    'location_city': lead.location_city,
+                    'location_suburb': lead.location_suburb,
+                    'location_address': lead.location_address,
+                    'budget_range': lead.budget_range,
+                    'budget_display': lead.get_budget_display_range(),
+                    'urgency': lead.urgency,
+                    'urgency_display': lead.get_urgency_display(),
+                    'hiring_intent': lead.hiring_intent,
+                    'hiring_timeline': lead.hiring_timeline,
+                    'verification_score': lead.verification_score,
+                    'created_at': lead.created_at.isoformat(),
+                    'expires_at': lead.expires_at.isoformat(),
+                    'contact_preview': self._generate_contact_preview(lead),
+                    'estimated_value': self._calculate_lead_value(lead),
+                    'credit_required': 50  # Default credit cost
+                })
+            
+            return serialized_leads
+            
+        except Exception as e:
+            logger.error(f"Query execution error: {str(e)}")
+            raise
+    
+    def _generate_contact_preview(self, lead):
+        """Generate masked contact information for preview."""
+        return {
+            'name_preview': f"{lead.client.first_name[:2]}***" if lead.client.first_name else "***",
+            'phone_preview': f"***{lead.client.phone[-3:]}" if lead.client.phone and len(lead.client.phone) > 3 else "***",
+            'email_preview': f"***@{lead.client.email.split('@')[1]}" if lead.client.email and '@' in lead.client.email else "***"
+        }
+    
+    def _calculate_lead_value(self, lead):
+        """Calculate estimated lead value for pricing."""
+        base_value = 50  # Base price in credits
+        
+        # Adjust based on verification score
+        if lead.verification_score >= 80:
+            return base_value * 2
+        elif lead.verification_score >= 60:
+            return int(base_value * 1.5)
+        else:
+            return base_value
+    
+    def _get_filter_summary(self, provider):
+        """Return summary of filters applied."""
+        profile = provider.provider_profile
+        return {
+            'service_categories': profile.service_categories,
+            'service_areas': profile.service_areas,
+            'min_verification_score': 40,
+            'status_filter': 'verified',
+            'verification_status': profile.verification_status
+        }
+    
+    def _error_response(self, message: str) -> dict:
+        """Standard error response format."""
+        return {
+            'success': False,
+            'error': message,
+            'leads': [],
+            'count': 0,
+            'timestamp': timezone.now().isoformat()
+        }
+
+
+# Enterprise API Views
+@api_view(['GET', 'POST'])
+@permission_classes([IsAuthenticated])
+def enterprise_wallet_available(request):
+    """
+    Enterprise-grade wallet API that uses the new filtering service.
+    Maintains backward compatibility with existing frontend.
+    """
+    try:
+        # Get provider from authenticated user
+        provider = request.user
+        
+        # Validate provider type
+        if provider.user_type not in ['provider', 'service_provider']:
+            return Response({
+                'success': False,
+                'error': 'Access denied: User is not a provider'
+            }, status=403)
+        
+        # Get limit from request
+        if request.method == 'POST':
+            try:
+                data = request.data
+                limit = min(data.get('limit', 20), 50)
+            except:
+                limit = 20
+        else:
+            limit = min(int(request.GET.get('limit', 20)), 50)
+        
+        # Use the new enterprise filtering service
+        filtering_service = EnterpriseLeadFilteringService()
+        result = filtering_service.get_leads_for_provider(provider.id, limit)
+        
+        # Format response to match legacy API structure
+        if result['success']:
+            # Get wallet information
+            try:
+                from backend.users.models import Wallet
+                wallet = Wallet.objects.get(user=provider)
+                wallet_data = {
+                    'credits': wallet.credits,
+                    'balance': float(wallet.balance),
+                    'total_spent': float(wallet.total_spent),
+                    'last_updated': wallet.updated_at.isoformat()
+                }
+            except Wallet.DoesNotExist:
+                wallet_data = {
+                    'credits': 0,
+                    'balance': 0.0,
+                    'total_spent': 0.0,
+                    'last_updated': None
+                }
+            
+            # Return legacy format
+            return Response({
+                'success': True,
+                'leads': result['leads'],
+                'count': result['count'],
+                'wallet': wallet_data,
+                'provider_id': provider.id,
+                'timestamp': result['timestamp']
+            })
+        else:
+            return Response({
+                'success': False,
+                'error': result['error'],
+                'leads': [],
+                'count': 0,
+                'wallet': {'credits': 0, 'balance': 0.0, 'total_spent': 0.0}
+            }, status=400)
+            
+    except Exception as e:
+        logger.error(f"Error in enterprise wallet API: {str(e)}")
+        return Response({
+            'success': False,
+            'error': 'Internal server error',
+            'leads': [],
+            'count': 0,
+            'wallet': {'credits': 0, 'balance': 0.0, 'total_spent': 0.0}
+        }, status=500)

@@ -647,40 +647,43 @@ class LeadFilteringService:
         - Availability status
         """
         try:
+            from backend.leads.models import Lead, LeadAssignment
+            from django.db.models import Q
+            from django.utils import timezone
+            
             profile = provider.provider_profile
             
             # Build base query with filters
-            base_filters = {}
+            base_filters = {
+                'status': 'verified',
+                'is_available': True,
+                'expires_at__gt': timezone.now()
+            }
             
-            # Apply status filter (default to 'active' if not specified)
-            if filters and 'status' in filters:
-                base_filters['status'] = filters['status']
-            else:
-                base_filters['status'] = 'active'  # Use 'active' status for production
+            # Override with provided filters
+            if filters:
+                if 'status' in filters:
+                    base_filters['status'] = filters['status']
+                if 'is_available' in filters:
+                    base_filters['is_available'] = filters['is_available']
+                if 'expires_at__gt' in filters:
+                    base_filters['expires_at__gt'] = filters['expires_at__gt']
             
-            # Apply availability filter
-            if filters and 'is_available' in filters:
-                base_filters['is_available'] = filters['is_available']
-            
-            # Apply expiry filter
-            if filters and 'expires_at__gt' in filters:
-                base_filters['expires_at__gt'] = filters['expires_at__gt']
-            
-            # Base query with optimized database queries
+            # Base query
             leads = Lead.objects.filter(
                 **base_filters,
-                service_category__slug__in=profile.service_categories
-            ).select_related('service_category', 'client').prefetch_related(
-                'assignments__provider',
-                'assignments__provider__provider_profile'
-            )
+                service_category__id__in=profile.service_categories
+            ).select_related('service_category', 'client')
             
             # Apply geographical filter
-            leads = LeadFilteringService.apply_geographical_filter(leads, profile)
-            
-            # Apply additional quality filters
-            if filters:
-                leads = LeadFilteringService.apply_quality_filters(leads, filters)
+            if profile.service_areas:
+                service_area_filter = Q()
+                for area in profile.service_areas:
+                    service_area_filter |= (
+                        Q(location_suburb__icontains=area) |
+                        Q(location_city__icontains=area)
+                    )
+                leads = leads.filter(service_area_filter)
             
             # Exclude already assigned leads
             assigned_lead_ids = LeadAssignment.objects.filter(
@@ -689,15 +692,12 @@ class LeadFilteringService:
             
             leads = leads.exclude(id__in=assigned_lead_ids)
             
+            # Order by priority
+            leads = leads.order_by('-verification_score', '-created_at')
+            
             # Apply limit if specified
             if filters and 'limit' in filters:
                 leads = leads[:filters['limit']]
-            
-            # Order by priority
-            leads = leads.order_by(
-                '-verification_score',
-                '-created_at'
-            )
             
             return leads
             
