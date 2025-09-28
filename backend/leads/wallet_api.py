@@ -53,10 +53,15 @@ def available_leads(request):
         # Direct lead filtering (replacing broken LeadFilteringService)
         profile = request.user.provider_profile
         
+        # Convert service category slugs to IDs
+        from backend.leads.models import ServiceCategory
+        category_slugs = profile.service_categories if profile.service_categories else []
+        category_ids = ServiceCategory.objects.filter(slug__in=category_slugs).values_list('id', flat=True)
+        
         # Base query
         leads = Lead.objects.filter(
             status='verified',
-            service_category__id__in=profile.service_categories,
+            service_category__id__in=category_ids,
             is_available=True,
             expires_at__gt=timezone.now()
         ).select_related('service_category', 'client')

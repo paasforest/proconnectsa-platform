@@ -451,7 +451,7 @@ def available_leads_view(request):
         leads = LeadFilteringService.get_filtered_leads_for_provider(
             provider=request.user,
             filters={
-                'status': 'active',  # Match actual lead status
+                'status': 'verified',  # Match actual lead status
                 'is_available': True,
                 'expires_at__gt': timezone.now(),
                 'limit': 20
@@ -460,10 +460,7 @@ def available_leads_view(request):
         
         logger.info(f"ML filtering returned {leads.count()} leads for provider {request.user.id}")
         
-        # For new providers, return empty list to show clean dashboard
-        if not request.user.provider_profile or not hasattr(request.user.provider_profile, 'service_categories'):
-            return Response({'leads': []})
-        
+        # Serialize and return leads
         serializer = LeadSerializer(leads, many=True)
         return Response({'leads': serializer.data})
         

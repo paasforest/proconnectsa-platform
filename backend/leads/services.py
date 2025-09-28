@@ -669,10 +669,15 @@ class LeadFilteringService:
                 if 'expires_at__gt' in filters:
                     base_filters['expires_at__gt'] = filters['expires_at__gt']
             
+            # Convert service category slugs to IDs
+            from backend.leads.models import ServiceCategory
+            category_slugs = profile.service_categories if profile.service_categories else []
+            category_ids = ServiceCategory.objects.filter(slug__in=category_slugs).values_list('id', flat=True)
+            
             # Base query
             leads = Lead.objects.filter(
                 **base_filters,
-                service_category__id__in=profile.service_categories
+                service_category__id__in=category_ids
             ).select_related('service_category', 'client')
             
             # Apply geographical filter
