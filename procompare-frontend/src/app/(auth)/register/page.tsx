@@ -207,10 +207,11 @@ export default function RegisterPage() {
       const data = await response.json();
 
       if (response.ok) {
-        setSuccess('Registration successful! Redirecting to login...');
+        setSuccess('🎉 Registration successful! Your account has been created. Redirecting to login page...');
+        setError(''); // Clear any previous errors
         setTimeout(() => {
           router.push('/login');
-        }, 2000);
+        }, 3000); // Give more time to see the message
       } else {
         console.error('Registration error:', data);
         if (data.errors) {
@@ -788,8 +789,17 @@ export default function RegisterPage() {
           )}
 
           {success && (
-            <div className="mb-4 p-4 bg-green-50 border border-green-200 rounded-lg">
-              <p className="text-sm text-green-600">{success}</p>
+            <div className="mb-6 p-6 bg-green-50 border-2 border-green-200 rounded-lg shadow-md">
+              <div className="flex items-center">
+                <div className="flex-shrink-0">
+                  <svg className="h-6 w-6 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                </div>
+                <div className="ml-3">
+                  <p className="text-sm font-medium text-green-800">{success}</p>
+                </div>
+              </div>
             </div>
           )}
 
@@ -826,8 +836,14 @@ export default function RegisterPage() {
                   <button
                     type="submit"
                     disabled={loading}
-                    className="px-6 py-2 text-sm font-medium text-white bg-emerald-600 rounded-lg hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="px-6 py-2 text-sm font-medium text-white bg-emerald-600 rounded-lg hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
                   >
+                    {loading && (
+                      <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                    )}
                     {loading ? 'Creating Account...' : 'Create Account'}
                   </button>
                 )}
