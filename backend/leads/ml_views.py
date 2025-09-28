@@ -778,7 +778,7 @@ def purchase_lead_access_view(request, lead_id):
 
         # Step 4: Check user credits
         provider_profile = request.user.provider_profile
-        credit_cost = calculate_lead_credit_cost(lead)
+        credit_cost = calculate_lead_credit_cost(lead, request.user)
         
         if provider_profile.credit_balance < credit_cost:
             logger.error(f"💰 Insufficient credits: User has {provider_profile.credit_balance}, needs {credit_cost}")
@@ -1132,7 +1132,7 @@ def ml_model_performance_view(request):
 
 def validate_purchase_rules(user, lead):
     """
-    Validate all business rules for lead purchase
+    Validate all business rules for lead purchase including ML-based location control
     """
     logger.info(f"🔍 Validating purchase rules for user {user.id} and lead {lead.id}")
     
@@ -1156,7 +1156,40 @@ def validate_purchase_rules(user, lead):
                 }
             }
     
-    # Rule 2: Check if lead is still active
+    # Rule 2: ML-based location validation
+    if hasattr(user, 'provider_profile'):
+        from .ml_services import GeographicalMLService
+        geo_ml = GeographicalMLService()
+        
+        # Extract geographical features
+        geo_features = geo_ml.extract_geographical_features(lead, user)
+        
+        # Check if lead location matches provider's service areas
+        service_areas_lower = [area.lower() for area in user.provider_profile.service_areas or []]
+        lead_city_lower = lead.location_city.lower()
+        lead_suburb_lower = lead.location_suburb.lower()
+        
+        # Check if lead is in provider's service areas
+        city_match = lead_city_lower in service_areas_lower
+        suburb_match = lead_suburb_lower in service_areas_lower
+        province_match = geo_features.get('province_in_service_areas', 0) == 1
+        
+        logger.info(f"🌍 Location validation - Lead: {lead.location_city}, {lead.location_suburb}")
+        logger.info(f"🌍 Provider service areas: {user.provider_profile.service_areas}")
+        logger.info(f"🌍 City match: {city_match}, Suburb match: {suburb_match}, Province match: {province_match}")
+        
+        if not (city_match or suburb_match or province_match):
+            return {
+                'valid': False,
+                'reason': f'This lead is located in {lead.location_city}, {lead.location_suburb}. You can only purchase leads in your service areas: {", ".join(user.provider_profile.service_areas or [])}',
+                'code': 'LOCATION_MISMATCH',
+                'details': {
+                    'lead_location': f"{lead.location_city}, {lead.location_suburb}",
+                    'provider_service_areas': user.provider_profile.service_areas or []
+                }
+            }
+    
+    # Rule 3: Check if lead is still active
     if hasattr(lead, 'status') and lead.status in ['closed', 'expired']:
         return {
             'valid': False,
@@ -1164,7 +1197,7 @@ def validate_purchase_rules(user, lead):
             'code': 'LEAD_INACTIVE'
         }
     
-    # Rule 3: Check user account status
+    # Rule 4: Check user account status
     if not user.is_active:
         return {
             'valid': False,
@@ -1172,7 +1205,7 @@ def validate_purchase_rules(user, lead):
             'code': 'ACCOUNT_INACTIVE'
         }
     
-    # Rule 4: Check if user is a provider
+    # Rule 5: Check if user is a provider
     if user.user_type != 'provider':
         return {
             'valid': False,
@@ -1184,32 +1217,59 @@ def validate_purchase_rules(user, lead):
     return {'valid': True}
 
 
-def calculate_lead_credit_cost(lead):
+def calculate_lead_credit_cost(lead, provider=None):
     """
-    Calculate credit cost based on lead properties
+    Calculate credit cost using ML-based dynamic pricing
     """
-    base_cost = 1  # Base cost: 1 credit (R50)
-    
-    # Adjust based on budget range
-    budget_multipliers = {
-        'under_1000': 1.0,
-        '1000_5000': 1.0,
-        '5000_15000': 1.5,
-        '15000_50000': 2.0,
-        'over_50000': 2.5
-    }
-    
-    multiplier = budget_multipliers.get(lead.budget_range, 1.0)
-    
-    # Adjust based on urgency
-    if hasattr(lead, 'urgency'):
-        if lead.urgency == 'this_week':
-            multiplier *= 1.3
-        elif lead.urgency == 'this_month':
-            multiplier *= 1.1
-    
-    final_cost = int(base_cost * multiplier)
-    logger.info(f"💰 Credit cost calculation: base={base_cost}, multiplier={multiplier}, final={final_cost}")
-    
-    return final_cost
+    try:
+        from .ml_services import DynamicPricingMLService
+        pricing_service = DynamicPricingMLService()
+        
+        if provider:
+            # Use ML-based dynamic pricing
+            pricing_result = pricing_service.calculate_dynamic_lead_price(lead, provider)
+            final_cost = pricing_result['price']
+            logger.info(f"💰 ML Credit cost calculation: {pricing_result['reasoning']}")
+        else:
+            # Fallback to simple pricing
+            base_cost = 1  # Base cost: 1 credit (R50)
+            
+            # Adjust based on budget range
+            budget_multipliers = {
+                'under_1000': 1.0,
+                '1000_5000': 1.0,
+                '5000_15000': 1.5,
+                '15000_50000': 2.0,
+                'over_50000': 2.5
+            }
+            
+            multiplier = budget_multipliers.get(lead.budget_range, 1.0)
+            
+            # Adjust based on urgency
+            if hasattr(lead, 'urgency'):
+                if lead.urgency == 'this_week':
+                    multiplier *= 1.3
+                elif lead.urgency == 'this_month':
+                    multiplier *= 1.1
+            
+            final_cost = int(base_cost * multiplier)
+            logger.info(f"💰 Fallback credit cost calculation: base={base_cost}, multiplier={multiplier}, final={final_cost}")
+        
+        return final_cost
+        
+    except Exception as e:
+        logger.error(f"💰 ML pricing failed, using fallback: {str(e)}")
+        # Fallback to simple pricing
+        base_cost = 1
+        multiplier = 1.0
+        
+        if hasattr(lead, 'urgency'):
+            if lead.urgency == 'this_week':
+                multiplier *= 1.3
+            elif lead.urgency == 'this_month':
+                multiplier *= 1.1
+        
+        final_cost = int(base_cost * multiplier)
+        logger.info(f"💰 Error fallback credit cost: base={base_cost}, multiplier={multiplier}, final={final_cost}")
+        return final_cost
 
