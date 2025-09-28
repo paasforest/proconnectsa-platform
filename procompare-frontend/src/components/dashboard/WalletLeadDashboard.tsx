@@ -541,7 +541,6 @@ const WalletLeadDashboard = () => {
                     </div>
                   </div>
                   ))
-                  )}
                 </div>
             </div>
           </div>
