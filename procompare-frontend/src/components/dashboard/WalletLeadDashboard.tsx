@@ -18,14 +18,27 @@ const WalletLeadDashboard = () => {
       apiClient.setToken(token);
       const response = await apiClient.get('/api/leads/wallet/available/');
       
-      if (response.data && response.data.leads) {
-        setLeads(response.data.leads);
-        if (response.data.leads.length > 0) {
-          setSelectedLead(response.data.leads[0]);
-        }
+      console.log('🔍 API Response:', response); // Debug log
+      
+      // Handle different response structures
+      const leadsData = response.leads || response.data?.leads || [];
+      const walletData = response.wallet || response.data?.wallet || {};
+      
+      if (leadsData.length > 0) {
+        setLeads(leadsData);
+        setSelectedLead(leadsData[0]);
+        console.log('✅ Leads loaded:', leadsData.length); // Debug log
+      } else {
+        console.log('⚠️ No leads found in response'); // Debug log
+      }
+      
+      // Set credits from wallet data
+      if (walletData.credits !== undefined) {
+        setUserCredits(walletData.credits);
+        console.log('✅ Credits loaded from wallet:', walletData.credits); // Debug log
       }
     } catch (error) {
-      console.error('Error fetching leads:', error);
+      console.error('❌ Error fetching leads:', error);
     }
   }, [token]);
 
@@ -36,11 +49,14 @@ const WalletLeadDashboard = () => {
       apiClient.setToken(token);
       const response = await apiClient.get('/api/auth/stats/');
       
-      if (response.data && response.data.credits !== undefined) {
-        setUserCredits(response.data.credits);
-      }
+      console.log('🔍 Stats Response:', response); // Debug log
+      
+      // Handle different response structures for credits
+      const credits = response.credits || response.data?.credits || response.wallet?.credits || 0;
+      setUserCredits(credits);
+      console.log('✅ Credits loaded:', credits); // Debug log
     } catch (error) {
-      console.error('Error fetching user stats:', error);
+      console.error('❌ Error fetching user stats:', error);
     }
   }, [token]);
 
@@ -55,9 +71,13 @@ const WalletLeadDashboard = () => {
 
   const getUrgencyColor = (urgency) => {
     switch (urgency) {
-      case 'urgent': return 'bg-red-100 text-red-700 border-red-200';
-      case 'medium': return 'bg-yellow-100 text-yellow-700 border-yellow-200';
-      default: return 'bg-green-100 text-green-700 border-green-200';
+      case 'urgent': 
+      case 'high': 
+        return 'bg-red-100 text-red-700 border-red-200';
+      case 'medium': 
+        return 'bg-yellow-100 text-yellow-700 border-yellow-200';
+      default: 
+        return 'bg-green-100 text-green-700 border-green-200';
     }
   };
 
@@ -71,42 +91,53 @@ const WalletLeadDashboard = () => {
 
   const canPurchaseLead = (lead) => {
     return !purchasedLeads.has(lead.id) && 
-           userCredits >= (lead.credit_cost || 1) &&
+           userCredits >= (lead.credits || lead.credit_cost || 1) &&
            lead.status !== 'closed';
   };
 
   const purchaseLead = async (leadId) => {
     const lead = leads.find(l => l.id === leadId);
-    if (!canPurchaseLead(lead)) return;
-
-    try {
-      apiClient.setToken(token);
-      const response = await apiClient.post(`/api/leads/${leadId}/unlock/`);
-      
-      if (response.data && response.data.success) {
-        setPurchasedLeads(prev => new Set([...prev, leadId]));
-        setUserCredits(prev => prev - (lead.credit_cost || 1));
+    if (canPurchaseLead(lead)) {
+      try {
+        apiClient.setToken(token);
+        const response = await apiClient.post(`/api/leads/${leadId}/unlock/`);
         
-        // Update lead status
-        setLeads(prev => prev.map(l => 
-          l.id === leadId 
-            ? { ...l, status: 'unlocked' }
-            : l
-        ));
+        if (response.success || response.data?.success) {
+          setPurchasedLeads(prev => new Set([...prev, leadId]));
+          setUserCredits(prev => prev - (lead.credits || lead.credit_cost || 1));
+          
+          // Update lead status
+          setLeads(prev => prev.map(l => 
+            l.id === leadId 
+              ? { ...l, status: 'unlocked', isUnlocked: true }
+              : l
+          ));
+        }
+      } catch (error) {
+        console.error('Error purchasing lead:', error);
       }
-    } catch (error) {
-      console.error('Error purchasing lead:', error);
     }
   };
 
   const formatTimeAgo = (dateString) => {
-    const now = new Date();
-    const posted = new Date(dateString);
-    const diffInHours = Math.floor((now - posted) / (1000 * 60 * 60));
+    if (!dateString) return 'Recently posted';
     
-    if (diffInHours < 1) return 'Just posted';
-    if (diffInHours < 24) return `${diffInHours}h ago`;
-    return `${Math.floor(diffInHours / 24)}d ago`;
+    // Handle different time formats
+    if (typeof dateString === 'string' && dateString.includes('ago')) {
+      return dateString; // Already formatted
+    }
+    
+    try {
+      const now = new Date();
+      const posted = new Date(dateString);
+      const diffInHours = Math.floor((now - posted) / (1000 * 60 * 60));
+      
+      if (diffInHours < 1) return 'Just posted';
+      if (diffInHours < 24) return `${diffInHours}h ago`;
+      return `${Math.floor(diffInHours / 24)}d ago`;
+    } catch (error) {
+      return 'Recently posted';
+    }
   };
 
   if (loading) {
@@ -169,43 +200,43 @@ const WalletLeadDashboard = () => {
                   >
                     <div className="flex justify-between items-start mb-2">
                       <h3 className="font-semibold text-gray-900 text-sm line-clamp-2">
-                        {lead.title}
+                        {lead.service || lead.title || 'Service Request'}
                       </h3>
                       <div className="flex items-center space-x-1 ml-2">
-                        <span className={`px-2 py-1 rounded-full text-xs font-medium border ${getUrgencyColor(lead.urgency || 'low')}`}>
-                          {lead.urgency || 'low'}
+                        <span className={`px-2 py-1 rounded-full text-xs font-medium border ${getUrgencyColor(lead.urgency || 'medium')}`}>
+                          {lead.urgency || 'medium'}
                         </span>
                       </div>
                     </div>
                     
                     <p className="text-sm text-gray-600 line-clamp-2 mb-3">
-                      {lead.description}
+                      {lead.details || lead.masked_details || lead.description || 'Service details available after purchase'}
                     </p>
                     
                     <div className="space-y-2">
                       <div className="flex items-center text-xs text-gray-500">
                         <MapPin className="h-3 w-3 mr-1" />
-                        <span>{lead.location_suburb || lead.location_city}, {lead.location_city}</span>
+                        <span>{lead.masked_location || lead.location || 'Location hidden'}</span>
                       </div>
                       
                       <div className="flex items-center justify-between text-xs">
                         <div className="flex items-center text-green-600">
                           <DollarSign className="h-3 w-3 mr-1" />
-                          <span className="font-medium">{lead.budget_range || 'Budget not specified'}</span>
+                          <span className="font-medium">{lead.budget || lead.budget_range || 'Budget available'}</span>
                         </div>
                         <div className="flex items-center text-blue-600">
-                          <span className="font-medium">{lead.credit_cost || 1} credits</span>
+                          <span className="font-medium">{lead.credits || lead.credit_cost || 1} credits</span>
                         </div>
                       </div>
                       
                       <div className="flex items-center justify-between text-xs text-gray-500">
                         <div className="flex items-center">
                           <Clock className="h-3 w-3 mr-1" />
-                          <span>{formatTimeAgo(lead.created_at)}</span>
+                          <span>{formatTimeAgo(lead.timeAgo || lead.lastActivity || lead.created_at)}</span>
                         </div>
                         <div className="flex items-center">
                           <Users className="h-3 w-3 mr-1" />
-                          <span>{lead.service_category?.name || 'General'}</span>
+                          <span>{lead.responses_count || 0} responses</span>
                         </div>
                       </div>
                       
@@ -229,21 +260,21 @@ const WalletLeadDashboard = () => {
                   <div className="flex justify-between items-start mb-4">
                     <div>
                       <h2 className="text-xl font-bold text-gray-900 mb-2">
-                        {selectedLead.title}
+                        {selectedLead.service || selectedLead.title || 'Service Request'}
                       </h2>
                       <div className="flex items-center space-x-4 text-sm text-gray-600">
                         <span className="bg-blue-100 text-blue-700 px-2 py-1 rounded">
-                          {selectedLead.service_category?.name || 'General'}
+                          {selectedLead.category || 'General'}
                         </span>
                         <div className="flex items-center">
                           <Clock className="h-4 w-4 mr-1" />
-                          <span>{formatTimeAgo(selectedLead.created_at)}</span>
+                          <span>{formatTimeAgo(selectedLead.timeAgo || selectedLead.lastActivity || selectedLead.created_at)}</span>
                         </div>
                       </div>
                     </div>
                     <div className="flex items-center space-x-2">
-                      <span className={`px-3 py-1 rounded-full text-sm font-medium border ${getUrgencyColor(selectedLead.urgency || 'low')}`}>
-                        {selectedLead.urgency || 'low'} priority
+                      <span className={`px-3 py-1 rounded-full text-sm font-medium border ${getUrgencyColor(selectedLead.urgency || 'medium')}`}>
+                        {selectedLead.urgency || 'medium'} priority
                       </span>
                     </div>
                   </div>
@@ -257,7 +288,7 @@ const WalletLeadDashboard = () => {
                       Project Description
                     </h3>
                     <p className="text-gray-700 leading-relaxed">
-                      {selectedLead.description}
+                      {selectedLead.details || selectedLead.masked_details || selectedLead.description || 'Service details available after purchase'}
                     </p>
                   </div>
 
@@ -268,11 +299,11 @@ const WalletLeadDashboard = () => {
                       <div className="text-gray-700">
                         <div className="flex items-center mb-1">
                           <MapPin className="h-4 w-4 mr-2 text-gray-400" />
-                          <span>{selectedLead.location_suburb || selectedLead.location_city}, {selectedLead.location_city}</span>
+                          <span>{selectedLead.masked_location || selectedLead.location || 'Location hidden'}</span>
                         </div>
                         {purchasedLeads.has(selectedLead.id) ? (
                           <div className="text-sm text-green-600 mt-1">
-                            ✓ Exact address: {selectedLead.location_address || 'Address available after purchase'}
+                            ✓ Exact address: {selectedLead.location || 'Address available'}
                           </div>
                         ) : (
                           <div className="text-sm text-gray-500 flex items-center mt-1">
@@ -287,7 +318,7 @@ const WalletLeadDashboard = () => {
                       <h4 className="font-medium text-gray-900 mb-2">Budget Range</h4>
                       <div className="flex items-center text-green-600 font-semibold">
                         <DollarSign className="h-4 w-4 mr-1" />
-                        {selectedLead.budget_range || 'Budget not specified'}
+                        {selectedLead.budget || selectedLead.budget_range || 'Budget available'}
                       </div>
                     </div>
                   </div>
@@ -297,14 +328,14 @@ const WalletLeadDashboard = () => {
                       <h4 className="font-medium text-gray-900 mb-2">Timeline</h4>
                       <div className="flex items-center text-gray-700">
                         <Calendar className="h-4 w-4 mr-2 text-gray-400" />
-                        {selectedLead.hiring_timeline || 'Timeline not specified'}
+                        {selectedLead.timeline || 'Timeline not specified'}
                       </div>
                     </div>
                     
                     <div>
-                      <h4 className="font-medium text-gray-900 mb-2">Urgency</h4>
+                      <h4 className="font-medium text-gray-900 mb-2">Job Size</h4>
                       <div className="text-gray-700">
-                        {selectedLead.urgency || 'Not specified'}
+                        {selectedLead.jobSize || selectedLead.category || 'Standard'}
                       </div>
                     </div>
                   </div>
@@ -319,14 +350,14 @@ const WalletLeadDashboard = () => {
                             <User className="h-4 w-4 mr-2 text-blue-600" />
                             <span className="font-medium text-blue-900">
                               {purchasedLeads.has(selectedLead.id) 
-                                ? (selectedLead.contact_name || 'Client Name')
-                                : 'Client Name'
+                                ? (selectedLead.name || 'Client Name')
+                                : (selectedLead.masked_name || 'Client Name')
                               }
                             </span>
                           </div>
                           <div className="flex items-center mt-1 text-sm">
                             <Star className="h-3 w-3 mr-1 text-yellow-500 fill-current" />
-                            <span className="text-gray-600">4.5 rating</span>
+                            <span className="text-gray-600">{selectedLead.rating || 4.5} rating</span>
                             <span className="mx-2 text-gray-400">•</span>
                             <span className="text-gray-600">Verified client</span>
                           </div>
@@ -337,11 +368,11 @@ const WalletLeadDashboard = () => {
                         <div className="space-y-2 pt-2 border-t border-blue-200">
                           <div className="flex items-center text-green-600">
                             <Phone className="h-4 w-4 mr-2" />
-                            <span className="font-medium">{selectedLead.contact_phone || 'Phone available'}</span>
+                            <span className="font-medium">{selectedLead.phone || 'Phone available'}</span>
                           </div>
                           <div className="flex items-center text-green-600">
                             <Mail className="h-4 w-4 mr-2" />
-                            <span className="font-medium">{selectedLead.contact_email || 'Email available'}</span>
+                            <span className="font-medium">{selectedLead.email || 'Email available'}</span>
                           </div>
                         </div>
                       ) : (
@@ -368,6 +399,27 @@ const WalletLeadDashboard = () => {
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">
                   Lead Purchase
                 </h3>
+                
+                {/* Lead Status */}
+                <div className="mb-6">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm text-gray-600">Responses</span>
+                    <span className="font-medium text-gray-900">
+                      {selectedLead.responses_count || 0} responses
+                    </span>
+                  </div>
+                  <div className="w-full bg-gray-200 rounded-full h-2">
+                    <div 
+                      className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+                      style={{ 
+                        width: `${Math.min((selectedLead.responses_count || 0) * 10, 100)}%` 
+                      }}
+                    ></div>
+                  </div>
+                  <p className="text-xs text-gray-500 mt-1">
+                    Lead is still available
+                  </p>
+                </div>
 
                 {/* Credit Cost */}
                 <div className="bg-blue-50 rounded-lg p-4 mb-6">
@@ -375,7 +427,7 @@ const WalletLeadDashboard = () => {
                     <span className="font-medium text-blue-900">Lead Cost</span>
                     <div className="flex items-center text-blue-900">
                       <DollarSign className="h-5 w-5 mr-1" />
-                      <span className="text-2xl font-bold">{selectedLead.credit_cost || 1}</span>
+                      <span className="text-2xl font-bold">{selectedLead.credits || selectedLead.credit_cost || 1}</span>
                       <span className="text-sm ml-1">credits</span>
                     </div>
                   </div>
@@ -394,13 +446,13 @@ const WalletLeadDashboard = () => {
                         Contact details are now visible above
                       </p>
                     </div>
-                  ) : userCredits < (selectedLead.credit_cost || 1) ? (
+                  ) : userCredits < (selectedLead.credits || selectedLead.credit_cost || 1) ? (
                     <div className="space-y-3">
                       <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-center">
                         <AlertCircle className="h-6 w-6 text-red-600 mx-auto mb-2" />
                         <h4 className="font-medium text-red-900">Insufficient Credits</h4>
                         <p className="text-sm text-red-700 mt-1">
-                          You need {selectedLead.credit_cost || 1} credits
+                          You need {selectedLead.credits || selectedLead.credit_cost || 1} credits
                         </p>
                       </div>
                       <button className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 transition-colors font-semibold">
@@ -412,7 +464,7 @@ const WalletLeadDashboard = () => {
                       onClick={() => purchaseLead(selectedLead.id)}
                       className="w-full bg-green-600 text-white py-3 px-4 rounded-lg hover:bg-green-700 transition-colors font-semibold"
                     >
-                      Purchase Lead ({selectedLead.credit_cost || 1} Credits)
+                      Purchase Lead ({(selectedLead.credits || selectedLead.credit_cost || 1)} Credits)
                     </button>
                   )}
                 </div>
@@ -453,4 +505,4 @@ const WalletLeadDashboard = () => {
   );
 };
 
-export default WalletLeadDashboard;// Force deployment Sun Sep 28 11:09:32 AM SAST 2025
+export default WalletLeadDashboard;
