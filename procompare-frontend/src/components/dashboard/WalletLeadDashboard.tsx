@@ -100,18 +100,32 @@ const WalletLeadDashboard = () => {
     if (canPurchaseLead(lead)) {
       try {
         apiClient.setToken(token);
-        const response = await apiClient.post(`/api/leads/${leadId}/unlock/`);
+        const response = await apiClient.post(`/api/api/leads/${leadId}/unlock/`);
         
         if (response.success || response.data?.success) {
           setPurchasedLeads(prev => new Set([...prev, leadId]));
-          setUserCredits(prev => prev - (lead.credits || lead.credit_cost || 1));
+          
+          // Update credits from API response
+          if (response.remaining_credits !== undefined) {
+            setUserCredits(response.remaining_credits);
+          } else {
+            setUserCredits(prev => prev - (lead.credits || lead.credit_cost || 1));
+          }
           
           // Update lead status
           setLeads(prev => prev.map(l => 
             l.id === leadId 
-              ? { ...l, status: 'unlocked', isUnlocked: true }
+              ? { 
+                  ...l, 
+                  status: 'unlocked', 
+                  isUnlocked: true,
+                  // Update contact info if provided
+                  contact_info: response.contact_info || l.contact_info
+                }
               : l
           ));
+          
+          console.log('✅ Lead purchased successfully:', response);
         }
       } catch (error) {
         console.error('Error purchasing lead:', error);
@@ -306,7 +320,7 @@ const WalletLeadDashboard = () => {
                         </div>
                         {purchasedLeads.has(selectedLead.id) ? (
                           <div className="text-sm text-green-600 mt-1">
-                            ✓ Exact address: {selectedLead.location || 'Address available'}
+                            ✓ Exact address: {selectedLead.contact_info?.full_address || selectedLead.location || 'Address available'}
                           </div>
                         ) : (
                           <div className="text-sm text-gray-500 flex items-center mt-1">
@@ -371,12 +385,18 @@ const WalletLeadDashboard = () => {
                         <div className="space-y-2 pt-2 border-t border-blue-200">
                           <div className="flex items-center text-green-600">
                             <Phone className="h-4 w-4 mr-2" />
-                            <span className="font-medium">{selectedLead.phone || 'Phone available'}</span>
+                            <span className="font-medium">{selectedLead.contact_info?.phone || selectedLead.phone || 'Phone available'}</span>
                           </div>
                           <div className="flex items-center text-green-600">
                             <Mail className="h-4 w-4 mr-2" />
-                            <span className="font-medium">{selectedLead.email || 'Email available'}</span>
+                            <span className="font-medium">{selectedLead.contact_info?.email || selectedLead.email || 'Email available'}</span>
                           </div>
+                          {selectedLead.contact_info?.full_address && (
+                            <div className="flex items-center text-green-600">
+                              <MapPin className="h-4 w-4 mr-2" />
+                              <span className="font-medium">{selectedLead.contact_info.full_address}</span>
+                            </div>
+                          )}
                         </div>
                       ) : (
                         <div className="flex items-center justify-center py-3 text-gray-500 border-t border-blue-200">
