@@ -379,13 +379,25 @@ const WalletLeadDashboard = () => {
       
       // Show specific error message from API
       let errorMessage = 'Purchase failed. Please try again.';
+      let helpText = '';
+      
       if (error.response?.data?.error) {
         errorMessage = error.response.data.error;
       } else if (error.message) {
         errorMessage = error.message;
       }
       
-      showNotification(errorMessage, 'error');
+      // Include help text if available
+      if (error.response?.data?.help_text) {
+        helpText = error.response.data.help_text;
+      }
+      
+      // Show error message with help text
+      if (helpText) {
+        showNotification(`${errorMessage}\n\n${helpText}`, 'error');
+      } else {
+        showNotification(errorMessage, 'error');
+      }
     }
   };
 

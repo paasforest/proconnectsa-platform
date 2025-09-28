@@ -134,6 +134,7 @@ const LeadsPage = () => {
       
       // Show user-friendly error message
       let errorMessage = 'Failed to unlock lead. Please try again.';
+      let helpText = '';
       
       if (error.response?.data) {
         if (error.response.data.error) {
@@ -141,9 +142,19 @@ const LeadsPage = () => {
         } else if (error.response.data.message) {
           errorMessage = error.response.data.message;
         }
+        
+        // Include help text if available
+        if (error.response.data.help_text) {
+          helpText = error.response.data.help_text;
+        }
       }
       
-      alert(errorMessage);
+      // Show error message with help text
+      if (helpText) {
+        alert(`${errorMessage}\n\n${helpText}`);
+      } else {
+        alert(errorMessage);
+      }
     } finally {
       setUnlockingLead(null);
     }
