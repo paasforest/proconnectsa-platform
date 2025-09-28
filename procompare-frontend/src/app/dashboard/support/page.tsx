@@ -102,7 +102,7 @@ function ProviderSupportPage({ user }: { user: any }) {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
-                <Button variant="outline" className="w-full justify-start" onClick={() => router.push('/dashboard/leads')}>
+                <Button variant="outline" className="w-full justify-start" onClick={() => router.push('/dashboard/leads-dashboard')}>
                   View Available Leads
                 </Button>
                 <Button variant="outline" className="w-full justify-start" onClick={() => router.push('/dashboard/my-leads')}>

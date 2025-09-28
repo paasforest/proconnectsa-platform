@@ -346,7 +346,7 @@ const MyLeadsPage = () => {
           <User className="w-16 h-16 text-gray-300 mx-auto mb-4" />
           <h3 className="text-lg font-medium text-gray-900 mb-2">No leads found</h3>
           <p className="text-gray-600 mb-4">You haven't purchased any leads yet</p>
-          <a href="/dashboard/leads" className="text-blue-600 hover:text-blue-700 font-medium">
+          <a href="/dashboard/leads-dashboard" className="text-blue-600 hover:text-blue-700 font-medium">
             Browse available leads
           </a>
         </div>

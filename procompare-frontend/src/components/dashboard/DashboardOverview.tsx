@@ -209,7 +209,7 @@ const DashboardOverview = () => {
       title: 'Browse Leads',
       description: 'Find new opportunities',
       icon: Eye,
-      href: '/dashboard/leads',
+      href: '/dashboard/leads-dashboard',
       color: 'blue'
     },
     {
@@ -349,7 +349,7 @@ const DashboardOverview = () => {
               <div className="text-center py-8">
                 <Target className="w-12 h-12 text-gray-300 mx-auto mb-4" />
                 <p className="text-gray-500">No recent leads available</p>
-                <a href="/dashboard/leads" className="text-blue-600 hover:text-blue-700 text-sm font-medium">
+                <a href="/dashboard/leads-dashboard" className="text-blue-600 hover:text-blue-700 text-sm font-medium">
                   Browse all leads
                 </a>
               </div>

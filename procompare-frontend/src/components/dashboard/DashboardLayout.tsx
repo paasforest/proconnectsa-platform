@@ -60,7 +60,7 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
   // Navigation items
   const navigationItems = [
     { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard, current: pathname === '/dashboard' },
-    { name: 'Leads', href: '/dashboard/leads', icon: Target, current: pathname === '/dashboard/leads' },
+    { name: 'Leads', href: '/dashboard/leads-dashboard', icon: Target, current: pathname === '/dashboard/leads-dashboard' },
     { name: 'My Leads', href: '/dashboard/my-leads', icon: ShoppingCart, current: pathname === '/dashboard/my-leads' },
     { name: 'Chat', href: '/dashboard/chat', icon: MessageSquare, current: pathname === '/dashboard/chat' },
     { name: 'Wallet', href: '/dashboard/wallet', icon: Wallet, current: pathname === '/dashboard/wallet' },

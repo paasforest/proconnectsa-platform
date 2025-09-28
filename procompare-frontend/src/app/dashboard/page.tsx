@@ -214,7 +214,7 @@ function DashboardPage({ user }: { user: any }) {
                 </button>
                 
                 <button 
-                  onClick={() => router.push('/dashboard/leads')}
+                  onClick={() => router.push('/dashboard/leads-dashboard')}
                   className="w-full text-left p-3 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors"
                 >
                   <div className="font-medium text-blue-800">Browse Leads</div>
