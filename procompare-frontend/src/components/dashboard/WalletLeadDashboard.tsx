@@ -215,7 +215,8 @@ const WalletLeadDashboard = () => {
           budget_range: lead.budget || lead.budget_range || 'Budget available',
           urgency: lead.urgency || 'medium',
           timeline: lead.timeline || 'Flexible',
-          created_at: lead.timeAgo || lead.lastActivity || lead.created_at || new Date().toISOString(),
+          created_at: lead.created_at || new Date().toISOString(),
+          timeAgo: lead.timeAgo || lead.lastActivity || 'Recently posted',
           client_name: lead.masked_name || 'Client Name',
           credit_cost: lead.credits || lead.credit_cost || 1,
           max_providers: 5,
@@ -542,7 +543,7 @@ const WalletLeadDashboard = () => {
                       <div className="flex items-center justify-between text-xs text-gray-500">
                         <div className="flex items-center">
                           <Clock className="h-3 w-3 mr-1" />
-                          <span>{formatTimeAgo(lead.created_at)}</span>
+                          <span>{lead.timeAgo || 'Recently posted'}</span>
                         </div>
                         <div className="flex items-center">
                           <Users className="h-3 w-3 mr-1" />
@@ -585,7 +586,7 @@ const WalletLeadDashboard = () => {
                         </span>
                         <div className="flex items-center">
                           <Clock className="h-4 w-4 mr-1" />
-                          <span>{formatTimeAgo(selectedLead.created_at)}</span>
+                          <span>{selectedLead.timeAgo || 'Recently posted'}</span>
                         </div>
                       </div>
                     </div>
