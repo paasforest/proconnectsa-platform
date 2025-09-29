@@ -85,13 +85,20 @@ class LeadSerializer(serializers.ModelSerializer):
         """Get credit cost required to unlock this lead"""
         request = self.context.get('request')
         if not request or not request.user.is_authenticated:
-            return 1  # Default cost: 1 credit (R50)
+            # Use stored credit cost or calculate default
+            if hasattr(obj, 'credit_cost') and obj.credit_cost:
+                return int(round(obj.credit_cost / 50))  # Convert Rands to credits
+            return 4  # Default cost: 4 credits (R200)
         
         # If already unlocked, return 0
         if self.get_contact_details_unlocked(obj):
             return 0
         
-        # Calculate dynamic pricing
+        # Use stored credit cost if available, otherwise calculate dynamic pricing
+        if hasattr(obj, 'credit_cost') and obj.credit_cost:
+            return int(round(obj.credit_cost / 50))  # Convert Rands to credits
+        
+        # Calculate dynamic pricing as fallback
         try:
             from .ml_services import DynamicPricingMLService
             pricing_service = DynamicPricingMLService()
@@ -102,7 +109,7 @@ class LeadSerializer(serializers.ModelSerializer):
             import logging
             logger = logging.getLogger(__name__)
             logger.error(f"Dynamic pricing failed: {str(e)}")
-            return 1  # Fallback to 1 credit (R50)
+            return 4  # Fallback to 4 credits (R200)
     
     def validate_service_category_id(self, value):
         """Validate service category exists and is active"""

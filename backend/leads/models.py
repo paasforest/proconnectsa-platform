@@ -190,6 +190,15 @@ class Lead(models.Model):
     is_available = models.BooleanField(default=True, help_text="Whether this lead is still available for claiming")
     claimed_at = models.DateTimeField(null=True, blank=True, help_text="When the lead was fully claimed (all slots filled)")
     
+    # Dynamic Pricing
+    credit_cost = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        null=True,
+        blank=True,
+        help_text="Credit cost for this lead (R50 base + ML multipliers)"
+    )
+    
     # Timestamps
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

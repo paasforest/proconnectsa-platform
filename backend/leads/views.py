@@ -378,6 +378,20 @@ def create_public_lead(request):
         
         lead = Lead.objects.create(**validated_data)
         
+        # Calculate and store credit cost for this lead
+        try:
+            from .ml_services import DynamicPricingMLService
+            pricing_service = DynamicPricingMLService()
+            pricing_result = pricing_service.calculate_dynamic_lead_price(lead, None)
+            lead.credit_cost = pricing_result['price'] * 50  # Convert credits to Rands for storage
+            lead.save(update_fields=['credit_cost'])
+            logger.info(f"💰 Lead {lead.id} credit cost calculated: {pricing_result['price']} credits (R{pricing_result['price'] * 50})")
+        except Exception as e:
+            logger.error(f"💰 Failed to calculate credit cost for lead {lead.id}: {str(e)}")
+            # Set default credit cost
+            lead.credit_cost = 200  # Default R200 (4 credits)
+            lead.save(update_fields=['credit_cost'])
+        
         # Monitor lead creation
         from backend.leads.flow_monitor import flow_monitor
         flow_monitor.monitor_lead_creation(lead)
