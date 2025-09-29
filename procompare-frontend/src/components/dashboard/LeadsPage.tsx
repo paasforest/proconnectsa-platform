@@ -29,7 +29,7 @@ interface Lead {
   urgency?: 'low' | 'medium' | 'high';
   timeAgo: string;
   category: 'residential' | 'commercial' | 'premium';
-  jobSize?: 'small' | 'medium' | 'large';
+  jobSize?: 'small' | 'medium' | 'large' | 'residential' | 'commercial' | 'industrial' | 'retail' | 'other';
   leadScore?: number;
   estimatedValue?: string;
   timeline?: string;
@@ -493,7 +493,9 @@ const LeadsPage = () => {
                 )}
                 {lead.jobSize && (
                   <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                    {lead.jobSize.toUpperCase()}
+                    {lead.jobSize === 'small' || lead.jobSize === 'medium' || lead.jobSize === 'large' 
+                      ? lead.jobSize.toUpperCase() 
+                      : lead.jobSize.charAt(0).toUpperCase() + lead.jobSize.slice(1)}
                   </span>
                 )}
               </div>
@@ -586,3 +588,4 @@ export default LeadsPage;
 
 
 
+ 

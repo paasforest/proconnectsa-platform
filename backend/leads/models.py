@@ -118,6 +118,21 @@ class Lead(models.Model):
     preferred_contact_time = models.CharField(max_length=100, blank=True)
     additional_requirements = models.TextField(blank=True)
     
+    # Property Type
+    PROPERTY_TYPE_CHOICES = [
+        ('residential', 'Residential'),
+        ('commercial', 'Commercial/Office'),
+        ('industrial', 'Industrial'),
+        ('retail', 'Retail'),
+        ('other', 'Other'),
+    ]
+    property_type = models.CharField(
+        max_length=20, 
+        choices=PROPERTY_TYPE_CHOICES,
+        blank=True,
+        help_text="Type of property where work will be performed"
+    )
+    
     # Client Intent & Hiring Timeline
     HIRING_INTENT_CHOICES = [
         ('ready_to_hire', 'Ready to Hire'),

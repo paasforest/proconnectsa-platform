@@ -777,18 +777,19 @@ def purchase_lead_access_view(request, lead_id):
                 'details': validation_result.get('details', {})
             }, status=status.HTTP_400_BAD_REQUEST)
 
-        # Step 4: Check user credits
-        provider_profile = request.user.provider_profile
+        # Step 4: Check user credits (use Wallet system, not ProviderProfile)
+        from backend.users.models import Wallet
+        wallet, created = Wallet.objects.get_or_create(user=request.user)
         credit_cost = calculate_lead_credit_cost(lead, request.user)
         
-        if provider_profile.credit_balance < credit_cost:
-            logger.error(f"💰 Insufficient credits: User has {provider_profile.credit_balance}, needs {credit_cost}")
+        if wallet.credits < credit_cost:
+            logger.error(f"💰 Insufficient credits: User has {wallet.credits}, needs {credit_cost}")
             return Response({
-                'error': f'Not enough credits! This lead costs {credit_cost} credits but you only have {provider_profile.credit_balance} credits. Add more credits to your wallet to purchase this lead.',
+                'error': f'Not enough credits! This lead costs {credit_cost} credits but you only have {wallet.credits} credits. Add more credits to your wallet to purchase this lead.',
                 'code': 'INSUFFICIENT_CREDITS',
                 'required_credits': credit_cost,
-                'available_credits': provider_profile.credit_balance,
-                'help_text': f'You need {credit_cost - provider_profile.credit_balance} more credits. Go to your wallet to add credits or purchase a credit package.'
+                'available_credits': wallet.credits,
+                'help_text': f'You need {credit_cost - wallet.credits} more credits. Go to your wallet to add credits or purchase a credit package.'
             }, status=status.HTTP_402_PAYMENT_REQUIRED)
 
         # Step 5: Check lead availability
@@ -809,10 +810,20 @@ def purchase_lead_access_view(request, lead_id):
         from django.db import transaction
         
         with transaction.atomic():
-            # Deduct credits first
-            provider_profile.credit_balance -= credit_cost
-            provider_profile.save()
-            logger.info(f"💳 Deducted {credit_cost} credits from user {request.user.id}")
+            # Deduct credits from wallet
+            wallet.credits -= credit_cost
+            wallet.save()
+            logger.info(f"💳 Deducted {credit_cost} credits from wallet. New balance: {wallet.credits}")
+            
+            # Create wallet transaction record
+            from backend.users.models import WalletTransaction
+            WalletTransaction.objects.create(
+                wallet=wallet,
+                transaction_type='unlock',
+                amount=credit_cost,
+                description=f'Lead unlock: {lead.title}',
+                status='confirmed'
+            )
             
             # Create lead access
             lead_access = LeadAccess.objects.create(
@@ -832,7 +843,7 @@ def purchase_lead_access_view(request, lead_id):
             'message': 'Lead access purchased successfully',
             'lead_access_id': str(lead_access.id),
             'credits_deducted': credit_cost,
-            'remaining_credits': provider_profile.credit_balance,
+            'remaining_credits': wallet.credits,
             'unlocked_data': {
                 'client_name': f"{lead.client.first_name} {lead.client.last_name}",
                 'client_phone': getattr(lead.client, 'phone', 'Not provided'),

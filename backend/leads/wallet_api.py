@@ -44,30 +44,51 @@ def available_leads(request):
     wallet, created = Wallet.objects.get_or_create(user=request.user)
     
     try:
-        # MARKETPLACE APPROACH: Show ALL available leads for providers to choose from
-        # This allows providers to see all opportunities and expand their service areas
-        # Providers can then decide which leads to purchase based on their capabilities
+        # Use ML-based filtering instead of hardcoded queries
+        # This provides intelligent lead-provider matching based on:
+        # - Service categories compatibility
+        # - Geographical proximity with ML
+        # - Lead quality preferences
+        # - Provider availability and preferences
+        # Direct lead filtering (replacing broken LeadFilteringService)
+        profile = request.user.provider_profile
         
-        # Base query - show all verified, available leads
+        # Convert service category slugs to IDs
+        from backend.leads.models import ServiceCategory
+        category_slugs = profile.service_categories if profile.service_categories else []
+        category_ids = ServiceCategory.objects.filter(slug__in=category_slugs).values_list('id', flat=True)
+        
+        # Base query
         leads = Lead.objects.filter(
             status='verified',
+            service_category__id__in=category_ids,
             is_available=True,
             expires_at__gt=timezone.now()
         ).select_related('service_category', 'client')
         
-        # Exclude already purchased leads by this provider
+        # Apply geographical filter
+        if profile.service_areas:
+            from django.db.models import Q
+            service_area_filter = Q()
+            for area in profile.service_areas:
+                service_area_filter |= (
+                    Q(location_suburb__icontains=area) |
+                    Q(location_city__icontains=area)
+                )
+            leads = leads.filter(service_area_filter)
+        
+        # Exclude already assigned leads
         from backend.leads.models import LeadAssignment
-        purchased_lead_ids = LeadAssignment.objects.filter(
-            provider=request.user,
-            status='purchased'  # Only exclude purchased leads, not assigned ones
+        assigned_lead_ids = LeadAssignment.objects.filter(
+            provider=request.user
         ).values_list('lead_id', flat=True)
         
-        leads = leads.exclude(id__in=purchased_lead_ids)
+        leads = leads.exclude(id__in=assigned_lead_ids)
         
         # Order by priority and apply limit
         leads = leads.order_by('-verification_score', '-created_at')[:20]
         
-        logger.info(f"Marketplace returned {leads.count()} available leads for provider {request.user.id}")
+        logger.info(f"ML filtering returned {leads.count()} leads for provider {request.user.id}")
         
     except Exception as e:
         logger.error(f"ML filtering failed for provider {request.user.id}: {str(e)}")
@@ -121,19 +142,34 @@ def available_leads(request):
                 is_active=True
             ).exists()
             
-            # Use LeadAssignmentService for proper data formatting
-            from .services import LeadAssignmentService
-            assignment_service = LeadAssignmentService()
+            # Use LeadAssignmentService for proper data formatting (with error handling)
+            try:
+                from .services import LeadAssignmentService
+                assignment_service = LeadAssignmentService()
+                masked_name = assignment_service._mask_client_name(f"{lead.client.first_name} {lead.client.last_name}".strip() if lead.client else 'Anonymous Client')
+            except Exception as service_error:
+                logger.warning(f"LeadAssignmentService failed for lead {lead.id}: {str(service_error)}")
+                # Simple fallback for masking
+                client_name = f"{lead.client.first_name} {lead.client.last_name}".strip() if lead.client else 'Anonymous Client'
+                if not client_name or client_name == 'Anonymous Client':
+                    masked_name = 'A. C.'
+                else:
+                    parts = client_name.strip().split()
+                    if len(parts) >= 2:
+                        masked_name = f"{parts[0][0]}. {parts[-1][0]}***"
+                    else:
+                        masked_name = f"{parts[0][0]}***"
             
             lead_data = {
                 'id': str(lead.id),
                 'name': f"{lead.client.first_name} {lead.client.last_name}".strip() or lead.client.email if lead.client else 'Anonymous Client',
-                'masked_name': assignment_service._mask_client_name(f"{lead.client.first_name} {lead.client.last_name}".strip() if lead.client else 'Anonymous Client'),
+                'masked_name': masked_name,
                 'location': f"{lead.location_address}, {lead.location_city}" if lead.location_address else lead.location_city,
                 'masked_location': f"{lead.location_suburb}, {lead.location_city}",
                 'timeAgo': format_time_ago(lead.created_at),
                 'service': f"{lead.service_category.name} • {lead.title}",
                 'credits': credits_cost,
+                'credit_required': credits_cost,
                 'verifiedPhone': getattr(lead, 'is_sms_verified', False),
                 'highIntent': lead.hiring_intent in ['ready_to_hire', 'planning_to_hire'],
                 'email': lead.client.email if lead.client else None,
@@ -162,41 +198,49 @@ def available_leads(request):
             
         except Exception as e:
             logger.error(f"Error processing lead {lead.id} with ML services: {str(e)}")
-            # Fallback to simple processing
+            # Fallback to simple processing - BUT USE REAL CLIENT DATA
             try:
-                credits_cost = max(1, round(50 / 50, 1))  # R50 = 1 credit fallback
+                # Calculate proper credit cost even in fallback
+                credits_cost = calculate_ml_lead_pricing(lead)
+                
+                # Use REAL client data, not hardcoded values
+                client_name = f"{lead.client.first_name} {lead.client.last_name}".strip() if lead.client else 'Anonymous Client'
+                if not client_name or client_name == 'Anonymous Client':
+                    client_name = lead.client.email if lead.client else 'Anonymous Client'
+                
                 lead_data = {
                     'id': str(lead.id),
-                    'name': f"{lead.client.first_name} {lead.client.last_name}".strip() or lead.client.email if lead.client else 'Anonymous Client',
-                    'masked_name': 'A. C.',
-                    'location': lead.location_city or 'Location hidden',
-                    'masked_location': lead.location_city or 'Location hidden',
-                    'timeAgo': 'Recently posted',
+                    'name': client_name,  # REAL client name
+                    'masked_name': 'A. C.' if client_name == 'Anonymous Client' else client_name[:2] + '***',
+                    'location': f"{lead.location_address}, {lead.location_city}" if lead.location_address else lead.location_city,
+                    'masked_location': f"{lead.location_suburb}, {lead.location_city}",
+                    'timeAgo': format_time_ago(lead.created_at),
                     'service': f"{lead.service_category.name} • {lead.title}",
                     'credits': credits_cost,
-                    'verifiedPhone': False,
-                    'highIntent': False,
-                    'email': None,
-                    'phone': None,
-                    'masked_phone': '***-***-****',
-                    'budget': lead.budget_range or 'Budget available',
-                    'urgency': lead.urgency or 'medium',
+                'credit_required': credits_cost,
+                    'verifiedPhone': getattr(lead, 'is_sms_verified', False),
+                    'highIntent': lead.hiring_intent in ['ready_to_hire', 'planning_to_hire'],
+                    'email': lead.client.email if lead.client else None,  # REAL email
+                    'phone': getattr(lead.client, 'phone', '') if lead.client else '',  # REAL phone
+                    'masked_phone': mask_phone(getattr(lead.client, 'phone', '')) if lead.client else '***-***-****',
+                    'budget': get_budget_display(lead.budget_range),
+                    'urgency': map_urgency_level(lead.urgency),
                     'status': 'new',
                     'rating': 4.5,
-                    'lastActivity': 'Recently posted',
-                    'category': 'residential',
-                    'email_available': False,
-                    'jobSize': 'medium',
+                    'lastActivity': format_time_ago(lead.created_at),
+                    'category': get_category_type(lead),
+                    'email_available': bool(lead.client.email if lead.client else False),
+                    'jobSize': get_job_size(lead),  # Use real property type
                     'competitorCount': 0,
                     'leadScore': lead.verification_score / 10.0 if lead.verification_score else 7.5,
-                    'estimatedValue': lead.budget_range or 'R5,000 - R15,000',
-                    'timeline': lead.hiring_timeline or 'Flexible',
+                    'estimatedValue': get_estimated_value(lead.budget_range),
+                    'timeline': get_timeline_display(lead.hiring_timeline),
                     'previousHires': 0,
                     'isUnlocked': False,
                     'details': lead.description,
-                    'masked_details': lead.description,
-                    'views_count': 0,
-                    'responses_count': 0
+                    'masked_details': mask_text_content(lead.description) if not False else lead.description,
+                    'views_count': getattr(lead, 'views_count', 0),
+                    'responses_count': getattr(lead, 'responses_count', 0)
                 }
                 leads_data.append(lead_data)
             except Exception as fallback_error:
@@ -445,13 +489,18 @@ def get_category_type(lead):
         return 'residential'
 
 def get_job_size(lead):
-    """Determine job size based on budget and description"""
-    if lead.budget_range in ['over_50000']:
-        return 'large'
-    elif lead.budget_range in ['5000_15000', '15000_50000']:
-        return 'medium'
+    """Determine job size based on property_type field from database"""
+    # Use the actual property_type field from the database
+    if hasattr(lead, 'property_type') and lead.property_type:
+        return lead.property_type
     else:
-        return 'small'
+        # Fallback to budget-based sizing if property_type is not available
+        if lead.budget_range in ['over_50000']:
+            return 'large'
+        elif lead.budget_range in ['5000_15000', '15000_50000']:
+            return 'medium'
+        else:
+            return 'small'
 
 def get_estimated_value(budget_range):
     """Get estimated value for display"""

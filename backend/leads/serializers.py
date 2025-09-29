@@ -44,7 +44,7 @@ class LeadSerializer(serializers.ModelSerializer):
             'title', 'description', 'location_address', 'location_suburb',
             'location_city', 'latitude', 'longitude', 'budget_range',
             'budget_display', 'urgency', 'urgency_display',
-            'preferred_contact_time', 'additional_requirements',
+            'preferred_contact_time', 'additional_requirements', 'property_type',
             'hiring_intent', 'hiring_timeline', 'research_purpose',
             'verification_score', 'verification_notes', 'is_sms_verified',
             'status', 'assigned_providers_count', 'total_provider_contacts',
@@ -131,7 +131,7 @@ class LeadCreateSerializer(serializers.ModelSerializer):
             'location_address', 'location_suburb', 'location_city',
             'latitude', 'longitude', 'budget_range', 'urgency',
             'preferred_contact_time', 'additional_requirements',
-            'hiring_intent', 'hiring_timeline', 'research_purpose',
+            'property_type', 'hiring_intent', 'hiring_timeline', 'research_purpose',
             'source', 'utm_source', 'utm_medium', 'utm_campaign',
             'status', 'verification_score', 'verified_at'
         ]
