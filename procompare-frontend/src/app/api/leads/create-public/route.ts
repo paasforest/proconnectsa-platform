@@ -2,14 +2,10 @@ import { NextRequest, NextResponse } from 'next/server';
 
 export async function POST(request: NextRequest) {
   try {
-    console.log('🎯 API Route: Received POST request to create-public');
-    console.log('🔍 Request headers:', Object.fromEntries(request.headers.entries()));
 
     const leadData = await request.json();
-    console.log('📥 Received lead data:', JSON.stringify(leadData, null, 2));
 
     // Check if Django backend is running
-    console.log('🔍 Checking Django backend connectivity...');
     
         try {
         // Use production API URL for production, localhost for development
@@ -62,8 +58,6 @@ export async function POST(request: NextRequest) {
       body: JSON.stringify(leadData),
     });
 
-        console.log('🔗 Django response status:', backendResponse.status);
-        console.log('🔗 Django response headers:', Object.fromEntries(backendResponse.headers.entries()));
 
         if (!backendResponse.ok) {
           const errorText = await backendResponse.text();

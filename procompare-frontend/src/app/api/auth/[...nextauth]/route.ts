@@ -29,8 +29,6 @@ const handler = NextAuth({
 
           const data = await response.json()
           
-          console.log('Credentials provider - API response:', data)
-          
           if (data.success && data.user) {
             const user = {
               id: data.user.id.toString(),
@@ -40,7 +38,6 @@ const handler = NextAuth({
               subscriptionTier: data.user.subscription_tier || 'basic',
               accessToken: data.token,
             }
-            console.log('Credentials provider - returning user:', user)
             return user
           }
         } catch (error) {
@@ -77,20 +74,15 @@ const handler = NextAuth({
     async jwt({ token, user }) {
       // Persist the OAuth access_token and or the user id to the token right after signin
       if (user) {
-        console.log('JWT callback - user data:', user)
         token.accessToken = user.accessToken || ''
         token.userType = user.userType || 'client'
         token.subscriptionTier = user.subscriptionTier || 'basic'
-        console.log('JWT callback - token after update:', token)
       }
       
       // Ensure token has default values to prevent hydration mismatches
       token.accessToken = token.accessToken || ''
       token.userType = token.userType || 'client'
       token.subscriptionTier = token.subscriptionTier || 'basic'
-      
-      // Debug logging
-      console.log('JWT callback - final token:', token)
       
       return token
     },
@@ -105,9 +97,6 @@ const handler = NextAuth({
         session.user.name = session.user.email?.split('@')[0] || 'User'
       }
       
-      // Debug logging
-      console.log('Session callback - token:', token)
-      console.log('Session callback - session:', session)
       
       return session
     },

@@ -327,17 +327,11 @@ export default function LeadGenerationForm({ onComplete, onCancel, preselectedCa
       // Transform data to backend format
       const backendData = transformToBackendFormat(formData)
       
-      console.log('📤 Submitting lead (backend format):', JSON.stringify(backendData, null, 2))
-      console.log('🔍 Form data being sent:', JSON.stringify(formData, null, 2))
-      console.log('🔍 Raw form data keys:', Object.keys(formData))
-      console.log('🔍 Backend data keys:', Object.keys(backendData))
       
         // Submit directly to Django backend using API client
-        console.log('🌐 Making request to Django backend via API client')
         const { apiClient } = await import('@/lib/api-simple')
         const result = await apiClient.createPublicLead(backendData)
         
-        console.log('✅ Lead created successfully:', result)
         
         // Call the onComplete callback if provided
         if (onComplete) {

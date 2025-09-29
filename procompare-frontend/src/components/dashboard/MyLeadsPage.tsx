@@ -53,7 +53,6 @@ const MyLeadsPage = () => {
           const response = await apiClient.get('/api/leads/assignments/');
           setLeads(response.data?.leads || response.leads || []);
         } catch (apiError) {
-          console.log('API not available, using mock data');
           // For now, show mock data since API endpoint might not exist
           setLeads([
           {

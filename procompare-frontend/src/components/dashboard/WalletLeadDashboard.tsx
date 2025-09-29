@@ -194,8 +194,6 @@ const WalletLeadDashboard = () => {
       apiClient.setToken(token);
       const response = await apiClient.get('/api/leads/wallet/available/');
       
-      console.log('🔍 API Response:', response); // Debug log
-      
       // Handle different response structures
       const leadsData = response.leads || response.data?.leads || [];
       const walletData = response.wallet || response.data?.wallet || {};
@@ -267,12 +265,9 @@ const WalletLeadDashboard = () => {
       // Use wallet endpoint for consistent credit data
       const response = await apiClient.get('/api/wallet/');
       
-      console.log('🔍 Wallet Response:', response); // Debug log
-      
       // Get credits from wallet data consistently
       const credits = response.credits || response.data?.credits || 0;
       setUserCredits(credits);
-      console.log('✅ Credits loaded from wallet:', credits); // Debug log
     } catch (error) {
       console.error('❌ Error fetching wallet data:', error);
       // For new users or errors, start with 0 credits
@@ -334,14 +329,12 @@ const WalletLeadDashboard = () => {
     }
     
     try {
-      console.log('🔄 Sending purchase request to API...');
       apiClient.setToken(token);
       
       // All leads should be real API leads now, no sample data simulation
       
       // For real leads, use the actual API
       const response = await apiClient.post(`/api/leads/${leadId}/purchase/`);
-      console.log('📡 API Response:', response);
       
       if (response.success || response.data?.success) {
         setPurchasedLeads(prev => new Set([...prev, leadId]));

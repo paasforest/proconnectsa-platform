@@ -187,11 +187,9 @@ export default function RegisterPage() {
         
         // Get user type from response and redirect
         const userType = data.user?.user_type;
-        console.log('🔍 DEBUG - User type:', userType);
         
         // Route to appropriate dashboard based on user type
         const dashboardPath = redirectToDashboard(userType);
-        console.log('🔍 DEBUG - Redirecting to:', dashboardPath);
         window.location.replace(dashboardPath);
       } else {
         setError(data.message || 'Invalid email or password');

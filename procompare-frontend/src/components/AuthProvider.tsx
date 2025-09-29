@@ -29,18 +29,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     // Load user from localStorage on mount
-    console.log('🔍 DEBUG - AuthProvider: Loading user from localStorage');
     const savedUser = getUserFromStorage();
     const savedToken = getTokenFromStorage();
-    
-    console.log('🔍 DEBUG - AuthProvider: Saved user:', savedUser);
-    console.log('🔍 DEBUG - AuthProvider: Saved token:', savedToken);
     
     setUser(savedUser);
     setToken(savedToken);
     setIsLoading(false);
-    
-    console.log('🔍 DEBUG - AuthProvider: Loading complete');
   }, []);
 
   const logout = () => {
@@ -70,14 +64,9 @@ export function withAuth<P extends object>(
       if (!isLoading) {
         if (!user) {
           // Not logged in, redirect to login
-          console.log('🔍 DEBUG - No user found, redirecting to login');
           router.push('/login');
           return;
         }
-
-        console.log('🔍 DEBUG - User found in withAuth:', user);
-        console.log('🔍 DEBUG - Allowed user types:', allowedUserTypes);
-        console.log('🔍 DEBUG - User type:', user.user_type);
 
         if (allowedUserTypes && !allowedUserTypes.includes(user.user_type)) {
           // Wrong user type, redirect to appropriate dashboard
@@ -85,7 +74,6 @@ export function withAuth<P extends object>(
             : user.user_type === 'client' ? '/client'
             : (user.user_type === 'provider' || user.user_type === 'provider') ? '/provider-dashboard'
             : '/dashboard';
-          console.log('🔍 DEBUG - Wrong user type, redirecting to:', correctDashboard);
           router.push(correctDashboard);
           return;
         }

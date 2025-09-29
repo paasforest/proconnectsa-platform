@@ -110,23 +110,10 @@ export default function RequestQuotePage() {
         client_phone: data.contact_phone
       }
       
-      console.log('📤 Submitting lead data to API:', leadData)
-      console.log('📤 Required fields check:')
-      console.log('  - service_category_id:', leadData.service_category_id)
-      console.log('  - title:', leadData.title)
-      console.log('  - description:', leadData.description)
-      console.log('  - location_address:', leadData.location_address)
-      console.log('  - location_suburb:', leadData.location_suburb)
-      console.log('  - location_city:', leadData.location_city)
-      console.log('  - budget_range:', leadData.budget_range)
-      console.log('  - urgency:', leadData.urgency)
-      console.log('  - hiring_intent:', leadData.hiring_intent)
-      console.log('  - hiring_timeline:', leadData.hiring_timeline)
       
       // Submit to API using public endpoint
       const response = await apiClient.createPublicLead(leadData)
       
-      console.log('✅ Lead submitted successfully:', response)
       // Don't set formSubmitted here - let the form handle its own success state
       toast.success('🎉 Quote Request Submitted Successfully!', {
         description: 'We\'ll match you with the best providers and you\'ll receive quotes within 24 hours.',
