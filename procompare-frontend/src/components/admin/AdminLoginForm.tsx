@@ -43,11 +43,11 @@ export default function AdminLoginForm() {
         const session = await response.json();
         
         if (user?.userType === 'admin' && 
-            user?.email === 'admin@example.com') {
+            user?.email === 'admin@proconnectsa.co.za') {
           router.push('/admin/dashboard');
           router.refresh();
         } else {
-          setError('Access denied. Only admin@example.com can access the admin dashboard.');
+          setError('Access denied. Only admin@proconnectsa.co.za can access the admin dashboard.');
         }
       }
     } catch (error) {
