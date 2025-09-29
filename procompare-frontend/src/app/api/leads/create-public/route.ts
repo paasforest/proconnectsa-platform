@@ -12,10 +12,10 @@ export async function POST(request: NextRequest) {
     console.log('🔍 Checking Django backend connectivity...');
     
         try {
-        // Use external IP for production, localhost for development
+        // Use production API URL for production, localhost for development
         const backendUrl = process.env.NODE_ENV === 'production' 
-          ? 'http://128.140.123.48:8000' 
-          : 'http://localhost:5000';
+          ? 'https://api.proconnectsa.co.za' 
+          : 'http://localhost:8000';
           
           const healthCheck = await fetch(`${backendUrl}/health/`, {
             method: 'GET',
@@ -51,7 +51,7 @@ export async function POST(request: NextRequest) {
         // Forward to Django backend (environment-aware URL)
         console.log('📤 Forwarding to Django backend...');
         const backendUrl = process.env.NODE_ENV === 'production' 
-          ? 'http://128.140.123.48:8000' 
+          ? 'https://api.proconnectsa.co.za' 
           : 'http://localhost:8000';
     
     const backendResponse = await fetch(`${backendUrl}/api/leads/create-public/`, {

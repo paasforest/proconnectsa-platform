@@ -20,53 +20,41 @@ export interface LeadCreationData {
 
 export const createLead = async (data: LeadCreationData) => {
   try {
-    // Map budget_range to budget field for API compatibility
-    const budgetMap = {
-      'under_1000': 500,
-      '1000_5000': 3000,
-      '5000_15000': 10000,
-      '15000_50000': 32500,
-      'over_50000': 75000,
-      'no_budget': 5000,
-      '0_1000': 500,
-      '5000_20000': 12500,
-      '20000_plus': 50000
-    };
-
-    // Prepare data in Flask server format
+    // Import API client
+    const { apiClient } = await import('@/lib/api-simple');
+    
+    // Map data to Django backend format
     const payload = {
-      // Required Flask server fields
-      service_category: data.category || data.service_category || 'home-improvement',
-      service_type: data.title || data.name || data.service_name || 'General Service',
-      location: data.location || data.city || 'Cape Town',
-      urgency: data.urgency === 'medium' ? 'this_month' : (data.urgency || 'flexible'),
-      project_title: data.title || data.name || data.service_name || 'Service Request',
-      project_description: data.description || data.details || 'Service description',
-      budget_range: data.budget_range || 'R1,500 - R5,000',
-      contact_name: data.client_name || 'Anonymous Client',
-      contact_phone: data.client_phone || '+27123456789',
-      contact_email: data.client_email || 'client@example.com'
+      service_category_id: 1, // Default to cleaning
+      title: data.title || data.name || data.service_name || 'Service Request',
+      description: data.description || data.details || 'Service description',
+      location_address: data.location || data.city || 'Cape Town',
+      location_suburb: 'Suburb not specified',
+      location_city: data.location || data.city || 'Cape Town',
+      budget_range: data.budget_range || '1000_5000',
+      urgency: data.urgency || 'flexible',
+      preferred_contact_time: 'morning',
+      additional_requirements: '',
+      hiring_intent: 'ready_to_hire',
+      hiring_timeline: 'asap',
+      research_purpose: '',
+      source: 'website',
+      client_name: data.client_name || 'Anonymous Client',
+      client_email: data.client_email || 'client@example.com',
+      client_phone: data.client_phone || '+27123456789'
     };
 
     console.log('Sending lead creation request:', payload);
 
-    const response = await fetch('/api/leads/create-public/', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(payload)
-    });
-
-    const result = await response.json();
+    // Use API client to call Django backend directly
+    const result = await apiClient.createPublicLead(payload);
     
-    if (!response.ok) {
-      throw new Error(result.message || `HTTP error! status: ${response.status}`);
-    }
-
-    return result;
-  } catch (error) {
+    return { success: true, data: result };
+  } catch (error: any) {
     console.error('Lead creation error:', error);
-    throw error;
+    return { 
+      success: false, 
+      message: error.response?.data?.error || error.message || 'Failed to create lead' 
+    };
   }
 };

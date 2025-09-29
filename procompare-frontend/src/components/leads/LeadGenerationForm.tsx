@@ -191,20 +191,11 @@ export default function LeadGenerationForm({ onComplete, onCancel, preselectedCa
       console.log('🔍 Raw form data keys:', Object.keys(formData))
       console.log('🔍 Backend data keys:', Object.keys(backendData))
       
-        // Submit to Next.js API route (which proxies to Django backend)
-        console.log('🌐 Making request to /api/leads/create-public/')
-        const response = await fetch('/api/leads/create-public/', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(backendData)
-        })
+        // Submit directly to Django backend using API client
+        console.log('🌐 Making request to Django backend via API client')
+        const { apiClient } = await import('@/lib/api-simple')
+        const result = await apiClient.createPublicLead(backendData)
         
-        console.log('📡 Response received:', response.status, response.statusText)
-
-      if (response.ok) {
-        const result = await response.json()
         console.log('✅ Lead created successfully:', result)
         
         // Call the onComplete callback if provided
@@ -233,20 +224,20 @@ export default function LeadGenerationForm({ onComplete, onCancel, preselectedCa
           preferred_contact_method: '',
           marketing_consent: false
         })
-      } else {
-        const errorData = await response.json()
-        console.error('❌ Submission failed:', JSON.stringify(errorData, null, 2))
-        console.error('❌ Response status:', response.status)
-        console.error('❌ Response headers:', Object.fromEntries(response.headers.entries()))
-        throw new Error(`Submission failed: ${response.status} - ${errorData.error || errorData.message || errorData.detail || 'Unknown error'}`)
-      }
-    } catch (error) {
-      console.error('Submission error:', error)
-      console.error('Error details:', error.message)
+    } catch (error: any) {
+      console.error('❌ Submission error:', error)
+      console.error('❌ Error details:', error.response?.data || error.message)
       
-      // Show more specific error message
-      const errorMessage = error.message || 'Something went wrong. Please try again.'
-      alert(`Error: ${errorMessage}`)
+      let errorMessage = 'Failed to submit lead. Please try again.';
+      if (error.response?.data) {
+        if (error.response.data.error) {
+          errorMessage = error.response.data.error;
+        } else if (error.response.data.message) {
+          errorMessage = error.response.data.message;
+        }
+      }
+      
+      alert(`Submission failed: ${errorMessage}`);
     } finally {
       setIsSubmitting(false)
     }
