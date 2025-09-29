@@ -838,10 +838,10 @@ export default function LeadGenerationForm({ onComplete, onCancel, preselectedCa
             </div>
 
             <div className="text-sm text-gray-500">
-              Step {currentStep} of 3
+              Step {currentStep} of 4
             </div>
 
-            {currentStep < 3 ? (
+            {currentStep < 4 ? (
               <button
                 type="button"
                 onClick={nextStep}
