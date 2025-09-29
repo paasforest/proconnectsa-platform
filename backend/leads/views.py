@@ -1,6 +1,7 @@
 from rest_framework import generics, status, permissions
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from backend.users.api_key_auth import PublicAPIKeyAuthentication
+from backend.procompare.secure_auth import SecureAPIKeyAuthentication, PublicEndpointPermission
 from django.utils import timezone
 try:
     from ratelimit.decorators import ratelimit
@@ -321,15 +322,89 @@ def submit_quote(request, assignment_id):
 
 
 @api_view(['POST'])
-@permission_classes([AllowAny])
+@permission_classes([PublicEndpointPermission])
 @ratelimit(key='ip', rate='20/h', block=True)  # 20 lead creations per hour
 def create_public_lead(request):
-    """Create a lead without authentication (public endpoint)"""
+    """Create a lead with secure API key authentication (public endpoint)"""
     from django.contrib.auth import get_user_model
+    from django.core.exceptions import ValidationError
+    import re
+    
     User = get_user_model()
     
+    # Input validation and sanitization
+    try:
+        # Validate required fields
+        required_fields = ['title', 'description', 'service_category_id', 'location_city']
+        for field in required_fields:
+            if not request.data.get(field):
+                return Response({
+                    'error': 'Missing required field',
+                    'message': f'{field} is required'
+                }, status=status.HTTP_400_BAD_REQUEST)
+        
+        # Sanitize text inputs
+        def sanitize_text(text, max_length=1000):
+            if not text:
+                return text
+            # Remove potentially dangerous characters
+            text = re.sub(r'[<>"\']', '', str(text))
+            # Limit length
+            return text[:max_length] if len(text) > max_length else text
+        
+        # Validate and sanitize inputs
+        title = sanitize_text(request.data.get('title'), 200)
+        description = sanitize_text(request.data.get('description'), 1000)
+        location_city = sanitize_text(request.data.get('location_city'), 100)
+        location_suburb = sanitize_text(request.data.get('location_suburb', ''), 100)
+        location_address = sanitize_text(request.data.get('location_address', ''), 200)
+        
+        # Validate email format
+        client_email = request.data.get('client_email', '')
+        if client_email:
+            email_pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+            if not re.match(email_pattern, client_email):
+                return Response({
+                    'error': 'Invalid email format',
+                    'message': 'Please provide a valid email address'
+                }, status=status.HTTP_400_BAD_REQUEST)
+        
+        # Validate phone number format
+        client_phone = request.data.get('client_phone', '')
+        if client_phone:
+            phone_pattern = r'^[\+]?[0-9\s\-\(\)]{10,15}$'
+            if not re.match(phone_pattern, client_phone):
+                return Response({
+                    'error': 'Invalid phone format',
+                    'message': 'Please provide a valid phone number'
+                }, status=status.HTTP_400_BAD_REQUEST)
+        
+        # Validate budget range
+        budget_range = request.data.get('budget_range', '')
+        valid_budget_ranges = ['under_1000', '1000_5000', '5000_15000', '15000_50000', 'over_50000']
+        if budget_range and budget_range not in valid_budget_ranges:
+            return Response({
+                'error': 'Invalid budget range',
+                'message': 'Please select a valid budget range'
+            }, status=status.HTTP_400_BAD_REQUEST)
+        
+        # Validate urgency
+        urgency = request.data.get('urgency', '')
+        valid_urgencies = ['asap', 'this_week', 'this_month', 'flexible']
+        if urgency and urgency not in valid_urgencies:
+            return Response({
+                'error': 'Invalid urgency level',
+                'message': 'Please select a valid urgency level'
+            }, status=status.HTTP_400_BAD_REQUEST)
+        
+    except Exception as e:
+        return Response({
+            'error': 'Invalid request data',
+            'message': 'Request contains invalid or malformed data'
+        }, status=status.HTTP_400_BAD_REQUEST)
+    
     # Extract client contact details from request
-    client_name = request.data.get('client_name', 'Anonymous Client')
+    client_name = sanitize_text(request.data.get('client_name', 'Anonymous Client'), 100)
     client_email = request.data.get('client_email', f'client_{timezone.now().timestamp()}@temp.proconnectsa.co.za')
     client_phone = request.data.get('client_phone', '0000000000')
     

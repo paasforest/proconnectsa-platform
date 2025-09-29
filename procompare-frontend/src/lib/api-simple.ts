@@ -28,6 +28,11 @@ export class SimpleApiClient {
       (headers as any)['Authorization'] = `Token ${this.token}`
     }
 
+    // Add API key for public endpoints
+    if (endpoint.includes('/create-public/') || endpoint.includes('/leads/create-public/')) {
+      (headers as any)['X-API-Key'] = 'proconnectsa_lead_creation_2024'
+    }
+
     const url = `${this.baseURL}${endpoint}`
     
     try {
