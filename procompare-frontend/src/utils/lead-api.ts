@@ -39,9 +39,9 @@ export const createLead = async (data: LeadCreationData) => {
       hiring_timeline: 'asap',
       research_purpose: '',
       source: 'website',
-      client_name: data.client_name || 'Anonymous Client',
-      client_email: data.client_email || 'client@example.com',
-      client_phone: data.client_phone || '+27123456789'
+      client_name: data.client_name || data.contact_name || 'Anonymous Client',
+      client_email: data.client_email || data.contact_email || 'client@example.com',
+      client_phone: data.client_phone || data.contact_phone || '+27123456789'
     };
 
     console.log('Sending lead creation request:', payload);
