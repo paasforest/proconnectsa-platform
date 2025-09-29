@@ -1236,28 +1236,37 @@ def calculate_lead_credit_cost(lead, provider=None):
             final_cost = pricing_result['price']
             logger.info(f"💰 ML Credit cost calculation: {pricing_result['reasoning']}")
         else:
-            # Fallback to simple pricing
-            base_cost = 1  # Base cost: 1 credit (R50)
+            # Fallback to simple pricing - REVENUE OPTIMIZED
+            base_cost = 4  # Base cost: 4 credits (R200) - REALISTIC BASE PRICE
             
-            # Adjust based on budget range
+            # Adjust based on budget range - AGGRESSIVE PRICING
             budget_multipliers = {
                 'under_1000': 1.0,
-                '1000_5000': 1.0,
-                '5000_15000': 1.5,
-                '15000_50000': 2.0,
-                'over_50000': 2.5
+                '1000_5000': 1.5,
+                '5000_15000': 2.0,
+                '15000_50000': 3.0,
+                'over_50000': 4.0
             }
             
             multiplier = budget_multipliers.get(lead.budget_range, 1.0)
             
-            # Adjust based on urgency
+            # Adjust based on urgency - AGGRESSIVE PRICING
             if hasattr(lead, 'urgency'):
-                if lead.urgency == 'this_week':
-                    multiplier *= 1.3
+                if lead.urgency == 'urgent':
+                    multiplier *= 3.0  # Urgent premium
+                elif lead.urgency == 'this_week':
+                    multiplier *= 2.0  # This week premium
                 elif lead.urgency == 'this_month':
-                    multiplier *= 1.1
+                    multiplier *= 1.5  # This month premium
             
-            final_cost = int(base_cost * multiplier)
+            # Adjust based on hiring intent - AGGRESSIVE PRICING
+            if hasattr(lead, 'hiring_intent'):
+                if lead.hiring_intent == 'ready_to_hire':
+                    multiplier += 2.0  # Ready to hire premium
+                elif lead.hiring_intent == 'planning_to_hire':
+                    multiplier += 1.0  # Planning premium
+            
+            final_cost = min(int(base_cost * multiplier), 20)  # Max 20 credits = R1000
             logger.info(f"💰 Fallback credit cost calculation: base={base_cost}, multiplier={multiplier}, final={final_cost}")
         
         return final_cost

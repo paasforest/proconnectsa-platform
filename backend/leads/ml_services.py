@@ -545,70 +545,120 @@ class DynamicPricingMLService:
     
     def calculate_dynamic_lead_price(self, lead, provider):
         """Calculate dynamic lead price with ML fallback"""
+        logger.info(f"🔍 DynamicPricingMLService: use_ml={self.use_ml}, lead_urgency={lead.urgency}, lead_budget={lead.budget_range}")
+        
         if not self.use_ml:
+            logger.info("🔍 Using simple pricing (ML disabled)")
             return self._calculate_simple_price(lead, provider)
         
         try:
             # ML pricing returns credits directly
+            logger.info("🔍 Attempting ML pricing...")
             credits = self.calculate_optimal_credit_cost(lead, provider)
-            return {
+            result = {
                 'price': credits,
                 'reasoning': f"ML pricing: {credits} credits based on lead characteristics",
                 'base_price': 50,
                 'multiplier': credits
             }
+            logger.info(f"🔍 ML pricing result: {result}")
+            return result
         except Exception as e:
             logger.warning(f"ML pricing failed, using fallback: {str(e)}")
             return self._calculate_simple_price(lead, provider)
     
     def _calculate_simple_price(self, lead, provider):
-        """Fast fallback pricing calculation - REALISTIC CREDIT PRICING"""
-        # Base pricing: 1 credit (R50 = 1 credit)
-        base_credits = 1  # 1 credit = R50
+        """Fast fallback pricing calculation - REALISTIC REVENUE-OPTIMIZED PRICING"""
+        # Base pricing: 4 credits (R200) - REALISTIC BASE PRICE
+        base_credits = 4  # 4 credits = R200 (realistic base price)
         
         multiplier = 1.0
+        logger.info(f"🔍 Simple pricing: base_credits={base_credits}, initial_multiplier={multiplier}")
         
-        # Urgency multipliers (based on lead urgency field)
+        # Urgency multipliers (based on lead urgency field) - AGGRESSIVE PRICING
         if lead.urgency == 'urgent':
-            multiplier = 2.0  # 2 credits = R100
+            multiplier = 3.0  # 12 credits = R600 (urgent premium)
+            logger.info(f"🔍 Urgent lead: multiplier={multiplier}")
         elif lead.urgency == 'this_week':
-            multiplier = 1.5  # 1.5 credits = R75
+            multiplier = 2.0  # 8 credits = R400 (this week premium)
+            logger.info(f"🔍 This week lead: multiplier={multiplier}")
         elif lead.urgency == 'this_month':
-            multiplier = 1.2  # 1.2 credits = R60
+            multiplier = 1.5  # 6 credits = R300 (this month premium)
+            logger.info(f"🔍 This month lead: multiplier={multiplier}")
         else:  # flexible
-            multiplier = 1.0  # 1 credit = R50
+            multiplier = 1.0  # 4 credits = R200 (base price)
+            logger.info(f"🔍 Flexible lead: multiplier={multiplier}")
         
-        # Quality multipliers (verification score)
+        # Quality multipliers (verification score) - HIGHER PREMIUMS
         if lead.verification_score > 80:
-            multiplier += 0.5  # +0.5 credits = +R25
+            multiplier += 1.0  # +1.0 credits = +R50 (high quality premium)
+            logger.info(f"🔍 High quality lead: +1.0, multiplier={multiplier}")
         elif lead.verification_score > 60:
-            multiplier += 0.2  # +0.2 credits = +R10
+            multiplier += 0.5  # +0.5 credits = +R25 (medium quality premium)
+            logger.info(f"🔍 Medium quality lead: +0.5, multiplier={multiplier}")
         
-        # Budget multipliers (higher budget = higher credit cost)
+        # Budget multipliers (higher budget = MUCH higher credit cost) - AGGRESSIVE PRICING
         if hasattr(lead, 'budget_range'):
             if 'over_50000' in str(lead.budget_range):
-                multiplier += 0.8  # +0.8 credits = +R40
+                multiplier += 3.0  # +3.0 credits = +R150 (high budget premium)
+                logger.info(f"🔍 High budget lead: +3.0, multiplier={multiplier}")
             elif '15000_50000' in str(lead.budget_range):
-                multiplier += 0.5  # +0.5 credits = +R25
+                multiplier += 2.0  # +2.0 credits = +R100 (medium-high budget premium)
+                logger.info(f"🔍 Medium-high budget lead: +2.0, multiplier={multiplier}")
             elif '5000_15000' in str(lead.budget_range):
-                multiplier += 0.2  # +0.2 credits = +R10
+                multiplier += 1.0  # +1.0 credits = +R50 (medium budget premium)
+                logger.info(f"🔍 Medium budget lead: +1.0, multiplier={multiplier}")
         
-        # High intent multiplier (ready to hire = more valuable)
+        # High intent multiplier (ready to hire = MUCH more valuable) - AGGRESSIVE PRICING
         if hasattr(lead, 'hiring_intent'):
             if lead.hiring_intent == 'ready_to_hire':
-                multiplier += 0.5  # +0.5 credits = +R25
+                multiplier += 2.0  # +2.0 credits = +R100 (ready to hire premium)
+                logger.info(f"🔍 Ready to hire: +2.0, multiplier={multiplier}")
             elif lead.hiring_intent == 'planning_to_hire':
-                multiplier += 0.2  # +0.2 credits = +R10
+                multiplier += 1.0  # +1.0 credits = +R50 (planning premium)
+                logger.info(f"🔍 Planning to hire: +1.0, multiplier={multiplier}")
         
-        # Cap the maximum price to be reasonable (max 3 credits = R150)
-        total_credits = min(int(base_credits * multiplier), 3)  # Max 3 credits = R150
+        # Service category multipliers (different services have different values)
+        if hasattr(lead, 'service_category'):
+            service_multipliers = {
+                'cleaning': 1.0,      # Base multiplier
+                'electrical': 1.5,    # Electrical is more valuable
+                'plumbing': 1.3,      # Plumbing is valuable
+                'hvac': 1.4,          # HVAC is valuable
+                'carpentry': 1.2,     # Carpentry is moderately valuable
+                'painting': 1.1,      # Painting is slightly more valuable
+                'roofing': 1.6,       # Roofing is very valuable
+                'flooring': 1.3,      # Flooring is valuable
+                'landscaping': 1.1,   # Landscaping is slightly more valuable
+                'moving': 1.2,        # Moving is moderately valuable
+                'appliance-repair': 1.3,  # Appliance repair is valuable
+                'handyman': 1.1,      # Handyman is slightly more valuable
+                'pool-maintenance': 1.4,  # Pool maintenance is valuable
+                'security': 1.5,      # Security is valuable
+                'it-support': 1.3,    # IT support is valuable
+                'web-design': 1.2,    # Web design is moderately valuable
+                'marketing': 1.1,     # Marketing is slightly more valuable
+                'accounting': 1.2,    # Accounting is moderately valuable
+                'legal': 1.8,         # Legal is very valuable
+                'consulting': 1.4,    # Consulting is valuable
+                'other': 1.0          # Other services base multiplier
+            }
+            service_multiplier = service_multipliers.get(lead.service_category.slug, 1.0)
+            multiplier *= service_multiplier
+            logger.info(f"🔍 Service category {lead.service_category.slug}: ×{service_multiplier}, multiplier={multiplier}")
         
-        return {
+        # Cap the maximum price to be reasonable but PROFITABLE (max 20 credits = R1000)
+        total_credits = min(int(base_credits * multiplier), 20)  # Max 20 credits = R1000
+        logger.info(f"🔍 Final calculation: {base_credits} × {multiplier:.1f} = {total_credits} credits")
+        
+        result = {
             'price': total_credits,
-            'reasoning': f"Base: {base_credits} credit × {multiplier:.1f} (urgency: {lead.urgency}, quality: {lead.verification_score})",
+            'reasoning': f"Base: {base_credits} credits × {multiplier:.1f} (urgency: {lead.urgency}, quality: {lead.verification_score}, budget: {lead.budget_range})",
             'base_price': 50,  # R50 per credit
             'multiplier': multiplier
         }
+        logger.info(f"🔍 Simple pricing result: {result}")
+        return result
 
     def calculate_optimal_credit_cost(self, lead, provider):
         """Calculate optimal credit cost using ML - REASONABLE PRICING"""

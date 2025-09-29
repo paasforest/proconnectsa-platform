@@ -346,36 +346,69 @@ def calculate_ml_lead_pricing(lead):
         logger = logging.getLogger(__name__)
         logger.warning(f"ML pricing failed, using fallback: {str(e)}")
         
-        # Simple fallback pricing - realistic credit pricing
-        base_credits = 1  # 1 credit = R50 base
+        # Simple fallback pricing - REVENUE OPTIMIZED PRICING
+        base_credits = 4  # 4 credits = R200 base - REALISTIC BASE PRICE
         
-        # Service category multiplier (all categories same base price)
-        category_multiplier = 1.0
+        # Service category multiplier (different services have different values)
+        service_multipliers = {
+            'cleaning': 1.0,      # Base multiplier
+            'electrical': 1.5,    # Electrical is more valuable
+            'plumbing': 1.3,      # Plumbing is valuable
+            'hvac': 1.4,          # HVAC is valuable
+            'carpentry': 1.2,     # Carpentry is moderately valuable
+            'painting': 1.1,      # Painting is slightly more valuable
+            'roofing': 1.6,       # Roofing is very valuable
+            'flooring': 1.3,      # Flooring is valuable
+            'landscaping': 1.1,   # Landscaping is slightly more valuable
+            'moving': 1.2,        # Moving is moderately valuable
+            'appliance-repair': 1.3,  # Appliance repair is valuable
+            'handyman': 1.1,      # Handyman is slightly more valuable
+            'pool-maintenance': 1.4,  # Pool maintenance is valuable
+            'security': 1.5,      # Security is valuable
+            'it-support': 1.3,    # IT support is valuable
+            'web-design': 1.2,    # Web design is moderately valuable
+            'marketing': 1.1,     # Marketing is slightly more valuable
+            'accounting': 1.2,    # Accounting is moderately valuable
+            'legal': 1.8,         # Legal is very valuable
+            'consulting': 1.4,    # Consulting is valuable
+            'other': 1.0          # Other services base multiplier
+        }
+        category_multiplier = service_multipliers.get(lead.service_category.slug, 1.0)
         
-        # Urgency multiplier (based on lead urgency)
+        # Urgency multiplier (based on lead urgency) - AGGRESSIVE PRICING
         urgency_multipliers = {
-            'urgent': 2.0,        # 2 credits = R100
-            'this_week': 1.5,     # 1.5 credits = R75
-            'this_month': 1.2,    # 1.2 credits = R60
-            'flexible': 1.0       # 1 credit = R50
+            'urgent': 3.0,        # 12 credits = R600 (urgent premium)
+            'this_week': 2.0,     # 8 credits = R400 (this week premium)
+            'this_month': 1.5,    # 6 credits = R300 (this month premium)
+            'flexible': 1.0       # 4 credits = R200 (base price)
         }
         
         urgency_multiplier = urgency_multipliers.get(lead.urgency, 1.0)
         
-        # Quality multiplier (verification score impact)
-        verification_multiplier = 1 + (lead.verification_score / 100.0)  # More impactful
+        # Quality multiplier (verification score impact) - HIGHER PREMIUMS
+        verification_multiplier = 1 + (lead.verification_score / 50.0)  # More impactful
         
-        # High intent multiplier
-        high_intent_multiplier = 1.5 if lead.hiring_intent == 'ready_to_hire' else 1.2 if lead.hiring_intent == 'planning_to_hire' else 1.0
+        # High intent multiplier - AGGRESSIVE PRICING
+        high_intent_multiplier = 2.0 if lead.hiring_intent == 'ready_to_hire' else 1.5 if lead.hiring_intent == 'planning_to_hire' else 1.0
         
-        # Calculate final credits
-        credits = base_credits * category_multiplier * urgency_multiplier * verification_multiplier * high_intent_multiplier
+        # Budget multiplier - AGGRESSIVE PRICING
+        budget_multipliers = {
+            'under_1000': 1.0,
+            '1000_5000': 1.5,
+            '5000_15000': 2.0,
+            '15000_50000': 3.0,
+            'over_50000': 4.0
+        }
+        budget_multiplier = budget_multipliers.get(lead.budget_range, 1.0)
+        
+        # Calculate final credits - REVENUE OPTIMIZED
+        credits = base_credits * category_multiplier * urgency_multiplier * verification_multiplier * high_intent_multiplier * budget_multiplier
         
         # Round to nearest 0.5 credits
         credits = round(credits * 2) / 2
         
-        # Ensure reasonable bounds (1-3 credits = R50-R150)
-        return max(1, min(int(credits), 3))
+        # Ensure reasonable bounds (4-20 credits = R200-R1000) - PROFITABLE PRICING
+        return max(4, min(int(credits), 20))
 
 
 def format_time_ago(created_at):
