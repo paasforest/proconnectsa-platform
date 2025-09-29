@@ -23,6 +23,7 @@ interface LeadFormData {
   preferred_start_date: string
   special_requirements: string
   additional_requirements: string
+  property_type: string
   
   // Step 3: Intent & Timeline (ML Critical)
   hiring_intent: string
@@ -196,6 +197,14 @@ const HIRING_TIMELINE_OPTIONS = [
   { label: 'Flexible', value: 'flexible' }
 ]
 
+const PROPERTY_TYPE_OPTIONS = [
+  { label: 'Residential', value: 'residential' },
+  { label: 'Commercial/Office', value: 'commercial' },
+  { label: 'Industrial', value: 'industrial' },
+  { label: 'Retail', value: 'retail' },
+  { label: 'Other', value: 'other' }
+]
+
 interface LeadGenerationFormProps {
   onComplete?: (data: any) => void
   onCancel?: () => void
@@ -221,6 +230,7 @@ export default function LeadGenerationForm({ onComplete, onCancel, preselectedCa
     preferred_start_date: '',
     special_requirements: '',
     additional_requirements: '',
+    property_type: '',
     hiring_intent: '',
     hiring_timeline: '',
     research_purpose: '',
@@ -240,9 +250,9 @@ export default function LeadGenerationForm({ onComplete, onCancel, preselectedCa
   const isStepValid = useMemo(() => {
     switch (currentStep) {
       case 1:
-        return formData.service_category && formData.service_type && formData.location && formData.urgency
+        return formData.service_category && formData.service_type && formData.location_address && formData.location_suburb && formData.location_city && formData.urgency
       case 2:
-        return formData.project_title && formData.project_description && formData.budget_range
+        return formData.project_title && formData.project_description && formData.budget_range && formData.property_type
       case 3:
         return formData.hiring_intent && formData.hiring_timeline
       case 4:
@@ -276,9 +286,9 @@ export default function LeadGenerationForm({ onComplete, onCancel, preselectedCa
       description: data.project_description,
       
       // Location information (ML Critical)
-      location_address: data.location_address || data.location,
-      location_suburb: data.location_suburb || 'Suburb not specified',
-      location_city: data.location_city || data.location,
+      location_address: data.location_address,
+      location_suburb: data.location_suburb,
+      location_city: data.location_city,
       latitude: data.latitude,
       longitude: data.longitude,
       
@@ -294,6 +304,7 @@ export default function LeadGenerationForm({ onComplete, onCancel, preselectedCa
       
       // Additional requirements
       additional_requirements: data.additional_requirements || data.special_requirements || '',
+      property_type: data.property_type,
       
       // Client contact information
       client_name: data.contact_name,
@@ -354,6 +365,7 @@ export default function LeadGenerationForm({ onComplete, onCancel, preselectedCa
           preferred_start_date: '',
           special_requirements: '',
           additional_requirements: '',
+          property_type: '',
           hiring_intent: '',
           hiring_timeline: '',
           research_purpose: '',
@@ -504,19 +516,55 @@ export default function LeadGenerationForm({ onComplete, onCancel, preselectedCa
                 </div>
               )}
 
-              {/* Location */}
+              {/* Location Details */}
               <div className="mb-8">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-700 mb-4">
                   <MapPin className="inline w-4 h-4 mr-1" />
-                  Location
+                  Location Details
                 </label>
-                <input
-                  type="text"
-                  placeholder="Enter your suburb or postal code"
-                  value={formData.location}
-                  onChange={(e) => updateFormData('location', e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
-                />
+                
+                {/* Address */}
+                <div className="mb-4">
+                  <label className="block text-sm font-medium text-gray-600 mb-2">Street Address *</label>
+                  <input
+                    type="text"
+                    placeholder="e.g., 123 Main Street, Building A"
+                    value={formData.location_address}
+                    onChange={(e) => updateFormData('location_address', e.target.value)}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                  />
+                </div>
+
+                {/* Suburb and City */}
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-600 mb-2">Suburb *</label>
+                    <input
+                      type="text"
+                      placeholder="e.g., Sandton, Sea Point"
+                      value={formData.location_suburb}
+                      onChange={(e) => updateFormData('location_suburb', e.target.value)}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-600 mb-2">City *</label>
+                    <select
+                      value={formData.location_city}
+                      onChange={(e) => updateFormData('location_city', e.target.value)}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                    >
+                      <option value="">Select City</option>
+                      <option value="Cape Town">Cape Town</option>
+                      <option value="Johannesburg">Johannesburg</option>
+                      <option value="Durban">Durban</option>
+                      <option value="Pretoria">Pretoria</option>
+                      <option value="Port Elizabeth">Port Elizabeth</option>
+                      <option value="Bloemfontein">Bloemfontein</option>
+                      <option value="Other">Other</option>
+                    </select>
+                  </div>
+                </div>
               </div>
 
               {/* Urgency */}
@@ -616,6 +664,27 @@ export default function LeadGenerationForm({ onComplete, onCancel, preselectedCa
                   onChange={(e) => updateFormData('preferred_start_date', e.target.value)}
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
                 />
+              </div>
+
+              {/* Property Type */}
+              <div className="mb-6">
+                <label className="block text-sm font-medium text-gray-700 mb-4">Property Type *</label>
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                  {PROPERTY_TYPE_OPTIONS.map((option) => (
+                    <button
+                      key={option.value}
+                      type="button"
+                      onClick={() => updateFormData('property_type', option.value)}
+                      className={`p-3 rounded-lg border text-center font-medium transition-all ${
+                        formData.property_type === option.value
+                          ? 'border-emerald-600 bg-emerald-50 text-emerald-700'
+                          : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
+                      }`}
+                    >
+                      {option.label}
+                    </button>
+                  ))}
+                </div>
               </div>
 
               {/* Special Requirements */}
