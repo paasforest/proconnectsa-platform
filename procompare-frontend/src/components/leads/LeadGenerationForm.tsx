@@ -166,7 +166,6 @@ const SERVICE_CATEGORIES = {
     types: ['Custom Service', 'Specialized Service', 'Unique Request', 'One-off Service', 'Emergency Service', 'Specialized Repair']
   }
 }
-}
 
 const BUDGET_RANGES = [
   { label: 'Under R1,000', value: 'under_1000' },
