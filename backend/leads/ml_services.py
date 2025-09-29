@@ -661,50 +661,62 @@ class DynamicPricingMLService:
         return result
 
     def calculate_optimal_credit_cost(self, lead, provider):
-        """Calculate optimal credit cost using ML - REASONABLE PRICING"""
+        """Calculate optimal credit cost using ML - STARTUP-FRIENDLY PRICING"""
         try:
-            # Start with base cost of 1 credit (R50)
-            base_cost = 1.0
+            # Start with base cost of 2 credits (R100) - STARTUP-FRIENDLY BASE
+            base_cost = 2.0
             
-            # Urgency multiplier (most important factor)
+            # Urgency multiplier (moderate pricing for startup)
             if lead.urgency == 'urgent':
-                base_cost += 1.0  # +1 credit for urgent
+                base_cost = 3.0  # 3 credits = R150 (urgent premium)
             elif lead.urgency == 'this_week':
-                base_cost += 0.5  # +0.5 credit for this week
+                base_cost = 2.5  # 2.5 credits = R125 (this week premium)
             elif lead.urgency == 'this_month':
-                base_cost += 0.2  # +0.2 credit for this month
+                base_cost = 2.2  # 2.2 credits = R110 (this month premium)
+            else:  # flexible
+                base_cost = 2.0  # 2 credits = R100 (base price)
             
-            # Quality multiplier (verification score)
+            # Quality multiplier (verification score) - MODERATE PREMIUMS
             if lead.verification_score > 80:
-                base_cost += 0.5  # +0.5 credit for high quality
+                base_cost += 0.5  # +0.5 credits = +R25 (high quality premium)
             elif lead.verification_score > 60:
-                base_cost += 0.2  # +0.2 credit for medium quality
+                base_cost += 0.2  # +0.2 credits = +R10 (medium quality premium)
             
-            # Budget multiplier (higher budget = slightly more expensive)
-            if lead.budget_range in ['15000_50000', 'over_50000']:
-                base_cost += 0.5  # +0.5 credit for high budget
+            # Budget multiplier (higher budget = slightly more expensive) - MODERATE PRICING
+            if lead.budget_range == 'over_50000':
+                base_cost += 1.0  # +1 credit = +R50 (high budget premium)
+            elif lead.budget_range == '15000_50000':
+                base_cost += 0.5  # +0.5 credits = +R25 (medium-high budget premium)
             elif lead.budget_range == '5000_15000':
-                base_cost += 0.2  # +0.2 credit for medium budget
+                base_cost += 0.2  # +0.2 credits = +R10 (medium budget premium)
             
-            # Service category multiplier (cleaning = base, electrical = more)
+            # High intent multiplier (ready to hire = more valuable) - MODERATE PRICING
+            if hasattr(lead, 'hiring_intent'):
+                if lead.hiring_intent == 'ready_to_hire':
+                    base_cost += 0.5  # +0.5 credits = +R25 (ready to hire premium)
+                elif lead.hiring_intent == 'planning_to_hire':
+                    base_cost += 0.2  # +0.2 credits = +R10 (planning premium)
+            
+            # Service category multiplier (different services have different values) - MODERATE PRICING
             service_multiplier = self._get_service_multiplier(lead.service_category.slug)
             base_cost *= service_multiplier
             
-            # Provider tier discount
-            if provider.provider_profile.subscription_tier == 'enterprise':
-                base_cost *= 0.8
-            elif provider.provider_profile.subscription_tier == 'pro':
-                base_cost *= 0.9
+            # Provider tier discount (generous discounts for startup)
+            if provider and hasattr(provider, 'provider_profile'):
+                if provider.provider_profile.subscription_tier == 'enterprise':
+                    base_cost *= 0.8  # 20% discount for enterprise
+                elif provider.provider_profile.subscription_tier == 'pro':
+                    base_cost *= 0.9  # 10% discount for pro
             
-            # Clamp to reasonable range: 1-3 credits (R50-R150)
-            final_cost = max(1, min(3, int(round(base_cost))))
+            # Clamp to startup-friendly range: 1-5 credits (R50-R250)
+            final_cost = max(1, min(5, int(round(base_cost))))
             
-            logger.info(f"💰 ML Pricing: base=1, final={final_cost} credits (urgency={lead.urgency}, quality={lead.verification_score}, budget={lead.budget_range})")
+            logger.info(f"💰 ML Pricing: base=2, final={final_cost} credits (urgency={lead.urgency}, quality={lead.verification_score}, budget={lead.budget_range}, service={lead.service_category.slug})")
             return final_cost
             
         except Exception as e:
             logger.error(f"Error calculating optimal pricing: {str(e)}")
-            return 1
+            return 2  # Fallback to 2 credits (R100)
     
     def _get_budget_value(self, budget_range):
         mapping = {
@@ -744,21 +756,29 @@ class DynamicPricingMLService:
         return mapping.get(tier, 1)
     
     def _get_service_multiplier(self, category_slug):
-        """Get pricing multiplier based on service category"""
+        """Get pricing multiplier based on service category - STARTUP-FRIENDLY"""
         multipliers = {
-            'building': 2.5,      # Building work: 2.5x (expensive)
-            'renovation': 2.0,    # Renovation: 2x
-            'plumbing': 1.5,      # Plumbing: 1.5x
-            'electrical': 1.5,    # Electrical: 1.5x
-            'handyman': 1.2,      # Handyman: 1.2x
             'cleaning': 1.0,      # Cleaning: 1x (base)
-            'landscaping': 1.3,   # Landscaping: 1.3x
-            'painting': 1.1,      # Painting: 1.1x
-            'automotive': 1.2,    # Automotive: 1.2x
-            'pool-services': 1.4, # Pool services: 1.4x
-            'photography': 1.0,   # Photography: 1x
-            'entertainment': 0.8, # Entertainment: 0.8x (cheaper)
-            'health-wellness': 1.1, # Health & wellness: 1.1x
+            'electrical': 1.3,    # Electrical: 1.3x (moderate premium)
+            'plumbing': 1.2,      # Plumbing: 1.2x (moderate premium)
+            'hvac': 1.3,          # HVAC: 1.3x (moderate premium)
+            'carpentry': 1.1,     # Carpentry: 1.1x (slight premium)
+            'painting': 1.0,      # Painting: 1x (base)
+            'roofing': 1.4,       # Roofing: 1.4x (moderate premium)
+            'flooring': 1.2,      # Flooring: 1.2x (moderate premium)
+            'landscaping': 1.0,   # Landscaping: 1x (base)
+            'moving': 1.1,        # Moving: 1.1x (slight premium)
+            'appliance-repair': 1.2,  # Appliance repair: 1.2x (moderate premium)
+            'handyman': 1.0,      # Handyman: 1x (base)
+            'pool-maintenance': 1.2,  # Pool maintenance: 1.2x (moderate premium)
+            'security': 1.3,      # Security: 1.3x (moderate premium)
+            'it-support': 1.2,    # IT support: 1.2x (moderate premium)
+            'web-design': 1.1,    # Web design: 1.1x (slight premium)
+            'marketing': 1.0,     # Marketing: 1x (base)
+            'accounting': 1.1,    # Accounting: 1.1x (slight premium)
+            'legal': 1.5,         # Legal: 1.5x (moderate premium)
+            'consulting': 1.2,    # Consulting: 1.2x (moderate premium)
+            'other': 1.0          # Other: 1x (base)
         }
         return multipliers.get(category_slug, 1.0)
     
