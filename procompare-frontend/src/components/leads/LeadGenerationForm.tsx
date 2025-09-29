@@ -3,12 +3,17 @@
 import { useState, useCallback, useMemo } from 'react'
 import { ChevronRight, ChevronLeft, MapPin, Calendar, DollarSign, Phone, Mail, CheckCircle, Star, Shield, Users } from 'lucide-react'
 
-// Lead form data structure - Compatible with backend
+// Lead form data structure - Compatible with ML services
 interface LeadFormData {
   // Step 1: Service & Location
   service_category: string
   service_type: string
   location: string
+  location_address: string
+  location_suburb: string
+  location_city: string
+  latitude: number | null
+  longitude: number | null
   urgency: string
   
   // Step 2: Project Details & Budget
@@ -17,8 +22,14 @@ interface LeadFormData {
   budget_range: string
   preferred_start_date: string
   special_requirements: string
+  additional_requirements: string
   
-  // Step 3: Contact & Preferences
+  // Step 3: Intent & Timeline (ML Critical)
+  hiring_intent: string
+  hiring_timeline: string
+  research_purpose: string
+  
+  // Step 4: Contact & Preferences
   contact_name: string
   contact_phone: string
   contact_email: string
@@ -26,55 +37,164 @@ interface LeadFormData {
   marketing_consent: boolean
 }
 
-// Service categories with backend mapping
+// Service categories with correct backend mapping
 const SERVICE_CATEGORIES = {
-  'home-improvement': {
-    name: 'Home Improvement',
-    icon: '🏠',
-    backendId: 1, // Map to actual backend category ID
-    types: ['Plumbing', 'Electrical', 'Painting', 'Flooring', 'Roofing', 'Kitchen Renovation', 'Bathroom Renovation', 'Garden Landscaping']
-  },
   'cleaning': {
     name: 'Cleaning Services', 
     icon: '🧹',
-    backendId: 2,
+    backendId: 1, // Correct backend ID
     types: ['House Cleaning', 'Carpet Cleaning', 'Window Cleaning', 'Deep Cleaning', 'Move-in/out Cleaning', 'Office Cleaning']
   },
-  'automotive': {
-    name: 'Automotive',
-    icon: '🚗', 
+  'plumbing': {
+    name: 'Plumbing Services',
+    icon: '🔧',
+    backendId: 2,
+    types: ['Pipe Repair', 'Drain Cleaning', 'Toilet Repair', 'Water Heater', 'Leak Detection', 'Bathroom Installation']
+  },
+  'electrical': {
+    name: 'Electrical Services',
+    icon: '⚡',
     backendId: 3,
-    types: ['Car Repair', 'Car Wash', 'Towing', 'Mobile Mechanic', 'Car Inspection', 'Tire Service']
+    types: ['Wiring', 'Outlet Installation', 'Light Fixtures', 'Electrical Panel', 'Generator Installation', 'Smart Home Setup']
   },
-  'wellness': {
-    name: 'Wellness & Beauty',
-    icon: '💄',
+  'hvac': {
+    name: 'HVAC Services',
+    icon: '🌡️',
     backendId: 4,
-    types: ['Personal Trainer', 'Massage Therapy', 'Hair Styling', 'Makeup Artist', 'Nutrition Counseling', 'Spa Services']
+    types: ['AC Repair', 'Heating Repair', 'Duct Cleaning', 'Installation', 'Maintenance', 'Thermostat Setup']
   },
-  'business': {
-    name: 'Business Services',
-    icon: '💼',
+  'carpentry': {
+    name: 'Carpentry Services',
+    icon: '🔨',
     backendId: 5,
-    types: ['Legal Advice', 'Accounting', 'Marketing', 'Web Design', 'Photography', 'Event Planning']
+    types: ['Furniture Repair', 'Cabinet Installation', 'Door Repair', 'Window Installation', 'Custom Woodwork', 'Deck Building']
   },
-  'tutoring': {
-    name: 'Tutoring & Training',
-    icon: '📚',
+  'painting': {
+    name: 'Painting Services',
+    icon: '🎨',
     backendId: 6,
-    types: ['Academic Tutoring', 'Music Lessons', 'Language Learning', 'Driving Lessons', 'Computer Training', 'Fitness Training']
+    types: ['Interior Painting', 'Exterior Painting', 'Wallpaper Removal', 'Color Consultation', 'Touch-ups', 'Priming']
+  },
+  'roofing': {
+    name: 'Roofing Services',
+    icon: '🏠',
+    backendId: 7,
+    types: ['Roof Repair', 'Roof Replacement', 'Gutter Cleaning', 'Leak Repair', 'Roof Inspection', 'Shingle Installation']
+  },
+  'flooring': {
+    name: 'Flooring Services',
+    icon: '🏠',
+    backendId: 8,
+    types: ['Tile Installation', 'Carpet Installation', 'Hardwood Flooring', 'Laminate Flooring', 'Floor Repair', 'Floor Sanding']
+  },
+  'landscaping': {
+    name: 'Landscaping Services',
+    icon: '🌱',
+    backendId: 9,
+    types: ['Garden Design', 'Lawn Care', 'Tree Trimming', 'Hedge Cutting', 'Irrigation', 'Paving']
+  },
+  'moving': {
+    name: 'Moving Services',
+    icon: '📦',
+    backendId: 10,
+    types: ['Local Moving', 'Long Distance Moving', 'Packing Services', 'Storage', 'Furniture Assembly', 'Office Relocation']
+  },
+  'appliance-repair': {
+    name: 'Appliance Repair',
+    icon: '🔧',
+    backendId: 11,
+    types: ['Refrigerator Repair', 'Washing Machine Repair', 'Dishwasher Repair', 'Oven Repair', 'Microwave Repair', 'Dryer Repair']
+  },
+  'handyman': {
+    name: 'Handyman Services',
+    icon: '🔨',
+    backendId: 12,
+    types: ['General Repairs', 'Assembly', 'Mounting', 'Hanging', 'Minor Renovations', 'Maintenance']
+  },
+  'pool-maintenance': {
+    name: 'Pool Maintenance',
+    icon: '🏊',
+    backendId: 13,
+    types: ['Pool Cleaning', 'Chemical Balancing', 'Equipment Repair', 'Pool Opening', 'Pool Closing', 'Water Testing']
+  },
+  'security': {
+    name: 'Security Services',
+    icon: '🔒',
+    backendId: 14,
+    types: ['Alarm Installation', 'CCTV Setup', 'Access Control', 'Security Consultation', 'Monitoring', 'Emergency Response']
+  },
+  'it-support': {
+    name: 'IT Support',
+    icon: '💻',
+    backendId: 15,
+    types: ['Computer Repair', 'Network Setup', 'Software Installation', 'Data Recovery', 'Virus Removal', 'Tech Support']
+  },
+  'web-design': {
+    name: 'Web Design',
+    icon: '🌐',
+    backendId: 16,
+    types: ['Website Design', 'E-commerce', 'Mobile Apps', 'SEO', 'Maintenance', 'Hosting']
+  },
+  'marketing': {
+    name: 'Marketing Services',
+    icon: '📈',
+    backendId: 17,
+    types: ['Digital Marketing', 'Social Media', 'Content Creation', 'Advertising', 'Branding', 'Analytics']
+  },
+  'accounting': {
+    name: 'Accounting Services',
+    icon: '📊',
+    backendId: 18,
+    types: ['Bookkeeping', 'Tax Preparation', 'Financial Planning', 'Payroll', 'Auditing', 'Consulting']
+  },
+  'legal': {
+    name: 'Legal Services',
+    icon: '⚖️',
+    backendId: 19,
+    types: ['Legal Consultation', 'Document Review', 'Contract Drafting', 'Litigation', 'Compliance', 'Notary']
+  },
+  'consulting': {
+    name: 'Consulting Services',
+    icon: '💼',
+    backendId: 20,
+    types: ['Business Consulting', 'Management Consulting', 'Strategy Consulting', 'Operations Consulting', 'Financial Consulting', 'HR Consulting']
+  },
+  'other': {
+    name: 'Other Services',
+    icon: '🔧',
+    backendId: 21,
+    types: ['Custom Service', 'Specialized Service', 'Unique Request', 'One-off Service', 'Emergency Service', 'Specialized Repair']
   }
+}
 }
 
 const BUDGET_RANGES = [
-  'Under R500', 'R500 - R1,500', 'R1,500 - R5,000', 'R5,000 - R15,000', 'R15,000 - R50,000', 'Over R50,000'
+  { label: 'Under R1,000', value: 'under_1000' },
+  { label: 'R1,000 - R5,000', value: '1000_5000' },
+  { label: 'R5,000 - R15,000', value: '5000_15000' },
+  { label: 'R15,000 - R50,000', value: '15000_50000' },
+  { label: 'Over R50,000', value: 'over_50000' }
 ]
 
 const URGENCY_OPTIONS = [
-  { value: 'urgent', label: 'ASAP (Within 24 hours)', color: 'bg-red-500' },
-  { value: 'this-week', label: 'This week', color: 'bg-amber-500' },
-  { value: 'this-month', label: 'Within a month', color: 'bg-emerald-500' },
-  { value: 'flexible', label: "I'm flexible", color: 'bg-blue-500' }
+  { label: 'Urgent (ASAP)', value: 'urgent' },
+  { label: 'This Week', value: 'this_week' },
+  { label: 'This Month', value: 'this_month' },
+  { label: 'Flexible', value: 'flexible' }
+]
+
+const HIRING_INTENT_OPTIONS = [
+  { label: 'Ready to Hire', value: 'ready_to_hire' },
+  { label: 'Planning to Hire', value: 'planning_to_hire' },
+  { label: 'Comparing Quotes', value: 'comparing_quotes' },
+  { label: 'Just Researching', value: 'researching' }
+]
+
+const HIRING_TIMELINE_OPTIONS = [
+  { label: 'ASAP', value: 'asap' },
+  { label: 'This Month', value: 'this_month' },
+  { label: 'Next Month', value: 'next_month' },
+  { label: 'Flexible', value: 'flexible' }
 ]
 
 interface LeadGenerationFormProps {
@@ -90,12 +210,21 @@ export default function LeadGenerationForm({ onComplete, onCancel, preselectedCa
     service_category: preselectedCategory || '',
     service_type: '',
     location: '',
+    location_address: '',
+    location_suburb: '',
+    location_city: '',
+    latitude: null,
+    longitude: null,
     urgency: '',
     project_title: '',
     project_description: '',
     budget_range: '',
     preferred_start_date: '',
     special_requirements: '',
+    additional_requirements: '',
+    hiring_intent: '',
+    hiring_timeline: '',
+    research_purpose: '',
     contact_name: '',
     contact_phone: '',
     contact_email: '',
@@ -116,6 +245,8 @@ export default function LeadGenerationForm({ onComplete, onCancel, preselectedCa
       case 2:
         return formData.project_title && formData.project_description && formData.budget_range
       case 3:
+        return formData.hiring_intent && formData.hiring_timeline
+      case 4:
         return formData.contact_name && formData.contact_phone && formData.contact_email
       default:
         return false
@@ -124,7 +255,7 @@ export default function LeadGenerationForm({ onComplete, onCancel, preselectedCa
 
   // Navigation
   const nextStep = () => {
-    if (isStepValid && currentStep < 3) {
+    if (isStepValid && currentStep < 4) {
       setCurrentStep(currentStep + 1)
     }
   }
@@ -139,41 +270,41 @@ export default function LeadGenerationForm({ onComplete, onCancel, preselectedCa
   const transformToBackendFormat = (data: LeadFormData) => {
     const selectedCategory = SERVICE_CATEGORIES[data.service_category as keyof typeof SERVICE_CATEGORIES]
     
-    // Map urgency to Flask server format
-    const urgencyMapping: { [key: string]: string } = {
-      'urgent': 'urgent',
-      'this-week': 'this_week',
-      'this-month': 'this_month',
-      'flexible': 'flexible'
-    }
-
-    // Map budget to Flask server format
-    const budgetMapping: { [key: string]: string } = {
-      'Under R500': 'Under R500',
-      'R500 - R1,500': 'R500 - R1,500',
-      'R1,500 - R5,000': 'R1,500 - R5,000',
-      'R5,000 - R15,000': 'R5,000 - R15,000',
-      'R15,000 - R50,000': 'R15,000 - R50,000',
-      'Over R50,000': 'Over R50,000'
-    }
-    
     return {
-      // Required Flask server fields (string format)
-      service_category: data.service_category, // This should be the string key like 'home-improvement'
-      service_type: data.service_type,
-      location: data.location,
-      urgency: urgencyMapping[data.urgency] || 'flexible',
-      project_title: data.project_title,
-      project_description: data.project_description,
-      budget_range: budgetMapping[data.budget_range] || 'No budget specified',
-      contact_name: data.contact_name,
-      contact_phone: data.contact_phone,
-      contact_email: data.contact_email,
+      // Service information
+      service_category_id: selectedCategory?.backendId || 1,
+      title: data.project_title,
+      description: data.project_description,
+      
+      // Location information (ML Critical)
+      location_address: data.location_address || data.location,
+      location_suburb: data.location_suburb || 'Suburb not specified',
+      location_city: data.location_city || data.location,
+      latitude: data.latitude,
+      longitude: data.longitude,
+      
+      // Budget and urgency
+      budget_range: data.budget_range,
+      urgency: data.urgency,
+      preferred_contact_time: 'morning',
+      
+      // Intent and timeline (ML Critical)
+      hiring_intent: data.hiring_intent,
+      hiring_timeline: data.hiring_timeline,
+      research_purpose: data.research_purpose || '',
+      
+      // Additional requirements
+      additional_requirements: data.additional_requirements || data.special_requirements || '',
+      
+      // Client contact information
+      client_name: data.contact_name,
+      client_email: data.contact_email,
+      client_phone: data.contact_phone,
       
       // Metadata
       source: 'website',
-      status: 'verified', // Auto-verify for now
-      verification_score: 85 // Default score
+      status: 'verified',
+      verification_score: 85
     }
   }
 
@@ -212,12 +343,21 @@ export default function LeadGenerationForm({ onComplete, onCancel, preselectedCa
           service_category: preselectedCategory || '',
           service_type: '',
           location: '',
+          location_address: '',
+          location_suburb: '',
+          location_city: '',
+          latitude: null,
+          longitude: null,
           urgency: '',
           project_title: '',
           project_description: '',
           budget_range: '',
           preferred_start_date: '',
           special_requirements: '',
+          additional_requirements: '',
+          hiring_intent: '',
+          hiring_timeline: '',
+          research_purpose: '',
           contact_name: '',
           contact_phone: '',
           contact_email: '',
@@ -298,13 +438,13 @@ export default function LeadGenerationForm({ onComplete, onCancel, preselectedCa
         {/* Progress Bar */}
         <div className="mb-8">
           <div className="flex items-center justify-between text-sm text-gray-500 mb-2">
-            <span>Step {currentStep} of 3</span>
-            <span>{Math.round((currentStep / 3) * 100)}% Complete</span>
+            <span>Step {currentStep} of 4</span>
+            <span>{Math.round((currentStep / 4) * 100)}% Complete</span>
           </div>
           <div className="w-full bg-gray-200 rounded-full h-2">
             <div 
               className="bg-emerald-600 h-2 rounded-full transition-all duration-500 ease-out"
-              style={{ width: `${(currentStep / 3) * 100}%` }}
+              style={{ width: `${(currentStep / 4) * 100}%` }}
             />
           </div>
         </div>
@@ -453,16 +593,16 @@ export default function LeadGenerationForm({ onComplete, onCancel, preselectedCa
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                   {BUDGET_RANGES.map((range) => (
                     <button
-                      key={range}
+                      key={range.value}
                       type="button"
-                      onClick={() => updateFormData('budget_range', range)}
+                      onClick={() => updateFormData('budget_range', range.value)}
                       className={`p-3 rounded-lg border text-center font-medium transition-all ${
-                        formData.budget_range === range
+                        formData.budget_range === range.value
                           ? 'border-emerald-600 bg-emerald-50 text-emerald-700'
                           : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
                       }`}
                     >
-                      {range}
+                      {range.label}
                     </button>
                   ))}
                 </div>
@@ -493,8 +633,90 @@ export default function LeadGenerationForm({ onComplete, onCancel, preselectedCa
             </div>
           )}
 
-          {/* Step 3: Contact Information */}
+          {/* Step 3: Intent & Timeline (ML Critical) */}
           {currentStep === 3 && (
+            <div className="p-8">
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">Help us match you with the right professionals</h2>
+              <p className="text-gray-600 mb-6">This information helps us prioritize your request and match you with the most suitable providers.</p>
+              
+              {/* Hiring Intent */}
+              <div className="mb-6">
+                <label className="block text-sm font-medium text-gray-700 mb-4">
+                  How ready are you to hire someone?
+                </label>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  {HIRING_INTENT_OPTIONS.map((option) => (
+                    <button
+                      key={option.value}
+                      type="button"
+                      onClick={() => updateFormData('hiring_intent', option.value)}
+                      className={`p-4 rounded-lg border text-left transition-all ${
+                        formData.hiring_intent === option.value
+                          ? 'border-emerald-600 bg-emerald-50 text-emerald-700'
+                          : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
+                      }`}
+                    >
+                      <div className="font-medium">{option.label}</div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Hiring Timeline */}
+              <div className="mb-6">
+                <label className="block text-sm font-medium text-gray-700 mb-4">
+                  When do you need this completed?
+                </label>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  {HIRING_TIMELINE_OPTIONS.map((option) => (
+                    <button
+                      key={option.value}
+                      type="button"
+                      onClick={() => updateFormData('hiring_timeline', option.value)}
+                      className={`p-4 rounded-lg border text-left transition-all ${
+                        formData.hiring_timeline === option.value
+                          ? 'border-emerald-600 bg-emerald-50 text-emerald-700'
+                          : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
+                      }`}
+                    >
+                      <div className="font-medium">{option.label}</div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Research Purpose */}
+              <div className="mb-6">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Research Purpose (Optional)
+                </label>
+                <textarea
+                  rows={3}
+                  placeholder="Are you researching prices, comparing options, or just getting ideas? This helps us understand your needs better."
+                  value={formData.research_purpose}
+                  onChange={(e) => updateFormData('research_purpose', e.target.value)}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                />
+              </div>
+
+              {/* Additional Requirements */}
+              <div className="mb-6">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Additional Requirements (Optional)
+                </label>
+                <textarea
+                  rows={3}
+                  placeholder="Any additional requirements, preferences, or special considerations for this project."
+                  value={formData.additional_requirements}
+                  onChange={(e) => updateFormData('additional_requirements', e.target.value)}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                />
+              </div>
+            </div>
+          )}
+
+          {/* Step 4: Contact Information */}
+          {currentStep === 4 && (
             <div className="p-8">
               <h2 className="text-2xl font-bold text-gray-900 mb-2">Almost done! How can professionals reach you?</h2>
               <p className="text-gray-600 mb-6">We'll only share your details with qualified professionals who can help with your project.</p>
