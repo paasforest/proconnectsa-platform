@@ -682,13 +682,20 @@ class DynamicPricingMLService:
             elif lead.verification_score > 60:
                 base_cost += 0.2  # +0.2 credits = +R10 (medium quality premium)
             
-            # Budget multiplier (higher budget = slightly more expensive) - MODERATE PRICING
+            # Budget multiplier (higher budget = more expensive) - AGGRESSIVE PRICING FOR HIGH-VALUE
             if lead.budget_range == 'over_50000':
-                base_cost += 1.0  # +1 credit = +R50 (high budget premium)
+                base_cost += 3.0  # +3 credits = +R150 (high budget premium)
             elif lead.budget_range == '15000_50000':
-                base_cost += 0.5  # +0.5 credits = +R25 (medium-high budget premium)
+                base_cost += 1.5  # +1.5 credits = +R75 (medium-high budget premium)
             elif lead.budget_range == '5000_15000':
-                base_cost += 0.2  # +0.2 credits = +R10 (medium budget premium)
+                base_cost += 0.5  # +0.5 credits = +R25 (medium budget premium)
+            
+            # Property type multiplier (industrial = premium pricing)
+            if hasattr(lead, 'property_type'):
+                if lead.property_type == 'industrial':
+                    base_cost += 2.0  # +2 credits = +R100 (industrial premium)
+                elif lead.property_type == 'commercial':
+                    base_cost += 1.0  # +1 credit = +R50 (commercial premium)
             
             # High intent multiplier (ready to hire = more valuable) - MODERATE PRICING
             if hasattr(lead, 'hiring_intent'):
@@ -708,8 +715,8 @@ class DynamicPricingMLService:
                 elif provider.provider_profile.subscription_tier == 'pro':
                     base_cost *= 0.9  # 10% discount for pro
             
-            # Clamp to startup-friendly range: 1-5 credits (R50-R250)
-            final_cost = max(1, min(5, int(round(base_cost))))
+            # Clamp to realistic range: 1-20 credits (R50-R1000) for high-value projects
+            final_cost = max(1, min(20, int(round(base_cost))))
             
             logger.info(f"💰 ML Pricing: base=2, final={final_cost} credits (urgency={lead.urgency}, quality={lead.verification_score}, budget={lead.budget_range}, service={lead.service_category.slug})")
             return final_cost

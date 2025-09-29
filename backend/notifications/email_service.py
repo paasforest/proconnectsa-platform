@@ -172,7 +172,9 @@ def send_lead_notification_email(provider, lead):
         
         # HTML content
         html_content = render_to_string('emails/lead_notification.html', {
+            'provider': provider,
             'lead': lead,
+            'dashboard_url': f"{settings.FRONTEND_URL}/dashboard/leads/",
             'site_url': settings.FRONTEND_URL,
         })
         

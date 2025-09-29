@@ -132,7 +132,8 @@ def available_leads(request):
             from .ml_services import DynamicPricingMLService
             pricing_service = DynamicPricingMLService()
             pricing_result = pricing_service.calculate_dynamic_lead_price(lead, request.user)
-            credits_cost = max(1, round(pricing_result.get('price', 50) / 50, 1))  # R50 = 1 credit
+            # ML service returns credits directly, not Rands
+            credits_cost = max(1, round(pricing_result.get('price', 4), 1))
             
             # Check if already unlocked by this user using LeadAccess model
             from .models import LeadAccess
@@ -356,10 +357,10 @@ def calculate_ml_lead_pricing(lead):
         pricing_service = DynamicPricingMLService()
         pricing_result = pricing_service.calculate_dynamic_lead_price(lead, provider=None)
         
-        # Convert Rands to credits (R50 = 1 credit)
-        price_in_rands = pricing_result.get('price', 50)
-        # Ensure minimum 1 credit, but allow fractional credits for better pricing
-        credits = max(1, round(price_in_rands / 50, 1))
+        # ML service returns credits directly (1 credit = R50)
+        credits = pricing_result.get('price', 4)
+        # Ensure minimum 1 credit
+        credits = max(1, round(credits, 1))
         
         return credits
         

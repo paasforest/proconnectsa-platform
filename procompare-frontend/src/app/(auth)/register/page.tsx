@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { redirectToDashboard } from '@/lib/auth-utils';
 
 // Service categories for ML matching
 const serviceCategories = [
@@ -42,6 +43,7 @@ const majorCities = [
 
 export default function RegisterPage() {
   const router = useRouter();
+  const [authMode, setAuthMode] = useState<'login' | 'signup'>('signup'); // Add auth mode state
   const [currentStep, setCurrentStep] = useState(1);
   const [formData, setFormData] = useState({
     // Basic info
@@ -80,6 +82,7 @@ export default function RegisterPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [message, setMessage] = useState(''); // Add message state for login
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value, type } = e.target;
@@ -145,6 +148,60 @@ export default function RegisterPage() {
       return false;
     }
     return true;
+  };
+
+  // Add login handler
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setError('');
+    setMessage('');
+
+    try {
+      if (!formData.email || !formData.password) {
+        setError('Please enter both email and password');
+        setLoading(false);
+        return;
+      }
+
+      console.log('Attempting login...');
+      
+      const loginResponse = await fetch('https://api.proconnectsa.co.za/api/login/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: formData.email,
+          password: formData.password
+        })
+      });
+
+      const data = await loginResponse.json();
+      console.log('Login response:', data);
+
+      if (data.success && data.token) {
+        // Store authentication data
+        localStorage.setItem('token', data.token);
+        localStorage.setItem('user', JSON.stringify(data.user));
+        
+        // Get user type from response and redirect
+        const userType = data.user?.user_type;
+        console.log('🔍 DEBUG - User type:', userType);
+        
+        // Route to appropriate dashboard based on user type
+        const dashboardPath = redirectToDashboard(userType);
+        console.log('🔍 DEBUG - Redirecting to:', dashboardPath);
+        window.location.replace(dashboardPath);
+      } else {
+        setError(data.message || 'Invalid email or password');
+      }
+    } catch (err: any) {
+      console.error('Login error:', err);
+      setError('Login failed. Please check your connection and try again.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -234,11 +291,14 @@ export default function RegisterPage() {
   const renderStep1 = () => (
     <div className="space-y-6">
       <div className="text-center mb-8">
-        <h2 className="text-2xl font-bold text-gray-900 mb-2">
-          Create your account
+        <h2 className="text-3xl font-bold text-gray-900 mb-2">
+          Join{' '}
+          <span className="bg-gradient-to-r from-emerald-600 to-blue-600 bg-clip-text text-transparent">
+            ProConnectSA
+          </span>
         </h2>
         <p className="text-gray-600">
-          Join ProConnectSA Lead Marketplace
+          Start earning with South Africa's premium service marketplace
         </p>
       </div>
 
@@ -441,20 +501,93 @@ export default function RegisterPage() {
     </div>
   );
 
+  // Add login form render function
+  const renderLoginForm = () => (
+    <div className="space-y-6">
+      <div className="text-center mb-8">
+        <h2 className="text-3xl font-bold text-gray-900 mb-2">
+          Welcome back to{' '}
+          <span className="bg-gradient-to-r from-emerald-600 to-blue-600 bg-clip-text text-transparent">
+            ProConnectSA
+          </span>
+        </h2>
+        <p className="text-gray-600">
+          Sign in to your account and start earning
+        </p>
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-2">
+          Email Address *
+        </label>
+        <input
+          name="email"
+          type="email"
+          required
+          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
+          placeholder="your@email.com"
+          value={formData.email}
+          onChange={handleChange}
+        />
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-2">
+          Password *
+        </label>
+        <input
+          name="password"
+          type="password"
+          required
+          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
+          placeholder="Your password"
+          value={formData.password}
+          onChange={handleChange}
+        />
+      </div>
+
+      <div className="flex items-center justify-between">
+        <div className="flex items-center">
+          <input
+            id="remember-me"
+            name="remember-me"
+            type="checkbox"
+            className="h-4 w-4 text-emerald-600 focus:ring-emerald-500 border-gray-300 rounded"
+          />
+          <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-700">
+            Remember me
+          </label>
+        </div>
+
+        <div className="text-sm">
+          <a href="#" className="font-medium text-emerald-600 hover:text-emerald-500">
+            Forgot your password?
+          </a>
+        </div>
+      </div>
+    </div>
+  );
+
   const renderStep2 = () => (
     <div className="space-y-6">
       <div className="text-center mb-8">
-        <h2 className="text-2xl font-bold text-gray-900 mb-2">
-          Service Provider Details
+        <h2 className="text-3xl font-bold text-gray-900 mb-2">
+          Complete Your{' '}
+          <span className="bg-gradient-to-r from-emerald-600 to-blue-600 bg-clip-text text-transparent">
+            Professional Profile
+          </span>
         </h2>
         <p className="text-gray-600">
-          Complete your profile for ML-powered lead matching
+          Help us match you with the perfect leads using AI
         </p>
       </div>
 
       {/* Business Information */}
-      <div className="bg-gray-50 p-4 rounded-lg">
-        <h3 className="text-lg font-semibold text-gray-800 mb-4">Business Information</h3>
+      <div className="bg-gradient-to-br from-emerald-50 to-blue-50 p-6 rounded-xl border border-emerald-200">
+        <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+          <span className="w-2 h-2 bg-emerald-500 rounded-full mr-2"></span>
+          Business Information
+        </h3>
         
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -748,38 +881,85 @@ export default function RegisterPage() {
   );
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-blue-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <div className="text-center">
-          <h1 className="text-3xl font-bold text-gray-900">ProConnectSA</h1>
-          <p className="mt-2 text-sm text-gray-600">
-            Lead Marketplace - Find and Purchase Qualified Leads
+          <h1 className="text-4xl font-bold text-gray-900 mb-2">
+            <span className="text-emerald-600">ProConnect</span>
+            <span className="text-gray-900">SA</span>
+          </h1>
+          <p className="text-lg text-gray-600">
+            South Africa's Premium Service Marketplace
           </p>
         </div>
       </div>
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
-          {/* Progress indicator */}
+        <div className="bg-white py-8 px-4 shadow-2xl border border-gray-200 sm:rounded-2xl sm:px-10">
+          {/* Auth Mode Tabs */}
           <div className="mb-8">
-            <div className="flex items-center justify-center space-x-4">
-              <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
-                currentStep >= 1 ? 'bg-emerald-500 text-white' : 'bg-gray-300 text-gray-600'
-              }`}>
-                1
-              </div>
-              <div className={`w-16 h-1 ${currentStep >= 2 ? 'bg-emerald-500' : 'bg-gray-300'}`}></div>
-              <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
-                currentStep >= 2 ? 'bg-emerald-500 text-white' : 'bg-gray-300 text-gray-600'
-              }`}>
-                2
-              </div>
-            </div>
-            <div className="flex justify-between mt-2 text-xs text-gray-500">
-              <span>Basic Info</span>
-              <span>{formData.user_type === 'provider' ? 'Provider Details' : 'Complete'}</span>
+            <div className="flex bg-gradient-to-r from-emerald-50 to-blue-50 rounded-xl p-1 border border-emerald-200">
+              <button
+                type="button"
+                onClick={() => {
+                  setAuthMode('login');
+                  setCurrentStep(1);
+                  setError('');
+                  setSuccess('');
+                }}
+                className={`flex-1 py-3 px-6 text-sm font-semibold rounded-lg transition-all duration-200 ${
+                  authMode === 'login'
+                    ? 'bg-white text-emerald-700 shadow-lg border border-emerald-200'
+                    : 'text-gray-600 hover:text-emerald-700 hover:bg-white/50'
+                }`}
+              >
+                Sign In
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setAuthMode('signup');
+                  setCurrentStep(1);
+                  setError('');
+                  setSuccess('');
+                }}
+                className={`flex-1 py-3 px-6 text-sm font-semibold rounded-lg transition-all duration-200 ${
+                  authMode === 'signup'
+                    ? 'bg-white text-emerald-700 shadow-lg border border-emerald-200'
+                    : 'text-gray-600 hover:text-emerald-700 hover:bg-white/50'
+                }`}
+              >
+                Sign Up
+              </button>
             </div>
           </div>
+
+          {/* Progress indicator for signup only */}
+          {authMode === 'signup' && (
+            <div className="mb-8">
+              <div className="flex items-center justify-center space-x-4">
+                <div className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold shadow-lg ${
+                  currentStep >= 1 
+                    ? 'bg-gradient-to-r from-emerald-500 to-emerald-600 text-white' 
+                    : 'bg-gray-200 text-gray-500'
+                }`}>
+                  1
+                </div>
+                <div className={`w-20 h-2 rounded-full ${currentStep >= 2 ? 'bg-gradient-to-r from-emerald-500 to-emerald-600' : 'bg-gray-200'}`}></div>
+                <div className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold shadow-lg ${
+                  currentStep >= 2 
+                    ? 'bg-gradient-to-r from-emerald-500 to-emerald-600 text-white' 
+                    : 'bg-gray-200 text-gray-500'
+                }`}>
+                  2
+                </div>
+              </div>
+              <div className="flex justify-between mt-3 text-sm font-medium text-gray-600">
+                <span>Basic Info</span>
+                <span>{formData.user_type === 'provider' ? 'Provider Details' : 'Complete'}</span>
+              </div>
+            </div>
+          )}
 
           {/* Error and Success Messages */}
           {error && (
@@ -803,24 +983,44 @@ export default function RegisterPage() {
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {currentStep === 1 && renderStep1()}
-            {currentStep === 2 && renderStep2()}
+          <form onSubmit={authMode === 'login' ? handleLogin : handleSubmit} className="space-y-6">
+            {authMode === 'login' ? (
+              renderLoginForm()
+            ) : (
+              <>
+                {currentStep === 1 && renderStep1()}
+                {currentStep === 2 && renderStep2()}
+              </>
+            )}
 
             {/* Navigation buttons */}
             <div className="flex justify-between">
-              {currentStep > 1 && (
+              {authMode === 'signup' && currentStep > 1 && (
                 <button
                   type="button"
                   onClick={() => setCurrentStep(currentStep - 1)}
-                  className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                  className="px-6 py-3 text-sm font-semibold text-gray-700 bg-white border border-gray-300 rounded-xl hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-emerald-500 shadow-sm transition-all duration-200"
                 >
                   Previous
                 </button>
               )}
               
               <div className="ml-auto">
-                {currentStep < 2 && formData.user_type === 'provider' ? (
+                {authMode === 'login' ? (
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className="px-8 py-3 text-sm font-semibold text-white bg-gradient-to-r from-emerald-600 to-emerald-700 rounded-xl hover:from-emerald-700 hover:to-emerald-800 focus:outline-none focus:ring-2 focus:ring-emerald-500 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center shadow-lg transition-all duration-200"
+                  >
+                    {loading && (
+                      <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                    )}
+                    {loading ? 'Signing In...' : 'Sign In'}
+                  </button>
+                ) : currentStep < 2 && formData.user_type === 'provider' ? (
                   <button
                     type="button"
                     onClick={() => {
@@ -828,7 +1028,7 @@ export default function RegisterPage() {
                         setCurrentStep(2);
                       }
                     }}
-                    className="px-6 py-2 text-sm font-medium text-white bg-emerald-600 rounded-lg hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                    className="px-8 py-3 text-sm font-semibold text-white bg-gradient-to-r from-emerald-600 to-emerald-700 rounded-xl hover:from-emerald-700 hover:to-emerald-800 focus:outline-none focus:ring-2 focus:ring-emerald-500 shadow-lg transition-all duration-200"
                   >
                     Next
                   </button>
@@ -836,7 +1036,7 @@ export default function RegisterPage() {
                   <button
                     type="submit"
                     disabled={loading}
-                    className="px-6 py-2 text-sm font-medium text-white bg-emerald-600 rounded-lg hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+                    className="px-8 py-3 text-sm font-semibold text-white bg-gradient-to-r from-emerald-600 to-emerald-700 rounded-xl hover:from-emerald-700 hover:to-emerald-800 focus:outline-none focus:ring-2 focus:ring-emerald-500 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center shadow-lg transition-all duration-200"
                   >
                     {loading && (
                       <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
@@ -852,12 +1052,39 @@ export default function RegisterPage() {
           </form>
 
           <div className="mt-6 text-center">
-            <p className="text-sm text-gray-600">
-              Already have an account?{' '}
-              <Link href="/login" className="font-medium text-emerald-600 hover:text-emerald-500">
-                Sign in here
-              </Link>
-            </p>
+            {authMode === 'login' ? (
+              <p className="text-sm text-gray-600">
+                Don't have an account?{' '}
+                <button
+                  type="button"
+                  onClick={() => {
+                    setAuthMode('signup');
+                    setCurrentStep(1);
+                    setError('');
+                    setSuccess('');
+                  }}
+                  className="font-semibold text-emerald-600 hover:text-emerald-700 transition-colors"
+                >
+                  Sign up here
+                </button>
+              </p>
+            ) : (
+              <p className="text-sm text-gray-600">
+                Already have an account?{' '}
+                <button
+                  type="button"
+                  onClick={() => {
+                    setAuthMode('login');
+                    setCurrentStep(1);
+                    setError('');
+                    setSuccess('');
+                  }}
+                  className="font-semibold text-emerald-600 hover:text-emerald-700 transition-colors"
+                >
+                  Sign in here
+                </button>
+              </p>
+            )}
           </div>
         </div>
       </div>

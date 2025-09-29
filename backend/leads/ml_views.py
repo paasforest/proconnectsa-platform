@@ -817,11 +817,21 @@ def purchase_lead_access_view(request, lead_id):
             
             # Create wallet transaction record
             from backend.users.models import WalletTransaction
+            import time
+            import uuid
+            
+            # Generate unique reference for transaction
+            transaction_reference = f"UNLOCK_{int(time.time() * 1000)}_{str(uuid.uuid4())[:8]}"
+            
             WalletTransaction.objects.create(
                 wallet=wallet,
                 transaction_type='unlock',
-                amount=credit_cost,
+                amount=credit_cost * 50,  # Convert credits to Rands (1 credit = R50)
+                credits=credit_cost,      # Number of credits
+                reference=transaction_reference,
                 description=f'Lead unlock: {lead.title}',
+                lead_id=str(lead.id),
+                lead_title=lead.title,
                 status='confirmed'
             )
             
