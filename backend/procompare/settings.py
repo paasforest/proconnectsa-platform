@@ -16,7 +16,7 @@ SECRET_KEY = config('SECRET_KEY', default='django-insecure-change-me-in-producti
 DEBUG = config('DEBUG', default=True, cast=bool)
 
 # ML Services Configuration
-USE_ML_PRICING = config('USE_ML_PRICING', default=False, cast=bool)  # Only enable in production
+USE_ML_PRICING = config('USE_ML_PRICING', default=True, cast=bool)  # Enable dynamic pricing
 
 ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost,127.0.0.1', cast=lambda v: [s.strip() for s in v.split(',')])
 
@@ -604,6 +604,6 @@ ALERT_QUALITY_DECLINE_THRESHOLD = 0.3  # 30% low quality leads
 ALERT_RESPONSE_TIME_THRESHOLD = 24  # 24 hours
 
 # ML Pricing Configuration - DISABLE for testing/production
-USE_ML_PRICING = False  # Use simple fixed pricing (1 credit = R50 per lead)
+USE_ML_PRICING = True  # Enable dynamic pricing based on lead characteristics
 
 

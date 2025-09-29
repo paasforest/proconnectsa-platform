@@ -97,8 +97,11 @@ class LeadSerializer(serializers.ModelSerializer):
             pricing_service = DynamicPricingMLService()
             pricing_result = pricing_service.calculate_dynamic_lead_price(obj, request.user)
             # Return credits, not price in Rands
-            return int(round(pricing_result['credits']))
-        except:
+            return int(round(pricing_result['price']))
+        except Exception as e:
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.error(f"Dynamic pricing failed: {str(e)}")
             return 1  # Fallback to 1 credit (R50)
     
     def validate_service_category_id(self, value):
