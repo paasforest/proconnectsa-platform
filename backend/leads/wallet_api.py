@@ -44,51 +44,30 @@ def available_leads(request):
     wallet, created = Wallet.objects.get_or_create(user=request.user)
     
     try:
-        # Use ML-based filtering instead of hardcoded queries
-        # This provides intelligent lead-provider matching based on:
-        # - Service categories compatibility
-        # - Geographical proximity with ML
-        # - Lead quality preferences
-        # - Provider availability and preferences
-        # Direct lead filtering (replacing broken LeadFilteringService)
-        profile = request.user.provider_profile
+        # MARKETPLACE APPROACH: Show ALL available leads for providers to choose from
+        # This allows providers to see all opportunities and expand their service areas
+        # Providers can then decide which leads to purchase based on their capabilities
         
-        # Convert service category slugs to IDs
-        from backend.leads.models import ServiceCategory
-        category_slugs = profile.service_categories if profile.service_categories else []
-        category_ids = ServiceCategory.objects.filter(slug__in=category_slugs).values_list('id', flat=True)
-        
-        # Base query
+        # Base query - show all verified, available leads
         leads = Lead.objects.filter(
             status='verified',
-            service_category__id__in=category_ids,
             is_available=True,
             expires_at__gt=timezone.now()
         ).select_related('service_category', 'client')
         
-        # Apply geographical filter
-        if profile.service_areas:
-            from django.db.models import Q
-            service_area_filter = Q()
-            for area in profile.service_areas:
-                service_area_filter |= (
-                    Q(location_suburb__icontains=area) |
-                    Q(location_city__icontains=area)
-                )
-            leads = leads.filter(service_area_filter)
-        
-        # Exclude already assigned leads
+        # Exclude already purchased leads by this provider
         from backend.leads.models import LeadAssignment
-        assigned_lead_ids = LeadAssignment.objects.filter(
-            provider=request.user
+        purchased_lead_ids = LeadAssignment.objects.filter(
+            provider=request.user,
+            status='purchased'  # Only exclude purchased leads, not assigned ones
         ).values_list('lead_id', flat=True)
         
-        leads = leads.exclude(id__in=assigned_lead_ids)
+        leads = leads.exclude(id__in=purchased_lead_ids)
         
         # Order by priority and apply limit
         leads = leads.order_by('-verification_score', '-created_at')[:20]
         
-        logger.info(f"ML filtering returned {leads.count()} leads for provider {request.user.id}")
+        logger.info(f"Marketplace returned {leads.count()} available leads for provider {request.user.id}")
         
     except Exception as e:
         logger.error(f"ML filtering failed for provider {request.user.id}: {str(e)}")
