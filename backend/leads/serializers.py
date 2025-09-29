@@ -85,7 +85,7 @@ class LeadSerializer(serializers.ModelSerializer):
         """Get credit cost required to unlock this lead"""
         request = self.context.get('request')
         if not request or not request.user.is_authenticated:
-            return 50  # Default cost
+            return 1  # Default cost: 1 credit (R50)
         
         # If already unlocked, return 0
         if self.get_contact_details_unlocked(obj):
@@ -96,7 +96,7 @@ class LeadSerializer(serializers.ModelSerializer):
             from .ml_services import DynamicPricingMLService
             pricing_service = DynamicPricingMLService()
             pricing_result = pricing_service.calculate_dynamic_lead_price(obj, request.user)
-            # Return credits, not price in Rands
+            # Return credits (the ML service already returns credits)
             return int(round(pricing_result['price']))
         except Exception as e:
             import logging
