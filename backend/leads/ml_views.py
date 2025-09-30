@@ -13,6 +13,7 @@ from datetime import timedelta
 from .models import Lead, LeadAssignment, LeadAccess
 from .ml_services import LeadQualityMLService, LeadConversionMLService, LeadAccessControlMLService
 from backend.notifications.consumers import NotificationConsumer
+from backend.utils.sendgrid_service import sendgrid_service
 import logging
 
 logger = logging.getLogger(__name__)
@@ -847,7 +848,30 @@ def purchase_lead_access_view(request, lead_id):
             lead.assigned_providers_count = LeadAccess.objects.filter(lead=lead).count()
             lead.save()
 
-        # Step 7: Return success response with unlocked data
+        # Step 7: Send email notifications
+        try:
+            # Send notification to the provider who unlocked the lead
+            sendgrid_service.send_lead_status_update(
+                user=request.user,
+                lead=lead,
+                status="unlocked",
+                message=f"You have successfully unlocked this lead for {credit_cost} credits. You can now contact the client directly."
+            )
+            
+            # Send notification to the client whose lead was unlocked
+            sendgrid_service.send_lead_status_update(
+                user=lead.client,
+                lead=lead,
+                status="claimed",
+                message=f"A service provider has unlocked your lead and will be contacting you soon."
+            )
+            
+            logger.info(f"📧 Email notifications sent for lead {lead_id} unlock")
+        except Exception as e:
+            logger.error(f"❌ Failed to send email notifications: {str(e)}")
+            # Don't fail the transaction if email fails
+        
+        # Step 8: Return success response with unlocked data
         return Response({
             'success': True,
             'message': 'Lead access purchased successfully',

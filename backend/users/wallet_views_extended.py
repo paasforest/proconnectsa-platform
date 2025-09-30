@@ -13,6 +13,7 @@ import uuid
 
 from .models import User, Wallet, WalletTransaction
 from .reconciliation import reconcile_bank_deposits
+from backend.utils.sendgrid_service import sendgrid_service
 
 logger = logging.getLogger(__name__)
 

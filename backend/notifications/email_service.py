@@ -168,41 +168,48 @@ def send_welcome_email(user):
 def send_lead_notification_email(provider, lead):
     """Send lead notification to a provider"""
     try:
-        subject = f"New {lead.service_category.name} lead in {lead.location_city}"
-        
-        # HTML content
-        html_content = render_to_string('emails/lead_notification.html', {
-            'provider': provider,
-            'lead': lead,
-            'dashboard_url': f"{settings.FRONTEND_URL}/dashboard/leads/",
-            'site_url': settings.FRONTEND_URL,
-        })
-        
-        # Plain text content
-        text_content = f"""
-        New Lead Available: {lead.title}
-        
-        Service: {lead.service_category.name}
-        Location: {lead.location_city}, {lead.location_suburb}
-        Budget: {lead.budget_range}
-        Urgency: {lead.urgency}
-        
-        Description:
-        {lead.description}
-        
-        View and respond to this lead at {settings.FRONTEND_URL}/leads/{lead.id}
-        
-        Best regards,
-        ProConnectSA Team
-        """
-        
-        # Send to provider
-        msg = EmailMultiAlternatives(subject, text_content, settings.DEFAULT_FROM_EMAIL, [provider.email])
-        msg.attach_alternative(html_content, "text/html")
-        msg.send()
-        
-        logger.info(f"Lead notification sent to {provider.email}")
-        return True
+        # Use SendGrid service if available, otherwise fall back to Django email
+        try:
+            from utils.sendgrid_service import sendgrid_service
+            return sendgrid_service.send_lead_notification(provider, lead)
+        except ImportError:
+            logger.warning("SendGrid service not available, using Django email backend")
+            # Fallback to Django email backend
+            subject = f"New {lead.service_category.name} lead in {lead.location_city}"
+            
+            # HTML content
+            html_content = render_to_string('emails/lead_notification.html', {
+                'provider': provider,
+                'lead': lead,
+                'dashboard_url': f"{settings.FRONTEND_URL}/dashboard/leads/",
+                'site_url': settings.FRONTEND_URL,
+            })
+            
+            # Plain text content
+            text_content = f"""
+            New Lead Available: {lead.title}
+            
+            Service: {lead.service_category.name}
+            Location: {lead.location_city}, {lead.location_suburb}
+            Budget: {lead.budget_range}
+            Urgency: {lead.urgency}
+            
+            Description:
+            {lead.description}
+            
+            View and respond to this lead at {settings.FRONTEND_URL}/leads/{lead.id}
+            
+            Best regards,
+            ProConnectSA Team
+            """
+            
+            # Send to provider
+            msg = EmailMultiAlternatives(subject, text_content, settings.DEFAULT_FROM_EMAIL, [provider.email])
+            msg.attach_alternative(html_content, "text/html")
+            msg.send()
+            
+            logger.info(f"Lead notification sent to {provider.email}")
+            return True
         
     except Exception as e:
         logger.error(f"Failed to send lead notification: {str(e)}")
@@ -653,21 +660,27 @@ def send_password_reset_email(email, reset_code, reset_token):
         © 2024 ProConnectSA. All rights reserved.
         """
         
-        # Send email
-        email_service = EmailService()
-        success = email_service.send_email(
-            to_email=email,
-            subject=subject,
-            html_content=html_content,
-            text_content=text_content
-        )
-        
-        if success:
-            logger.info(f"Password reset email sent successfully to {email}")
-            return True
-        else:
-            logger.error(f"Failed to send password reset email to {email}")
-            return False
+        # Use SendGrid service if available, otherwise fall back to Django email
+        try:
+            from utils.sendgrid_service import sendgrid_service
+            return sendgrid_service.send_password_reset_email(email, reset_code, reset_token)
+        except ImportError:
+            logger.warning("SendGrid service not available, using Django email backend")
+            # Fallback to Django email backend
+            email_service = EmailService()
+            success = email_service.send_email(
+                to_email=email,
+                subject=subject,
+                html_content=html_content,
+                text_content=text_content
+            )
+            
+            if success:
+                logger.info(f"Password reset email sent successfully to {email}")
+                return True
+            else:
+                logger.error(f"Failed to send password reset email to {email}")
+                return False
             
     except Exception as e:
         logger.error(f"Failed to send password reset email: {str(e)}")

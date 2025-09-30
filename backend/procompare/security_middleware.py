@@ -19,7 +19,8 @@ class SecurityMiddleware(MiddlewareMixin):
         
         # Check request size
         if hasattr(request, 'META') and 'CONTENT_LENGTH' in request.META:
-            content_length = int(request.META.get('CONTENT_LENGTH', 0))
+            content_length_str = request.META.get('CONTENT_LENGTH', '0')
+            content_length = int(content_length_str) if content_length_str else 0
             max_size = getattr(settings, 'DATA_UPLOAD_MAX_MEMORY_SIZE', 10 * 1024 * 1024)
             
             if content_length > max_size:

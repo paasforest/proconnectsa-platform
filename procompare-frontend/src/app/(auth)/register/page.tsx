@@ -4,6 +4,8 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { redirectToDashboard } from '@/lib/auth-utils';
+import ForgotPasswordModal from '@/components/auth/ForgotPasswordModal';
+import PasswordResetModal from '@/components/auth/PasswordResetModal';
 
 // Service categories for ML matching
 const serviceCategories = [
@@ -83,7 +85,11 @@ export default function RegisterPage() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [message, setMessage] = useState(''); // Add message state for login
-
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const [showPasswordReset, setShowPasswordReset] = useState(false);
+  const [resetEmail, setResetEmail] = useState('');
+  const [resetToken, setResetToken] = useState('');
+  
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value, type } = e.target;
     
@@ -348,34 +354,34 @@ export default function RegisterPage() {
       </div>
 
       <div className="grid grid-cols-2 gap-4">
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-2">
             Password *
-          </label>
-          <input
-            name="password"
-            type="password"
-            required
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
-            placeholder="Password (min 6 characters)"
-            value={formData.password}
-            onChange={handleChange}
-          />
-        </div>
-        
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+        </label>
+        <input
+          name="password"
+          type="password"
+          required
+          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
+          placeholder="Password (min 6 characters)"
+          value={formData.password}
+          onChange={handleChange}
+        />
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-2">
             Confirm Password *
-          </label>
-          <input
-            name="password_confirm"
-            type="password"
-            required
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
-            placeholder="Confirm Password"
-            value={formData.password_confirm}
-            onChange={handleChange}
-          />
+        </label>
+        <input
+          name="password_confirm"
+          type="password"
+          required
+          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
+          placeholder="Confirm Password"
+          value={formData.password_confirm}
+          onChange={handleChange}
+        />
         </div>
       </div>
 
@@ -448,19 +454,19 @@ export default function RegisterPage() {
       </div>
 
       <div className="grid grid-cols-2 gap-4">
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-2">
             City *
-          </label>
-          <input
-            name="city"
-            type="text"
+        </label>
+        <input
+          name="city"
+          type="text"
             required
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
-            placeholder="City"
-            value={formData.city}
-            onChange={handleChange}
-          />
+          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
+          placeholder="City"
+          value={formData.city}
+          onChange={handleChange}
+        />
         </div>
         
         <div>
@@ -558,9 +564,13 @@ export default function RegisterPage() {
         </div>
 
         <div className="text-sm">
-          <a href="#" className="font-medium text-emerald-600 hover:text-emerald-500">
+          <button
+            type="button"
+            onClick={() => setShowForgotPassword(true)}
+            className="font-medium text-emerald-600 hover:text-emerald-700 transition-colors"
+          >
             Forgot your password?
-          </a>
+          </button>
         </div>
       </div>
     </div>
@@ -586,56 +596,56 @@ export default function RegisterPage() {
           <span className="w-2 h-2 bg-emerald-500 rounded-full mr-2"></span>
           Business Information
         </h3>
-        
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-2">
             Business Name *
-          </label>
-          <input
-            name="business_name"
-            type="text"
-            required
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
-            placeholder="Your business name"
-            value={formData.business_name}
-            onChange={handleChange}
-          />
-        </div>
+        </label>
+        <input
+          name="business_name"
+          type="text"
+          required
+          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
+          placeholder="Your business name"
+          value={formData.business_name}
+          onChange={handleChange}
+        />
+      </div>
 
         <div className="mt-4">
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+        <label className="block text-sm font-medium text-gray-700 mb-2">
             Business Address *
-          </label>
+        </label>
           <textarea
             name="business_address"
             rows={2}
-            required
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
+          required
+          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
             placeholder="Full business address"
             value={formData.business_address}
-            onChange={handleChange}
+          onChange={handleChange}
           />
-        </div>
+      </div>
 
         <div className="grid grid-cols-2 gap-4 mt-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-2">
               Business Phone
-            </label>
+        </label>
             <input
               name="business_phone"
               type="tel"
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
+          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
               placeholder="Business phone number"
               value={formData.business_phone}
-              onChange={handleChange}
+          onChange={handleChange}
             />
-          </div>
-          
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-2">
               Business Email
-            </label>
+        </label>
             <input
               name="business_email"
               type="email"
@@ -656,19 +666,19 @@ export default function RegisterPage() {
           <label className="block text-sm font-medium text-gray-700 mb-2">
             Primary Service *
           </label>
-          <select
+            <select
             name="primary_service"
             required
             className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
             value={formData.primary_service}
-            onChange={handleChange}
-          >
+              onChange={handleChange}
+            >
             <option value="">Select primary service</option>
             {serviceCategories.map((category) => (
               <option key={category} value={category}>{category}</option>
-            ))}
-          </select>
-        </div>
+              ))}
+            </select>
+          </div>
 
         <div className="mt-4">
           <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -677,7 +687,7 @@ export default function RegisterPage() {
           <div className="grid grid-cols-2 gap-2">
             {serviceCategories.map((category) => (
               <label key={category} className="flex items-center">
-                <input
+            <input
                   type="checkbox"
                   value={category}
                   checked={formData.service_categories.includes(category)}
@@ -701,7 +711,7 @@ export default function RegisterPage() {
               </label>
             ))}
           </div>
-        </div>
+      </div>
 
         <div className="mt-4">
           <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -710,7 +720,7 @@ export default function RegisterPage() {
           <div className="grid grid-cols-2 gap-2">
             {majorCities.map((area) => (
               <label key={area} className="flex items-center">
-                <input
+          <input
                   type="checkbox"
                   value={area}
                   checked={formData.service_areas.includes(area)}
@@ -755,7 +765,7 @@ export default function RegisterPage() {
             <option value="200">200+ km</option>
           </select>
         </div>
-
+        
         <div className="mt-4">
           <label className="block text-sm font-medium text-gray-700 mb-2">
             Years of Experience *
@@ -772,59 +782,59 @@ export default function RegisterPage() {
               <option key={level} value={level}>{level}</option>
             ))}
           </select>
-        </div>
+      </div>
 
         <div className="mt-4">
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+        <label className="block text-sm font-medium text-gray-700 mb-2">
             Service Description *
-          </label>
-          <textarea
-            name="service_description"
-            rows={3}
+        </label>
+        <textarea
+          name="service_description"
+          rows={3}
             required
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
+          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
             placeholder="Describe your services and expertise"
-            value={formData.service_description}
-            onChange={handleChange}
-          />
+          value={formData.service_description}
+          onChange={handleChange}
+        />
         </div>
       </div>
 
       {/* Pricing Information */}
       <div className="bg-green-50 p-4 rounded-lg">
         <h3 className="text-lg font-semibold text-gray-800 mb-4">Pricing Information</h3>
-        
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
               Hourly Rate (Min) - R
-            </label>
-            <input
+          </label>
+          <input
               name="hourly_rate_min"
               type="number"
               step="0.01"
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
+            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
               placeholder="150.00"
               value={formData.hourly_rate_min}
-              onChange={handleChange}
-            />
-          </div>
-          
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            onChange={handleChange}
+          />
+        </div>
+        
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
               Hourly Rate (Max) - R
-            </label>
+          </label>
             <input
               name="hourly_rate_max"
               type="number"
               step="0.01"
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
+            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
               placeholder="300.00"
               value={formData.hourly_rate_max}
-              onChange={handleChange}
+            onChange={handleChange}
             />
-          </div>
         </div>
+      </div>
 
         <div className="mt-4">
           <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -885,12 +895,12 @@ export default function RegisterPage() {
           <h1 className="text-4xl font-bold text-gray-900 mb-2">
             <span className="text-emerald-600">ProConnect</span>
             <span className="text-gray-900">SA</span>
-          </h1>
+              </h1>
           <p className="text-lg text-gray-600">
             South Africa's Premium Service Marketplace
           </p>
+          </div>
         </div>
-      </div>
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
         <div className="bg-white py-8 px-4 shadow-2xl border border-gray-200 sm:rounded-2xl sm:px-10">
@@ -929,12 +939,12 @@ export default function RegisterPage() {
               >
                 Sign Up
               </button>
+              </div>
             </div>
-          </div>
 
           {/* Progress indicator for signup only */}
           {authMode === 'signup' && (
-            <div className="mb-8">
+                <div className="mb-8">
               <div className="flex items-center justify-center space-x-4">
                 <div className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold shadow-lg ${
                   currentStep >= 1 
@@ -942,7 +952,7 @@ export default function RegisterPage() {
                     : 'bg-gray-200 text-gray-500'
                 }`}>
                   1
-                </div>
+                  </div>
                 <div className={`w-20 h-2 rounded-full ${currentStep >= 2 ? 'bg-gradient-to-r from-emerald-500 to-emerald-600' : 'bg-gray-200'}`}></div>
                 <div className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold shadow-lg ${
                   currentStep >= 2 
@@ -955,18 +965,18 @@ export default function RegisterPage() {
               <div className="flex justify-between mt-3 text-sm font-medium text-gray-600">
                 <span>Basic Info</span>
                 <span>{formData.user_type === 'provider' ? 'Provider Details' : 'Complete'}</span>
-              </div>
-            </div>
-          )}
+                  </div>
+                </div>
+              )}
 
           {/* Error and Success Messages */}
-          {error && (
+              {error && (
             <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg">
               <p className="text-sm text-red-600">{error}</p>
-            </div>
-          )}
-
-          {success && (
+                </div>
+              )}
+              
+              {success && (
             <div className="mb-6 p-6 bg-green-50 border-2 border-green-200 rounded-lg shadow-md">
               <div className="flex items-center">
                 <div className="flex-shrink-0">
@@ -978,8 +988,8 @@ export default function RegisterPage() {
                   <p className="text-sm font-medium text-green-800">{success}</p>
                 </div>
               </div>
-            </div>
-          )}
+                </div>
+              )}
 
           <form onSubmit={authMode === 'login' ? handleLogin : handleSubmit} className="space-y-6">
             {authMode === 'login' ? (
@@ -994,15 +1004,15 @@ export default function RegisterPage() {
             {/* Navigation buttons */}
             <div className="flex justify-between">
               {authMode === 'signup' && currentStep > 1 && (
-                <button
-                  type="button"
+                    <button
+                      type="button"
                   onClick={() => setCurrentStep(currentStep - 1)}
                   className="px-6 py-3 text-sm font-semibold text-gray-700 bg-white border border-gray-300 rounded-xl hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-emerald-500 shadow-sm transition-all duration-200"
-                >
-                  Previous
-                </button>
-              )}
-              
+                    >
+                      Previous
+                    </button>
+                  )}
+
               <div className="ml-auto">
                 {authMode === 'login' ? (
                   <button
@@ -1046,8 +1056,8 @@ export default function RegisterPage() {
                   </button>
                 )}
               </div>
-            </div>
-          </form>
+                </div>
+              </form>
 
           <div className="mt-6 text-center">
             {authMode === 'login' ? (
@@ -1067,8 +1077,8 @@ export default function RegisterPage() {
                 </button>
               </p>
             ) : (
-              <p className="text-sm text-gray-600">
-                Already have an account?{' '}
+                <p className="text-sm text-gray-600">
+                  Already have an account?{' '}
                 <button
                   type="button"
                   onClick={() => {
@@ -1079,13 +1089,41 @@ export default function RegisterPage() {
                   }}
                   className="font-semibold text-emerald-600 hover:text-emerald-700 transition-colors"
                 >
-                  Sign in here
+                    Sign in here
                 </button>
-              </p>
+                </p>
             )}
           </div>
         </div>
       </div>
+
+      {/* Forgot Password Modal */}
+      <ForgotPasswordModal
+        isOpen={showForgotPassword}
+        onClose={() => setShowForgotPassword(false)}
+        onSuccess={(email, token) => {
+          setShowForgotPassword(false);
+          setResetEmail(email);
+          setResetToken(token);
+          setShowPasswordReset(true);
+        }}
+      />
+
+      {/* Password Reset Modal */}
+      <PasswordResetModal
+        isOpen={showPasswordReset}
+        onClose={() => {
+          setShowPasswordReset(false);
+          setResetEmail('');
+          setResetToken('');
+        }}
+        email={resetEmail}
+        resetToken={resetToken}
+        onSuccess={() => {
+          setMessage('Password reset successfully! You can now log in with your new password.');
+          setAuthMode('login');
+        }}
+      />
     </div>
   );
 }

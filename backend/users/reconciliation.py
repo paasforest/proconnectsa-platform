@@ -7,6 +7,7 @@ import json
 from django.conf import settings
 
 from .models import Wallet, WalletTransaction
+from backend.utils.sendgrid_service import sendgrid_service
 
 logger = logging.getLogger(__name__)
 
@@ -229,9 +230,22 @@ def get_mock_bank_transactions():
 
 def send_deposit_notification(user, credits_added, total_credits):
     """Send email/SMS notification for successful deposit"""
-    # Implement your notification service (email/SMS)
-    logger.info(f"Deposit notification: {user.username} received {credits_added} credits (total: {total_credits})")
-    pass
+    try:
+        # Get the latest transaction for this user
+        latest_transaction = WalletTransaction.objects.filter(
+            wallet__user=user,
+            status='confirmed',
+            transaction_type='deposit'
+        ).order_by('-created_at').first()
+        
+        if latest_transaction:
+            # Send payment confirmation email
+            sendgrid_service.send_payment_confirmation(user, latest_transaction)
+            logger.info(f"📧 Payment confirmation email sent to {user.email}")
+        
+        logger.info(f"Deposit notification: {user.username} received {credits_added} credits (total: {total_credits})")
+    except Exception as e:
+        logger.error(f"❌ Failed to send deposit notification: {str(e)}")
 
 
 def create_mock_deposit_for_testing(user, amount):

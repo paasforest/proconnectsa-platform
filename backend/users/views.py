@@ -19,6 +19,7 @@ from .serializers import (
 from rest_framework.views import APIView
 from django.contrib.auth import update_session_auth_hash
 from backend.notifications.email_service import send_welcome_email
+from .verification_service import VerificationService
 
 
 class UserRegistrationView(generics.CreateAPIView):
@@ -27,7 +28,6 @@ class UserRegistrationView(generics.CreateAPIView):
     serializer_class = UserRegistrationSerializer
     permission_classes = [permissions.AllowAny]
     
-    @ratelimit(key='ip', rate='5/m', method='POST', block=True)
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -36,9 +36,17 @@ class UserRegistrationView(generics.CreateAPIView):
         # Create auth token
         token, created = Token.objects.get_or_create(user=user)
         
-        # Send welcome email
+        # Send welcome email and email verification
+        verification_service = VerificationService()
         try:
+            # Send welcome email
             send_welcome_email(user)
+            
+            # Initiate email verification
+            verification_result = verification_service.initiate_email_verification(user)
+            if not verification_result.get('success'):
+                logger.warning(f"Email verification failed for {user.email}: {verification_result.get('error')}")
+                
         except Exception as e:
             # Log error but don't fail registration
             import logging
