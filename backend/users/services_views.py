@@ -174,6 +174,9 @@ def add_service(request):
             is_active=True
         )
         
+        # CRITICAL FIX: Update service_categories JSON field to sync with Service objects
+        _sync_service_categories_json_field(provider_profile)
+        
         return Response({
             'success': True,
             'service': {
@@ -306,3 +309,26 @@ def service_stats(request):
             {'error': 'Failed to fetch service stats'}, 
             status=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
+
+
+def _sync_service_categories_json_field(provider_profile):
+    """
+    CRITICAL FIX: Sync service_categories JSON field with Service objects.
+    This ensures that when services are added/removed, the JSON field is updated
+    so that lead filtering works correctly.
+    """
+    try:
+        # Get all active service category slugs from Service objects
+        active_service_categories = set()
+        for service in provider_profile.services.filter(is_active=True):
+            if service.category.slug:
+                active_service_categories.add(service.category.slug)
+        
+        # Update the JSON field to match Service objects
+        provider_profile.service_categories = list(active_service_categories)
+        provider_profile.save(update_fields=['service_categories'])
+        
+        logger.info(f"Synced service_categories for {provider_profile.user.email}: {list(active_service_categories)}")
+        
+    except Exception as e:
+        logger.error(f"Failed to sync service_categories for {provider_profile.user.email}: {str(e)}")
