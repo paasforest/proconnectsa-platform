@@ -25,6 +25,104 @@ class EmailService:
             logger.error(f"Failed to send email to {to_email}: {str(e)}")
             return False
 
+    def send_verification_email(self, email, verification_code, verification_token):
+        """Send email verification code"""
+        try:
+            subject = "🔐 Verify Your ProConnectSA Account"
+            
+            # HTML content
+            html_content = f"""
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <meta charset="utf-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                <title>Verify Your Account - ProConnectSA</title>
+                <style>
+                    body {{ font-family: Arial, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; }}
+                    .container {{ max-width: 600px; margin: 0 auto; padding: 20px; }}
+                    .header {{ background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }}
+                    .content {{ background: #f9fafb; padding: 30px; border-radius: 0 0 10px 10px; }}
+                    .verification-code {{ background: #10b981; color: white; padding: 15px 30px; border-radius: 8px; font-size: 24px; font-weight: bold; text-align: center; margin: 20px 0; letter-spacing: 3px; }}
+                    .footer {{ text-align: center; margin-top: 30px; color: #6b7280; font-size: 14px; }}
+                </style>
+            </head>
+            <body>
+                <div class="container">
+                    <div class="header">
+                        <h1>🔐 Verify Your Account</h1>
+                        <p>Welcome to ProConnectSA!</p>
+                    </div>
+                    <div class="content">
+                        <h2>Email Verification Required</h2>
+                        <p>Thank you for registering with ProConnectSA! To complete your registration and start using our platform, please verify your email address.</p>
+                        
+                        <div class="verification-code">
+                            {verification_code}
+                        </div>
+                        
+                        <p><strong>How to verify:</strong></p>
+                        <ol>
+                            <li>Copy the verification code above</li>
+                            <li>Go to your ProConnectSA dashboard</li>
+                            <li>Enter the code when prompted</li>
+                            <li>Or click the verification link below</li>
+                        </ol>
+                        
+                        <div style="text-align: center; margin: 30px 0;">
+                            <a href="{settings.FRONTEND_URL}/verify-email?token={verification_token}" style="display: inline-block; background: #10b981; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px;">Verify Email Address</a>
+                        </div>
+                        
+                        <p><strong>Important:</strong> This verification code will expire in 24 hours for security reasons.</p>
+                        
+                        <p>If you didn't create an account with ProConnectSA, please ignore this email.</p>
+                        
+                        <p>Best regards,<br>The ProConnectSA Team</p>
+                    </div>
+                    <div class="footer">
+                        <p>ProConnectSA - Connecting you with the best service providers</p>
+                        <p>Email: support@proconnectsa.co.za | Phone: +27 21 123 4567</p>
+                    </div>
+                </div>
+            </body>
+            </html>
+            """
+            
+            # Plain text version
+            text_content = f"""
+            Verify Your ProConnectSA Account
+            
+            Welcome to ProConnectSA!
+            
+            Email Verification Required
+            
+            Thank you for registering with ProConnectSA! To complete your registration and start using our platform, please verify your email address.
+            
+            Verification Code: {verification_code}
+            
+            How to verify:
+            1. Copy the verification code above
+            2. Go to your ProConnectSA dashboard
+            3. Enter the code when prompted
+            4. Or visit: {settings.FRONTEND_URL}/verify-email?token={verification_token}
+            
+            Important: This verification code will expire in 24 hours for security reasons.
+            
+            If you didn't create an account with ProConnectSA, please ignore this email.
+            
+            Best regards,
+            The ProConnectSA Team
+            
+            ProConnectSA - Connecting you with the best service providers
+            Email: support@proconnectsa.co.za | Phone: +27 21 123 4567
+            """
+            
+            return self.send_email(email, subject, html_content, text_content)
+            
+        except Exception as e:
+            logger.error(f"Error sending verification email: {str(e)}")
+            return False
+
     def send_password_reset_email(self, email, reset_code, reset_token):
         """Send password reset code via email"""
         try:

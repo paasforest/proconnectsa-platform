@@ -65,7 +65,6 @@ class UserLoginView(generics.GenericAPIView):
     serializer_class = UserLoginSerializer
     permission_classes = [permissions.AllowAny]
     
-    @ratelimit(key='ip', rate='10/m', method='POST', block=True)
     def post(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         
