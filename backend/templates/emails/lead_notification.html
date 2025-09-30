@@ -30,8 +30,8 @@
                 <h3>🎯 {{ lead.service_category.name }} Lead</h3>
                 <p><strong>Title:</strong> {{ lead.title }}</p>
                 <p><strong>Location:</strong> {{ lead.location_suburb }}, {{ lead.location_city }}</p>
-                <p><strong>Budget:</strong> {{ lead.get_budget_display_range }}</p>
-                <p><strong>Urgency:</strong> {{ lead.get_urgency_display }}</p>
+                <p><strong>Budget:</strong> {{ lead.budget_display }}</p>
+                <p><strong>Urgency:</strong> {{ lead.urgency_display }}</p>
                 <p><strong>Description:</strong> {{ lead.description|truncatewords:30 }}</p>
             </div>
             

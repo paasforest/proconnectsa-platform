@@ -275,7 +275,7 @@ def send_lead_notification_email(provider, lead):
             # Fallback to Django email backend
             subject = f"New {lead.service_category.name} lead in {lead.location_city}"
             
-            # HTML content
+            # HTML content - Fix template context
             html_content = render_to_string('emails/lead_notification.html', {
                 'provider': provider,
                 'lead': lead,
