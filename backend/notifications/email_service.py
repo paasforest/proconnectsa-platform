@@ -233,6 +233,7 @@ def send_welcome_email(user):
         html_content = render_to_string('emails/welcome.html', {
             'user': user,
             'site_url': settings.FRONTEND_URL,
+            'dashboard_url': f"{settings.FRONTEND_URL}/dashboard/",
         })
         
         # Plain text content
