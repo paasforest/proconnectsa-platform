@@ -324,7 +324,7 @@ export default function LeadFilters({
         {activeFiltersCount > 0 && (
           <div className="border-t pt-4">
             <div className="flex items-center gap-2 mb-2">
-              <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+              <span className="text-sm font-medium text-gray-700">
                 Active Filters:
               </span>
             </div>

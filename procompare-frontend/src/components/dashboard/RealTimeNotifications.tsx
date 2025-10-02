@@ -70,13 +70,13 @@ export default function RealTimeNotifications({
   const getPriorityColor = (priority: string) => {
     switch (priority) {
       case 'high':
-        return 'border-l-red-500 bg-red-50 dark:bg-red-900/20';
+        return 'border-l-red-500 bg-red-50';
       case 'medium':
-        return 'border-l-yellow-500 bg-yellow-50 dark:bg-yellow-900/20';
+        return 'border-l-yellow-500 bg-yellow-50';
       case 'low':
-        return 'border-l-blue-500 bg-blue-50 dark:bg-blue-900/20';
+        return 'border-l-blue-500 bg-blue-50';
       default:
-        return 'border-l-gray-500 bg-gray-50 dark:bg-gray-900/20';
+        return 'border-l-gray-500 bg-gray-50';
     }
   };
 
@@ -134,11 +134,11 @@ export default function RealTimeNotifications({
             transition={{ duration: 0.2 }}
             className="absolute right-0 top-full mt-2 w-80 z-50"
           >
-            <Card className="shadow-lg border border-gray-200 dark:border-gray-700">
+            <Card className="shadow-lg border border-gray-200">
               <CardContent className="p-0">
                 {/* Header */}
-                <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
-                  <h3 className="font-semibold text-gray-900 dark:text-white">
+                <div className="flex items-center justify-between p-4 border-b border-gray-200">
+                  <h3 className="font-semibold text-gray-900">
                     Notifications
                   </h3>
                   <div className="flex items-center gap-2">
@@ -165,7 +165,7 @@ export default function RealTimeNotifications({
                 {/* Notifications List */}
                 <div className="max-h-96 overflow-y-auto">
                   {notifications.length === 0 ? (
-                    <div className="p-8 text-center text-gray-500 dark:text-gray-400">
+                    <div className="p-8 text-center text-gray-500">
                       <Bell className="h-8 w-8 mx-auto mb-2 opacity-50" />
                       <p>No notifications yet</p>
                     </div>
@@ -176,8 +176,8 @@ export default function RealTimeNotifications({
                         initial={{ opacity: 0, x: -20 }}
                         animate={{ opacity: 1, x: 0 }}
                         exit={{ opacity: 0, x: 20 }}
-                        className={`border-l-4 p-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors ${
-                          !notification.read ? 'bg-blue-50 dark:bg-blue-900/20' : ''
+                        className={`border-l-4 p-4 cursor-pointer hover:bg-gray-50 transition-colors ${
+                          !notification.read ? 'bg-blue-50' : ''
                         } ${getPriorityColor(notification.priority)}`}
                         onClick={() => handleNotificationClick(notification)}
                       >
@@ -189,7 +189,7 @@ export default function RealTimeNotifications({
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center justify-between">
                               <h4 className={`text-sm font-medium ${
-                                !notification.read ? 'text-gray-900 dark:text-white' : 'text-gray-700 dark:text-gray-300'
+                                !notification.read ? 'text-gray-900' : 'text-gray-700'
                               }`}>
                                 {notification.title}
                               </h4>
@@ -211,7 +211,7 @@ export default function RealTimeNotifications({
                               </div>
                             </div>
                             
-                            <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                            <p className="text-sm text-gray-600 mt-1">
                               {notification.message}
                             </p>
 
@@ -241,7 +241,7 @@ export default function RealTimeNotifications({
 
                 {/* Footer */}
                 {notifications.length > 0 && (
-                  <div className="p-4 border-t border-gray-200 dark:border-gray-700">
+                  <div className="p-4 border-t border-gray-200">
                     <Button
                       variant="outline"
                       size="sm"

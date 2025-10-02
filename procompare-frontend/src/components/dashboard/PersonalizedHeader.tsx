@@ -148,15 +148,15 @@ export default function PersonalizedHeader({
   const getSubscriptionColor = (tier: string) => {
     switch (tier) {
       case 'enterprise':
-        return 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200';
+        return 'bg-purple-100 text-purple-800';
       case 'pro':
-        return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200';
+        return 'bg-blue-100 text-blue-800';
       case 'advanced':
-        return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200';
+        return 'bg-green-100 text-green-800';
       case 'basic':
-        return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200';
+        return 'bg-yellow-100 text-yellow-800';
       default:
-        return 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200';
+        return 'bg-gray-100 text-gray-800';
     }
   };
 
@@ -175,11 +175,11 @@ export default function PersonalizedHeader({
 
   if (loading) {
     return (
-      <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-gray-900 dark:to-gray-800 border-b border-gray-200 dark:border-gray-700">
-        <div className="max-w-7xl mx-auto px-6 py-8">
+      <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-gray-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
           <div className="animate-pulse">
-            <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded w-1/3 mb-4"></div>
-            <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-1/2"></div>
+            <div className="h-8 bg-gray-200 rounded w-1/3 mb-4"></div>
+            <div className="h-4 bg-gray-200 rounded w-1/2"></div>
           </div>
         </div>
       </div>
@@ -188,9 +188,9 @@ export default function PersonalizedHeader({
 
   if (!stats) {
     return (
-      <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-gray-900 dark:to-gray-800 border-b border-gray-200 dark:border-gray-700">
-        <div className="max-w-7xl mx-auto px-6 py-8">
-          <div className="text-center text-gray-500 dark:text-gray-400">
+      <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-gray-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
+          <div className="text-center text-gray-500">
             <p>Loading provider information...</p>
           </div>
         </div>
@@ -205,19 +205,19 @@ export default function PersonalizedHeader({
     <motion.div
       initial={{ opacity: 0, y: -20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-gray-900 dark:to-gray-800 border-b border-gray-200 dark:border-gray-700"
+      className="bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-gray-200"
     >
-      <div className="max-w-7xl mx-auto px-6 py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
         {/* Business Header - Vertical Layout */}
         <div className="mb-6">
           <div className="flex items-center gap-4 mb-4">
-            <div className="bg-white dark:bg-gray-800 p-3 rounded-xl shadow-sm">
+            <div className="bg-white p-3 rounded-xl shadow-sm">
               <Building2 className="h-8 w-8 text-blue-600" />
             </div>
             
             <div className="flex-1">
               <div className="flex flex-wrap items-center gap-3 mb-2">
-                <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+                <h1 className="text-xl sm:text-2xl font-bold text-gray-900">
                   Welcome back, {stats.business_name || 'Provider'}
                 </h1>
                 <Badge className={getSubscriptionColor(stats.subscription_tier || 'basic')}>
@@ -232,7 +232,7 @@ export default function PersonalizedHeader({
           </div>
           
           {/* Business Info - Vertical Stack */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-gray-600 dark:text-gray-400">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 text-sm text-gray-600">
             <div className="flex items-center gap-2">
               <MapPin className="h-4 w-4" />
               <span>
@@ -264,7 +264,7 @@ export default function PersonalizedHeader({
                   <div className="text-2xl font-bold text-blue-600">
                     {stats.leads_claimed_this_month || 0}
                   </div>
-                  <div className="text-xs text-gray-600 dark:text-gray-400">
+                  <div className="text-xs text-gray-600">
                     Leads this month
                   </div>
                   <div className="text-xs text-gray-500">
@@ -280,7 +280,7 @@ export default function PersonalizedHeader({
                   <div className="text-2xl font-bold text-green-600">
                     {stats.credit_balance || 0}
                   </div>
-                  <div className="text-xs text-gray-600 dark:text-gray-400">
+                  <div className="text-xs text-gray-600">
                     Credits
                   </div>
                 </div>
@@ -293,7 +293,7 @@ export default function PersonalizedHeader({
                   <div className="text-2xl font-bold text-yellow-600">
                     {Number(stats.average_rating || 0).toFixed(1)}
                   </div>
-                  <div className="text-xs text-gray-600 dark:text-gray-400">
+                  <div className="text-xs text-gray-600">
                     Rating
                   </div>
                   <div className="text-xs text-gray-500">
@@ -309,7 +309,7 @@ export default function PersonalizedHeader({
                   <div className="text-2xl font-bold text-purple-600">
                     {Number(stats.job_completion_rate || 0).toFixed(0)}%
                   </div>
-                  <div className="text-xs text-gray-600 dark:text-gray-400">
+                  <div className="text-xs text-gray-600">
                     Completion
                   </div>
                 </div>
@@ -357,8 +357,8 @@ export default function PersonalizedHeader({
         {/* Service Categories */}
         <div className="mt-6">
           <div className="flex items-center gap-2 mb-3">
-            <Zap className="h-4 w-4 text-gray-600 dark:text-gray-400" />
-            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+            <Zap className="h-4 w-4 text-gray-600" />
+            <span className="text-sm font-medium text-gray-700">
               Your Services
             </span>
           </div>
@@ -370,7 +370,7 @@ export default function PersonalizedHeader({
                 </Badge>
               ))
             ) : (
-              <span className="text-sm text-gray-500 dark:text-gray-400">No services configured</span>
+              <span className="text-sm text-gray-500">No services configured</span>
             )}
           </div>
         </div>
