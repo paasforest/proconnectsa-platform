@@ -21,12 +21,12 @@ export default function HowItWorksPage() {
       
       <main className="flex-1">
         {/* Hero Section */}
-        <section className="bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-blue-950 dark:to-indigo-900 py-20">
+        <section className="bg-gradient-to-br from-blue-50 to-indigo-100 py-20">
           <div className="container mx-auto px-4 text-center">
-            <h1 className="text-4xl md:text-6xl font-bold text-gray-900 dark:text-white mb-6">
+            <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-6">
               How ProConnectSA Works
             </h1>
-            <p className="text-xl text-gray-600 dark:text-gray-300 mb-8 max-w-3xl mx-auto">
+            <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto">
               Getting connected with verified service providers has never been easier. 
               Follow our simple 3-step process to find the perfect professional for your needs.
             </p>
@@ -45,10 +45,10 @@ export default function HowItWorksPage() {
                   </div>
                   <FileText className="w-8 h-8 text-blue-600 mx-auto" />
                 </div>
-                <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+                <h3 className="text-2xl font-bold text-gray-900 mb-4">
                   Describe Your Job
                 </h3>
-                <p className="text-gray-600 dark:text-gray-300 mb-6">
+                <p className="text-gray-600 mb-6">
                   Tell us what you need done, when you need it, your budget range, and any specific requirements. 
                   The more details you provide, the better we can match you with the right professionals.
                 </p>
@@ -76,10 +76,10 @@ export default function HowItWorksPage() {
                   </div>
                   <Users className="w-8 h-8 text-blue-600 mx-auto" />
                 </div>
-                <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+                <h3 className="text-2xl font-bold text-gray-900 mb-4">
                   Get Matched & Verified
                 </h3>
-                <p className="text-gray-600 dark:text-gray-300 mb-6">
+                <p className="text-gray-600 mb-6">
                   Our system finds up to 3 verified professionals in your area who match your requirements. 
                   We verify your request via SMS to ensure quality and prevent spam.
                 </p>
@@ -107,10 +107,10 @@ export default function HowItWorksPage() {
                   </div>
                   <MessageSquare className="w-8 h-8 text-blue-600 mx-auto" />
                 </div>
-                <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+                <h3 className="text-2xl font-bold text-gray-900 mb-4">
                   Compare & Choose
                 </h3>
-                <p className="text-gray-600 dark:text-gray-300 mb-6">
+                <p className="text-gray-600 mb-6">
                   Professionals will contact you directly with quotes and questions. 
                   Compare their profiles, reviews, and prices to choose the best fit for your project.
                 </p>
@@ -137,10 +137,10 @@ export default function HowItWorksPage() {
         <section className="py-20 bg-gray-50 dark:bg-gray-800">
           <div className="container mx-auto px-4">
             <div className="text-center mb-16">
-              <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">
+              <h2 className="text-3xl font-bold text-gray-900 mb-4">
                 Why Choose ProConnectSA?
               </h2>
-              <p className="text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
+              <p className="text-gray-600 max-w-2xl mx-auto">
                 We make it easy, safe, and efficient to find the right service provider
               </p>
             </div>
@@ -149,10 +149,10 @@ export default function HowItWorksPage() {
               <Card className="text-center">
                 <CardContent className="p-6">
                   <Shield className="w-12 h-12 text-blue-600 mx-auto mb-4" />
-                  <h3 className="font-semibold text-gray-900 dark:text-white mb-2">
+                  <h3 className="font-semibold text-gray-900 mb-2">
                     Verified Professionals
                   </h3>
-                  <p className="text-sm text-gray-600 dark:text-gray-300">
+                  <p className="text-sm text-gray-600">
                     All providers are background checked and verified for your safety
                   </p>
                 </CardContent>
@@ -161,10 +161,10 @@ export default function HowItWorksPage() {
               <Card className="text-center">
                 <CardContent className="p-6">
                   <Clock className="w-12 h-12 text-blue-600 mx-auto mb-4" />
-                  <h3 className="font-semibold text-gray-900 dark:text-white mb-2">
+                  <h3 className="font-semibold text-gray-900 mb-2">
                     Fast Response
                   </h3>
-                  <p className="text-sm text-gray-600 dark:text-gray-300">
+                  <p className="text-sm text-gray-600">
                     Get quotes within hours, not days. Most providers respond within 2 hours
                   </p>
                 </CardContent>
@@ -173,10 +173,10 @@ export default function HowItWorksPage() {
               <Card className="text-center">
                 <CardContent className="p-6">
                   <Star className="w-12 h-12 text-blue-600 mx-auto mb-4" />
-                  <h3 className="font-semibold text-gray-900 dark:text-white mb-2">
+                  <h3 className="font-semibold text-gray-900 mb-2">
                     Quality Reviews
                   </h3>
-                  <p className="text-sm text-gray-600 dark:text-gray-300">
+                  <p className="text-sm text-gray-600">
                     Read real reviews from previous customers to make informed decisions
                   </p>
                 </CardContent>
@@ -185,10 +185,10 @@ export default function HowItWorksPage() {
               <Card className="text-center">
                 <CardContent className="p-6">
                   <Users className="w-12 h-12 text-blue-600 mx-auto mb-4" />
-                  <h3 className="font-semibold text-gray-900 dark:text-white mb-2">
+                  <h3 className="font-semibold text-gray-900 mb-2">
                     Local Experts
                   </h3>
-                  <p className="text-sm text-gray-600 dark:text-gray-300">
+                  <p className="text-sm text-gray-600">
                     Connect with professionals in your area who know the local market
                   </p>
                 </CardContent>
