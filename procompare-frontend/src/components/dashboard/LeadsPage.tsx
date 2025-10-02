@@ -260,15 +260,15 @@ const LeadsPage = () => {
   }
 
   return (
-    <div className="p-6">
+    <div className="p-4 sm:p-6">
       {/* Header */}
       <div className="mb-6">
-        <h1 className="text-3xl font-bold text-gray-900">Available Leads</h1>
-        <p className="text-gray-600 mt-2">Browse and purchase leads from your service areas</p>
+        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Available Leads</h1>
+        <p className="text-gray-600 mt-2 text-sm sm:text-base">Browse and purchase leads from your service areas</p>
       </div>
 
       {/* Search and Filters */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6 mb-6">
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0">
           {/* Search */}
           <div className="flex-1 max-w-md">
@@ -285,7 +285,7 @@ const LeadsPage = () => {
           </div>
 
           {/* Filter and Sort Controls */}
-          <div className="flex items-center space-x-4">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center space-y-2 sm:space-y-0 sm:space-x-4">
             <button
               onClick={() => setShowFilters(!showFilters)}
               className="flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
@@ -298,7 +298,7 @@ const LeadsPage = () => {
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value)}
-              className="px-4 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full sm:w-auto px-4 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
               <option value="newest">Newest First</option>
               <option value="oldest">Oldest First</option>
@@ -320,7 +320,7 @@ const LeadsPage = () => {
         {/* Advanced Filters */}
         {showFilters && (
           <div className="mt-6 pt-6 border-t border-gray-200">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Service</label>
                 <select
@@ -375,7 +375,7 @@ const LeadsPage = () => {
               </div>
             </div>
 
-            <div className="mt-4 flex items-center space-x-4">
+            <div className="mt-4 flex flex-col sm:flex-row items-start sm:items-center space-y-2 sm:space-y-0 sm:space-x-4">
               <label className="flex items-center">
                 <input
                   type="checkbox"
@@ -438,25 +438,25 @@ const LeadsPage = () => {
           </button>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
           {filteredLeads.map((lead) => (
-            <div key={lead.id} className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow">
+            <div key={lead.id} className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6 hover:shadow-md transition-shadow">
               {/* Header */}
-              <div className="flex items-start justify-between mb-4">
+              <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between mb-4 space-y-2 sm:space-y-0">
                 <div className="flex-1">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-1">
+                  <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-1">
                     {lead.isUnlocked ? lead.name : lead.masked_name}
                   </h3>
-                  <div className="flex items-center text-sm text-gray-600 mb-2">
-                    <MapPin className="w-4 h-4 mr-1" />
+                  <div className="flex items-center text-xs sm:text-sm text-gray-600 mb-1">
+                    <MapPin className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
                     {lead.isUnlocked ? lead.location : lead.masked_location}
                   </div>
-                  <div className="flex items-center text-sm text-gray-600">
-                    <Clock className="w-4 h-4 mr-1" />
+                  <div className="flex items-center text-xs sm:text-sm text-gray-600">
+                    <Clock className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
                     {lead.timeAgo}
                   </div>
                 </div>
-                <div className="flex flex-col items-end space-y-2">
+                <div className="flex flex-row sm:flex-col items-start sm:items-end space-x-2 sm:space-x-0 sm:space-y-2">
                   <span className={`px-2 py-1 text-xs font-medium rounded-full ${getUrgencyColor(lead.urgency)}`}>
                     {lead.urgency?.toUpperCase() || 'MEDIUM'}
                   </span>
@@ -470,8 +470,8 @@ const LeadsPage = () => {
               <div className="mb-4">
                 <p className="text-sm font-medium text-gray-900 mb-1">{lead.service}</p>
                 {lead.budget && (
-                  <div className="flex items-center text-sm text-gray-600">
-                    <DollarSign className="w-4 h-4 mr-1" />
+                  <div className="flex items-center text-xs sm:text-sm text-gray-600">
+                    <DollarSign className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
                     {lead.budget}
                   </div>
                 )}
@@ -502,13 +502,13 @@ const LeadsPage = () => {
 
               {/* Bark-style Competition Stats */}
         <div className="mb-4 p-3 bg-gray-50 rounded-lg">
-          <div className="flex items-center justify-between text-sm text-gray-600">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between text-xs sm:text-sm text-gray-600 space-y-1 sm:space-y-0">
             <div className="flex items-center">
-              <Eye className="w-4 h-4 mr-1" />
+              <Eye className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
               <span>{lead.views_count || 0} professionals viewed</span>
             </div>
             <div className="flex items-center">
-              <Users className="w-4 h-4 mr-1" />
+              <Users className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
               <span>{lead.responses_count || 0} responded</span>
             </div>
           </div>
@@ -542,15 +542,15 @@ const LeadsPage = () => {
               )}
 
               {/* Action Button */}
-              <div className="flex items-center justify-between">
-                <div className="flex items-center text-sm text-gray-600">
-                  <Wallet className="w-4 h-4 mr-1" />
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-2 sm:space-y-0">
+                <div className="flex items-center text-xs sm:text-sm text-gray-600">
+                  <Wallet className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
                   {lead.credits} credits
                 </div>
                 <button
                   onClick={() => handleUnlockLead(lead.id)}
                   disabled={unlockingLead === lead.id || lead.isUnlocked}
-                  className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
+                  className={`w-full sm:w-auto px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
                     lead.isUnlocked
                       ? 'bg-green-100 text-green-700 cursor-not-allowed'
                       : unlockingLead === lead.id
