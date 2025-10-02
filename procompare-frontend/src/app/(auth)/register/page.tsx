@@ -274,11 +274,41 @@ export default function RegisterPage() {
       const data = await response.json();
 
       if (response.ok) {
-        setSuccess('🎉 Registration successful! Your account has been created. Redirecting to login page...');
+        setSuccess('🎉 Registration successful! Your account has been created. You can now sign in below.');
         setError(''); // Clear any previous errors
-        setTimeout(() => {
-          router.push('/login');
-        }, 3000); // Give more time to see the message
+        // Switch to login mode instead of redirecting
+        setAuthMode('login');
+        // Clear the form data
+        setFormData({
+          first_name: '',
+          last_name: '',
+          email: '',
+          password: '',
+          password_confirm: '',
+          user_type: 'client',
+          phone_number: '',
+          area_code: '+27',
+          city: '',
+          suburb: '',
+          province: '',
+          latitude: '',
+          longitude: '',
+          business_name: '',
+          business_address: '',
+          business_phone: '',
+          business_email: '',
+          primary_service: '',
+          service_categories: [],
+          service_areas: [],
+          max_travel_distance: 50,
+          years_experience: '',
+          service_description: '',
+          hourly_rate_min: '',
+          hourly_rate_max: '',
+          minimum_job_value: '',
+          terms_accepted: false,
+          privacy_accepted: false
+        });
       } else {
         console.error('Registration error:', data);
         if (data.errors) {
@@ -919,7 +949,10 @@ export default function RegisterPage() {
                   setAuthMode('login');
                   setCurrentStep(1);
                   setError('');
-                  setSuccess('');
+                  // Don't clear success message if it's a registration success
+                  if (!success.includes('Registration successful')) {
+                    setSuccess('');
+                  }
                   setMessage('');
                 }}
                 className={`flex-1 py-3 px-6 text-sm font-semibold rounded-lg transition-all duration-200 ${
@@ -1109,7 +1142,10 @@ export default function RegisterPage() {
                     setAuthMode('login');
                     setCurrentStep(1);
                     setError('');
-                    setSuccess('');
+                    // Don't clear success message if it's a registration success
+                    if (!success.includes('Registration successful')) {
+                      setSuccess('');
+                    }
                     setMessage('');
                   }}
                   className="font-semibold text-emerald-600 hover:text-emerald-700 transition-colors"
