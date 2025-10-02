@@ -351,7 +351,7 @@ export default function RegisterPage() {
             name="first_name"
             type="text"
             required
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
+            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 focus:bg-white focus:text-gray-900 transition-colors bg-white text-gray-900 placeholder-gray-500 focus:outline-none"
             placeholder="First Name"
             value={formData.first_name}
             onChange={handleChange}
@@ -366,7 +366,7 @@ export default function RegisterPage() {
             name="last_name"
             type="text"
             required
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
+            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 focus:bg-white focus:text-gray-900 transition-colors bg-white text-gray-900 placeholder-gray-500 focus:outline-none"
             placeholder="Last Name"
             value={formData.last_name}
             onChange={handleChange}
@@ -382,7 +382,7 @@ export default function RegisterPage() {
           name="email"
           type="email"
           required
-          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
+          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 focus:bg-white focus:text-gray-900 transition-colors bg-white text-gray-900 placeholder-gray-500 focus:outline-none"
           placeholder="your@email.com"
           value={formData.email}
           onChange={handleChange}
@@ -398,7 +398,7 @@ export default function RegisterPage() {
           name="password"
           type="password"
           required
-          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
+          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 focus:bg-white focus:text-gray-900 transition-colors bg-white text-gray-900 placeholder-gray-500 focus:outline-none"
           placeholder="Password (min 6 characters)"
           value={formData.password}
           onChange={handleChange}
@@ -413,7 +413,7 @@ export default function RegisterPage() {
           name="password_confirm"
           type="password"
           required
-          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
+          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 focus:bg-white focus:text-gray-900 transition-colors bg-white text-gray-900 placeholder-gray-500 focus:outline-none"
           placeholder="Confirm Password"
           value={formData.password_confirm}
           onChange={handleChange}
@@ -464,7 +464,7 @@ export default function RegisterPage() {
           <div className="w-1/3">
             <select
               name="area_code"
-              className="w-full px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors text-sm"
+              className="w-full px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 focus:bg-white focus:text-gray-900 transition-colors text-sm bg-white text-gray-900"
               value={formData.area_code}
               onChange={handleChange}
             >
@@ -477,7 +477,7 @@ export default function RegisterPage() {
             <input
               name="phone_number"
               type="tel"
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 focus:bg-white focus:text-gray-900 transition-colors bg-white text-gray-900 placeholder-gray-500 focus:outline-none"
               placeholder="e.g., 123456789"
               value={formData.phone_number}
               onChange={handleChange}
@@ -498,7 +498,7 @@ export default function RegisterPage() {
           name="city"
           type="text"
             required
-          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
+          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 focus:bg-white focus:text-gray-900 transition-colors bg-white text-gray-900 placeholder-gray-500 focus:outline-none"
           placeholder="City"
           value={formData.city}
           onChange={handleChange}
@@ -513,7 +513,7 @@ export default function RegisterPage() {
             name="suburb"
             type="text"
             required
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
+            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 focus:bg-white focus:text-gray-900 transition-colors bg-white text-gray-900 placeholder-gray-500 focus:outline-none"
             placeholder="Suburb"
             value={formData.suburb}
             onChange={handleChange}
@@ -528,7 +528,7 @@ export default function RegisterPage() {
         <select
           name="province"
           required
-          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
+          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 focus:bg-white focus:text-gray-900 transition-colors bg-white text-gray-900 placeholder-gray-500 focus:outline-none"
           value={formData.province}
           onChange={handleChange}
         >
@@ -564,7 +564,7 @@ export default function RegisterPage() {
           name="email"
           type="email"
           required
-          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
+          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 focus:bg-white focus:text-gray-900 transition-colors bg-white text-gray-900 placeholder-gray-500 focus:outline-none"
           placeholder="your@email.com"
           value={formData.email}
           onChange={handleChange}
@@ -579,7 +579,7 @@ export default function RegisterPage() {
           name="password"
           type="password"
           required
-          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
+          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 focus:bg-white focus:text-gray-900 transition-colors bg-white text-gray-900 placeholder-gray-500 focus:outline-none"
           placeholder="Your password"
           value={formData.password}
           onChange={handleChange}
@@ -641,7 +641,7 @@ export default function RegisterPage() {
           name="business_name"
           type="text"
           required
-          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
+          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 focus:bg-white focus:text-gray-900 transition-colors bg-white text-gray-900 placeholder-gray-500 focus:outline-none"
           placeholder="Your business name"
           value={formData.business_name}
           onChange={handleChange}
@@ -656,7 +656,7 @@ export default function RegisterPage() {
             name="business_address"
             rows={2}
           required
-          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
+          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 focus:bg-white focus:text-gray-900 transition-colors bg-white text-gray-900 placeholder-gray-500 focus:outline-none"
             placeholder="Full business address"
             value={formData.business_address}
           onChange={handleChange}
@@ -671,7 +671,7 @@ export default function RegisterPage() {
             <input
               name="business_phone"
               type="tel"
-          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
+          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 focus:bg-white focus:text-gray-900 transition-colors bg-white text-gray-900 placeholder-gray-500 focus:outline-none"
               placeholder="Business phone number"
               value={formData.business_phone}
           onChange={handleChange}
@@ -685,7 +685,7 @@ export default function RegisterPage() {
             <input
               name="business_email"
               type="email"
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 focus:bg-white focus:text-gray-900 transition-colors bg-white text-gray-900 placeholder-gray-500 focus:outline-none"
               placeholder="Business email"
               value={formData.business_email}
               onChange={handleChange}
@@ -705,7 +705,7 @@ export default function RegisterPage() {
             <select
             name="primary_service"
             required
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
+            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 focus:bg-white focus:text-gray-900 transition-colors bg-white text-gray-900 placeholder-gray-500 focus:outline-none"
             value={formData.primary_service}
               onChange={handleChange}
             >
@@ -789,7 +789,7 @@ export default function RegisterPage() {
           <select
             name="max_travel_distance"
             required
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
+            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 focus:bg-white focus:text-gray-900 transition-colors bg-white text-gray-900 placeholder-gray-500 focus:outline-none"
             value={formData.max_travel_distance}
             onChange={handleChange}
           >
@@ -809,7 +809,7 @@ export default function RegisterPage() {
           <select
             name="years_experience"
             required
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
+            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 focus:bg-white focus:text-gray-900 transition-colors bg-white text-gray-900 placeholder-gray-500 focus:outline-none"
             value={formData.years_experience}
             onChange={handleChange}
           >
@@ -828,7 +828,7 @@ export default function RegisterPage() {
           name="service_description"
           rows={3}
             required
-          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
+          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 focus:bg-white focus:text-gray-900 transition-colors bg-white text-gray-900 placeholder-gray-500 focus:outline-none"
             placeholder="Describe your services and expertise"
           value={formData.service_description}
           onChange={handleChange}
@@ -849,7 +849,7 @@ export default function RegisterPage() {
               name="hourly_rate_min"
               type="number"
               step="0.01"
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
+            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 focus:bg-white focus:text-gray-900 transition-colors bg-white text-gray-900 placeholder-gray-500 focus:outline-none"
               placeholder="150.00"
               value={formData.hourly_rate_min}
             onChange={handleChange}
@@ -864,7 +864,7 @@ export default function RegisterPage() {
               name="hourly_rate_max"
               type="number"
               step="0.01"
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
+            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 focus:bg-white focus:text-gray-900 transition-colors bg-white text-gray-900 placeholder-gray-500 focus:outline-none"
               placeholder="300.00"
               value={formData.hourly_rate_max}
             onChange={handleChange}
@@ -880,7 +880,7 @@ export default function RegisterPage() {
             name="minimum_job_value"
             type="number"
             step="0.01"
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
+            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 focus:bg-white focus:text-gray-900 transition-colors bg-white text-gray-900 placeholder-gray-500 focus:outline-none"
             placeholder="500.00"
             value={formData.minimum_job_value}
             onChange={handleChange}
