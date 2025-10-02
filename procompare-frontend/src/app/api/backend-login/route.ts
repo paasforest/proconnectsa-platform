@@ -32,8 +32,8 @@ export async function POST(request: NextRequest) {
           if (response.ok && data.success) {
             return NextResponse.json({
               success: true,
-              user: data.data.user,
-              token: data.data.token,
+              user: data.user,
+              token: data.token,
               message: data.message || 'Login successful'
             }, { status: 200 })
           } else {

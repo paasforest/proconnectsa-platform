@@ -191,12 +191,18 @@ export default function RegisterPage() {
         localStorage.setItem('token', data.token);
         localStorage.setItem('user', JSON.stringify(data.user));
         
+        // Show success message
+        setMessage('🎉 Login successful! Redirecting to your dashboard...');
+        setError(''); // Clear any previous errors
+        
         // Get user type from response and redirect
         const userType = data.user?.user_type;
         
-        // Route to appropriate dashboard based on user type
+        // Route to appropriate dashboard based on user type with a small delay to show the message
         const dashboardPath = redirectToDashboard(userType);
-        window.location.replace(dashboardPath);
+        setTimeout(() => {
+          window.location.replace(dashboardPath);
+        }, 2000); // Show message for 2 seconds before redirect
       } else {
         setError(data.message || 'Invalid email or password');
       }
@@ -914,6 +920,7 @@ export default function RegisterPage() {
                   setCurrentStep(1);
                   setError('');
                   setSuccess('');
+                  setMessage('');
                 }}
                 className={`flex-1 py-3 px-6 text-sm font-semibold rounded-lg transition-all duration-200 ${
                   authMode === 'login'
@@ -930,6 +937,7 @@ export default function RegisterPage() {
                   setCurrentStep(1);
                   setError('');
                   setSuccess('');
+                  setMessage('');
                 }}
                 className={`flex-1 py-3 px-6 text-sm font-semibold rounded-lg transition-all duration-200 ${
                   authMode === 'signup'
@@ -986,6 +994,21 @@ export default function RegisterPage() {
                 </div>
                 <div className="ml-3">
                   <p className="text-sm font-medium text-green-800">{success}</p>
+                </div>
+              </div>
+                </div>
+              )}
+
+              {message && (
+            <div className="mb-6 p-6 bg-blue-50 border-2 border-blue-200 rounded-lg shadow-md">
+              <div className="flex items-center">
+                <div className="flex-shrink-0">
+                  <svg className="h-6 w-6 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+                <div className="ml-3">
+                  <p className="text-sm font-medium text-blue-800">{message}</p>
                 </div>
               </div>
                 </div>
@@ -1070,6 +1093,7 @@ export default function RegisterPage() {
                     setCurrentStep(1);
                     setError('');
                     setSuccess('');
+                    setMessage('');
                   }}
                   className="font-semibold text-emerald-600 hover:text-emerald-700 transition-colors"
                 >
@@ -1086,6 +1110,7 @@ export default function RegisterPage() {
                     setCurrentStep(1);
                     setError('');
                     setSuccess('');
+                    setMessage('');
                   }}
                   className="font-semibold text-emerald-600 hover:text-emerald-700 transition-colors"
                 >
