@@ -261,6 +261,8 @@ export default function RegisterPage() {
         });
       }
 
+      console.log('📤 Sending registration data:', JSON.stringify(apiData, null, 2));
+
       const response = await fetch('https://api.proconnectsa.co.za/api/register/', {
         method: 'POST',
         headers: {
@@ -270,6 +272,8 @@ export default function RegisterPage() {
       });
 
       const data = await response.json();
+      console.log('📥 Registration response:', data);
+      console.log('📊 Response status:', response.status);
 
       if (response.ok) {
         setSuccess('🎉 Registration successful! Your account has been created. You can now sign in below.');
@@ -308,15 +312,31 @@ export default function RegisterPage() {
           privacy_accepted: false
         });
       } else {
-        console.error('Registration error:', data);
+        console.error('❌ Registration error:', data);
+        
+        // Handle various error response formats from backend
+        let errorMessage = 'Registration failed. Please try again.';
+        
         if (data.errors) {
           const errorMessages = Object.values(data.errors).flat();
-          setError(errorMessages.join(', '));
+          errorMessage = errorMessages.join(', ');
         } else if (data.error) {
-          setError(data.error);
-        } else {
-          setError('Registration failed. Please try again.');
+          errorMessage = data.error;
+        } else if (data.username || data.email || data.password || data.password_confirm || data.phone) {
+          // Handle field-specific errors from Django REST Framework
+          const fieldErrors = [];
+          if (data.username) fieldErrors.push(`Username: ${data.username.join(', ')}`);
+          if (data.email) fieldErrors.push(`Email: ${data.email.join(', ')}`);
+          if (data.password) fieldErrors.push(`Password: ${data.password.join(', ')}`);
+          if (data.password_confirm) fieldErrors.push(`Password Confirm: ${data.password_confirm.join(', ')}`);
+          if (data.phone) fieldErrors.push(`Phone: ${data.phone.join(', ')}`);
+          if (data.first_name) fieldErrors.push(`First Name: ${data.first_name.join(', ')}`);
+          if (data.last_name) fieldErrors.push(`Last Name: ${data.last_name.join(', ')}`);
+          errorMessage = fieldErrors.join('; ');
         }
+        
+        console.log('🔍 Parsed error message:', errorMessage);
+        setError(errorMessage);
       }
     } catch (error) {
       console.error('Registration error:', error);
