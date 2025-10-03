@@ -202,8 +202,6 @@ export default function RegisterPage() {
         return;
       }
 
-      console.log('Attempting login...');
-      
       const loginResponse = await fetch('https://api.proconnectsa.co.za/api/login/', {
         method: 'POST',
         headers: {
@@ -216,7 +214,6 @@ export default function RegisterPage() {
       });
 
       const data = await loginResponse.json();
-      console.log('Login response:', data);
 
       if (data.success && data.token) {
         // Store authentication data
@@ -233,7 +230,7 @@ export default function RegisterPage() {
         // Route to appropriate dashboard based on user type with a small delay to show the message
         const dashboardPath = redirectToDashboard(userType);
         setTimeout(() => {
-          window.location.replace(dashboardPath);
+        window.location.replace(dashboardPath);
         }, 2000); // Show message for 2 seconds before redirect
       } else {
         setError(data.message || 'Invalid email or password');
@@ -293,8 +290,6 @@ export default function RegisterPage() {
         });
       }
 
-      console.log('📤 Sending registration data:', JSON.stringify(apiData, null, 2));
-
       const response = await fetch('https://api.proconnectsa.co.za/api/register/', {
         method: 'POST',
         headers: {
@@ -304,8 +299,6 @@ export default function RegisterPage() {
       });
 
       const data = await response.json();
-      console.log('📥 Registration response:', data);
-      console.log('📊 Response status:', response.status);
 
       if (response.ok) {
         setSuccess('🎉 Registration successful! Your account has been created. You can now sign in below.');
@@ -343,8 +336,6 @@ export default function RegisterPage() {
           privacy_accepted: false
         });
       } else {
-        console.error('❌ Registration error:', data);
-        
         // Handle various error response formats from backend
         let errorMessage = 'Registration failed. Please try again.';
         
@@ -366,7 +357,6 @@ export default function RegisterPage() {
           errorMessage = fieldErrors.join('; ');
         }
         
-        console.log('🔍 Parsed error message:', errorMessage);
         setError(errorMessage);
       }
     } catch (error) {
@@ -509,15 +499,15 @@ export default function RegisterPage() {
         <label className="block text-sm font-medium text-gray-700 mb-2">
           Phone Number *
         </label>
-        <input
-          name="phone_number"
-          type="tel"
+            <input
+              name="phone_number"
+              type="tel"
           className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 focus:bg-white focus:text-gray-900 transition-colors bg-white text-gray-900 placeholder-gray-500 focus:outline-none"
           placeholder="e.g., 0812345678 or +27812345678"
-          value={formData.phone_number}
+              value={formData.phone_number}
           onChange={handlePhoneChange}
           required
-        />
+            />
         <p className="text-xs text-gray-500 mt-1">
           Format: +27XXXXXXXXX (South African mobile number)
           {formData.phone_number && <span className="ml-2 font-medium text-emerald-600">✓ {formData.phone_number}</span>}
@@ -986,7 +976,7 @@ export default function RegisterPage() {
                   setError('');
                   // Don't clear success message if it's a registration success
                   if (!success.includes('Registration successful')) {
-                    setSuccess('');
+                  setSuccess('');
                   }
                   setMessage('');
                 }}
@@ -1179,7 +1169,7 @@ export default function RegisterPage() {
                     setError('');
                     // Don't clear success message if it's a registration success
                     if (!success.includes('Registration successful')) {
-                      setSuccess('');
+                    setSuccess('');
                     }
                     setMessage('');
                   }}
