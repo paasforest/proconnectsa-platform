@@ -19,31 +19,6 @@ const experienceLevels = [
   'Less than 1 year', '1-2 years', '3-5 years', '6-10 years', '11-20 years', '20+ years'
 ];
 
-// South African mobile prefixes (for display only)
-const mobileNetworks = [
-  { prefix: '60-', name: 'Vodacom (60)' },
-  { prefix: '61-', name: 'Vodacom (61)' },
-  { prefix: '62-', name: 'Vodacom (62)' },
-  { prefix: '63-', name: 'Vodacom (63)' },
-  { prefix: '64-', name: 'Vodacom (64)' },
-  { prefix: '65-', name: 'Vodacom (65)' },
-  { prefix: '66-', name: 'Vodacom (66)' },
-  { prefix: '67-', name: 'Vodacom (67)' },
-  { prefix: '68-', name: 'Vodacom (68)' },
-  { prefix: '69-', name: 'Vodacom (69)' },
-  { prefix: '71-', name: 'Vodacom (71)' },
-  { prefix: '72-', name: 'MTN (72)' },
-  { prefix: '73-', name: 'MTN (73)' },
-  { prefix: '74-', name: 'Cell C (74)' },
-  { prefix: '76-', name: 'Vodacom (76)' },
-  { prefix: '78-', name: 'MTN (78)' },
-  { prefix: '79-', name: 'Vodacom (79)' },
-  { prefix: '81-', name: 'Vodacom (81)' },
-  { prefix: '82-', name: 'Vodacom (82)' },
-  { prefix: '83-', name: 'MTN (83)' },
-  { prefix: '84-', name: 'Cell C (84)' }
-];
-
 // South African provinces
 const provinces = [
   'Western Cape', 'Gauteng', 'KwaZulu-Natal', 'Eastern Cape', 
