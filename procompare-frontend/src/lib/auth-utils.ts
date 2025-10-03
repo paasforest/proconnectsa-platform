@@ -11,23 +11,18 @@ export interface User {
 
 export const getUserFromStorage = (): User | null => {
   if (typeof window === 'undefined') {
-    console.log('🔍 DEBUG - getUserFromStorage: Window undefined');
     return null;
   }
   
   try {
     const userStr = localStorage.getItem('user');
-    console.log('🔍 DEBUG - getUserFromStorage: Raw user string:', userStr);
     if (!userStr) {
-      console.log('🔍 DEBUG - getUserFromStorage: No user string found');
       return null;
     }
     
     const user = JSON.parse(userStr) as User;
-    console.log('🔍 DEBUG - getUserFromStorage: Parsed user:', user);
     return user;
   } catch (error) {
-    console.log('🔍 DEBUG - getUserFromStorage: Error parsing user:', error);
     return null;
   }
 };

@@ -236,9 +236,7 @@ const WalletLeadDashboard = () => {
         
         setLeads(transformedLeads);
         setSelectedLead(transformedLeads[0]);
-        console.log('✅ Leads loaded:', transformedLeads.length); // Debug log
       } else {
-        console.log('⚠️ No leads found in response, showing empty state for new provider'); // Debug log
         // For new providers, show empty state instead of sample data
         setLeads([]);
         setSelectedLead(null);
@@ -247,7 +245,6 @@ const WalletLeadDashboard = () => {
       // Set credits from wallet data
       if (walletData.credits !== undefined) {
         setUserCredits(walletData.credits);
-        console.log('✅ Credits loaded from wallet:', walletData.credits); // Debug log
       }
     } catch (error) {
       console.error('❌ Error fetching leads:', error);

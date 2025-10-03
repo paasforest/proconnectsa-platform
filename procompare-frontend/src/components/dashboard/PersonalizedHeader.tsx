@@ -66,7 +66,6 @@ export default function PersonalizedHeader({
 
       if (response.ok) {
         const data = await response.json();
-        console.log('Profile data received:', data);
         if (data.data && data.data.provider_profile) {
           setStats(data.data.provider_profile);
         } else {

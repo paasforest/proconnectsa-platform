@@ -261,8 +261,6 @@ export default function RegisterPage() {
         });
       }
 
-      console.log('🚀 Sending registration data:', apiData);
-
       const response = await fetch('https://api.proconnectsa.co.za/api/register/', {
         method: 'POST',
         headers: {
