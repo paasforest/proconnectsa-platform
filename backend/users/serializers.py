@@ -192,9 +192,7 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         hourly_rate_max = validated_data.pop('hourly_rate_max', None)
         minimum_job_value = validated_data.pop('minimum_job_value', None)
         
-        user = User.objects.create_user(**validated_data)
-        user.set_password(password)
-        user.save()
+        user = User.objects.create_user(password=password, **validated_data)
         
         # Create ProviderProfile if user is a service provider
         if user.user_type == 'provider':
