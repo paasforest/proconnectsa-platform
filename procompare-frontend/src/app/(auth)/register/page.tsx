@@ -19,15 +19,29 @@ const experienceLevels = [
   'Less than 1 year', '1-2 years', '3-5 years', '6-10 years', '11-20 years', '20+ years'
 ];
 
-// South African area codes
-const areaCodes = [
-  { code: '+27', name: 'South Africa (+27)' },
-  { code: '+2711', name: 'Johannesburg (+2711)' },
-  { code: '+2721', name: 'Cape Town (+2721)' },
-  { code: '+2731', name: 'Durban (+2731)' },
-  { code: '+2712', name: 'Pretoria (+2712)' },
-  { code: '+2741', name: 'Port Elizabeth (+2741)' },
-  { code: '+2751', name: 'Bloemfontein (+2751)' }
+// South African mobile prefixes (for display only)
+const mobileNetworks = [
+  { prefix: '60-', name: 'Vodacom (60)' },
+  { prefix: '61-', name: 'Vodacom (61)' },
+  { prefix: '62-', name: 'Vodacom (62)' },
+  { prefix: '63-', name: 'Vodacom (63)' },
+  { prefix: '64-', name: 'Vodacom (64)' },
+  { prefix: '65-', name: 'Vodacom (65)' },
+  { prefix: '66-', name: 'Vodacom (66)' },
+  { prefix: '67-', name: 'Vodacom (67)' },
+  { prefix: '68-', name: 'Vodacom (68)' },
+  { prefix: '69-', name: 'Vodacom (69)' },
+  { prefix: '71-', name: 'Vodacom (71)' },
+  { prefix: '72-', name: 'MTN (72)' },
+  { prefix: '73-', name: 'MTN (73)' },
+  { prefix: '74-', name: 'Cell C (74)' },
+  { prefix: '76-', name: 'Vodacom (76)' },
+  { prefix: '78-', name: 'MTN (78)' },
+  { prefix: '79-', name: 'Vodacom (79)' },
+  { prefix: '81-', name: 'Vodacom (81)' },
+  { prefix: '82-', name: 'Vodacom (82)' },
+  { prefix: '83-', name: 'MTN (83)' },
+  { prefix: '84-', name: 'Cell C (84)' }
 ];
 
 // South African provinces
@@ -55,8 +69,7 @@ export default function RegisterPage() {
     first_name: '',
     last_name: '',
     user_type: 'client',
-    area_code: '+27',
-    phone_number: '',
+    phone_number: '', // Full number with +27 prefix
     city: '',
     suburb: '',
     province: '',
@@ -107,11 +120,30 @@ export default function RegisterPage() {
     }
   };
 
-  const getFullPhoneNumber = () => {
-    if (formData.area_code && formData.phone_number) {
-      return `${formData.area_code}${formData.phone_number}`;
+  const formatPhoneNumber = (value: string) => {
+    // Remove all non-digits
+    let cleaned = value.replace(/\D/g, '');
+    
+    // If it starts with 27, keep it
+    // If it starts with 0, replace with 27
+    // Otherwise, prepend 27
+    if (cleaned.startsWith('27')) {
+      cleaned = cleaned.substring(0, 11); // +27 + 9 digits = 11 digits total
+    } else if (cleaned.startsWith('0')) {
+      cleaned = '27' + cleaned.substring(1, 10); // Replace 0 with 27, keep next 9 digits
+    } else if (cleaned.length > 0) {
+      cleaned = '27' + cleaned.substring(0, 9); // Prepend 27, keep first 9 digits
     }
-    return '';
+    
+    return cleaned ? `+${cleaned}` : '';
+  };
+
+  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const formatted = formatPhoneNumber(e.target.value);
+    setFormData(prev => ({
+      ...prev,
+      phone_number: formatted
+    }));
   };
 
   const validateStep1 = () => {
@@ -235,7 +267,7 @@ export default function RegisterPage() {
         first_name: formData.first_name,
         last_name: formData.last_name,
         user_type: formData.user_type,
-        phone: getFullPhoneNumber() || null,
+        phone: formData.phone_number || null,
         city: formData.city,
         suburb: formData.suburb,
         latitude: formData.latitude ? parseFloat(formData.latitude) : null,
@@ -247,7 +279,7 @@ export default function RegisterPage() {
         Object.assign(apiData, {
           business_name: formData.business_name,
           business_address: formData.business_address,
-          business_phone: getFullPhoneNumber() || null,
+          business_phone: formData.phone_number || null,
           business_email: formData.business_email || formData.email,
           primary_service: formData.primary_service,
           service_categories: formData.service_categories,
@@ -289,7 +321,6 @@ export default function RegisterPage() {
           password_confirm: '',
           user_type: 'client',
           phone_number: '',
-          area_code: '+27',
           city: '',
           suburb: '',
           province: '',
@@ -476,34 +507,20 @@ export default function RegisterPage() {
 
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-2">
-          Phone Number
+          Phone Number *
         </label>
-        <div className="flex gap-2">
-          <div className="w-1/3">
-            <select
-              name="area_code"
-              className="w-full px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 focus:bg-white focus:text-gray-900 transition-colors text-sm bg-white text-gray-900"
-              value={formData.area_code}
-              onChange={handleChange}
-            >
-              {areaCodes.map((area) => (
-                <option key={area.code} value={area.code}>{area.name}</option>
-              ))}
-            </select>
-          </div>
-          <div className="w-2/3">
-            <input
-              name="phone_number"
-              type="tel"
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 focus:bg-white focus:text-gray-900 transition-colors bg-white text-gray-900 placeholder-gray-500 focus:outline-none"
-              placeholder="e.g., 123456789"
-              value={formData.phone_number}
-              onChange={handleChange}
-            />
-          </div>
-        </div>
+        <input
+          name="phone_number"
+          type="tel"
+          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 focus:bg-white focus:text-gray-900 transition-colors bg-white text-gray-900 placeholder-gray-500 focus:outline-none"
+          placeholder="e.g., 0812345678 or +27812345678"
+          value={formData.phone_number}
+          onChange={handlePhoneChange}
+          required
+        />
         <p className="text-xs text-gray-500 mt-1">
-          Full number: {getFullPhoneNumber() || 'Not provided'}
+          Format: +27XXXXXXXXX (South African mobile number)
+          {formData.phone_number && <span className="ml-2 font-medium text-emerald-600">✓ {formData.phone_number}</span>}
         </p>
       </div>
 
