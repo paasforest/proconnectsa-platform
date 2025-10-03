@@ -63,7 +63,7 @@ export default function ClientDashboardOverview() {
       }
     }
 
-    if (authUser && authUser.email && authUser.userType) {
+    if (authUser && authUser.email && token) {
       fetchDashboardData()
     }
   }, [authUser, token])
