@@ -160,11 +160,40 @@ const Sidebar = ({ navigation, currentView, setCurrentView }: {
 };
 
 const OverviewDashboard = () => {
+  const { token } = useAuth();
+  const [stats, setStats] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const response = await fetch('https://api.proconnectsa.co.za/api/support/stats/', {
+          headers: {
+            'Authorization': `Token ${token}`,
+          },
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          setStats(data);
+        }
+      } catch (error) {
+        console.error('Failed to fetch admin stats:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (token) {
+      fetchStats();
+    }
+  }, [token]);
+
   return (
     <div className="p-6">
       <div className="mb-6">
         <h1 className="text-3xl font-bold text-gray-900">Admin Overview</h1>
-        <p className="text-gray-600 mt-2">Welcome to the ProCompare Admin Dashboard</p>
+        <p className="text-gray-600 mt-2">Welcome to the ProConnectSA Admin Dashboard</p>
       </div>
 
       {/* Quick Stats */}
@@ -176,7 +205,11 @@ const OverviewDashboard = () => {
             </div>
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-600">Total Tickets</p>
-              <p className="text-2xl font-bold text-gray-900">156</p>
+              {loading ? (
+                <div className="h-8 w-16 bg-gray-200 animate-pulse rounded"></div>
+              ) : (
+                <p className="text-2xl font-bold text-gray-900">{stats?.total_tickets || 0}</p>
+              )}
             </div>
           </div>
         </div>
@@ -188,7 +221,11 @@ const OverviewDashboard = () => {
             </div>
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-600">Active Staff</p>
-              <p className="text-2xl font-bold text-gray-900">12</p>
+              {loading ? (
+                <div className="h-8 w-16 bg-gray-200 animate-pulse rounded"></div>
+              ) : (
+                <p className="text-2xl font-bold text-gray-900">{stats?.active_staff || 0}</p>
+              )}
             </div>
           </div>
         </div>
@@ -199,8 +236,12 @@ const OverviewDashboard = () => {
               <DollarSign className="w-6 h-6 text-yellow-600" />
             </div>
             <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Revenue</p>
-              <p className="text-2xl font-bold text-gray-900">R125,000</p>
+              <p className="text-sm font-medium text-gray-600">Total Credits Sold</p>
+              {loading ? (
+                <div className="h-8 w-20 bg-gray-200 animate-pulse rounded"></div>
+              ) : (
+                <p className="text-2xl font-bold text-gray-900">{stats?.total_credits_sold || 0}</p>
+              )}
             </div>
           </div>
         </div>
@@ -211,8 +252,12 @@ const OverviewDashboard = () => {
               <BarChart3 className="w-6 h-6 text-purple-600" />
             </div>
             <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Satisfaction</p>
-              <p className="text-2xl font-bold text-gray-900">4.8/5</p>
+              <p className="text-sm font-medium text-gray-600">Avg Response Time</p>
+              {loading ? (
+                <div className="h-8 w-20 bg-gray-200 animate-pulse rounded"></div>
+              ) : (
+                <p className="text-2xl font-bold text-gray-900">{stats?.avg_response_time || '0h'}</p>
+              )}
             </div>
           </div>
         </div>
@@ -255,27 +300,39 @@ const OverviewDashboard = () => {
         </div>
 
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Recent Activity</h3>
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">System Status</h3>
           <div className="space-y-3">
-            <div className="flex items-center text-sm">
-              <div className="w-2 h-2 bg-green-500 rounded-full mr-3"></div>
-              <span className="text-gray-600">Ticket #ST-20241216-ABC123 resolved</span>
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-gray-600">API Status</span>
+              <span className="flex items-center text-green-600">
+                <div className="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
+                Online
+              </span>
             </div>
-            <div className="flex items-center text-sm">
-              <div className="w-2 h-2 bg-blue-500 rounded-full mr-3"></div>
-              <span className="text-gray-600">New staff member John Doe added</span>
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-gray-600">Database</span>
+              <span className="flex items-center text-green-600">
+                <div className="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
+                Connected
+              </span>
             </div>
-            <div className="flex items-center text-sm">
-              <div className="w-2 h-2 bg-yellow-500 rounded-full mr-3"></div>
-              <span className="text-gray-600">Payment issue reported</span>
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-gray-600">Email Service</span>
+              <span className="flex items-center text-green-600">
+                <div className="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
+                Active
+              </span>
             </div>
-            <div className="flex items-center text-sm">
-              <div className="w-2 h-2 bg-red-500 rounded-full mr-3"></div>
-              <span className="text-gray-600">Critical bug detected in API</span>
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-gray-600">Payment Gateway</span>
+              <span className="flex items-center text-green-600">
+                <div className="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
+                Active
+              </span>
             </div>
-            <div className="flex items-center text-sm">
-              <div className="w-2 h-2 bg-green-500 rounded-full mr-3"></div>
-              <span className="text-gray-600">System maintenance completed</span>
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-gray-600">Last Backup</span>
+              <span className="text-gray-600">Today</span>
             </div>
           </div>
         </div>
