@@ -1,7 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useAuth } from '@/components/AuthProvider';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 
 export default function AdminLoginForm() {
@@ -10,17 +9,6 @@ export default function AdminLoginForm() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const router = useRouter();
-  const { user, token } = useAuth();
-
-  // Clear any existing sessions when component mounts
-  useEffect(() => {
-    const clearExistingSessions = async () => {
-      if (session) {
-        await signOut({ redirect: false });
-      }
-    };
-    clearExistingSessions();
-  }, [session]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -28,28 +16,36 @@ export default function AdminLoginForm() {
     setError('');
 
     try {
-      const result = await signIn('credentials', {
-        email,
-        password,
-        redirect: false,
+      // Call login API
+      const response = await fetch('https://api.proconnectsa.co.za/api/login/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password }),
       });
 
-      if (result?.error) {
+      const data = await response.json();
+
+      if (!response.ok) {
         setError('Invalid credentials. Please try again.');
-      } else if (result?.ok) {
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        return;
+      }
+
+      // Check if user is admin or support
+      if (data.user?.user_type === 'admin' || data.user?.user_type === 'support') {
+        // Store token and user in localStorage
+        localStorage.setItem('token', data.token);
+        localStorage.setItem('user', JSON.stringify(data.user));
         
-        const response = await fetch('/api/auth/session');
-        const session = await response.json();
-        
-        if (user?.userType === 'admin' || user?.userType === 'support') {
-          router.push('/admin/dashboard');
-          router.refresh();
-        } else {
-          setError('Access denied. Only admin and support team members can access the admin dashboard.');
-        }
+        // Redirect to admin dashboard
+        router.push('/admin/dashboard');
+        router.refresh();
+      } else {
+        setError('Access denied. Only admin and support team members can access the admin dashboard.');
       }
     } catch (error) {
+      console.error('Login error:', error);
       setError('An error occurred. Please try again.');
     } finally {
       setIsLoading(false);
