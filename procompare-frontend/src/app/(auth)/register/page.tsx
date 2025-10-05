@@ -399,6 +399,7 @@ export default function RegisterPage() {
           name="email"
           type="email"
           required
+          autoComplete="email"
           className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 focus:bg-white focus:text-gray-900 transition-colors bg-white text-gray-900 placeholder-gray-500 focus:outline-none"
           placeholder="your@email.com"
           value={formData.email}
@@ -415,6 +416,7 @@ export default function RegisterPage() {
           name="password"
           type="password"
           required
+          autoComplete="new-password"
           className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 focus:bg-white focus:text-gray-900 transition-colors bg-white text-gray-900 placeholder-gray-500 focus:outline-none"
           placeholder="Password (min 6 characters)"
           value={formData.password}
@@ -430,6 +432,7 @@ export default function RegisterPage() {
           name="password_confirm"
           type="password"
           required
+          autoComplete="new-password"
           className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 focus:bg-white focus:text-gray-900 transition-colors bg-white text-gray-900 placeholder-gray-500 focus:outline-none"
           placeholder="Confirm Password"
           value={formData.password_confirm}
@@ -567,6 +570,7 @@ export default function RegisterPage() {
           name="email"
           type="email"
           required
+          autoComplete="username"
           className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 focus:bg-white focus:text-gray-900 transition-colors bg-white text-gray-900 placeholder-gray-500 focus:outline-none"
           placeholder="your@email.com"
           value={formData.email}
@@ -582,6 +586,7 @@ export default function RegisterPage() {
           name="password"
           type="password"
           required
+          autoComplete="current-password"
           className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 focus:bg-white focus:text-gray-900 transition-colors bg-white text-gray-900 placeholder-gray-500 focus:outline-none"
           placeholder="Your password"
           value={formData.password}
