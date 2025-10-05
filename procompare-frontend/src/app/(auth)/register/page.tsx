@@ -276,15 +276,18 @@ export default function RegisterPage() {
       const data = await response.json();
 
       if (response.ok) {
+        // Store the email for login
+        const registeredEmail = formData.email;
+        
         setSuccess('🎉 Registration successful! Your account has been created. You can now sign in below.');
         setError(''); // Clear any previous errors
         // Switch to login mode instead of redirecting
         setAuthMode('login');
-        // Clear the form data
+        // Clear the form data but keep the email for convenience
         setFormData({
           first_name: '',
           last_name: '',
-          email: '',
+          email: registeredEmail, // Keep email for login convenience
           password: '',
           password_confirm: '',
           user_type: 'client',

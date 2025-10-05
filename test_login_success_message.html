@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Login Success Message</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .test-container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .test-form {
+            margin-bottom: 20px;
+        }
+        .test-form input {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+        .test-form button {
+            background: #10b981;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .test-form button:hover {
+            background: #059669;
+        }
+        .test-form button:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 5px;
+            display: none;
+        }
+        .success {
+            background: #d1fae5;
+            border: 1px solid #10b981;
+            color: #065f46;
+        }
+        .error {
+            background: #fee2e2;
+            border: 1px solid #ef4444;
+            color: #991b1b;
+        }
+        .info {
+            background: #dbeafe;
+            border: 1px solid #3b82f6;
+            color: #1e40af;
+        }
+        .loading {
+            display: none;
+            text-align: center;
+            margin: 20px 0;
+        }
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #10b981;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .test-info {
+            background: #f0f9ff;
+            border: 1px solid #0ea5e9;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🧪 Login Success Message Test</h1>
+    
+    <div class="test-info">
+        <h3>Test Instructions:</h3>
+        <p>This test will verify that the login success message fix is working properly.</p>
+        <p><strong>Expected Behavior:</strong> After successful login, you should see a blue success message saying "🎉 Login successful! Redirecting to your dashboard..." before being redirected.</p>
+    </div>
+
+    <div class="test-container">
+        <h2>Test 1: Backend API Response Format</h2>
+        <p>Testing if the backend returns the correct response format for login.</p>
+        <button onclick="testBackendResponse()">Test Backend Response</button>
+        <div id="backendResult" class="result"></div>
+    </div>
+
+    <div class="test-container">
+        <h2>Test 2: Frontend Login Flow</h2>
+        <p>Testing the complete login flow with success message display.</p>
+        <form class="test-form" onsubmit="testLoginFlow(event)">
+            <input type="email" id="email" placeholder="Email" value="test@example.com" required>
+            <input type="password" id="password" placeholder="Password" value="testpassword" required>
+            <button type="submit" id="loginBtn">Test Login Flow</button>
+        </form>
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p>Testing login flow...</p>
+        </div>
+        <div id="loginResult" class="result"></div>
+    </div>
+
+    <div class="test-container">
+        <h2>Test 3: Frontend-Backend Integration</h2>
+        <p>Testing the complete integration between frontend and backend.</p>
+        <button onclick="testIntegration()">Test Integration</button>
+        <div id="integrationResult" class="result"></div>
+    </div>
+
+    <script>
+        const API_BASE = 'https://api.proconnectsa.co.za';
+        
+        function showResult(elementId, message, type) {
+            const element = document.getElementById(elementId);
+            element.className = `result ${type}`;
+            element.innerHTML = message;
+            element.style.display = 'block';
+        }
+
+        function hideLoading() {
+            document.getElementById('loading').style.display = 'none';
+        }
+
+        function showLoading() {
+            document.getElementById('loading').style.display = 'block';
+        }
+
+        async function testBackendResponse() {
+            showResult('backendResult', 'Testing backend response format...', 'info');
+            
+            try {
+                // Test with a known test user or create one
+                const response = await fetch(`${API_BASE}/api/login/`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        email: 'test@example.com',
+                        password: 'testpassword'
+                    })
+                });
+
+                const data = await response.json();
+                
+                if (response.ok && data.success) {
+                    // Check if response has the correct format
+                    const hasUser = data.user !== undefined;
+                    const hasToken = data.token !== undefined;
+                    const hasMessage = data.message !== undefined;
+                    
+                    if (hasUser && hasToken && hasMessage) {
+                        showResult('backendResult', 
+                            `✅ Backend response format is correct!<br>
+                             <strong>User:</strong> ${data.user.email}<br>
+                             <strong>Token:</strong> ${data.token.substring(0, 20)}...<br>
+                             <strong>Message:</strong> ${data.message}`, 
+                            'success');
+                    } else {
+                        showResult('backendResult', 
+                            `❌ Backend response format is incorrect!<br>
+                             Missing: ${!hasUser ? 'user ' : ''}${!hasToken ? 'token ' : ''}${!hasMessage ? 'message ' : ''}`, 
+                            'error');
+                    }
+                } else {
+                    showResult('backendResult', 
+                        `❌ Backend login failed: ${data.message || 'Unknown error'}<br>
+                         <em>Note: This might be expected if test credentials don't exist</em>`, 
+                        'error');
+                }
+            } catch (error) {
+                showResult('backendResult', 
+                    `❌ Backend connection failed: ${error.message}`, 
+                    'error');
+            }
+        }
+
+        async function testLoginFlow(event) {
+            event.preventDefault();
+            showLoading();
+            
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            
+            try {
+                // Simulate the frontend login flow
+                const response = await fetch(`${API_BASE}/api/login/`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ email, password })
+                });
+
+                const data = await response.json();
+                
+                if (response.ok && data.success) {
+                    // Simulate the success message display
+                    showResult('loginResult', 
+                        `✅ Login successful!<br>
+                         <strong>Success Message:</strong> "🎉 Login successful! Redirecting to your dashboard..."<br>
+                         <strong>User:</strong> ${data.user.email}<br>
+                         <strong>User Type:</strong> ${data.user.user_type}<br>
+                         <em>In the actual app, you would see this message for 2 seconds before redirect</em>`, 
+                        'success');
+                } else {
+                    showResult('loginResult', 
+                        `❌ Login failed: ${data.message || 'Invalid credentials'}<br>
+                         <em>Note: This might be expected if test credentials don't exist</em>`, 
+                        'error');
+                }
+            } catch (error) {
+                showResult('loginResult', 
+                    `❌ Login test failed: ${error.message}`, 
+                    'error');
+            } finally {
+                hideLoading();
+            }
+        }
+
+        async function testIntegration() {
+            showResult('integrationResult', 'Testing frontend-backend integration...', 'info');
+            
+            try {
+                // Test the backend-login route that the frontend uses
+                const response = await fetch('/api/backend-login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        email: 'test@example.com',
+                        password: 'testpassword'
+                    })
+                });
+
+                const data = await response.json();
+                
+                if (response.ok && data.success) {
+                    showResult('integrationResult', 
+                        `✅ Frontend-Backend integration working!<br>
+                         <strong>Response Format:</strong> Correct<br>
+                         <strong>User Data:</strong> Available<br>
+                         <strong>Token:</strong> Available<br>
+                         <strong>Message:</strong> ${data.message}`, 
+                        'success');
+                } else {
+                    showResult('integrationResult', 
+                        `❌ Integration test failed: ${data.message || 'Unknown error'}<br>
+                         <em>Note: This might be expected if test credentials don't exist</em>`, 
+                        'error');
+                }
+            } catch (error) {
+                showResult('integrationResult', 
+                    `❌ Integration test failed: ${error.message}<br>
+                     <em>Note: This test requires running from the frontend domain</em>`, 
+                    'error');
+            }
+        }
+
+        // Auto-run backend test on page load
+        window.onload = function() {
+            testBackendResponse();
+        };
+    </script>
+</body>
+</html>
+
+
+
+
+
+

@@ -170,8 +170,14 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         return None
     
     def create(self, validated_data):
+        import logging
+        logger = logging.getLogger(__name__)
+        
         validated_data.pop('password_confirm')
         password = validated_data.pop('password')
+        
+        # DEBUG: Log password info (remove in production)
+        logger.info(f"🔐 Registration - Email: {validated_data.get('email')}, Password length: {len(password) if password else 0}")
         
         # Handle empty phone numbers
         if 'phone' in validated_data and validated_data['phone'] == '':
@@ -193,6 +199,9 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         minimum_job_value = validated_data.pop('minimum_job_value', None)
         
         user = User.objects.create_user(password=password, **validated_data)
+        
+        # DEBUG: Verify password was set correctly
+        logger.info(f"✅ User created - Can check password: {user.check_password(password)}")
         
         # Create ProviderProfile if user is a service provider
         if user.user_type == 'provider':
@@ -259,6 +268,9 @@ class UserLoginSerializer(serializers.Serializer):
     password = serializers.CharField()
     
     def validate(self, attrs):
+        import logging
+        logger = logging.getLogger(__name__)
+        
         email = attrs.get('email')
         password = attrs.get('password')
         
@@ -266,14 +278,19 @@ class UserLoginSerializer(serializers.Serializer):
             # Try to authenticate with email
             try:
                 user = User.objects.get(email=email)
+                logger.info(f"🔑 Login attempt - Email: {email}, Password length: {len(password)}")
+                
                 if user.check_password(password):
+                    logger.info(f"✅ Login successful for: {email}")
                     if not user.is_active:
                         raise serializers.ValidationError('User account is disabled')
                     attrs['user'] = user
                     return attrs
                 else:
+                    logger.warning(f"❌ Invalid password for: {email}")
                     raise serializers.ValidationError('Invalid credentials')
             except User.DoesNotExist:
+                logger.warning(f"❌ User not found: {email}")
                 raise serializers.ValidationError('Invalid credentials')
         else:
             raise serializers.ValidationError('Must include username and password')

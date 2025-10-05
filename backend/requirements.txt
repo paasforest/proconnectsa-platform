@@ -1,0 +1,81 @@
+# Django and core dependencies
+Django==4.2.7
+djangorestframework==3.14.0
+django-cors-headers==4.3.1
+django-filter==23.3
+django-extensions==3.2.3
+
+# Database
+psycopg2-binary==2.9.7
+
+# Authentication and security
+djangorestframework-simplejwt==5.3.0
+django-allauth==0.57.0
+
+# Environment and configuration
+python-decouple==3.8
+django-environ==0.11.2
+
+# Background tasks
+celery==5.3.4
+redis==5.0.1
+django-celery-beat==2.5.0
+
+# Caching
+django-redis==5.4.0
+
+# Email and SMS
+django-anymail==10.1
+requests==2.31.0
+
+# File handling
+Pillow==10.1.0
+django-storages==1.14.2
+
+# API documentation
+drf-spectacular==0.26.5
+
+# Development and testing
+pytest==7.4.3
+pytest-django==4.7.0
+pytest-cov==4.1.0
+factory-boy==3.3.0
+faker==20.1.0
+
+# Code quality
+black==23.11.0
+flake8==6.1.0
+isort==5.12.0
+pre-commit==3.5.0
+
+# Production
+gunicorn==21.2.0
+whitenoise==6.6.0
+django-health-check==3.17.0
+
+# Monitoring and logging
+sentry-sdk==1.38.0
+django-silk==5.0.4
+
+# Utilities
+python-dateutil==2.8.2
+pytz==2023.3
+
+# Rate limiting
+django-ratelimit==4.1.0
+
+# WebSocket support
+channels==4.0.0
+channels-redis==4.1.0
+
+# Machine Learning
+scikit-learn==1.3.2
+pandas==2.1.4
+numpy==1.24.4
+joblib==1.3.2
+
+# Payment processing
+paypalrestsdk==1.13.3
+
+psycopg2-binary==2.9.10
+python-decouple==3.8

@@ -1,0 +1,53 @@
+# 🔒 SECURE PRODUCTION ENVIRONMENT - ProConnectSA
+# ⚠️ DO NOT SHARE OR COMMIT THIS FILE
+
+# Django Security Settings
+SECRET_KEY=0x+%#@pl1qg&r^h4bf5c)7*yz8+30=)!=-wdlt-2*svzc=&ztg
+DEBUG=False
+ALLOWED_HOSTS=api.proconnectsa.co.za,proconnectsa.co.za,www.proconnectsa.co.za,backend.proconnectsa.co.za
+
+# Database Configuration (CHANGE THESE PASSWORDS)
+DB_NAME=proconnectsa
+DB_USER=proconnectsa
+DB_PASSWORD=ProConnectSA_Secure_DB_Password_2024!
+DB_HOST=localhost
+DB_PORT=5432
+USE_SQLITE=False
+
+# Email Configuration - SendGrid (REGENERATE API KEY)
+EMAIL_BACKEND=django.core.mail.backends.smtp.EmailBackend
+EMAIL_HOST=smtp.sendgrid.net
+EMAIL_PORT=587
+EMAIL_USE_TLS=True
+EMAIL_HOST_USER=apikey
+EMAIL_HOST_PASSWORD=REPLACE_WITH_NEW_SENDGRID_API_KEY
+DEFAULT_FROM_EMAIL=noreply@proconnectsa.co.za
+SUPPORT_EMAIL=support@proconnectsa.co.za
+ADMIN_EMAIL=admin@proconnectsa.co.za
+
+# SendGrid API (REGENERATE THIS KEY)
+SENDGRID_API_KEY=REPLACE_WITH_NEW_SENDGRID_API_KEY
+
+# Frontend URL
+FRONTEND_URL=https://proconnectsa.co.za
+
+# CORS Settings
+CORS_ALLOWED_ORIGINS=https://proconnectsa.co.za,https://www.proconnectsa.co.za
+
+# Redis Configuration
+REDIS_URL=redis://localhost:6379/0
+
+# SMS Configuration (Disabled for cost savings)
+SMS_ENABLED=False
+EMAIL_NOTIFICATIONS_ENABLED=True
+
+# Security Settings
+SECURE_SSL_REDIRECT=True
+SECURE_HSTS_SECONDS=31536000
+SECURE_HSTS_INCLUDE_SUBDOMAINS=True
+SECURE_HSTS_PRELOAD=True
+SESSION_COOKIE_SECURE=True
+CSRF_COOKIE_SECURE=True
+
+# Bank API Configuration (Disabled for now)
+BANK_API_ENABLED=False
