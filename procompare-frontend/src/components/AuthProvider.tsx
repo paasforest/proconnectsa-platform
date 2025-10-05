@@ -71,8 +71,9 @@ export function withAuth<P extends object>(
         if (allowedUserTypes && !allowedUserTypes.includes(user.user_type)) {
           // Wrong user type, redirect to appropriate dashboard
           const correctDashboard = user.user_type === 'admin' ? '/admin/dashboard'
+            : user.user_type === 'support' ? '/admin/dashboard'
             : user.user_type === 'client' ? '/client'
-            : (user.user_type === 'provider' || user.user_type === 'provider') ? '/provider-dashboard'
+            : (user.user_type === 'provider' || user.user_type === 'service_provider') ? '/provider-dashboard'
             : '/dashboard';
           router.push(correctDashboard);
           return;
