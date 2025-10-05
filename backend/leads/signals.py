@@ -1,4 +1,7 @@
 from django.db.models.signals import post_save
+import logging
+
+logger = logging.getLogger(__name__)
 from django.dispatch import receiver
 from .models import Lead, LeadAssignment
 from backend.notifications.models import Notification
@@ -37,3 +40,24 @@ def create_assignment_notification(sender, instance, created, **kwargs):
             priority='high'
         )
 
+
+@receiver(post_save, sender=Lead)
+def auto_assign_lead_to_providers(sender, instance, created, **kwargs):
+    """Automatically assign verified leads to matching providers using ML service"""
+    if created and instance.status == 'verified':
+        logger.info(f"🤖 AUTO-ASSIGNING LEAD: {instance.id} - {instance.title}")
+        
+        try:
+            from .services import LeadAssignmentService
+            assignment_service = LeadAssignmentService()
+            assignments = assignment_service.assign_lead_to_providers(instance.id)
+            
+            if assignments:
+                logger.info(f"✅ AUTO-ASSIGNED: {len(assignments)} providers for lead {instance.id}")
+                for assignment in assignments:
+                    logger.info(f"   - {assignment.provider.first_name} {assignment.provider.last_name} ({assignment.provider.email})")
+            else:
+                logger.warning(f"⚠️  NO MATCHING PROVIDERS: Lead {instance.id} not assigned")
+                
+        except Exception as e:
+            logger.error(f"❌ AUTO-ASSIGNMENT FAILED: Lead {instance.id} - {str(e)}")
