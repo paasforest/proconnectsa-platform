@@ -7,7 +7,7 @@ function AdminDashboardPage({ user }: { user: any }) {
   return <AdminDashboard />;
 }
 
-export default withAuth(AdminDashboardPage, ['admin']);
+export default withAuth(AdminDashboardPage, ['admin', 'support']);
 
 
 

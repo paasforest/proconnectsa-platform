@@ -17,6 +17,7 @@ class User(AbstractUser):
         ('client', 'Client'),
         ('provider', 'Service Provider'),
         ('admin', 'Administrator'),
+        ('support', 'Support Team'),
     ]
     
     # Primary key
@@ -76,6 +77,10 @@ class User(AbstractUser):
     @property
     def is_admin(self):
         return self.user_type == 'admin'
+    
+    @property
+    def is_support(self):
+        return self.user_type == 'support'
     
     def update_last_active(self):
         """Update last active timestamp"""

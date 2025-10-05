@@ -42,11 +42,11 @@ export default function AdminLoginForm() {
         const response = await fetch('/api/auth/session');
         const session = await response.json();
         
-        if (user?.userType === 'admin') {
+        if (user?.userType === 'admin' || user?.userType === 'support') {
           router.push('/admin/dashboard');
           router.refresh();
         } else {
-          setError('Access denied. Only admin users can access the admin dashboard.');
+          setError('Access denied. Only admin and support team members can access the admin dashboard.');
         }
       }
     } catch (error) {
