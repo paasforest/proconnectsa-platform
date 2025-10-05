@@ -269,7 +269,7 @@ const Homepage = () => {
     "name": "ProConnectSA",
     "description": "South Africa's premium service marketplace connecting customers with verified, insured professionals",
     "url": "https://proconnectsa.co.za",
-    "telephone": "+27689518124",
+    "telephone": "+27679518124",
     "email": "support@proconnectsa.co.za",
     "address": {
       "@type": "PostalAddress",
@@ -857,7 +857,7 @@ const Homepage = () => {
               </p>
               <div className="space-y-2 text-sm text-gray-400">
                 <p>📧 support@proconnectsa.co.za</p>
-                <p>📱 +27689518124</p>
+                <p>📱 +27679518124</p>
                 <p>🏢 Johannesburg, Cape Town, Durban, Pretoria</p>
               </div>
             </div>

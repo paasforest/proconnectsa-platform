@@ -303,7 +303,7 @@ const ChatPage = () => {
             <Phone className="w-5 h-5 text-green-600 mr-2" />
             <div>
               <h3 className="font-medium text-gray-900">Phone Support</h3>
-              <p className="text-sm text-gray-600">+27689518124</p>
+              <p className="text-sm text-gray-600">+27679518124</p>
             </div>
           </div>
         </div>
