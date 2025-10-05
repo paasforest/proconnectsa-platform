@@ -11,7 +11,8 @@ import PasswordResetModal from '@/components/auth/PasswordResetModal';
 const serviceCategories = [
   'Cleaning', 'Electrical', 'Plumbing', 'Painting', 'Carpentry', 
   'Gardening', 'Handyman', 'Roofing', 'Flooring', 'Tiling',
-  'Appliance Repair', 'HVAC', 'Security', 'Landscaping', 'Pool Maintenance'
+  'Appliance Repair', 'HVAC', 'Security', 'Landscaping', 'Pool Maintenance',
+  'Construction', 'Renovations', 'Farm Fencing'
 ];
 
 // Experience levels

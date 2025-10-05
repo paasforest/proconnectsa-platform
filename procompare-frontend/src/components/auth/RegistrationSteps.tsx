@@ -116,7 +116,7 @@ export default function RegistrationSteps({
                   id="phone"
                   name="phone"
                   type="tel"
-                  placeholder="+27 11 123 4567"
+                  placeholder="+27812345678"
                   value={formData.phone}
                   onChange={onInputChange}
                   required
@@ -280,7 +280,7 @@ export default function RegistrationSteps({
                 id="businessPhone"
                 name="businessPhone"
                 type="tel"
-                placeholder="+27 11 123 4567"
+                placeholder="+27812345678"
                 value={formData.businessPhone}
                 onChange={onInputChange}
                 required
