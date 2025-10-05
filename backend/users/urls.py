@@ -14,7 +14,8 @@ urlpatterns = [
     # Authentication
     path('register/', views.UserRegistrationView.as_view(), name='user-register'),
     path('login/', views.UserLoginView.as_view(), name='user-login'),
-    path('logout/', views.logout_view, name='user-logout'),
+    path('logout/', views.logout_user, name='user-logout'),
+    path('refresh-token/', views.refresh_token, name='refresh-token'),
     
     # Profile management
     path('profile/', views.UserProfileView.as_view(), name='user-profile'),

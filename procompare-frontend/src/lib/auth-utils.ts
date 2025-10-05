@@ -53,3 +53,58 @@ export const clearAuth = () => {
   localStorage.removeItem('token');
   localStorage.removeItem('user');
 };
+
+export const logoutUser = async (): Promise<boolean> => {
+  const token = getTokenFromStorage();
+  
+  if (token) {
+    try {
+      // Invalidate token on server
+      const response = await fetch('https://api.proconnectsa.co.za/api/auth/logout/', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Token ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+      
+      if (response.ok) {
+        clearAuth();
+        return true;
+      }
+    } catch (error) {
+      console.error('Logout error:', error);
+    }
+  }
+  
+  // Even if server logout fails, clear local storage
+  clearAuth();
+  return true;
+};
+
+export const refreshAuthToken = async (): Promise<string | null> => {
+  const currentToken = getTokenFromStorage();
+  if (!currentToken) return null;
+  
+  try {
+    const response = await fetch('https://api.proconnectsa.co.za/api/auth/refresh-token/', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Token ${currentToken}`,
+        'Content-Type': 'application/json',
+      },
+    });
+    
+    if (response.ok) {
+      const data = await response.json();
+      if (data.success && data.token) {
+        localStorage.setItem('token', data.token);
+        return data.token;
+      }
+    }
+  } catch (error) {
+    console.error('Token refresh failed:', error);
+  }
+  
+  return null;
+};

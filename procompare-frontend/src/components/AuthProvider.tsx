@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { User, getUserFromStorage, getTokenFromStorage, clearAuth } from '@/lib/auth-utils';
+import { User, getUserFromStorage, getTokenFromStorage, logoutUser as logoutUserUtil } from '@/lib/auth-utils';
 
 interface AuthContextType {
   user: User | null;
@@ -37,8 +37,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setIsLoading(false);
   }, []);
 
-  const logout = () => {
-    clearAuth();
+  const logout = async () => {
+    await logoutUserUtil();
     setUser(null);
     setToken(null);
     router.push('/login');

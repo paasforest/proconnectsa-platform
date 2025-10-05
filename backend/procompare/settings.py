@@ -203,7 +203,8 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # Django REST Framework
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework.authentication.TokenAuthentication',
+        'backend.users.expiring_token_auth.ExpiringTokenAuthentication',  # Tokens expire after 14 days
+        'rest_framework.authentication.TokenAuthentication',  # Fallback for backward compatibility
         'rest_framework.authentication.SessionAuthentication',
     ],
     'DEFAULT_PERMISSION_CLASSES': [

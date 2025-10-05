@@ -92,6 +92,56 @@ class UserLoginView(generics.GenericAPIView):
         })
 
 
+@api_view(['POST'])
+@permission_classes([permissions.IsAuthenticated])
+def logout_user(request):
+    """
+    Logout user by deleting their auth token.
+    This invalidates the token on the server side for security.
+    """
+    try:
+        # Delete the user's auth token
+        request.user.auth_token.delete()
+        
+        return Response({
+            'success': True,
+            'message': 'Logged out successfully'
+        }, status=status.HTTP_200_OK)
+        
+    except Exception as e:
+        return Response({
+            'success': False,
+            'message': f'Logout failed: {str(e)}'
+        }, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['POST'])
+@permission_classes([permissions.IsAuthenticated])
+def refresh_token(request):
+    """
+    Refresh user's auth token by creating a new one.
+    The old token is deleted for security.
+    """
+    try:
+        # Delete old token
+        request.user.auth_token.delete()
+        
+        # Create new token
+        token = Token.objects.create(user=request.user)
+        
+        return Response({
+            'success': True,
+            'token': token.key,
+            'message': 'Token refreshed successfully'
+        }, status=status.HTTP_200_OK)
+        
+    except Exception as e:
+        return Response({
+            'success': False,
+            'message': f'Token refresh failed: {str(e)}'
+        }, status=status.HTTP_400_BAD_REQUEST)
+
+
 class UserProfileView(generics.RetrieveUpdateAPIView):
     """User profile management"""
     serializer_class = UserProfileSerializer
