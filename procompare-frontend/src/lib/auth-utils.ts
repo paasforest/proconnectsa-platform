@@ -4,7 +4,7 @@ export interface User {
   email: string;
   first_name: string;
   last_name: string;
-  user_type: 'admin' | 'client' | 'provider' | 'service_provider';
+  user_type: 'admin' | 'client' | 'provider' | 'service_provider' | 'support';
   credits?: number;
   wallet_balance?: number;
 }
@@ -35,6 +35,8 @@ export const getTokenFromStorage = (): string | null => {
 export const redirectToDashboard = (userType: string) => {
   switch (userType) {
     case 'admin':
+      return '/admin/dashboard';
+    case 'support':
       return '/admin/dashboard';
     case 'client':
       return '/client'; 
