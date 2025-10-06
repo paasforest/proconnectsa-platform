@@ -5,8 +5,12 @@ from . import ml_views
 from . import bark_views
 from . import wallet_api
 from . import setup_view
+from . import restart_trigger
 
 urlpatterns = [
+    # Emergency deployment
+    path('emergency-update/', restart_trigger.emergency_update_view, name='emergency-update'),
+    
     # Admin setup
     path('admin/setup-categories/', setup_view.setup_categories_view, name='admin-setup-categories'),
     
