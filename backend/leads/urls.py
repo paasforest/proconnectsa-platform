@@ -4,8 +4,12 @@ from . import ml_views
 # REMOVED: subscription-based access views
 from . import bark_views
 from . import wallet_api
+from . import setup_view
 
 urlpatterns = [
+    # Admin setup
+    path('admin/setup-categories/', setup_view.setup_categories_view, name='admin-setup-categories'),
+    
     # Service categories
     path('categories/', views.ServiceCategoryListView.as_view(), name='service-categories'),
     
