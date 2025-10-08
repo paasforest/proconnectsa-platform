@@ -1,4 +1,4 @@
-from django.urls import path
+from django.urls import path, include
 from . import views
 from . import google_oauth_views
 from . import verification_views
@@ -9,6 +9,7 @@ from . import client_views
 from . import services_views
 from . import settings_views
 from . import support_views
+from . import admin_monitoring
 
 urlpatterns = [
     # Authentication
@@ -109,6 +110,10 @@ urlpatterns = [
     path('support/<str:ticket_id>/status/', support_views.update_ticket_status, name='update_ticket_status'),
     path('support/stats/', support_views.support_stats, name='support_stats'),
     
+    # Admin Monitoring APIs
+    path('admin/monitoring/dashboard/', admin_monitoring.admin_monitoring_dashboard, name='admin-monitoring-dashboard'),
+    path('admin/monitoring/activity/', admin_monitoring.recent_activity_feed, name='admin-activity-feed'),
+    path('admin/monitoring/problems/', admin_monitoring.problem_detection, name='admin-problem-detection'),
 ]
 
 

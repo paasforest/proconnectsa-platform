@@ -56,6 +56,15 @@ class LeadAssignmentService:
             lead = Lead.objects.get(id=lead_id, status='verified')
             logger.info(f"Assigning lead {lead_id} to providers")
             
+            # Validate lead has a service category
+            if not lead.service_category:
+                logger.error(f"Lead {lead_id} has no service category - cannot assign to providers")
+                return []
+            
+            if not lead.service_category.is_active:
+                logger.error(f"Lead {lead_id} has inactive service category '{lead.service_category.name}' - cannot assign to providers")
+                return []
+            
             # Find matching providers
             matching_providers = self.find_matching_providers(lead)
             

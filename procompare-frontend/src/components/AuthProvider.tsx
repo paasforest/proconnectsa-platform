@@ -41,7 +41,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     await logoutUserUtil();
     setUser(null);
     setToken(null);
-    router.push('/login');
+    router.push('/register');
   };
 
   return (
@@ -63,8 +63,8 @@ export function withAuth<P extends object>(
     useEffect(() => {
       if (!isLoading) {
         if (!user) {
-          // Not logged in, redirect to login
-          router.push('/login');
+          // Not logged in, redirect to register/login page
+          router.push('/register');
           return;
         }
 

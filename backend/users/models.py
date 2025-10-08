@@ -567,7 +567,9 @@ class Wallet(models.Model):
         """Convert R50 = 1 credit and add to wallet"""
         credits_to_add = int(amount_in_rands // 50)  # R50 = 1 credit
         self.credits += credits_to_add
-        self.balance += Decimal(str(amount_in_rands))
+        # DO NOT add to balance - money is converted to credits, not stored as cash
+        # self.balance should remain 0 after credit conversion
+        self.balance = Decimal('0.00')  # Balance is 0 because money is now credits
         self.save()
         return credits_to_add
     

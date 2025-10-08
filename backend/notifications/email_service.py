@@ -81,7 +81,7 @@ class EmailService:
                     </div>
                     <div class="footer">
                         <p>ProConnectSA - Connecting you with the best service providers</p>
-                        <p>Email: support@proconnectsa.co.za | Phone: +27 21 123 4567</p>
+                        <p>Email: support@proconnectsa.co.za | Phone: +27 67 951 8124</p>
                     </div>
                 </div>
             </body>
@@ -114,7 +114,7 @@ class EmailService:
             The ProConnectSA Team
             
             ProConnectSA - Connecting you with the best service providers
-            Email: support@proconnectsa.co.za | Phone: +27 21 123 4567
+            Email: support@proconnectsa.co.za | Phone: +27 67 951 8124
             """
             
             return self.send_email(email, subject, html_content, text_content)
@@ -452,7 +452,7 @@ def send_quote_received_email(client, lead, provider, quote_details=None):
                 </div>
                 <div class="footer">
                     <p>ProConnectSA - Connecting you with the best service providers</p>
-                    <p>Email: support@proconnectsa.co.za | Phone: +27 21 123 4567</p>
+                    <p>Email: support@proconnectsa.co.za | Phone: +27 67 951 8124</p>
                 </div>
             </div>
         </body>
@@ -537,7 +537,7 @@ def send_lead_verification_email(client, lead, verification_code):
                 </div>
                 <div class="footer">
                     <p>ProConnectSA - Connecting you with the best service providers</p>
-                    <p>Email: support@proconnectsa.co.za | Phone: +27 21 123 4567</p>
+                    <p>Email: support@proconnectsa.co.za | Phone: +27 67 951 8124</p>
                 </div>
             </div>
         </body>
@@ -834,7 +834,7 @@ def send_credit_purchase_confirmation(provider, amount, credits):
                 </div>
                 <div class="footer">
                     <p>ProConnectSA - Connecting you with the best service providers</p>
-                    <p>Email: support@proconnectsa.co.za | Phone: +27 21 123 4567</p>
+                    <p>Email: support@proconnectsa.co.za | Phone: +27 67 951 8124</p>
                 </div>
             </div>
         </body>
@@ -933,7 +933,7 @@ def send_quote_response_notification(client, lead, provider, quote_details):
                 </div>
                 <div class="footer">
                     <p>ProConnectSA - Connecting you with the best service providers</p>
-                    <p>Email: support@proconnectsa.co.za | Phone: +27 21 123 4567</p>
+                    <p>Email: support@proconnectsa.co.za | Phone: +27 67 951 8124</p>
                 </div>
             </div>
         </body>
@@ -1020,7 +1020,7 @@ def send_deposit_notification(provider, deposit, credits_added):
                 </div>
                 <div class="footer">
                     <p>ProConnectSA - Connecting you with the best service providers</p>
-                    <p>Email: support@proconnectsa.co.za | Phone: +27 21 123 4567</p>
+                    <p>Email: support@proconnectsa.co.za | Phone: +27 67 951 8124</p>
                 </div>
             </div>
         </body>
@@ -1122,7 +1122,7 @@ def send_manual_deposit_instructions(provider, deposit):
                 </div>
                 <div class="footer">
                     <p>ProConnectSA - Connecting you with the best service providers</p>
-                    <p>Email: support@proconnectsa.co.za | Phone: +27 21 123 4567</p>
+                    <p>Email: support@proconnectsa.co.za | Phone: +27 67 951 8124</p>
                 </div>
             </div>
         </body>

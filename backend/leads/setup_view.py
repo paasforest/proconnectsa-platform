@@ -127,3 +127,4 @@ def setup_categories_view(request):
     
     return JsonResponse(result, json_dumps_params={'indent': 2})
 
+

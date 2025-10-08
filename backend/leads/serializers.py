@@ -136,8 +136,34 @@ class LeadCreateSerializer(serializers.ModelSerializer):
             'status', 'verification_score', 'verified_at'
         ]
     
+    def validate_service_category_id(self, value):
+        """Validate service category exists and is active"""
+        try:
+            category = ServiceCategory.objects.get(id=value, is_active=True)
+            return value
+        except ServiceCategory.DoesNotExist:
+            raise serializers.ValidationError("Invalid or inactive service category")
+    
     def create(self, validated_data):
+        # Extract and convert service_category_id to service_category object
+        service_category_id = validated_data.pop('service_category_id', None)
+        
+        if not service_category_id:
+            raise serializers.ValidationError({
+                'service_category_id': 'Service category is required and cannot be empty'
+            })
+        
+        try:
+            service_category = ServiceCategory.objects.get(id=service_category_id, is_active=True)
+        except ServiceCategory.DoesNotExist:
+            raise serializers.ValidationError({
+                'service_category_id': 'Invalid or inactive service category'
+            })
+        
+        # Set the service_category relationship
+        validated_data['service_category'] = service_category
         validated_data['client'] = self.context['request'].user
+        
         return super().create(validated_data)
 
 

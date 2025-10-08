@@ -38,9 +38,8 @@ export default function AdminLoginForm() {
         localStorage.setItem('token', data.token);
         localStorage.setItem('user', JSON.stringify(data.user));
         
-        // Redirect to admin dashboard
-        router.push('/admin/dashboard');
-        router.refresh();
+        // Use window.location for full page reload to ensure localStorage is loaded
+        window.location.href = '/admin/dashboard';
       } else {
         setError('Access denied. Only admin and support team members can access the admin dashboard.');
       }

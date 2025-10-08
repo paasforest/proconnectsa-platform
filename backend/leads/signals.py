@@ -47,6 +47,15 @@ def auto_assign_lead_to_providers(sender, instance, created, **kwargs):
     if created and instance.status == 'verified':
         logger.info(f"🤖 AUTO-ASSIGNING LEAD: {instance.id} - {instance.title}")
         
+        # Validate that the lead has a service category before attempting assignment
+        if not instance.service_category:
+            logger.error(f"❌ AUTO-ASSIGNMENT FAILED: Lead {instance.id} has no service category")
+            return
+        
+        if not instance.service_category.is_active:
+            logger.warning(f"⚠️  AUTO-ASSIGNMENT SKIPPED: Lead {instance.id} has inactive service category: {instance.service_category.name}")
+            return
+        
         try:
             from .services import LeadAssignmentService
             assignment_service = LeadAssignmentService()

@@ -115,6 +115,12 @@ app.conf.beat_schedule = {
         'task': 'backend.leads.tasks.optimize_lead_distribution',
         'schedule': crontab(minute=0, hour='*/4'),  # Every 4 hours
     },
+    
+    # ML Auto-Verification and Lead Assignment
+    'auto-verify-providers-ml': {
+        'task': 'backend.leads.tasks.auto_verify_providers_ml',
+        'schedule': crontab(minute='*/10'),  # Every 10 minutes for fast verification
+    },
 }
 
 @app.task(bind=True)

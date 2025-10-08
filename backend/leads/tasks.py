@@ -1260,6 +1260,135 @@ def optimize_lead_distribution():
 
 
 @shared_task
+def auto_verify_providers_ml():
+    """Automatically verify providers using ML-based criteria and assign leads"""
+    from backend.users.models import ProviderProfile
+    from backend.leads.services import LeadAssignmentService
+    from django.utils import timezone
+    
+    logger.info("🤖 Running ML auto-verification for providers...")
+    
+    try:
+        # Get pending providers
+        pending_providers = ProviderProfile.objects.filter(verification_status='pending')
+        logger.info(f"Found {pending_providers.count()} pending providers")
+        
+        if pending_providers.count() == 0:
+            logger.info("No pending providers to verify")
+            return {
+                'success': True,
+                'message': 'No pending providers to verify',
+                'verified_count': 0,
+                'timestamp': timezone.now().isoformat()
+            }
+        
+        verified_count = 0
+        assignment_service = LeadAssignmentService()
+        
+        for provider in pending_providers:
+            # Calculate ML verification score
+            verification_score = calculate_ml_verification_score(provider)
+            
+            logger.info(f"Provider {provider.user.email}: Score {verification_score}/100")
+            
+            if verification_score >= 75:  # ML threshold
+                provider.verification_status = 'verified'
+                provider.save()
+                verified_count += 1
+                logger.info(f"✅ Auto-verified: {provider.user.email}")
+                
+                # Assign available leads to newly verified provider
+                assign_leads_to_provider(provider, assignment_service)
+            else:
+                logger.info(f"❌ Not verified: {provider.user.email} (Score: {verification_score})")
+        
+        logger.info(f"🎉 Auto-verified {verified_count} providers!")
+        
+        return {
+            'success': True,
+            'message': f'Auto-verified {verified_count} providers',
+            'verified_count': verified_count,
+            'timestamp': timezone.now().isoformat()
+        }
+        
+    except Exception as e:
+        logger.error(f"Error in auto-verification: {str(e)}")
+        return {
+            'success': False,
+            'error': str(e),
+            'timestamp': timezone.now().isoformat()
+        }
+
+
+def calculate_ml_verification_score(provider):
+    """Calculate ML-based verification score for a provider"""
+    score = 0
+    
+    # Basic profile completeness (40 points)
+    if provider.user.email: score += 10
+    if provider.user.phone: score += 10
+    if provider.user.first_name: score += 5
+    if provider.user.last_name: score += 5
+    if provider.service_categories: score += 10
+    
+    # Service area coverage (20 points)
+    if provider.service_areas:
+        score += 20
+        # Bonus for multiple areas
+        if len(provider.service_areas) > 1:
+            score += 5
+    
+    # Profile quality indicators (20 points)
+    if len(provider.service_categories) > 1: score += 10  # Multiple services
+    if provider.user.is_active: score += 5
+    if provider.user.date_joined: score += 5
+    
+    # ML confidence factors (20 points)
+    # Email domain quality
+    if provider.user.email and '@gmail.com' in provider.user.email:
+        score += 5
+    elif provider.user.email and '@' in provider.user.email:
+        score += 3
+    
+    # Phone number format
+    if provider.user.phone and len(provider.user.phone) >= 10:
+        score += 5
+    
+    # Profile age (newer profiles get bonus)
+    days_since_joined = (timezone.now() - provider.user.date_joined).days
+    if days_since_joined <= 7:  # New profiles
+        score += 10
+    elif days_since_joined <= 30:  # Recent profiles
+        score += 5
+    
+    return min(score, 100)  # Cap at 100
+
+
+def assign_leads_to_provider(provider, assignment_service):
+    """Assign available leads to newly verified provider"""
+    from backend.leads.models import Lead
+    
+    # Get available leads that match this provider's categories
+    available_leads = Lead.objects.filter(
+        status='verified',
+        is_available=True,
+        service_category__slug__in=provider.service_categories
+    )
+    
+    if available_leads.count() > 0:
+        logger.info(f"Found {available_leads.count()} matching leads for {provider.user.email}")
+        
+        # Assign leads
+        for lead in available_leads[:3]:  # Limit to 3 leads per provider
+            try:
+                assignments = assignment_service.assign_lead_to_providers(lead.id)
+                if assignments:
+                    logger.info(f"✅ Assigned lead {lead.title} to {provider.user.email}")
+            except Exception as e:
+                logger.error(f"❌ Failed to assign lead {lead.title}: {str(e)}")
+
+
+@shared_task
 def adaptive_ml_threshold_adjustment():
     """Adjust ML training thresholds based on data patterns."""
     from backend.leads.models import Lead, LeadAssignment

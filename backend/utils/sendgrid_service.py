@@ -108,7 +108,7 @@ The ProConnectSA Team
 
 ---
 ProConnectSA - Connecting you with the best service providers
-Email: support@proconnectsa.co.za | Phone: +27 21 123 4567
+Email: support@proconnectsa.co.za | Phone: +27 67 951 8124
             """
             
             return self.send_email(user.email, subject, html_content, text_content)
@@ -190,7 +190,7 @@ Email: support@proconnectsa.co.za | Phone: +27 21 123 4567
                     </div>
                     <div class="footer">
                         <p>ProConnectSA - Connecting you with the best service providers</p>
-                        <p>Email: support@proconnectsa.co.za | Phone: +27 21 123 4567</p>
+                        <p>Email: support@proconnectsa.co.za | Phone: +27 67 951 8124</p>
                     </div>
                 </div>
             </body>
@@ -229,7 +229,7 @@ Best regards,
 The ProConnectSA Team
 
 ProConnectSA - Connecting you with the best service providers
-Email: support@proconnectsa.co.za | Phone: +27 21 123 4567
+Email: support@proconnectsa.co.za | Phone: +27 67 951 8124
             """
             
             return self.send_email(provider.email, subject, html_content, text_content)
@@ -385,7 +385,7 @@ Need help? Contact us at support@proconnectsa.co.za
                     </div>
                     <div class="footer">
                         <p>ProConnectSA - Connecting you with the best service providers</p>
-                        <p>Email: support@proconnectsa.co.za | Phone: +27 21 123 4567</p>
+                        <p>Email: support@proconnectsa.co.za | Phone: +27 67 951 8124</p>
                     </div>
                 </div>
             </body>
@@ -642,7 +642,7 @@ Your ProConnectSA email system is ready for production!
                     </div>
                     <div class="footer">
                         <p>ProConnectSA - Connecting you with the best service providers</p>
-                        <p>Email: support@proconnectsa.co.za | Phone: +27 21 123 4567</p>
+                        <p>Email: support@proconnectsa.co.za | Phone: +27 67 951 8124</p>
                     </div>
                 </div>
             </body>
@@ -668,7 +668,7 @@ Your ProConnectSA email system is ready for production!
             The ProConnectSA Team
             
             ProConnectSA - Connecting you with the best service providers
-            Email: support@proconnectsa.co.za | Phone: +27 21 123 4567
+            Email: support@proconnectsa.co.za | Phone: +27 67 951 8124
             """
             
             return self.send_email(user.email, subject, html_content, text_content)
@@ -727,7 +727,7 @@ Your ProConnectSA email system is ready for production!
                     </div>
                     <div class="footer">
                         <p>ProConnectSA - Connecting you with the best service providers</p>
-                        <p>Email: support@proconnectsa.co.za | Phone: +27 21 123 4567</p>
+                        <p>Email: support@proconnectsa.co.za | Phone: +27 67 951 8124</p>
                     </div>
                 </div>
             </body>
@@ -755,7 +755,7 @@ Your ProConnectSA email system is ready for production!
             The ProConnectSA Team
             
             ProConnectSA - Connecting you with the best service providers
-            Email: support@proconnectsa.co.za | Phone: +27 21 123 4567
+            Email: support@proconnectsa.co.za | Phone: +27 67 951 8124
             """
             
             return self.send_email(user.email, subject, html_content, text_content)
