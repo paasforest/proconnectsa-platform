@@ -110,37 +110,54 @@ const FinanceDashboard = () => {
       setLoading(true);
       apiClient.setToken(token);
 
-      // Fetch all financial data in parallel
-      const [
-        ticketsRes,
-        financialAuditRes
-      ] = await Promise.all([
-        apiClient.get('/api/support/tickets/?category=billing'),
-        apiClient.get('/api/payments/audit/')
-      ]);
+      // Fetch financial data from monitoring API
+      const monitoringRes = await fetch('https://api.proconnectsa.co.za/api/admin/monitoring/dashboard/', {
+        headers: { 'Authorization': `Token ${token}` },
+      });
 
-      setTickets(ticketsRes.results || ticketsRes);
+      let monitoringData: any = {};
+      if (monitoringRes.ok) {
+        monitoringData = await monitoringRes.json();
+      }
 
-      // Use real financial audit data
-      const auditData = financialAuditRes;
+      // Use monitoring data for finance stats
+      const auditData: any = {
+        revenue_metrics: {
+          total_revenue: monitoringData?.payments?.total_deposited || 0,
+          monthly_revenue: monitoringData?.payments?.total_deposited || 0,
+          net_revenue: monitoringData?.payments?.total_deposited || 0,
+          revenue_growth: 0,
+          refund_amount: 0
+        },
+        transaction_stats: {
+          total_transactions: monitoringData?.payments?.new_deposits || 0,
+          successful_transactions: monitoringData?.payments?.new_deposits || 0,
+          failed_transactions: 0,
+          average_transaction_value: monitoringData?.payments?.new_deposits > 0 
+            ? (monitoringData?.payments?.total_deposited / monitoringData?.payments?.new_deposits) 
+            : 0
+        },
+        platform_earnings: {},
+        financial_summary: {},
+        bank_reconciliation: {},
+        monthly_trends: []
+      };
+
+      setTickets([]);
 
       setStats({
-        total_tickets: ticketsRes.results?.length || ticketsRes.length || 0,
-        open_tickets: (ticketsRes.results || ticketsRes).filter(t => ['open', 'in_progress'].includes(t.status)).length,
-        resolved_tickets: (ticketsRes.results || ticketsRes).filter(t => ['resolved', 'closed'].includes(t.status)).length,
+        total_tickets: 0,
+        open_tickets: 0,
+        resolved_tickets: 0,
         total_amount_involved: auditData.revenue_metrics?.total_revenue || 0,
-        avg_resolution_time: 4.2, // This would need to be calculated from ticket data
-        refund_requests: (ticketsRes.results || ticketsRes).filter(t => t.title.toLowerCase().includes('refund')).length,
-        billing_issues: (ticketsRes.results || ticketsRes).length,
+        avg_resolution_time: 0,
+        refund_requests: 0,
+        billing_issues: 0,
         payment_failures: auditData.transaction_stats?.failed_transactions || 0,
         successful_transactions: auditData.transaction_stats?.successful_transactions || 0,
-        tickets_by_status: calculateTicketStatusDistribution(ticketsRes.results || ticketsRes),
-        tickets_by_priority: calculateTicketPriorityDistribution(ticketsRes.results || ticketsRes),
-        monthly_trends: auditData.monthly_trends?.map(trend => ({
-          month: trend.month_name,
-          tickets: trend.transactions,
-          amount: trend.revenue
-        })) || [],
+        tickets_by_status: {},
+        tickets_by_priority: {},
+        monthly_trends: [],
         // Real financial metrics from audit data
         total_revenue: auditData.revenue_metrics?.total_revenue || 0,
         monthly_revenue: auditData.revenue_metrics?.monthly_revenue || 0,
@@ -184,11 +201,45 @@ const FinanceDashboard = () => {
         resolved_tickets: 0,
         total_amount_involved: 0,
         avg_resolution_time: 0,
-        satisfaction_rating: 0,
+        refund_requests: 0,
+        billing_issues: 0,
+        payment_failures: 0,
+        successful_transactions: 0,
+        tickets_by_status: {},
+        tickets_by_priority: {},
+        monthly_trends: [],
+        total_revenue: 0,
         monthly_revenue: 0,
+        transaction_volume: 0,
+        average_transaction_value: 0,
+        refund_amount: 0,
+        net_revenue: 0,
         revenue_growth: 0,
-        total_deposits: 0,
-        avg_ticket_value: 0
+        platform_earnings: {
+          lead_sales: 0,
+          subscription_fees: 0,
+          transaction_fees: 0,
+          premium_features: 0,
+          other_income: 0
+        },
+        financial_summary: {
+          total_deposits: 0,
+          total_withdrawals: 0,
+          total_credits_sold: 0,
+          total_credits_used: 0,
+          outstanding_balances: 0,
+          pending_deposits: 0,
+          bank_reconciliation_codes: 0
+        },
+        bank_reconciliation: {
+          total_deposit_requests: 0,
+          pending_deposits: 0,
+          completed_deposits: 0,
+          failed_deposits: 0,
+          total_bank_references: 0,
+          pending_amount: 0,
+          recent_deposits: []
+        }
       });
       setTickets([]);
     } finally {
