@@ -7,9 +7,9 @@ import {
   Settings, BarChart3, Bell, LogOut, Menu, X
 } from 'lucide-react';
 import AdminSupportDashboard from './AdminSupportDashboard';
-// import StaffManagement from './StaffManagement';
-// import FinanceDashboard from './FinanceDashboard';
-// import TechnicalDashboard from './TechnicalDashboard';
+import StaffManagement from './StaffManagement';
+import FinanceDashboard from './FinanceDashboard';
+import TechnicalDashboard from './TechnicalDashboard';
 
 type DashboardView = 'overview' | 'support' | 'staff' | 'finance' | 'technical' | 'settings';
 
@@ -32,11 +32,11 @@ const AdminDashboard = () => {
       case 'support':
         return <AdminSupportDashboard />;
       case 'staff':
-        return <div className="p-6"><h1 className="text-2xl font-bold">Staff Management</h1><p>Staff management temporarily disabled for deployment.</p></div>;
+        return <StaffManagement />;
       case 'finance':
-        return <div className="p-6"><h1 className="text-2xl font-bold">Finance Dashboard</h1><p>Finance dashboard temporarily disabled for deployment.</p></div>;
+        return <FinanceDashboard />;
       case 'technical':
-        return <div className="p-6"><h1 className="text-2xl font-bold">Technical Dashboard</h1><p>Technical dashboard temporarily disabled for deployment.</p></div>;
+        return <TechnicalDashboard />;
       case 'settings':
         return <div className="p-6"><h1 className="text-2xl font-bold">Settings</h1><p>Settings panel coming soon...</p></div>;
       default:
@@ -161,31 +161,45 @@ const Sidebar = ({ navigation, currentView, setCurrentView }: {
 
 const OverviewDashboard = () => {
   const { token } = useAuth();
-  const [stats, setStats] = useState<any>(null);
+  const [monitoringData, setMonitoringData] = useState<any>(null);
+  const [problems, setProblems] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchStats = async () => {
+    const fetchDashboardData = async () => {
       try {
-        const response = await fetch('https://api.proconnectsa.co.za/api/support/stats/', {
-          headers: {
-            'Authorization': `Token ${token}`,
-          },
+        setLoading(true);
+        
+        // Fetch monitoring dashboard data
+        const monitoringRes = await fetch('https://api.proconnectsa.co.za/api/admin/monitoring/dashboard/', {
+          headers: { 'Authorization': `Token ${token}` },
         });
         
-        if (response.ok) {
-          const data = await response.json();
-          setStats(data);
+        const problemsRes = await fetch('https://api.proconnectsa.co.za/api/admin/monitoring/problems/', {
+          headers: { 'Authorization': `Token ${token}` },
+        });
+        
+        if (monitoringRes.ok) {
+          const data = await monitoringRes.json();
+          setMonitoringData(data);
+        }
+        
+        if (problemsRes.ok) {
+          const data = await problemsRes.json();
+          setProblems(data);
         }
       } catch (error) {
-        console.error('Failed to fetch admin stats:', error);
+        console.error('Failed to fetch monitoring data:', error);
       } finally {
         setLoading(false);
       }
     };
 
     if (token) {
-      fetchStats();
+      fetchDashboardData();
+      // Refresh every 30 seconds
+      const interval = setInterval(fetchDashboardData, 30000);
+      return () => clearInterval(interval);
     }
   }, [token]);
 
@@ -201,14 +215,14 @@ const OverviewDashboard = () => {
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
           <div className="flex items-center">
             <div className="p-2 bg-blue-100 rounded-lg">
-              <MessageSquare className="w-6 h-6 text-blue-600" />
+              <Users className="w-6 h-6 text-blue-600" />
             </div>
             <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Total Tickets</p>
+              <p className="text-sm font-medium text-gray-600">New Registrations</p>
               {loading ? (
                 <div className="h-8 w-16 bg-gray-200 animate-pulse rounded"></div>
               ) : (
-                <p className="text-2xl font-bold text-gray-900">{stats?.total_tickets || 0}</p>
+                <p className="text-2xl font-bold text-gray-900">{monitoringData?.registrations?.total || 0}</p>
               )}
             </div>
           </div>
@@ -217,14 +231,14 @@ const OverviewDashboard = () => {
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
           <div className="flex items-center">
             <div className="p-2 bg-green-100 rounded-lg">
-              <Users className="w-6 h-6 text-green-600" />
+              <DollarSign className="w-6 h-6 text-green-600" />
             </div>
             <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Active Staff</p>
+              <p className="text-sm font-medium text-gray-600">New Deposits</p>
               {loading ? (
                 <div className="h-8 w-16 bg-gray-200 animate-pulse rounded"></div>
               ) : (
-                <p className="text-2xl font-bold text-gray-900">{stats?.active_staff || 0}</p>
+                <p className="text-2xl font-bold text-gray-900">R{monitoringData?.payments?.total_deposited || 0}</p>
               )}
             </div>
           </div>
@@ -233,14 +247,14 @@ const OverviewDashboard = () => {
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
           <div className="flex items-center">
             <div className="p-2 bg-yellow-100 rounded-lg">
-              <DollarSign className="w-6 h-6 text-yellow-600" />
+              <LayoutDashboard className="w-6 h-6 text-yellow-600" />
             </div>
             <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Total Credits Sold</p>
+              <p className="text-sm font-medium text-gray-600">New Leads</p>
               {loading ? (
                 <div className="h-8 w-20 bg-gray-200 animate-pulse rounded"></div>
               ) : (
-                <p className="text-2xl font-bold text-gray-900">{stats?.total_credits_sold || 0}</p>
+                <p className="text-2xl font-bold text-gray-900">{monitoringData?.leads?.new_leads || 0}</p>
               )}
             </div>
           </div>
@@ -248,20 +262,49 @@ const OverviewDashboard = () => {
 
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
           <div className="flex items-center">
-            <div className="p-2 bg-purple-100 rounded-lg">
-              <BarChart3 className="w-6 h-6 text-purple-600" />
+            <div className="p-2 bg-red-100 rounded-lg">
+              <Bell className="w-6 h-6 text-red-600" />
             </div>
             <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Avg Response Time</p>
+              <p className="text-sm font-medium text-gray-600">Problems Detected</p>
               {loading ? (
                 <div className="h-8 w-20 bg-gray-200 animate-pulse rounded"></div>
               ) : (
-                <p className="text-2xl font-bold text-gray-900">{stats?.avg_response_time || '0h'}</p>
+                <p className="text-2xl font-bold text-gray-900">{problems?.problems_detected || 0}</p>
               )}
             </div>
           </div>
         </div>
       </div>
+
+      {/* Problems Alert */}
+      {problems && problems.problems_detected > 0 && (
+        <div className="mb-6 bg-red-50 border border-red-200 rounded-lg p-6">
+          <h3 className="text-lg font-semibold text-red-900 mb-4 flex items-center">
+            <Bell className="w-5 h-5 mr-2" />
+            ⚠️ {problems.problems_detected} Problem(s) Need Attention
+          </h3>
+          <div className="space-y-3">
+            {problems.problems.map((problem: any, index: number) => (
+              <div key={index} className="bg-white rounded p-4 border border-red-200">
+                <div className="flex items-start justify-between">
+                  <div className="flex-1">
+                    <p className="font-medium text-gray-900">{problem.message}</p>
+                    <p className="text-sm text-gray-600 mt-1">{problem.action}</p>
+                  </div>
+                  <span className={`px-2 py-1 text-xs font-medium rounded-full ${
+                    problem.severity === 'high' ? 'bg-red-100 text-red-800' :
+                    problem.severity === 'medium' ? 'bg-yellow-100 text-yellow-800' :
+                    'bg-blue-100 text-blue-800'
+                  }`}>
+                    {problem.severity}
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Quick Actions */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
