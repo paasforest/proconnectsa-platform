@@ -24,7 +24,11 @@ class LeadsConfig(AppConfig):
                     'Cleaning', 'Plumbing', 'Electrical', 'Handyman', 'Painting',
                     'Carpentry', 'Landscaping', 'Pest Control', 'Moving Services',
                     'HVAC', 'Roofing', 'Flooring', 'Tiling', 'Construction',
-                    'Renovations', 'Farm Fencing'
+                    'Renovations', 'Farm Fencing', 'Solar Installation', 'PVC Installation',
+                    'DSTV Installation', 'CCTV Installation', 'Access Control',
+                    'Satellite Installation', 'Home Automation', 'Alarm Systems',
+                    'Electric Fencing', 'Appliance Repair', 'Gardening', 'Pool Maintenance',
+                    'Security'
                 ]
                 
                 for name in categories:

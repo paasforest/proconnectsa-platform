@@ -12,7 +12,9 @@ const serviceCategories = [
   'Cleaning', 'Electrical', 'Plumbing', 'Painting', 'Carpentry', 
   'Gardening', 'Handyman', 'Roofing', 'Flooring', 'Tiling',
   'Appliance Repair', 'HVAC', 'Security', 'Landscaping', 'Pool Maintenance',
-  'Construction', 'Renovations', 'Farm Fencing'
+  'Construction', 'Renovations', 'Farm Fencing', 'Solar Installation',
+  'PVC Installation', 'DSTV Installation', 'CCTV Installation', 'Access Control',
+  'Satellite Installation', 'Home Automation', 'Alarm Systems', 'Electric Fencing'
 ];
 
 // Experience levels
