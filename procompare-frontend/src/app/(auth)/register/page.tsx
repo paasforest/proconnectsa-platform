@@ -232,10 +232,26 @@ export default function RegisterPage() {
     setError('');
     setSuccess('');
 
-    if (!validateStep1() || !validateStep2()) {
+    console.log('🚀 Registration form submitted', {
+      user_type: formData.user_type,
+      currentStep,
+      terms_accepted: formData.terms_accepted,
+      privacy_accepted: formData.privacy_accepted
+    });
+
+    // Validate Step 1
+    if (!validateStep1()) {
+      console.error('❌ Step 1 validation failed');
       return;
     }
 
+    // Validate Step 2 (only for providers)
+    if (!validateStep2()) {
+      console.error('❌ Step 2 validation failed');
+      return;
+    }
+
+    console.log('✅ All validations passed, submitting to API...');
     setLoading(true);
 
     try {
@@ -274,6 +290,12 @@ export default function RegisterPage() {
         });
       }
 
+      console.log('📤 Sending registration data to API:', {
+        ...apiData,
+        password: '***hidden***',
+        password_confirm: '***hidden***'
+      });
+
       const response = await fetch('https://api.proconnectsa.co.za/api/register/', {
         method: 'POST',
         headers: {
@@ -282,7 +304,10 @@ export default function RegisterPage() {
         body: JSON.stringify(apiData),
       });
 
+      console.log('📥 API Response status:', response.status, response.statusText);
+
       const data = await response.json();
+      console.log('📥 API Response data:', data);
 
       if (response.ok) {
         // Store the email for login
@@ -996,37 +1021,16 @@ export default function RegisterPage() {
         </div>
       </div>
 
-      {/* Terms and Conditions */}
-      <div className="space-y-4">
-        <h3 className="text-lg font-medium text-gray-900">Terms & Conditions</h3>
-        <div className="space-y-3">
-          <label className="flex items-start space-x-3">
-            <input
-              type="checkbox"
-              name="terms_accepted"
-              required
-              checked={formData.terms_accepted}
-              onChange={handleChange}
-              className="mt-1 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500"
-            />
-            <span className="text-sm text-gray-700">
-              I have read and agree to the <a href="/how-it-works" className="text-emerald-600 hover:underline">Terms of Service</a>
-            </span>
-          </label>
-          
-          <label className="flex items-start space-x-3">
-            <input
-              type="checkbox"
-              name="privacy_accepted"
-              required
-              checked={formData.privacy_accepted}
-              onChange={handleChange}
-              className="mt-1 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500"
-            />
-            <span className="text-sm text-gray-700">
-              I have read and agree to the <a href="/how-it-works" className="text-emerald-600 hover:underline">Privacy Policy</a>
-            </span>
-          </label>
+      {/* Note: Terms & Conditions already accepted in Step 1 */}
+      <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-4 mt-6">
+        <div className="flex items-start">
+          <svg className="w-5 h-5 text-emerald-600 mt-0.5 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+          </svg>
+          <div>
+            <p className="text-sm font-medium text-emerald-800">Terms & Conditions Accepted</p>
+            <p className="text-xs text-emerald-700 mt-1">You accepted the Terms of Service and Privacy Policy in Step 1.</p>
+          </div>
         </div>
       </div>
     </div>
