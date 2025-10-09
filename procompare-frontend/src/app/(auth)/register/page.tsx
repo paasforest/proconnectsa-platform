@@ -142,6 +142,10 @@ export default function RegisterPage() {
       setError('Please provide your location information');
       return false;
     }
+    if (!formData.terms_accepted || !formData.privacy_accepted) {
+      setError('Please accept the terms and conditions to continue');
+      return false;
+    }
     return true;
   };
 
@@ -159,10 +163,11 @@ export default function RegisterPage() {
         setError('Please select at least one service area');
         return false;
       }
-    }
-    if (!formData.terms_accepted || !formData.privacy_accepted) {
-      setError('Please accept the terms and conditions');
-      return false;
+      // Terms are already checked in Step 1, but double-check for providers
+      if (!formData.terms_accepted || !formData.privacy_accepted) {
+        setError('Please accept the terms and conditions');
+        return false;
+      }
     }
     return true;
   };
@@ -585,6 +590,40 @@ export default function RegisterPage() {
             <option key={province} value={province}>{province}</option>
           ))}
         </select>
+      </div>
+
+      {/* Terms and Conditions - Show for all users */}
+      <div className="space-y-4 mt-6 pt-6 border-t border-gray-200">
+        <h3 className="text-lg font-medium text-gray-900">Terms & Conditions</h3>
+        <div className="space-y-3">
+          <label className="flex items-start space-x-3">
+            <input
+              type="checkbox"
+              name="terms_accepted"
+              required
+              checked={formData.terms_accepted}
+              onChange={handleChange}
+              className="mt-1 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500"
+            />
+            <span className="text-sm text-gray-700">
+              I have read and agree to the <a href="/how-it-works" target="_blank" className="text-emerald-600 hover:underline">Terms of Service</a> *
+            </span>
+          </label>
+          
+          <label className="flex items-start space-x-3">
+            <input
+              type="checkbox"
+              name="privacy_accepted"
+              required
+              checked={formData.privacy_accepted}
+              onChange={handleChange}
+              className="mt-1 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500"
+            />
+            <span className="text-sm text-gray-700">
+              I have read and agree to the <a href="/how-it-works" target="_blank" className="text-emerald-600 hover:underline">Privacy Policy</a> *
+            </span>
+          </label>
+        </div>
       </div>
     </div>
   );
