@@ -109,11 +109,16 @@ export default function RegisterPage() {
     // If it starts with 0, replace with 27
     // Otherwise, prepend 27
     if (cleaned.startsWith('27')) {
-      cleaned = cleaned.substring(0, 11); // +27 + 9 digits = 11 digits total
+      cleaned = cleaned.substring(0, 11); // +27 + 9 digits = 11 digits total (without +)
     } else if (cleaned.startsWith('0')) {
       cleaned = '27' + cleaned.substring(1, 10); // Replace 0 with 27, keep next 9 digits
     } else if (cleaned.length > 0) {
       cleaned = '27' + cleaned.substring(0, 9); // Prepend 27, keep first 9 digits
+    }
+    
+    // Ensure we have exactly 11 digits (27 + 9 digits)
+    if (cleaned.length === 11 && cleaned.startsWith('27')) {
+      return `+${cleaned}`;
     }
     
     return cleaned ? `+${cleaned}` : '';
