@@ -24,6 +24,7 @@ import {
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { motion } from 'framer-motion';
+import { logoutUser } from '@/lib/auth-utils';
 
 interface NotificationSettings {
   email_notifications: boolean;
@@ -128,7 +129,7 @@ export default function SettingsPage() {
 
   const handleLogout = async () => {
     try {
-      await signOut({ redirect: false });
+      await logoutUser();
       router.push('/');
       toast.success('Logged out successfully');
     } catch (error) {
@@ -156,7 +157,7 @@ export default function SettingsPage() {
 
       if (response.ok) {
         toast.success('Account deleted successfully');
-        await signOut({ redirect: false });
+        await logoutUser();
         router.push('/');
       } else {
         toast.error('Failed to delete account');

@@ -12,13 +12,14 @@ import {
   DropdownMenuTrigger 
 } from "@/components/ui/dropdown-menu"
 import { Menu, X, User, LogOut, Settings, Bell, MessageCircle, FileText, Star, Coins } from "lucide-react"
+import { logoutUser } from '@/lib/auth-utils';
 
 export function Header() {
   const { user, token } = useAuth()
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
 
   const handleSignOut = () => {
-    signOut({ callbackUrl: "/" })
+    logoutUser()
   }
 
   return (
