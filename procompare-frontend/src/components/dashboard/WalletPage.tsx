@@ -476,7 +476,7 @@ const WalletPage = () => {
                 type="number"
                 value={topUpAmount}
                 onChange={(e) => setTopUpAmount(Number(e.target.value))}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-slate-800 font-medium"
                 min="50"
                 step="50"
               />
@@ -551,7 +551,7 @@ const WalletPage = () => {
               <div className="bg-blue-50 p-4 rounded-lg">
                 <h4 className="font-medium text-gray-900 mb-2">Customer Reference</h4>
                 <div className="flex items-center justify-between">
-                  <span className="text-sm font-mono bg-white px-2 py-1 rounded border">
+                  <span className="text-sm font-mono bg-white px-2 py-1 rounded border text-slate-800 font-medium">
                     {generateCustomerCode()}
                   </span>
                   <button
