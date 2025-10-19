@@ -862,7 +862,7 @@ export default function RegisterPage() {
           </label>
           <div className="grid grid-cols-2 gap-2">
             {serviceCategories.map((category) => (
-              <label key={category} className="flex items-center">
+              <label key={category} className="flex items-center p-2 rounded hover:bg-gray-50 cursor-pointer">
             <input
                   type="checkbox"
                   value={category}
@@ -881,9 +881,9 @@ export default function RegisterPage() {
                       });
                     }
                   }}
-                  className="mr-2"
+                  className="mr-3 w-4 h-4 text-emerald-600 bg-gray-100 border-gray-300 rounded focus:ring-emerald-500 focus:ring-2"
                 />
-                <span className="text-sm">{category}</span>
+                <span className="text-sm text-gray-700 font-medium">{category}</span>
               </label>
             ))}
           </div>
