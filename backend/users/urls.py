@@ -10,6 +10,7 @@ from . import services_views
 from . import settings_views
 from . import support_views
 from . import admin_monitoring
+from . import admin_views
 
 urlpatterns = [
     # Authentication
@@ -111,6 +112,13 @@ urlpatterns = [
     path('support/stats/', support_views.support_stats, name='support_stats'),
     
     # Admin Monitoring APIs
+    path('monitoring/', admin_monitoring.system_health, name='system_health'),
+    
+    # Support/Admin User Management APIs
+    path('support/users/', admin_views.support_users_list, name='support_users_list'),
+    path('support/users/<str:user_id>/', admin_views.support_user_detail, name='support_user_detail'),
+    path('support/users/<str:user_id>/update/', admin_views.support_user_update, name='support_user_update'),
+    path('support/users/<str:user_id>/provider-profile/', admin_views.support_user_provider_profile, name='support_user_provider_profile'),
     path('admin/monitoring/dashboard/', admin_monitoring.admin_monitoring_dashboard, name='admin-monitoring-dashboard'),
     path('admin/monitoring/activity/', admin_monitoring.recent_activity_feed, name='admin-activity-feed'),
     path('admin/monitoring/problems/', admin_monitoring.problem_detection, name='admin-problem-detection'),
