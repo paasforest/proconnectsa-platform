@@ -175,6 +175,18 @@ const serviceCategories: ServiceCategory[] = [
     avgTime: '2-4 hours',
     providers: 31,
     color: 'bg-blue-600'
+  },
+  {
+    id: 'immigration',
+    name: 'Immigration Solutions',
+    icon: Plane,
+    description: 'AI-powered immigration assistance for visa applications and documentation',
+    popular: true,
+    subcategories: ['SOP Generation', 'IELTS Practice', 'Interview Coaching', 'Visa Guidance', 'Document Checklist', 'Expert Review'],
+    avgPrice: 'R299-699',
+    avgTime: '2-4 weeks',
+    providers: 15,
+    color: 'bg-indigo-600'
   }
 ]
 
@@ -188,8 +200,14 @@ const serviceGroups = [
   {
     title: 'Specialized Services',
     description: 'Professional services for specific needs',
-    services: serviceCategories.slice(6),
+    services: serviceCategories.slice(6, -1),
     icon: Award
+  },
+  {
+    title: 'Immigration Solutions',
+    description: 'AI-powered immigration assistance and documentation',
+    services: serviceCategories.slice(-1),
+    icon: Plane
   }
 ]
 
@@ -207,7 +225,11 @@ export default function ServicesPage() {
   const popularCategories = serviceCategories.filter(category => category.popular)
 
   const handleGetQuotes = (categoryId: string) => {
-    router.push(`/request-quote?service=${categoryId}`)
+    if (categoryId === 'immigration') {
+      router.push('/immigration')
+    } else {
+      router.push(`/request-quote?service=${categoryId}`)
+    }
   }
 
   return (

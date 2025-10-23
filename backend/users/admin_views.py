@@ -224,3 +224,4 @@ def support_user_provider_profile(request, user_id):
             {'error': 'Failed to create/update provider profile'}, 
             status=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
+

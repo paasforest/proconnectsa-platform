@@ -1,0 +1,17 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer utilities {
+  .bg-grid-slate-100 {
+    background-image: linear-gradient(to right, rgb(241 245 249 / 0.2) 1px, transparent 1px),
+      linear-gradient(to bottom, rgb(241 245 249 / 0.2) 1px, transparent 1px);
+    background-size: 4rem 4rem;
+  }
+
+  .bg-grid-white\/10 {
+    background-image: linear-gradient(to right, rgb(255 255 255 / 0.1) 1px, transparent 1px),
+      linear-gradient(to bottom, rgb(255 255 255 / 0.1) 1px, transparent 1px);
+    background-size: 3rem 3rem;
+  }
+}

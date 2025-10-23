@@ -340,6 +340,12 @@ const Homepage = () => {
             Services
           </button>
           <button 
+            onClick={() => router.push('/immigration')}
+            className="text-gray-700 hover:text-emerald-600 transition-colors"
+          >
+            Immigration
+          </button>
+          <button 
             onClick={() => router.push('/providers')}
             className="text-gray-700 hover:text-emerald-600 transition-colors"
           >
