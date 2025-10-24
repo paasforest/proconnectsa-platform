@@ -341,9 +341,9 @@ const Homepage = () => {
           </button>
           <button 
             onClick={() => router.push('/immigration')}
-            className="text-gray-700 hover:text-emerald-600 transition-colors"
+            className="text-gray-700 hover:text-emerald-600 transition-colors font-medium"
           >
-            Immigration
+            🌍 Want to Travel Overseas?
           </button>
           <button 
             onClick={() => router.push('/providers')}

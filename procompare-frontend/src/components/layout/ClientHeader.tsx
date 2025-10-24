@@ -52,6 +52,12 @@ export function ClientHeader() {
           >
             Request Quote
           </Link>
+          <Link 
+            href="/immigration" 
+            className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors font-semibold"
+          >
+            🌍 Travel Overseas?
+          </Link>
         </nav>
 
         {/* Desktop Auth */}
@@ -145,6 +151,13 @@ export function ClientHeader() {
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 Request Quote
+              </Link>
+              <Link 
+                href="/immigration" 
+                className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors py-2 font-semibold"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                🌍 Travel Overseas?
               </Link>
             </nav>
             
