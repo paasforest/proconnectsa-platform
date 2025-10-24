@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState, useEffect } from 'react';
-import { Search, Star, ArrowRight, Shield, Clock, Award, CheckCircle, TrendingUp, Users, Zap, MapPin, Filter, Calendar, Phone, Mail, User, Wrench, Home, Paintbrush, Hammer, Droplets, Zap as Electric, X, Gift } from 'lucide-react';
+import { Search, Star, ArrowRight, Shield, Clock, Award, CheckCircle, TrendingUp, Users, Zap, MapPin, Filter, Calendar, Phone, Mail, User, Wrench, Home, Paintbrush, Hammer, Droplets, Zap as Electric, X, Gift, FileText, BookOpen, MessageSquare } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import LeadGenerationForm from '@/components/leads/LeadGenerationForm';
 import Head from 'next/head';
@@ -573,6 +573,150 @@ const Homepage = () => {
           Start Your Project Today
         </button>
       </div>
+        </div>
+      </section>
+
+      {/* Immigration Services Section */}
+      <section className="py-20 bg-gradient-to-br from-blue-50 via-white to-green-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-blue-100 rounded-full mb-6">
+              <span className="text-2xl">🌍</span>
+              <span className="text-sm font-medium text-blue-900">AI-Powered Immigration Assistant</span>
+            </div>
+            
+            <h2 className="text-4xl sm:text-5xl font-bold text-gray-900 mb-6">
+              Dreaming of Living Abroad?
+              <span className="block mt-2 bg-gradient-to-r from-blue-600 to-green-600 bg-clip-text text-transparent">
+                Make It Happen with AI
+              </span>
+            </h2>
+            
+            <p className="text-xl text-gray-600 max-w-3xl mx-auto mb-8">
+              Get AI-powered help for visa applications, English tests, and interview prep for 
+              <span className="font-semibold text-gray-900"> Canada 🇨🇦 UK 🇬🇧 USA 🇺🇸 Australia 🇦🇺</span> and more
+            </p>
+            
+            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12">
+              <button 
+                onClick={() => router.push('/immigration')}
+                className="group px-8 py-4 bg-blue-600 text-white font-semibold rounded-xl hover:bg-blue-700 transition-all duration-200 shadow-lg hover:shadow-xl flex items-center gap-2"
+              >
+                Start Your Immigration Journey
+                <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+              </button>
+              
+              <button 
+                onClick={() => router.push('/immigration')}
+                className="px-8 py-4 bg-white text-gray-900 font-semibold rounded-xl border-2 border-gray-200 hover:border-blue-300 transition-all duration-200 shadow-sm hover:shadow-md"
+              >
+                Check My Eligibility
+              </button>
+            </div>
+          </div>
+
+          {/* Immigration Features Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
+            <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-lg transition-all duration-300">
+              <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mb-4">
+                <FileText className="w-6 h-6 text-blue-600" />
+              </div>
+              <h3 className="text-xl font-bold text-gray-900 mb-3">AI SOP Generator</h3>
+              <p className="text-gray-600">Create compelling Statements of Purpose and cover letters that stand out to immigration officers.</p>
+            </div>
+            
+            <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-lg transition-all duration-300">
+              <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center mb-4">
+                <BookOpen className="w-6 h-6 text-green-600" />
+              </div>
+              <h3 className="text-xl font-bold text-gray-900 mb-3">IELTS Practice Tests</h3>
+              <p className="text-gray-600">Comprehensive prep for IELTS, TOEFL, and CELPIP with real-time feedback and adaptive learning.</p>
+            </div>
+            
+            <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-lg transition-all duration-300">
+              <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center mb-4">
+                <MessageSquare className="w-6 h-6 text-purple-600" />
+              </div>
+              <h3 className="text-xl font-bold text-gray-900 mb-3">Interview Coaching</h3>
+              <p className="text-gray-600">AI-powered mock interviews simulate real visa interviews, building confidence and perfecting answers.</p>
+            </div>
+          </div>
+
+          {/* Popular Destinations */}
+          <div className="text-center mb-8">
+            <h3 className="text-2xl font-bold text-gray-900 mb-6">Popular Destinations</h3>
+            <div className="flex flex-wrap justify-center items-center gap-6">
+              {[
+                { country: 'Canada', flag: '🇨🇦', visa: 'Express Entry' },
+                { country: 'UK', flag: '🇬🇧', visa: 'Skilled Worker' },
+                { country: 'USA', flag: '🇺🇸', visa: 'H1B Visa' },
+                { country: 'Australia', flag: '🇦🇺', visa: 'Skilled Independent' },
+                { country: 'New Zealand', flag: '🇳🇿', visa: 'Skilled Migrant' }
+              ].map((dest, index) => (
+                <div key={index} className="flex items-center gap-2 bg-white px-4 py-2 rounded-full border border-gray-200 shadow-sm">
+                  <span className="text-2xl">{dest.flag}</span>
+                  <div className="text-left">
+                    <div className="font-semibold text-gray-900 text-sm">{dest.country}</div>
+                    <div className="text-xs text-gray-600">{dest.visa}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Pricing Preview */}
+          <div className="bg-white rounded-2xl p-8 shadow-lg border border-gray-200 max-w-4xl mx-auto">
+            <div className="text-center mb-6">
+              <h3 className="text-2xl font-bold text-gray-900 mb-2">Affordable AI-Powered Immigration Support</h3>
+              <p className="text-gray-600">Plans start at just R299/month • Cancel anytime</p>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="text-center p-4 border border-gray-200 rounded-xl">
+                <div className="text-2xl font-bold text-gray-900 mb-1">R299</div>
+                <div className="text-sm text-gray-600 mb-2">Basic Plan</div>
+                <div className="text-xs text-gray-500">5 SOPs, IELTS practice, Basic support</div>
+              </div>
+              <div className="text-center p-4 border-2 border-blue-500 rounded-xl bg-blue-50 relative">
+                <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-blue-500 text-white px-3 py-1 rounded-full text-xs font-bold">
+                  Most Popular
+                </div>
+                <div className="text-2xl font-bold text-blue-600 mb-1">R499</div>
+                <div className="text-sm text-gray-600 mb-2">Standard Plan</div>
+                <div className="text-xs text-gray-500">Unlimited SOPs, Full test access, Priority support</div>
+              </div>
+              <div className="text-center p-4 border border-gray-200 rounded-xl">
+                <div className="text-2xl font-bold text-gray-900 mb-1">R699</div>
+                <div className="text-sm text-gray-600 mb-2">Premium Plan</div>
+                <div className="text-xs text-gray-500">Expert review, 24/7 support, Success guarantee</div>
+              </div>
+            </div>
+            
+            <div className="text-center mt-6">
+              <button 
+                onClick={() => router.push('/immigration')}
+                className="bg-gradient-to-r from-blue-600 to-green-600 text-white px-8 py-3 rounded-xl font-semibold hover:shadow-lg transition-all duration-200"
+              >
+                View All Plans & Start Today
+              </button>
+            </div>
+          </div>
+
+          {/* Trust Indicators */}
+          <div className="flex flex-wrap justify-center items-center gap-8 text-sm text-gray-600 mt-12">
+            <div className="flex items-center gap-2">
+              <CheckCircle className="w-5 h-5 text-green-500" />
+              <span>1000+ successful applications</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <CheckCircle className="w-5 h-5 text-green-500" />
+              <span>Money-back guarantee</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <CheckCircle className="w-5 h-5 text-green-500" />
+              <span>Expert consultant support</span>
+            </div>
+          </div>
         </div>
       </section>
 
