@@ -694,7 +694,7 @@ const ImmigrationPage = () => {
                 </li>
                 <li className="flex items-center gap-3">
                   <Phone className="w-5 h-5 flex-shrink-0" />
-                  <a href="tel:+27123456789" className="hover:text-white transition-colors">+27 12 345 6789</a>
+                  <a href="tel:+27679518124" className="hover:text-white transition-colors">0679518124</a>
                 </li>
                 <li className="flex items-center gap-3">
                   <Mail className="w-5 h-5 flex-shrink-0" />
