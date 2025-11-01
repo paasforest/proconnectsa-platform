@@ -53,7 +53,17 @@ export function ClientHeader() {
             Request Quote
           </Link>
           <Link 
-            href="/immigration" 
+            href="https://www.immigrationai.co.za" 
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={() => {
+              if (typeof window !== 'undefined' && (window as any).gtag) {
+                (window as any).gtag('event', 'click', {
+                  event_category: 'Immigration AI',
+                  event_label: 'ClientHeader Nav - Immigration',
+                });
+              }
+            }}
             className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors font-semibold"
           >
             🌍 Travel Overseas?

@@ -340,7 +340,15 @@ const Homepage = () => {
             Services
           </button>
           <button 
-            onClick={() => router.push('/immigration')}
+            onClick={() => {
+              if (typeof window !== 'undefined' && (window as any).gtag) {
+                (window as any).gtag('event', 'click', {
+                  event_category: 'Immigration AI',
+                  event_label: 'Navbar - Immigration',
+                });
+              }
+              window.open('https://www.immigrationai.co.za', '_blank', 'noopener,noreferrer');
+            }}
             className="text-gray-700 hover:text-emerald-600 transition-colors font-medium"
           >
             🌍 Want to Travel Overseas?
@@ -599,7 +607,15 @@ const Homepage = () => {
             
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12">
               <button 
-                onClick={() => router.push('/immigration')}
+                onClick={() => {
+                  if (typeof window !== 'undefined' && (window as any).gtag) {
+                    (window as any).gtag('event', 'click', {
+                      event_category: 'Immigration AI',
+                      event_label: 'Homepage - Start Journey',
+                    });
+                  }
+                  window.open('https://www.immigrationai.co.za', '_blank', 'noopener,noreferrer');
+                }}
                 className="group px-8 py-4 bg-blue-600 text-white font-semibold rounded-xl hover:bg-blue-700 transition-all duration-200 shadow-lg hover:shadow-xl flex items-center gap-2"
               >
                 Start Your Immigration Journey
@@ -607,7 +623,15 @@ const Homepage = () => {
               </button>
               
               <button 
-                onClick={() => router.push('/immigration')}
+                onClick={() => {
+                  if (typeof window !== 'undefined' && (window as any).gtag) {
+                    (window as any).gtag('event', 'click', {
+                      event_category: 'Immigration AI',
+                      event_label: 'Homepage - Check Eligibility',
+                    });
+                  }
+                  window.open('https://www.immigrationai.co.za', '_blank', 'noopener,noreferrer');
+                }}
                 className="px-8 py-4 bg-white text-gray-900 font-semibold rounded-xl border-2 border-gray-200 hover:border-blue-300 transition-all duration-200 shadow-sm hover:shadow-md"
               >
                 Check My Eligibility

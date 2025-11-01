@@ -1,21 +1,58 @@
 'use client'
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ArrowRight, Sparkles, FileText, MessageSquare, Globe, BookOpen, CheckCircle, Users, MapPin, TrendingUp, Clock, DollarSign, Plus, Minus, Mail, Phone, Facebook, Twitter, Linkedin, Instagram } from 'lucide-react';
+import { IMMIGRATION_AI_URL, ANALYTICS_EVENTS } from '@/config/immigration';
 
 const ImmigrationPage = () => {
   const [email, setEmail] = useState('');
   const [submitted, setSubmitted] = useState(false);
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(null);
 
+  // Track page view
+  useEffect(() => {
+    if (typeof window !== 'undefined' && (window as any).gtag) {
+      (window as any).gtag('event', ANALYTICS_EVENTS.IMMIGRATION_PAGE_VIEW, {
+        event_category: 'Immigration AI',
+        event_label: 'Page View',
+      });
+    }
+  }, []);
+
+  // Analytics tracking function
+  const trackClick = (eventLabel: string, eventValue?: string) => {
+    if (typeof window !== 'undefined') {
+      // Google Analytics
+      if ((window as any).gtag) {
+        (window as any).gtag('event', ANALYTICS_EVENTS.IMMIGRATION_CTA_CLICK, {
+          event_category: 'Immigration AI',
+          event_label: eventLabel,
+          value: eventValue,
+        });
+      }
+      // Google Tag Manager fallback
+      if ((window as any).dataLayer) {
+        (window as any).dataLayer.push({
+          event: ANALYTICS_EVENTS.IMMIGRATION_CTA_CLICK,
+          eventCategory: 'Immigration AI',
+          eventLabel: eventLabel,
+          eventValue: eventValue,
+        });
+      }
+    }
+  };
+
+  // Handle redirect to Immigration AI
+  const handleRedirect = (eventLabel: string) => {
+    trackClick(eventLabel);
+    window.open(IMMIGRATION_AI_URL, '_blank', 'noopener,noreferrer');
+  };
+
   const handleEmailSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Email submitted:', email);
-    setSubmitted(true);
-    setTimeout(() => {
-      setSubmitted(false);
-      setEmail('');
-    }, 3000);
+    trackClick('Lead Capture - Get Report', email);
+    // Redirect to Immigration AI website for email submission
+    handleRedirect('Lead Capture - Get Eligibility Report');
   };
 
   const features = [
@@ -248,12 +285,18 @@ const ImmigrationPage = () => {
             </p>
 
             <div className="mt-10 flex flex-col sm:flex-row gap-4 justify-center items-center">
-              <button className="group px-8 py-4 bg-blue-600 text-white font-semibold rounded-xl hover:bg-blue-700 transition-all duration-200 shadow-lg hover:shadow-xl flex items-center gap-2">
+              <button 
+                onClick={() => handleRedirect('Hero - Try AI Assistant')}
+                className="group px-8 py-4 bg-blue-600 text-white font-semibold rounded-xl hover:bg-blue-700 transition-all duration-200 shadow-lg hover:shadow-xl flex items-center gap-2"
+              >
                 Try the AI Immigration Assistant
                 <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
               </button>
 
-              <button className="px-8 py-4 bg-white text-gray-900 font-semibold rounded-xl border-2 border-gray-200 hover:border-gray-300 transition-all duration-200 shadow-sm hover:shadow-md">
+              <button 
+                onClick={() => handleRedirect('Hero - Check Eligibility')}
+                className="px-8 py-4 bg-white text-gray-900 font-semibold rounded-xl border-2 border-gray-200 hover:border-gray-300 transition-all duration-200 shadow-sm hover:shadow-md"
+              >
                 Check My Visa Eligibility
               </button>
             </div>
@@ -374,7 +417,10 @@ const ImmigrationPage = () => {
                   </div>
                 </div>
 
-                <button className="w-full py-3 bg-blue-600 text-white font-semibold rounded-xl hover:bg-blue-700 transition-colors">
+                <button 
+                  onClick={() => handleRedirect(`Country - Explore ${country.name}`)}
+                  className="w-full py-3 bg-blue-600 text-white font-semibold rounded-xl hover:bg-blue-700 transition-colors"
+                >
                   Explore {country.name}
                 </button>
               </div>
@@ -480,6 +526,7 @@ const ImmigrationPage = () => {
                 </div>
 
                 <button
+                  onClick={() => handleRedirect(`Pricing - ${plan.name} Plan`)}
                   className={`w-full py-4 rounded-xl font-semibold transition-all duration-200 mb-8 ${
                     plan.popular
                       ? 'bg-white text-blue-600 hover:bg-gray-50 shadow-lg'
@@ -560,12 +607,18 @@ const ImmigrationPage = () => {
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12">
-            <button className="group px-8 py-5 bg-white text-blue-600 font-bold rounded-xl hover:bg-gray-50 transition-all duration-200 shadow-2xl hover:shadow-3xl flex items-center gap-3 text-lg">
+            <button 
+              onClick={() => handleRedirect('Final CTA - Get Started R299')}
+              className="group px-8 py-5 bg-white text-blue-600 font-bold rounded-xl hover:bg-gray-50 transition-all duration-200 shadow-2xl hover:shadow-3xl flex items-center gap-3 text-lg"
+            >
               Get Started at R299/month
               <ArrowRight className="w-6 h-6 group-hover:translate-x-1 transition-transform" />
             </button>
 
-            <button className="px-8 py-5 bg-blue-800 text-white font-bold rounded-xl border-2 border-blue-400 hover:bg-blue-900 transition-all duration-200 text-lg">
+            <button 
+              onClick={() => handleRedirect('Final CTA - View All Plans')}
+              className="px-8 py-5 bg-blue-800 text-white font-bold rounded-xl border-2 border-blue-400 hover:bg-blue-900 transition-all duration-200 text-lg"
+            >
               View All Plans
             </button>
           </div>

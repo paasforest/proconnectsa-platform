@@ -226,7 +226,15 @@ export default function ServicesPage() {
 
   const handleGetQuotes = (categoryId: string) => {
     if (categoryId === 'immigration') {
-      router.push('/immigration')
+      // Track analytics
+      if (typeof window !== 'undefined' && (window as any).gtag) {
+        (window as any).gtag('event', 'click', {
+          event_category: 'Immigration AI',
+          event_label: 'Services Page - Immigration Category',
+        });
+      }
+      // Redirect to external Immigration AI website
+      window.open('https://www.immigrationai.co.za', '_blank', 'noopener,noreferrer');
     } else {
       router.push(`/request-quote?service=${categoryId}`)
     }
