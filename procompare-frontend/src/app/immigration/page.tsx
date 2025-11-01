@@ -234,8 +234,8 @@ const ImmigrationPage = () => {
       answer: 'Our practice tests are designed by IELTS-certified instructors and use the same format as official tests. While they can\'t replace official testing, they provide excellent preparation and identify areas for improvement.'
     },
     {
-      question: 'Do I need the Premium plan or is Basic enough?',
-      answer: 'Basic (R299) is great for getting started with limited usage. Standard (R499) is perfect for most users with unlimited access. Upgrade to Premium (R699) if you want expert human review of your documents, personalized consultation, or if your case is complex and requires professional guidance.'
+      question: 'Which plan should I choose?',
+      answer: 'Starter Plan (R149) is perfect for getting started with 3 eligibility checks and 2 document types per month. Entry Plan (R299) is our most popular choice, ideal for most users with 10 eligibility checks, 5 document types, and interview practice. Upgrade to Professional (R699) for unlimited access, all document types, and advanced features. Enterprise Plan (R1,499) is designed for businesses and teams requiring bulk processing, analytics, and dedicated support.'
     },
     {
       question: 'How long does it take to prepare an application?',
