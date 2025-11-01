@@ -692,27 +692,32 @@ const Homepage = () => {
           <div className="bg-white rounded-2xl p-8 shadow-lg border border-gray-200 max-w-4xl mx-auto">
             <div className="text-center mb-6">
               <h3 className="text-2xl font-bold text-gray-900 mb-2">Affordable AI-Powered Immigration Support</h3>
-              <p className="text-gray-600">Plans start at just R299/month • Cancel anytime</p>
+              <p className="text-gray-600">Plans start at just R149/month • Cancel anytime</p>
             </div>
             
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
               <div className="text-center p-4 border border-gray-200 rounded-xl">
-                <div className="text-2xl font-bold text-gray-900 mb-1">R299</div>
-                <div className="text-sm text-gray-600 mb-2">Basic Plan</div>
-                <div className="text-xs text-gray-500">5 SOPs, IELTS practice, Basic support</div>
+                <div className="text-2xl font-bold text-gray-900 mb-1">R149</div>
+                <div className="text-sm text-gray-600 mb-2">Starter Plan</div>
+                <div className="text-xs text-gray-500">3 Eligibility Checks, 2 Document Types</div>
               </div>
               <div className="text-center p-4 border-2 border-blue-500 rounded-xl bg-blue-50 relative">
                 <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-blue-500 text-white px-3 py-1 rounded-full text-xs font-bold">
                   Most Popular
                 </div>
-                <div className="text-2xl font-bold text-blue-600 mb-1">R499</div>
-                <div className="text-sm text-gray-600 mb-2">Standard Plan</div>
-                <div className="text-xs text-gray-500">Unlimited SOPs, Full test access, Priority support</div>
+                <div className="text-2xl font-bold text-blue-600 mb-1">R299</div>
+                <div className="text-sm text-gray-600 mb-2">Entry Plan</div>
+                <div className="text-xs text-gray-500">10 Checks, 5 Docs, Interview Practice</div>
               </div>
               <div className="text-center p-4 border border-gray-200 rounded-xl">
                 <div className="text-2xl font-bold text-gray-900 mb-1">R699</div>
-                <div className="text-sm text-gray-600 mb-2">Premium Plan</div>
-                <div className="text-xs text-gray-500">Expert review, 24/7 support, Success guarantee</div>
+                <div className="text-sm text-gray-600 mb-2">Professional Plan</div>
+                <div className="text-xs text-gray-500">Unlimited checks, All docs, Full features</div>
+              </div>
+              <div className="text-center p-4 border border-gray-200 rounded-xl">
+                <div className="text-2xl font-bold text-gray-900 mb-1">R1,499</div>
+                <div className="text-sm text-gray-600 mb-2">Enterprise Plan</div>
+                <div className="text-xs text-gray-500">Team features, Analytics, Dedicated support</div>
               </div>
             </div>
             

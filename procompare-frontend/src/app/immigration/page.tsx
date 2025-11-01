@@ -316,7 +316,7 @@ const ImmigrationPage = () => {
             <div className="mt-12 flex flex-wrap justify-center items-center gap-8 text-sm text-gray-600">
               <div className="flex items-center gap-2">
                 <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                <span>Plans from R299/month</span>
+                <span>Plans from R149/month</span>
               </div>
               <div className="flex items-center gap-2">
                 <div className="w-2 h-2 bg-green-500 rounded-full"></div>
@@ -623,7 +623,7 @@ const ImmigrationPage = () => {
               onClick={() => handleRedirect('Final CTA - Get Started R299')}
               className="group px-8 py-5 bg-white text-blue-600 font-bold rounded-xl hover:bg-gray-50 transition-all duration-200 shadow-2xl hover:shadow-3xl flex items-center gap-3 text-lg"
             >
-              Get Started at R299/month
+              Get Started at R149/month
               <ArrowRight className="w-6 h-6 group-hover:translate-x-1 transition-transform" />
             </button>
 
