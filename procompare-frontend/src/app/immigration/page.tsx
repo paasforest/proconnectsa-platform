@@ -153,57 +153,69 @@ const ImmigrationPage = () => {
 
   const plans = [
     {
-      name: 'Basic',
-      price: 'R299',
+      name: 'Starter Plan',
+      price: 'R149',
       period: 'per month',
       description: 'Perfect for getting started',
       features: [
-        '5 SOP generations per month',
-        'Basic IELTS practice tests',
-        '10 mock interview sessions',
-        'Visa guidance for 3 countries',
-        'Document checklist',
-        'Email support (48hr response)',
-        'Application tracking'
+        '3 Visa Eligibility Checks per month',
+        '2 Document Types (SOP, Cover Letter)',
+        'PDF Downloads',
+        'Basic Support',
+        'Email support'
       ],
       cta: 'Get Started',
       popular: false
     },
     {
-      name: 'Standard',
-      price: 'R499',
+      name: 'Entry Plan',
+      price: 'R299',
       period: 'per month',
       description: 'Everything you need to succeed',
       features: [
-        'Unlimited SOP generations',
-        'Full IELTS/TOEFL/CELPIP access',
-        'Unlimited mock interview sessions',
-        'All major destinations',
-        'Advanced document checklist',
-        'Priority email support (24hr response)',
-        'Application tracking',
-        'Progress analytics',
-        'CV/Resume builder'
+        '10 Visa Eligibility Checks per month',
+        '5 Document Types',
+        'Basic Interview Practice (5 sessions/month)',
+        'English Test Practice (IELTS only)',
+        'Priority email support',
+        'PDF Downloads'
       ],
-      cta: 'Most Popular',
+      cta: 'Get Started',
       popular: true
     },
     {
-      name: 'Premium',
+      name: 'Professional Plan',
       price: 'R699',
       period: 'per month',
-      description: 'For those who want expert review',
+      description: 'For professionals and serious applicants',
       features: [
-        'Everything in Standard',
-        'Expert lawyer SOP review',
-        'Real coach interview review',
-        'AI + Expert consultation combo',
-        'Personalized visa strategy',
-        '24/7 priority support',
-        'Success guarantee program',
-        'Direct consultant access'
+        'Unlimited Visa Eligibility Checks',
+        'All Document Types (8+ types)',
+        'Relationship Proof Kit',
+        'AI Photo Analysis',
+        'Unlimited Interview Practice',
+        'Full English Test Practice',
+        'Interview Questions Database',
+        'Agent Dashboard'
       ],
-      cta: 'Go Premium',
+      cta: 'Get Started',
+      popular: false
+    },
+    {
+      name: 'Enterprise Plan',
+      price: 'R1,499',
+      period: 'per month',
+      description: 'For businesses and teams',
+      features: [
+        'Everything in Professional',
+        'Unlimited Team Members',
+        'Advanced Analytics Dashboard',
+        'Bulk Document Processing',
+        'Priority Phone Support',
+        'Dedicated Account Manager',
+        'SLA Guarantee (99.9% uptime)'
+      ],
+      cta: 'Contact Sales',
       popular: false
     }
   ];
@@ -482,11 +494,11 @@ const ImmigrationPage = () => {
               Choose Your Plan
             </h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Affordable pricing to match your immigration journey. Plans start at just R299/month.
+              Affordable pricing to match your immigration journey. Plans start at just R149/month.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto items-center">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 max-w-7xl mx-auto items-center">
             {plans.map((plan, index) => (
               <div
                 key={index}
