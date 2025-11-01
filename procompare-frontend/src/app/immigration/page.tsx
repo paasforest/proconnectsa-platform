@@ -620,7 +620,7 @@ const ImmigrationPage = () => {
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12">
             <button 
-              onClick={() => handleRedirect('Final CTA - Get Started R299')}
+              onClick={() => handleRedirect('Final CTA - Get Started R149')}
               className="group px-8 py-5 bg-white text-blue-600 font-bold rounded-xl hover:bg-gray-50 transition-all duration-200 shadow-2xl hover:shadow-3xl flex items-center gap-3 text-lg"
             >
               Get Started at R149/month
