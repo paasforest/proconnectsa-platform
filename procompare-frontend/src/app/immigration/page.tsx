@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { ArrowRight, Sparkles, FileText, MessageSquare, Globe, BookOpen, CheckCircle, Users, MapPin, TrendingUp, Clock, DollarSign, Plus, Minus, Mail, Phone, Facebook, Twitter, Linkedin, Instagram } from 'lucide-react';
-import { IMMIGRATION_AI_URL, ANALYTICS_EVENTS } from '@/config/immigration';
+import { IMMIGRATION_AI_URL, ANALYTICS_EVENTS, IMMIGRATION_PLAN_MAPPING } from '@/config/immigration';
 
 const ImmigrationPage = () => {
   const [email, setEmail] = useState('');
@@ -42,10 +42,11 @@ const ImmigrationPage = () => {
     }
   };
 
-  // Handle redirect to Immigration AI
-  const handleRedirect = (eventLabel: string) => {
+  // Handle redirect to Immigration AI with plan parameter
+  const handleRedirect = (eventLabel: string, planSlug?: string) => {
     trackClick(eventLabel);
-    window.open(IMMIGRATION_AI_URL, '_blank', 'noopener,noreferrer');
+    const url = planSlug ? `${IMMIGRATION_AI_URL}?plan=${planSlug}` : IMMIGRATION_AI_URL;
+    window.open(url, '_blank', 'noopener,noreferrer');
   };
 
   const handleEmailSubmit = async (e: React.FormEvent) => {
@@ -306,7 +307,7 @@ const ImmigrationPage = () => {
               </button>
 
               <button 
-                onClick={() => handleRedirect('Hero - Check Eligibility')}
+                onClick={() => handleRedirect('Hero - Check Eligibility', 'entry-plan')}
                 className="px-8 py-4 bg-white text-gray-900 font-semibold rounded-xl border-2 border-gray-200 hover:border-gray-300 transition-all duration-200 shadow-sm hover:shadow-md"
               >
                 Check My Visa Eligibility
@@ -538,7 +539,11 @@ const ImmigrationPage = () => {
                 </div>
 
                 <button
-                  onClick={() => handleRedirect(`Pricing - ${plan.name} Plan`)}
+                  onClick={() => {
+                    // Get plan slug from mapping
+                    const planSlug = IMMIGRATION_PLAN_MAPPING[plan.name] || plan.name.toLowerCase().replace(/\s+/g, '-');
+                    handleRedirect(`Pricing - ${plan.name} Plan`, planSlug);
+                  }}
                   className={`w-full py-4 rounded-xl font-semibold transition-all duration-200 mb-8 ${
                     plan.popular
                       ? 'bg-white text-blue-600 hover:bg-gray-50 shadow-lg'
@@ -620,7 +625,7 @@ const ImmigrationPage = () => {
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12">
             <button 
-              onClick={() => handleRedirect('Final CTA - Get Started R149')}
+              onClick={() => handleRedirect('Final CTA - Get Started R149', 'starter-plan')}
               className="group px-8 py-5 bg-white text-blue-600 font-bold rounded-xl hover:bg-gray-50 transition-all duration-200 shadow-2xl hover:shadow-3xl flex items-center gap-3 text-lg"
             >
               Get Started at R149/month
