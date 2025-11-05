@@ -53,7 +53,7 @@ export function ClientHeader() {
             Request Quote
           </Link>
           <Link 
-            href="https://www.immigrationai.co.za" 
+            href="https://www.immigrationai.co.za?utm_source=proconnectsa&utm_medium=website&utm_campaign=immigration_integration&utm_content=client-header-nav" 
             target="_blank"
             rel="noopener noreferrer"
             onClick={() => {

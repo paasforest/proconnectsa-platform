@@ -233,8 +233,14 @@ export default function ServicesPage() {
           event_label: 'Services Page - Immigration Category',
         });
       }
-      // Redirect to external Immigration AI website
-      window.open('https://www.immigrationai.co.za', '_blank', 'noopener,noreferrer');
+      // Redirect to external Immigration AI website with tracking
+      const params = new URLSearchParams({
+        utm_source: 'proconnectsa',
+        utm_medium: 'website',
+        utm_campaign: 'immigration_integration',
+        utm_content: 'services-page',
+      });
+      window.open(`https://www.immigrationai.co.za?${params.toString()}`, '_blank', 'noopener,noreferrer');
     } else {
       router.push(`/request-quote?service=${categoryId}`)
     }

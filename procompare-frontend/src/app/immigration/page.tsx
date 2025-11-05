@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { ArrowRight, Sparkles, FileText, MessageSquare, Globe, BookOpen, CheckCircle, Users, MapPin, TrendingUp, Clock, DollarSign, Plus, Minus, Mail, Phone, Facebook, Twitter, Linkedin, Instagram } from 'lucide-react';
-import { IMMIGRATION_AI_URL, ANALYTICS_EVENTS, IMMIGRATION_PLAN_MAPPING } from '@/config/immigration';
+import { buildImmigrationAIUrl, ANALYTICS_EVENTS, IMMIGRATION_PLAN_MAPPING } from '@/config/immigration';
 
 const ImmigrationPage = () => {
   const [email, setEmail] = useState('');
@@ -42,10 +42,10 @@ const ImmigrationPage = () => {
     }
   };
 
-  // Handle redirect to Immigration AI with plan parameter
+  // Handle redirect to Immigration AI with plan parameter and tracking
   const handleRedirect = (eventLabel: string, planSlug?: string) => {
-    trackClick(eventLabel);
-    const url = planSlug ? `${IMMIGRATION_AI_URL}?plan=${planSlug}` : IMMIGRATION_AI_URL;
+    trackClick(eventLabel, planSlug);
+    const url = buildImmigrationAIUrl(planSlug, 'proconnectsa-immigration-page');
     window.open(url, '_blank', 'noopener,noreferrer');
   };
 
