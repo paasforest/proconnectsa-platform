@@ -741,7 +741,21 @@ const Homepage = () => {
             
             <div className="text-center mt-6">
               <button 
-                onClick={() => router.push('/immigration')}
+                onClick={() => {
+                  if (typeof window !== 'undefined' && (window as any).gtag) {
+                    (window as any).gtag('event', 'click', {
+                      event_category: 'Immigration AI',
+                      event_label: 'Homepage - View All Plans',
+                    });
+                  }
+                  const params = new URLSearchParams({
+                    utm_source: 'proconnectsa',
+                    utm_medium: 'website',
+                    utm_campaign: 'immigration_integration',
+                    utm_content: 'homepage-view-all-plans',
+                  });
+                  window.open(`https://www.immigrationai.co.za?${params.toString()}`, '_blank', 'noopener,noreferrer');
+                }}
                 className="bg-gradient-to-r from-blue-600 to-green-600 text-white px-8 py-3 rounded-xl font-semibold hover:shadow-lg transition-all duration-200"
               >
                 View All Plans & Start Today
