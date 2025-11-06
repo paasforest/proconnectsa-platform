@@ -351,7 +351,7 @@ const Homepage = () => {
                 utm_source: 'proconnectsa',
                 utm_medium: 'website',
                 utm_campaign: 'immigration_integration',
-                utm_content: 'navbar',
+                utm_content: 'nav_menu',
               });
               window.open(`https://www.immigrationai.co.za?${params.toString()}`, '_blank', 'noopener,noreferrer');
             }}
@@ -624,7 +624,7 @@ const Homepage = () => {
                     utm_source: 'proconnectsa',
                     utm_medium: 'website',
                     utm_campaign: 'immigration_integration',
-                    utm_content: 'homepage-start-journey',
+                    utm_content: 'hero_banner',
                   });
                   window.open(`https://www.immigrationai.co.za?${params.toString()}`, '_blank', 'noopener,noreferrer');
                 }}
@@ -646,7 +646,7 @@ const Homepage = () => {
                     utm_source: 'proconnectsa',
                     utm_medium: 'website',
                     utm_campaign: 'immigration_integration',
-                    utm_content: 'homepage-check-eligibility',
+                    utm_content: 'hero_banner',
                   });
                   window.open(`https://www.immigrationai.co.za?${params.toString()}`, '_blank', 'noopener,noreferrer');
                 }}
@@ -752,7 +752,7 @@ const Homepage = () => {
                     utm_source: 'proconnectsa',
                     utm_medium: 'website',
                     utm_campaign: 'immigration_integration',
-                    utm_content: 'homepage-view-all-plans',
+                    utm_content: 'hero_banner',
                   });
                   window.open(`https://www.immigrationai.co.za?${params.toString()}`, '_blank', 'noopener,noreferrer');
                 }}

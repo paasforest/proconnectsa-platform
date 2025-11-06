@@ -1,3 +1,5 @@
+"use client"
+
 import Link from "next/link"
 import { Facebook, Twitter, Instagram, Linkedin, Mail, Phone, MapPin } from "lucide-react"
 
@@ -61,6 +63,24 @@ export function Footer() {
                 <Link href="/request-quote/gardening" className="text-muted-foreground hover:text-foreground transition-colors">
                   Gardening
                 </Link>
+              </li>
+              <li>
+                <a 
+                  href="https://www.immigrationai.co.za?utm_source=proconnectsa&utm_medium=website&utm_campaign=immigration_integration&utm_content=footer_link"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={() => {
+                    if (typeof window !== 'undefined' && (window as any).gtag) {
+                      (window as any).gtag('event', 'click', {
+                        event_category: 'Immigration AI',
+                        event_label: 'Footer Link',
+                      });
+                    }
+                  }}
+                  className="text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  Immigration AI
+                </a>
               </li>
             </ul>
           </div>
