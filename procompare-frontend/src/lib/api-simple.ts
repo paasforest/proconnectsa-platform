@@ -19,8 +19,9 @@ export class SimpleApiClient {
     endpoint: string,
     options: RequestInit = {}
   ): Promise<T> {
+    const isFormData = typeof FormData !== 'undefined' && options.body instanceof FormData
     const headers: HeadersInit = {
-      'Content-Type': 'application/json',
+      ...(!isFormData ? { 'Content-Type': 'application/json' } : {}),
       ...options.headers,
     }
 
@@ -92,14 +93,14 @@ export class SimpleApiClient {
 
   // Authentication endpoints
   async login(email: string, password: string) {
-    return this.request('/api/auth/login/', {
+    return this.request<any>('/api/auth/login/', {
       method: 'POST',
       body: JSON.stringify({ email, password }),
     })
   }
 
   async register(userData: any) {
-    return this.request('/api/auth/register/', {
+    return this.request<any>('/api/auth/register/', {
       method: 'POST',
       body: JSON.stringify(userData),
     })
@@ -292,7 +293,7 @@ export class SimpleApiClient {
 
   // Manual deposit endpoints
   async createManualDeposit(amount: number, creditsToActivate: number) {
-    return this.request('/api/payments/manual-deposits/create/', {
+    return this.request<any>('/api/payments/manual-deposits/create/', {
       method: 'POST',
       body: JSON.stringify({
         amount,
@@ -313,12 +314,27 @@ export class SimpleApiClient {
     const formData = new FormData()
     formData.append('deposit_slip', file)
     
-    return this.request(`/api/payments/manual-deposits/${depositId}/upload-slip/`, {
+    return this.request<any>(`/api/payments/manual-deposits/${depositId}/upload-slip/`, {
       method: 'POST',
       body: formData,
       headers: {
         // Don't set Content-Type, let browser set it with boundary
       },
+    })
+  }
+
+  // Verification documents (provider)
+  async getVerificationDocuments() {
+    return this.request<any>('/api/auth/provider-profile/documents/')
+  }
+
+  async uploadVerificationDocument(documentType: string, file: File) {
+    const formData = new FormData()
+    formData.append('document_type', documentType)
+    formData.append('file', file)
+    return this.request<any>('/api/auth/provider-profile/documents/upload/', {
+      method: 'POST',
+      body: formData,
     })
   }
 

@@ -13,6 +13,7 @@ const WalletLeadDashboard = () => {
   const [userCredits, setUserCredits] = useState(100);
   const [purchasedLeads, setPurchasedLeads] = useState(new Set());
   const [notification, setNotification] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
+  const [reserveInfo, setReserveInfo] = useState<any | null>(null);
 
   // Helper function to show notifications
   const showNotification = (message: string, type: 'success' | 'error' = 'success') => {
@@ -300,7 +301,6 @@ const WalletLeadDashboard = () => {
   const canPurchaseLead = (lead) => {
     return !purchasedLeads.has(lead.id) && 
            lead.current_responses < lead.max_providers && 
-           userCredits >= lead.credit_cost && 
            lead.lead_status !== 'closed';
   };
 
@@ -373,6 +373,19 @@ const WalletLeadDashboard = () => {
       // Show specific error message from API
       let errorMessage = 'Purchase failed. Please try again.';
       let helpText = '';
+      // Handle reservation flow (202 Accepted with payment instructions)
+      const status = error.response?.status;
+      const data = error.response?.data;
+      if (status === 202 && data?.reservation) {
+        setReserveInfo({
+          reservation: data.reservation,
+          instructions: data.payment_instructions,
+          customer_code: data.customer_code,
+          message: data.message,
+        });
+        showNotification('Lead reserved. Check payment instructions.', 'success');
+        return;
+      }
       
       if (error.response?.data?.error) {
         errorMessage = error.response.data.error;
@@ -803,12 +816,20 @@ const WalletLeadDashboard = () => {
                           You need {selectedLead.credit_cost} credits
                         </p>
                       </div>
-                      <button 
-                        onClick={() => router.push('/dashboard/wallet')}
-                        className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 transition-colors font-semibold"
-                      >
-                        Buy More Credits
-                      </button>
+                      <div className="grid grid-cols-1 gap-3">
+                        <button 
+                          onClick={() => purchaseLead(selectedLead.id)}
+                          className="w-full bg-green-600 text-white py-3 px-4 rounded-lg hover:bg-green-700 transition-colors font-semibold"
+                        >
+                          Reserve Lead & Get EFT Instructions
+                        </button>
+                        <button 
+                          onClick={() => router.push('/dashboard/wallet')}
+                          className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 transition-colors font-semibold"
+                        >
+                          Buy More Credits
+                        </button>
+                      </div>
                     </div>
                   ) : (
                     <button
@@ -852,6 +873,53 @@ const WalletLeadDashboard = () => {
 
         </div>
       </div>
+      {/* Reserve Instructions Modal */}
+      {reserveInfo && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+          <div className="bg-white rounded-lg shadow-xl max-w-lg w-full mx-4">
+            <div className="p-6 border-b">
+              <h3 className="text-lg font-semibold text-gray-900">Complete EFT to Unlock This Lead</h3>
+              <p className="text-sm text-gray-600 mt-1">{reserveInfo.message}</p>
+            </div>
+            <div className="p-6 space-y-4">
+              <div className="bg-blue-50 border border-blue-200 rounded p-4">
+                <div className="flex justify-between text-sm">
+                  <span className="text-blue-900 font-medium">Credits Required</span>
+                  <span className="text-blue-900 font-bold">{reserveInfo.reservation.credits_required}</span>
+                </div>
+                <div className="flex justify-between text-sm mt-2">
+                  <span className="text-blue-900 font-medium">Amount Due</span>
+                  <span className="text-blue-900 font-bold">R{reserveInfo.reservation.amount_due}</span>
+                </div>
+                <div className="flex justify-between text-sm mt-2">
+                  <span className="text-blue-900 font-medium">Reservation Expires</span>
+                  <span className="text-blue-900">{new Date(reserveInfo.reservation.expires_at).toLocaleString()}</span>
+                </div>
+              </div>
+              <div className="bg-green-50 border border-green-200 rounded p-4">
+                <h4 className="font-medium text-green-900 mb-2">Bank Details</h4>
+                <div className="text-sm text-green-900 space-y-1">
+                  <div className="flex justify-between"><span>Bank</span><span>{reserveInfo.instructions.bank_name || 'Nedbank'}</span></div>
+                  <div className="flex justify-between"><span>Account</span><span>{reserveInfo.instructions.account_number}</span></div>
+                  <div className="flex justify-between"><span>Branch</span><span>{reserveInfo.instructions.branch_code}</span></div>
+                  <div className="flex justify-between font-semibold"><span>Reference</span><span>{reserveInfo.reservation.reference_number}</span></div>
+                </div>
+                <p className="text-xs text-green-700 mt-3">
+                  Use the exact reference so we can auto-activate your credits.
+                </p>
+              </div>
+            </div>
+            <div className="p-4 border-t flex justify-end">
+              <button
+                onClick={() => setReserveInfo(null)}
+                className="px-4 py-2 rounded bg-gray-100 text-gray-800 hover:bg-gray-200"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -66,6 +66,49 @@ def support_users_list(request):
             status=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
 
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def verify_provider(request, user_id):
+    """
+    Admin/support: approve or reject provider verification.
+    Body:
+      - action: 'approve' | 'reject'
+      - notes: optional string
+    """
+    try:
+        if not (request.user.is_staff or request.user.user_type in ['admin', 'support']):
+            return Response({'error': 'Access denied. Admin or support required.'}, status=status.HTTP_403_FORBIDDEN)
+        
+        user = get_object_or_404(User, id=user_id)
+        if user.user_type != 'provider':
+            return Response({'error': 'Target user is not a provider'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        profile = user.provider_profile
+        action = (request.data.get('action') or '').lower()
+        notes = request.data.get('notes', '')
+        
+        if action not in ['approve', 'reject']:
+            return Response({'error': 'Invalid action. Use approve or reject.'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        if action == 'approve':
+            profile.verification_status = 'verified'
+        else:
+            profile.verification_status = 'rejected'
+            # Optionally include notes inside verification_documents under 'admin_notes'
+            docs = profile.verification_documents or {}
+            docs['admin_notes'] = notes
+            profile.verification_documents = docs
+        profile.save(update_fields=['verification_status', 'verification_documents'])
+        
+        return Response({
+            'success': True,
+            'message': f'Provider {action}d',
+            'verification_status': profile.verification_status
+        })
+    except Exception as e:
+        logger.error(f"Failed to verify provider {user_id}: {str(e)}")
+        return Response({'error': 'Failed to update verification status'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def support_user_detail(request, user_id):
@@ -224,6 +267,8 @@ def support_user_provider_profile(request, user_id):
             {'error': 'Failed to create/update provider profile'}, 
             status=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
+
+
 
 
 

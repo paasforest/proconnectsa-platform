@@ -7,6 +7,7 @@ from . import my_leads_views
 from . import wallet_views_extended
 from . import client_views
 from . import services_views
+from . import public_views
 from . import settings_views
 from . import support_views
 from . import admin_monitoring
@@ -102,6 +103,8 @@ urlpatterns = [
     path('settings/change-password/', settings_views.change_password, name='change_password'),
     path('settings/upload-image/', settings_views.upload_profile_image, name='upload_profile_image'),
     path('settings/delete-image/', settings_views.delete_profile_image, name='delete_profile_image'),
+    path('provider-profile/documents/', settings_views.list_verification_documents, name='list_verification_documents'),
+    path('provider-profile/documents/upload/', settings_views.upload_verification_document, name='upload_verification_document'),
     
     # Support APIs
     path('support/', support_views.support_tickets, name='support_tickets'),
@@ -119,9 +122,14 @@ urlpatterns = [
     path('support/users/<str:user_id>/', admin_views.support_user_detail, name='support_user_detail'),
     path('support/users/<str:user_id>/update/', admin_views.support_user_update, name='support_user_update'),
     path('support/users/<str:user_id>/provider-profile/', admin_views.support_user_provider_profile, name='support_user_provider_profile'),
+    path('support/users/<str:user_id>/verify-provider/', admin_views.verify_provider, name='verify_provider'),
     path('admin/monitoring/dashboard/', admin_monitoring.admin_monitoring_dashboard, name='admin-monitoring-dashboard'),
     path('admin/monitoring/activity/', admin_monitoring.recent_activity_feed, name='admin-activity-feed'),
     path('admin/monitoring/problems/', admin_monitoring.problem_detection, name='admin-problem-detection'),
+    
+    # Public provider directory (SEO)
+    path('public/providers/', public_views.public_providers_list, name='public-providers-list'),
+    path('public/providers/<uuid:provider_id>/', public_views.public_provider_detail, name='public-provider-detail'),
 ]
 
 

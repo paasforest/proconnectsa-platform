@@ -20,6 +20,37 @@ logger = logging.getLogger(__name__)
 
 @api_view(['GET'])
 @permission_classes([IsAdminUser])
+def system_health(request):
+    """
+    Lightweight system health summary for admin use.
+    """
+    try:
+        return Response({
+            'timestamp': timezone.now().isoformat(),
+            'users': {
+                'total': User.objects.count(),
+                'providers': User.objects.filter(user_type='provider').count(),
+                'clients': User.objects.filter(user_type='client').count(),
+            },
+            'providers': {
+                'verified': ProviderProfile.objects.filter(verification_status='verified').count(),
+                'with_credits': ProviderProfile.objects.filter(credit_balance__gt=0).count(),
+            },
+            'payments': {
+                'pending_deposits': DepositRequest.objects.filter(status='pending').count(),
+                'recent_deposits_24h': DepositRequest.objects.filter(created_at__gte=timezone.now()-timedelta(hours=24)).count(),
+            },
+            'leads': {
+                'active_verified': Lead.objects.filter(status='verified').count(),
+                'assigned_last_24h': LeadAssignment.objects.filter(assigned_at__gte=timezone.now()-timedelta(hours=24)).count(),
+            }
+        })
+    except Exception as e:
+        logger.error(f"system_health error: {e}")
+        return Response({'error': 'health check failed'}, status=500)
+
+@api_view(['GET'])
+@permission_classes([IsAdminUser])
 def admin_monitoring_dashboard(request):
     """
     Comprehensive monitoring dashboard for admin

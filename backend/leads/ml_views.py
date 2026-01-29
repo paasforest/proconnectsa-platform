@@ -785,13 +785,119 @@ def purchase_lead_access_view(request, lead_id):
         
         if wallet.credits < credit_cost:
             logger.error(f"💰 Insufficient credits: User has {wallet.credits}, needs {credit_cost}")
-            return Response({
-                'error': f'Not enough credits! This lead costs {credit_cost} credits but you only have {wallet.credits} credits. Add more credits to your wallet to purchase this lead.',
-                'code': 'INSUFFICIENT_CREDITS',
-                'required_credits': credit_cost,
-                'available_credits': wallet.credits,
-                'help_text': f'You need {credit_cost - wallet.credits} more credits. Go to your wallet to add credits or purchase a credit package.'
-            }, status=status.HTTP_402_PAYMENT_REQUIRED)
+            # Hybrid flow (configurable): create a temporary reservation and provide manual EFT instructions
+            try:
+                from datetime import timedelta
+                from backend.leads.models import LeadReservation
+                from backend.payments.models import DepositRequest
+                from backend.payments.auto_deposit_service import AutoDepositService
+                
+                provider_profile = request.user.provider_profile
+                customer_code = provider_profile.customer_code
+                
+                # Calculate missing credits and amount due based on configured credit price
+                missing_credits = max(1, int(credit_cost - wallet.credits))
+                credit_price = getattr(settings, 'DEFAULT_CREDIT_PRICE', 50)
+                amount_due = float(missing_credits * credit_price)
+                
+                # Generate reference number (consistent with deposit request creation)
+                reference_number = f"PC{customer_code[-3:]}{DepositRequest.objects.count() + 1:03d}"
+                
+                # Create deposit request record
+                deposit_request = DepositRequest.objects.create(
+                    account=request.user.payment_account if hasattr(request.user, 'payment_account') else None,
+                    amount=amount_due,
+                    credits_to_activate=missing_credits,
+                    reference_number=reference_number,
+                    customer_code=customer_code
+                )
+                
+                # Create reservation with configurable expiry
+                reservation = LeadReservation.objects.create(
+                    lead=lead,
+                    provider=request.user,
+                    credits_required=missing_credits,
+                    amount_due=amount_due,
+                    status='pending',
+                    deposit_request=deposit_request,
+                    reference_number=reference_number,
+                    expires_at=timezone.now() + timedelta(hours=getattr(settings, 'RESERVATION_EXPIRY_HOURS', 24))
+                )
+                
+                # Payment instructions
+                instructions = AutoDepositService().get_deposit_instructions(customer_code)
+
+                # Send email with EFT instructions to provider
+                try:
+                    sendgrid_service.send_email(
+                        request.user.email,
+                        "Your lead is reserved — complete EFT to unlock",
+                        f"""
+                            <p>Hi {request.user.first_name or ''},</p>
+                            <p>We've reserved the lead "<strong>{lead.title}</strong>" for you.</p>
+                            <p>Please complete an EFT to activate <strong>{missing_credits}</strong> credits (Amount due: <strong>R{amount_due:.2f}</strong>).</p>
+                            <p><strong>Bank details</strong></p>
+                            <ul>
+                              <li>Bank: {instructions.get('instructions', {}).get('bank_name','Nedbank')}</li>
+                              <li>Account: {instructions.get('instructions', {}).get('account_number','')}</li>
+                              <li>Branch code: {instructions.get('instructions', {}).get('branch_code','')}</li>
+                              <li><strong>Reference: {reference_number}</strong></li>
+                            </ul>
+                            <p>Reservation expires: {reservation.expires_at.strftime('%Y-%m-%d %H:%M')}</p>
+                            <p>Once the payment reflects with the exact reference, your credits will auto-activate and you'll be able to view the client's contact details.</p>
+                            <p>— ProConnectSA</p>
+                        """,
+                        f"""Your lead is reserved — complete EFT to unlock
+
+Lead: {lead.title}
+Amount due: R{amount_due:.2f}
+Credits required: {missing_credits}
+Reference: {reference_number}
+Reservation expires: {reservation.expires_at.strftime('%Y-%m-%d %H:%M')}
+
+Bank details:
+- Bank: {instructions.get('instructions', {}).get('bank_name','Nedbank')}
+- Account: {instructions.get('instructions', {}).get('account_number','')}
+- Branch code: {instructions.get('instructions', {}).get('branch_code','')}
+
+Use the exact reference so we can auto-activate your credits."""
+                    )
+                except Exception as e:
+                    logger.error(f\"Failed to send EFT instruction email: {str(e)}\", exc_info=True)
+                
+                # Respect UNLOCK_MODE: if strict, don't allow reservation
+                if getattr(settings, 'UNLOCK_MODE', 'hybrid') == 'strict':
+                    return Response({
+                        'error': 'INSUFFICIENT_CREDITS',
+                        'message': 'Not enough credits. Please top up your wallet to unlock this lead.',
+                        'required_credits': credit_cost,
+                        'available_credits': wallet.credits,
+                        'top_up_instructions': instructions.get('instructions', {}),
+                    }, status=status.HTTP_402_PAYMENT_REQUIRED)
+
+                return Response({
+                    'success': False,
+                    'error': 'INSUFFICIENT_CREDITS',
+                    'message': f'You need {missing_credits} more credits to unlock this lead.',
+                    'reservation': {
+                        'id': str(reservation.id),
+                        'expires_at': reservation.expires_at,
+                        'credits_required': missing_credits,
+                        'amount_due': amount_due,
+                        'reference_number': reference_number
+                    },
+                    'payment_instructions': instructions.get('instructions', {}),
+                    'customer_code': customer_code,
+                    'help_text': 'Make an EFT with the reference shown. Credits will auto-activate and your reservation will be honored before expiry.'
+                }, status=status.HTTP_202_ACCEPTED)
+            except Exception as e:
+                logger.error(f"Failed to create reservation/instructions: {str(e)}", exc_info=True)
+                return Response({
+                    'error': 'INSUFFICIENT_CREDITS',
+                    'message': 'Not enough credits and failed to create a reservation. Please try again from your wallet.',
+                    'required_credits': credit_cost,
+                    'available_credits': wallet.credits,
+                }, status=status.HTTP_402_PAYMENT_REQUIRED)
 
         # Step 5: Check lead availability
         max_providers = getattr(lead, 'max_providers', 5)  # Default to 5
@@ -827,7 +933,7 @@ def purchase_lead_access_view(request, lead_id):
             WalletTransaction.objects.create(
                 wallet=wallet,
                 transaction_type='unlock',
-                amount=credit_cost * 50,  # Convert credits to Rands (1 credit = R50)
+                amount=credit_cost * getattr(settings, 'DEFAULT_CREDIT_PRICE', 50),  # Convert credits to Rands
                 credits=credit_cost,      # Number of credits
                 reference=transaction_reference,
                 description=f'Lead unlock: {lead.title}',

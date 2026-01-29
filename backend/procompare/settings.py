@@ -5,6 +5,7 @@ Django settings for ProCompare project.
 import os
 from pathlib import Path
 from decouple import config
+import environ
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -12,13 +13,21 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = config('SECRET_KEY', default='django-insecure-change-me-in-production')
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = config('DEBUG', default=False, cast=bool)
+# Load .env explicitly to ensure consistency under systemd/gunicorn
+_env = environ.Env()
+environ.Env.read_env(os.path.join(Path(__file__).resolve().parent.parent.parent, '.env'))
+
+# SECURITY WARNING: don't run with debug turned on in production! (prefer env over decouple cwd)
+DEBUG = _env.bool('DEBUG', default=config('DEBUG', default=False, cast=bool))
 
 # ML Services Configuration
 USE_ML_PRICING = config('USE_ML_PRICING', default=True, cast=bool)  # Enable dynamic pricing
 
-ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost,127.0.0.1', cast=lambda v: [s.strip() for s in v.split(',')])
+# Prefer env file for hosts to avoid decouple cwd issues under systemd
+ALLOWED_HOSTS = _env.list(
+    'ALLOWED_HOSTS',
+    default=config('ALLOWED_HOSTS', default='localhost,127.0.0.1', cast=lambda v: [s.strip() for s in v.split(',')])
+)
 
 # Application definition
 DJANGO_APPS = [
@@ -577,6 +586,11 @@ SA_RISKY_PAYMENT_INDICATORS = ['cash only', 'cash payment', 'cash upfront']
 # Credit pricing settings
 DEFAULT_CREDIT_PRICE = config('DEFAULT_CREDIT_PRICE', default=70, cast=int)  # R70 per credit
 CREDIT_PRICE_RANGE = (50, 120)  # Min/max credit prices (R50 - R120)
+
+# Unlock/reservation behavior
+# UNLOCK_MODE: 'hybrid' -> allow reservations with EFT; 'strict' -> 402 Payment Required
+UNLOCK_MODE = config('UNLOCK_MODE', default='hybrid')
+RESERVATION_EXPIRY_HOURS = config('RESERVATION_EXPIRY_HOURS', default=24, cast=int)
 
 # Dynamic pricing multipliers
 CREDIT_PRICE_MULTIPLIERS = {

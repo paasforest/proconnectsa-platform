@@ -8,6 +8,7 @@ from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
 import os
 import logging
+from django.utils import timezone
 
 from .models import User, ProviderProfile
 from .serializers import UserSerializer, ProviderProfileSerializer, PasswordChangeSerializer
@@ -228,4 +229,81 @@ def delete_profile_image(request):
             'success': False,
             'message': 'Failed to delete profile image'
         }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def list_verification_documents(request):
+    """List provider verification documents"""
+    try:
+        if request.user.user_type != 'provider':
+            return Response({'success': False, 'message': 'Only providers can list documents'}, status=status.HTTP_403_FORBIDDEN)
+        
+        profile = request.user.provider_profile
+        docs = profile.verification_documents or {}
+        return Response({'success': True, 'verification_status': profile.verification_status, 'documents': docs})
+    except Exception as e:
+        logger.error(f"Error listing verification documents: {str(e)}")
+        return Response({'success': False, 'message': 'Failed to list documents'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def upload_verification_document(request):
+    """
+    Upload a verification document for provider profile.
+    Form fields:
+      - document_type: one of ['id_document','proof_of_address','business_registration','insurance','other']
+      - file: the uploaded file
+    """
+    try:
+        if request.user.user_type != 'provider':
+            return Response({'success': False, 'message': 'Only providers can upload documents'}, status=status.HTTP_403_FORBIDDEN)
+        
+        if 'file' not in request.FILES:
+            return Response({'success': False, 'message': 'No file provided'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        document_type = request.POST.get('document_type', 'other')
+        allowed_types = {'id_document', 'proof_of_address', 'business_registration', 'insurance', 'other'}
+        if document_type not in allowed_types:
+            return Response({'success': False, 'message': 'Invalid document_type'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        file = request.FILES['file']
+        allowed_mime = {'image/jpeg', 'image/png', 'application/pdf'}
+        if file.content_type not in allowed_mime:
+            return Response({'success': False, 'message': 'Invalid file type. JPEG, PNG, or PDF only.'}, status=status.HTTP_400_BAD_REQUEST)
+        if file.size > 10 * 1024 * 1024:
+            return Response({'success': False, 'message': 'File too large (max 10MB).'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        profile = request.user.provider_profile
+        
+        # Save file
+        _, ext = os.path.splitext(file.name)
+        filename = f"verification_docs/user_{request.user.id}/{document_type}_{int(timezone.now().timestamp())}{ext}"
+        saved_path = default_storage.save(filename, ContentFile(file.read()))
+        file_url = default_storage.url(saved_path) if hasattr(default_storage, 'url') else f"/media/{saved_path}"
+        
+        # Update JSON field
+        docs = profile.verification_documents or {}
+        docs.setdefault(document_type, [])
+        docs[document_type].append({
+            'path': saved_path,
+            'url': file_url,
+            'uploaded_at': timezone.now().isoformat()
+        })
+        profile.verification_documents = docs
+        # Ensure status at least pending
+        if profile.verification_status in ['rejected', 'pending', 'suspended']:
+            profile.verification_status = 'pending'
+        profile.save(update_fields=['verification_documents', 'verification_status'])
+        
+        return Response({
+            'success': True,
+            'message': 'Document uploaded',
+            'verification_status': profile.verification_status,
+            'document': {'type': document_type, 'url': file_url}
+        }, status=status.HTTP_201_CREATED)
+    except Exception as e:
+        logger.error(f"Error uploading verification document: {str(e)}")
+        return Response({'success': False, 'message': 'Failed to upload document'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 

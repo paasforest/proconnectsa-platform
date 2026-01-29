@@ -116,6 +116,9 @@ export default function ProvidersPage() {
                 <Button size="lg" variant="outline" asChild>
                   <Link href="/how-it-works">Learn How It Works</Link>
                 </Button>
+                <Button size="lg" variant="ghost" asChild>
+                  <Link href="/providers/browse">Browse Verified Providers</Link>
+                </Button>
               </div>
             </div>
           </div>

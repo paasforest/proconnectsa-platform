@@ -53,6 +53,9 @@ const SettingsPage = () => {
   });
   const [showPassword, setShowPassword] = useState(false);
   const [message, setMessage] = useState<{type: 'success' | 'error', text: string} | null>(null);
+  const [verificationStatus, setVerificationStatus] = useState<string>('');
+  const [verificationDocs, setVerificationDocs] = useState<Record<string, Array<{url: string; path: string; uploaded_at: string}>>>({});
+  const [docType, setDocType] = useState<string>('id_document');
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -85,6 +88,15 @@ const SettingsPage = () => {
 
     if (user) {
       fetchProfile();
+      apiClient
+        .getVerificationDocuments()
+        .then((res: any) => {
+          setVerificationStatus(res.verification_status || '');
+          setVerificationDocs(res.documents || {});
+        })
+        .catch((err) => {
+          console.warn('Failed to load verification documents', err);
+        });
     }
   }, [user]);
 
@@ -135,6 +147,24 @@ const SettingsPage = () => {
     } catch (error) {
       console.error('Failed to upload image:', error);
       setMessage({ type: 'error', text: 'Failed to upload image. Please try again.' });
+    }
+  };
+
+  const handleVerificationUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    try {
+      const res = await apiClient.uploadVerificationDocument(docType, file);
+      setMessage({ type: 'success', text: 'Verification document uploaded.' });
+      setVerificationStatus(res.verification_status || verificationStatus);
+      const list = await apiClient.getVerificationDocuments();
+      setVerificationStatus(list.verification_status || '');
+      setVerificationDocs(list.documents || {});
+    } catch (e) {
+      console.error(e);
+      setMessage({ type: 'error', text: 'Failed to upload verification document.' });
+    } finally {
+      (event.target as HTMLInputElement).value = '';
     }
   };
 

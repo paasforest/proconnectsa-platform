@@ -551,3 +551,46 @@ class PredictionLog(models.Model):
         return f"{self.prediction_type} v{self.model_version} @ {self.created_at.isoformat()}"
 
 
+
+class LeadReservation(models.Model):
+    """
+    A temporary reservation for a provider to secure a lead while completing a manual EFT top-up.
+    """
+    STATUS_CHOICES = [
+        ('pending', 'Pending Payment'),
+        ('paid', 'Paid'),
+        ('expired', 'Expired'),
+        ('cancelled', 'Cancelled'),
+    ]
+    
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    lead = models.ForeignKey(Lead, on_delete=models.CASCADE, related_name='reservations')
+    provider = models.ForeignKey('users.User', on_delete=models.CASCADE, related_name='lead_reservations')
+    
+    credits_required = models.IntegerField(default=1)
+    amount_due = models.DecimalField(max_digits=10, decimal_places=2, help_text="Rands due for this reservation")
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    
+    # Link to a deposit request if created (manual EFT top-up)
+    deposit_request = models.ForeignKey('payments.DepositRequest', on_delete=models.SET_NULL, null=True, blank=True, related_name='lead_reservations')
+    reference_number = models.CharField(max_length=100, blank=True, help_text="Deposit reference number")
+    
+    expires_at = models.DateTimeField(help_text="Reservation expiry timestamp")
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        ordering = ['-created_at']
+        indexes = [
+            models.Index(fields=['provider', 'created_at']),
+            models.Index(fields=['lead', 'status']),
+            models.Index(fields=['status', 'expires_at']),
+        ]
+    
+    def __str__(self):
+        return f"Reservation {self.id} for {self.provider.email} → {self.lead.title}"
+    
+    @property
+    def is_active(self):
+        return self.status == 'pending' and timezone.now() < self.expires_at
+
