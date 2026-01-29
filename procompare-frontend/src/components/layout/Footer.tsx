@@ -146,15 +146,19 @@ export function Footer() {
         <div className="mt-8 pt-8 border-t">
           <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
             <div className="text-sm text-muted-foreground">
-              © 2024 ProConnectSA. All rights reserved.
+              © 2025 ProConnectSA. All rights reserved. | Proudly South African 🇿🇦
             </div>
-            <div className="flex space-x-6 text-sm">
-              <Link href="/how-it-works" className="text-muted-foreground hover:text-foreground transition-colors">
-                How it Works
-              </Link>
-              <Link href="/providers" className="text-muted-foreground hover:text-foreground transition-colors">
-                For Providers
-              </Link>
+            <div className="flex flex-wrap items-center gap-4 text-sm">
+              <Link href="/how-it-works" className="text-muted-foreground hover:text-foreground transition-colors">How it Works</Link>
+              <span className="text-muted-foreground">|</span>
+              <Link href="/providers" className="text-muted-foreground hover:text-foreground transition-colors">For Providers</Link>
+              <span className="text-muted-foreground">|</span>
+              <span className="inline-flex items-center rounded-full bg-green-50 text-green-800 px-3 py-1 border border-green-200">
+                SARS Registered
+              </span>
+              <span className="inline-flex items-center rounded-full bg-blue-50 text-blue-800 px-3 py-1 border border-blue-200">
+                CIPC Compliant
+              </span>
             </div>
           </div>
         </div>
