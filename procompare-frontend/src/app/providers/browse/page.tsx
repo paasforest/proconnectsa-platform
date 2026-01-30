@@ -1,3 +1,6 @@
+\"use client\"
+import { useEffect, useMemo, useState } from \"react\";
+import { useSearchParams } from \"next/navigation\";
 import { ClientHeader } from "@/components/layout/ClientHeader";
 import { Footer } from "@/components/layout/Footer";
 import Link from "next/link";
@@ -19,16 +22,17 @@ type PublicProvider = {
   slug: string;
 };
 
-async function fetchProviders(searchParams: { category?: string; city?: string; page?: string; page_size?: string }) {
-  const params = new URLSearchParams();
-  if (searchParams.category) params.set("category", searchParams.category);
-  if (searchParams.city) params.set("city", searchParams.city);
-  if (searchParams.page) params.set("page", searchParams.page);
-  if (searchParams.page_size) params.set("page_size", searchParams.page_size);
-  const url = `${API_BASE}/api/public/providers/${params.toString() ? `?${params.toString()}` : ""}`;
-  const res = await fetch(url, { next: { revalidate: 300 } });
-  if (!res.ok) throw new Error(`Failed to load providers (${res.status})`);
-  return res.json() as Promise<{ results: PublicProvider[]; pagination: { page: number; pages: number; total: number; page_size: number } }>;
+async function clientFetchProviders(query: URLSearchParams) {
+  const url = `${API_BASE}/api/public/providers/${query.toString() ? `?${query.toString()}` : ""}`;
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 8000);
+  try {
+    const res = await fetch(url, { signal: controller.signal });
+    if (!res.ok) throw new Error(`Failed (${res.status})`);
+    return (await res.json()) as { results: PublicProvider[]; pagination: any };
+  } finally {
+    clearTimeout(timeout);
+  }
 }
 
 export const metadata: Metadata = {
@@ -36,13 +40,35 @@ export const metadata: Metadata = {
   description: "Browse public profiles of verified service providers by category and city.",
 };
 
-export default async function ProvidersBrowsePage({
-  searchParams,
-}: {
-  searchParams: { category?: string; city?: string; page?: string; page_size?: string };
-}) {
-  const data = await fetchProviders(searchParams);
-  const providers = data.results || [];
+export default function ProvidersBrowsePage() {
+  const sp = useSearchParams();
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [providers, setProviders] = useState<PublicProvider[]>([]);
+
+  const query = useMemo(() => {
+    const q = new URLSearchParams();
+    const category = sp.get(\"category\") || \"\";
+    const city = sp.get(\"city\") || \"\";
+    const page = sp.get(\"page\") || \"1\";
+    const pageSize = sp.get(\"page_size\") || \"20\";
+    if (category) q.set(\"category\", category);
+    if (city) q.set(\"city\", city);
+    if (page) q.set(\"page\", page);
+    if (pageSize) q.set(\"page_size\", pageSize);
+    return q;
+  }, [sp]);
+
+  useEffect(() => {
+    setLoading(true);
+    setError(null);
+    clientFetchProviders(query)
+      .then((data) => {
+        setProviders(data.results || []);
+      })
+      .catch((e) => setError(e.message || \"Failed to load\")) 
+      .finally(() => setLoading(false));
+  }, [query]);
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -58,13 +84,13 @@ export default async function ProvidersBrowsePage({
               <input
                 name="category"
                 placeholder="Category slug (e.g. plumbing)"
-                defaultValue={searchParams.category || ""}
+                defaultValue={sp.get(\"category\") || \"\"}
                 className="border rounded px-3 py-2"
               />
               <input
                 name="city"
                 placeholder="City (e.g. Johannesburg)"
-                defaultValue={searchParams.city || ""}
+                defaultValue={sp.get(\"city\") || \"\"}
                 className="border rounded px-3 py-2"
               />
               <input type="hidden" name="page" value="1" />
@@ -81,7 +107,9 @@ export default async function ProvidersBrowsePage({
 
         <section className="py-8">
           <div className="container mx-auto px-4 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {providers.length === 0 && (
+            {loading && <div className=\"col-span-full text-gray-600\">Loading providers...</div>}
+            {error && !loading && <div className=\"col-span-full text-red-600\">{error}. Please try again.</div>}
+            {!loading && !error && providers.length === 0 && (
               <div className="col-span-full text-gray-600">No providers found for your filters.</div>
             )}
             {providers.map((p) => (

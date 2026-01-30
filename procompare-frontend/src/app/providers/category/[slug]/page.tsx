@@ -1,3 +1,5 @@
+\"use client\"
+import { useEffect, useState } from \"react\";
 import Link from "next/link";
 import { ClientHeader } from "@/components/layout/ClientHeader";
 import { Footer } from "@/components/layout/Footer";
@@ -27,16 +29,26 @@ export async function generateMetadata({ params }: { params: { slug: string } })
   };
 }
 
-async function fetchProvidersByCategory(slug: string) {
+async function clientFetchProvidersByCategory(slug: string) {
   const url = `${API_BASE}/api/public/providers/?category=${encodeURIComponent(slug)}`;
-  const res = await fetch(url, { next: { revalidate: 300 } });
-  if (!res.ok) throw new Error(`Failed to load providers (${res.status})`);
-  return res.json() as Promise<{ results: PublicProvider[]; pagination: any }>;
+  const res = await fetch(url);
+  if (!res.ok) throw new Error(`Failed (${res.status})`);
+  return (await res.json()) as { results: PublicProvider[]; pagination: any };
 }
 
-export default async function ProvidersByCategoryPage({ params }: { params: { slug: string } }) {
-  const data = await fetchProvidersByCategory(params.slug);
-  const providers = data.results || [];
+export default function ProvidersByCategoryPage({ params }: { params: { slug: string } }) {
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [providers, setProviders] = useState<PublicProvider[]>([]);
+
+  useEffect(() => {
+    setLoading(true);
+    setError(null);
+    clientFetchProvidersByCategory(params.slug)
+      .then((data) => setProviders(data.results || []))
+      .catch((e) => setError(e.message || \"Failed to load\"))
+      .finally(() => setLoading(false));
+  }, [params.slug]);
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -56,7 +68,9 @@ export default async function ProvidersByCategoryPage({ params }: { params: { sl
 
         <section className="py-8">
           <div className="container mx-auto px-4 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {providers.length === 0 && (
+            {loading && <div className=\"col-span-full text-gray-600\">Loading providers...</div>}
+            {error && !loading && <div className=\"col-span-full text-red-600\">{error}. Please try again.</div>}
+            {!loading && !error && providers.length === 0 && (
               <div className="col-span-full text-gray-600">No providers found for this category.</div>
             )}
             {providers.map((p) => (
