@@ -65,7 +65,7 @@ def setup_categories_view(request):
                 'first_name': 'Auto',
                 'last_name': 'Client',
                 'user_type': 'client',
-                'phone_number': '+27812340000'
+                'phone': '+27812340000'
             }
         )
         
