@@ -332,7 +332,7 @@ export default function BarkLeadForm({ onComplete, onCancel, preselectedCategory
                   className="mt-2 w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
                   value={contactPhone}
                   onChange={(e) => setContactPhone(e.target.value)}
-                  placeholder="e.g. 0679518165"
+                  placeholder="e.g. +27679518124"
                 />
               </div>
               <div>
