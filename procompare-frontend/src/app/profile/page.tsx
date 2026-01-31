@@ -105,18 +105,17 @@ export default function ProfilePage() {
 
   // Redirect if not authenticated
   useEffect(() => {
-    if (false) return;
-    if (!session || user?.userType !== 'provider') {
+    if (!token || user?.userType !== 'provider') {
       router.push('/login');
     }
-  }, [session, status, router]);
+  }, [token, user?.userType, router]);
 
   // Fetch profile data
   useEffect(() => {
     if (token) {
       fetchProfile();
     }
-  }, [session]);
+  }, [token]);
 
   const fetchProfile = async () => {
     try {
