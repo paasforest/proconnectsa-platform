@@ -38,9 +38,15 @@ class AutoDepositService:
             dict: Processing result with success status and details
         """
         try:
-            # Find wallet by customer code (wallet is the source of truth for credits)
-            wallet = Wallet.objects.select_related('user').get(customer_code=customer_code)
-            provider = wallet.user.provider_profile
+            # Find the provider + wallet by customer code.
+            # Prefer Wallet.customer_code (what the wallet UI shows), but fall back to
+            # ProviderProfile.customer_code for legacy setups.
+            try:
+                wallet = Wallet.objects.select_related('user').get(customer_code=customer_code)
+                provider = wallet.user.provider_profile
+            except Wallet.DoesNotExist:
+                provider = ProviderProfile.objects.get(customer_code=customer_code)
+                wallet, _ = Wallet.objects.get_or_create(user=provider.user)
             
             # Calculate credits (deterministic): DEFAULT_CREDIT_PRICE (R50) = 1 credit
             from django.conf import settings
@@ -73,7 +79,7 @@ class AutoDepositService:
                 'provider_email': provider.user.email
             }
             
-        except ProviderProfile.DoesNotExist:
+        except (Wallet.DoesNotExist, ProviderProfile.DoesNotExist):
             logger.warning(f"Customer code not found: {customer_code}")
             return {
                 'success': False,
@@ -134,8 +140,8 @@ class AutoDepositService:
             amount=amount,
             credits_to_activate=credits_to_activate,
             reference_number=reference_number,
-            customer_code=provider.provider_profile.customer_code,
-            status='verified',  # Auto-verified
+            customer_code=(getattr(provider, "provider_profile", None) and (provider.provider_profile.customer_code or "")[:10]) or ("" if not reference_number else str(reference_number)[:10]),
+            status=TransactionStatus.COMPLETED,  # Auto-processed
             is_auto_verified=True,
             verification_notes='Automatically verified by customer code match'
         )
@@ -170,7 +176,7 @@ class AutoDepositService:
             # Create credit transaction
             Transaction.objects.create(
                 account=deposit.account,
-                amount=deposit.credits_to_activate,
+                amount=deposit.amount,
                 transaction_type=TransactionType.DEPOSIT,
                 status=TransactionStatus.COMPLETED,
                 reference=deposit.reference_number,
@@ -179,8 +185,9 @@ class AutoDepositService:
             )
             
             # Update deposit status
-            deposit.verified_at = timezone.now()
-            deposit.save(update_fields=['verified_at'])
+            deposit.status = TransactionStatus.COMPLETED
+            deposit.processed_at = timezone.now()
+            deposit.save(update_fields=['status', 'processed_at'])
             
             return {
                 'credits_added': deposit.credits_to_activate,
