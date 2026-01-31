@@ -14,11 +14,11 @@ import {
 import { Menu, X, User, LogOut, Settings, Bell } from "lucide-react"
 
 export function ClientHeader() {
-  const { user, token } = useAuth()
+  const { user, logout } = useAuth()
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
 
   const handleSignOut = () => {
-    signOut({ callbackUrl: "/" })
+    logout()
   }
 
   return (
@@ -35,38 +35,28 @@ export function ClientHeader() {
         {/* Desktop Navigation */}
         <nav className="hidden md:flex items-center space-x-6">
           <Link 
-            href="/how-it-works" 
-            className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
-          >
-            How it Works
-          </Link>
-          <Link 
             href="/services" 
             className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
           >
             Services
           </Link>
           <Link 
-            href="/request-quote" 
+            href="/providers/browse" 
             className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
           >
-            Request Quote
+            Browse Pros
           </Link>
           <Link 
-            href="https://www.immigrationai.co.za?utm_source=proconnectsa&utm_medium=website&utm_campaign=immigration_integration&utm_content=nav_menu" 
-            target="_blank"
-            rel="noopener noreferrer"
-            onClick={() => {
-              if (typeof window !== 'undefined' && (window as any).gtag) {
-                (window as any).gtag('event', 'click', {
-                  event_category: 'Immigration AI',
-                  event_label: 'ClientHeader Nav - Immigration',
-                });
-              }
-            }}
+            href="/how-it-works" 
+            className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+          >
+            How it Works
+          </Link>
+          <Link 
+            href="/for-pros"
             className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors font-semibold"
           >
-            🌍 Travel Overseas?
+            For Pros
           </Link>
         </nav>
 
@@ -116,10 +106,10 @@ export function ClientHeader() {
           ) : (
             <div className="flex items-center space-x-2">
               <Button variant="ghost" asChild>
-                <Link href="/login">Sign In</Link>
+                <Link href="/for-pros">I’m a pro</Link>
               </Button>
               <Button asChild>
-                <Link href="/register">Get Started</Link>
+                <Link href="/request-quote">Get free quotes</Link>
               </Button>
             </div>
           )}
@@ -142,13 +132,6 @@ export function ClientHeader() {
           <div className="container py-4 space-y-4">
             <nav className="flex flex-col space-y-2">
               <Link 
-                href="/how-it-works" 
-                className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors py-2"
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                How it Works
-              </Link>
-              <Link 
                 href="/services" 
                 className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors py-2"
                 onClick={() => setIsMobileMenuOpen(false)}
@@ -156,18 +139,32 @@ export function ClientHeader() {
                 Services
               </Link>
               <Link 
-                href="/request-quote" 
+                href="/providers/browse" 
                 className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors py-2"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
-                Request Quote
+                Browse Pros
               </Link>
               <Link 
-                href="/immigration" 
+                href="/how-it-works" 
+                className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors py-2"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                How it Works
+              </Link>
+              <Link 
+                href="/for-pros" 
                 className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors py-2 font-semibold"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
-                🌍 Travel Overseas?
+                For Pros
+              </Link>
+              <Link
+                href="/request-quote"
+                className="text-sm font-semibold text-foreground py-2"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                Get free quotes
               </Link>
             </nav>
             
