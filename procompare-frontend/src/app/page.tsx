@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { Search, Star, ArrowRight, Shield, Clock, Award, CheckCircle, TrendingUp, Users, Zap, MapPin, Filter, Calendar, Phone, Mail, User, Wrench, Home, Paintbrush, Hammer, Droplets, Zap as Electric, X, Gift, FileText, BookOpen, MessageSquare } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import LeadGenerationForm from '@/components/leads/LeadGenerationForm';
+import BarkLeadForm from '@/components/leads/BarkLeadForm';
 
 const Homepage = () => {
   const router = useRouter();
@@ -41,39 +41,8 @@ const Homepage = () => {
 
   const handleLeadFormComplete = async (leadData: any) => {
     try {
-      // Import the API client and toast
-      const { apiClient } = await import('@/lib/api-simple');
       const { toast } = await import('sonner');
-      
-      // Map form data to API format (including client contact details)
-      const mappedLeadData = {
-        service_category_id: leadData.service_category_id || 1,
-        title: leadData.title,
-        description: leadData.description,
-        location_address: leadData.address,
-        location_suburb: leadData.suburb,
-        location_city: leadData.city,
-        budget_range: leadData.budget_range,
-        urgency: leadData.urgency,
-        preferred_contact_time: leadData.preferred_contact_time,
-        additional_requirements: leadData.special_requirements || '',
-        hiring_intent: leadData.hiring_intent,
-        hiring_timeline: leadData.hiring_timeline,
-        research_purpose: leadData.research_purpose || '',
-        source: 'website',
-        // Client contact details from form
-        client_name: leadData.contact_name || 'Anonymous Client',
-        client_email: leadData.contact_email,
-        client_phone: leadData.contact_phone
-      };
-      
-      console.log('📤 Submitting lead data:', mappedLeadData);
-      
-      // Submit to API using public endpoint
-      const response = await apiClient.createPublicLead(mappedLeadData);
-      
-      console.log('✅ Lead created successfully:', response);
-      
+
       // Show success toast
       toast.success('🎉 Quote Request Submitted!', {
         description: 'You\'ll receive quotes from verified professionals within 24 hours. Check your email for updates.',
@@ -88,7 +57,6 @@ const Homepage = () => {
       
     } catch (error: any) {
       console.error('❌ Error creating lead:', error);
-      console.error('❌ API Response:', error.response?.data);
       
       // Import toast for error message
       const { toast } = await import('sonner');
@@ -1148,7 +1116,8 @@ const Homepage = () => {
             </p>
           </div>
           <div className="p-6">
-            <LeadGenerationForm
+            <BarkLeadForm
+              onComplete={handleLeadFormComplete}
               onCancel={handleLeadFormCancel}
               preselectedCategory={selectedCategory}
             />
