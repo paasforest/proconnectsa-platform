@@ -48,24 +48,28 @@ export default function RequestQuotePage() {
     if (!searchParams) return
     const serviceParam = searchParams.get('service')
     if (serviceParam) {
-      // Map service ID to backend service slug
+      // Normalize legacy/old slugs to current backend slugs
       const serviceMap: { [key: string]: string } = {
-        'plumbing': 'plumbing',
-        'electrical': 'electrical',
-        'handyman': 'renovation', // Map handyman to renovation since it's the closest match
-        'cleaning': 'cleaning',
-        'painting': 'painting',
-        'gardening': 'landscaping', // Map gardening to landscaping
-        'hvac': 'hvac',
-        'renovation': 'renovation',
-        'automotive': 'automotive',
-        'photography': 'cleaning', // Map photography to cleaning as fallback
-        'entertainment': 'cleaning', // Map entertainment to cleaning as fallback
-        'health': 'cleaning' // Map health to cleaning as fallback
+        plumbing: 'plumbing',
+        electrical: 'electrical',
+        cleaning: 'cleaning',
+        painting: 'painting',
+        handyman: 'handyman',
+        hvac: 'hvac',
+        renovation: 'renovations',
+        renovations: 'renovations',
+        pool: 'pool-maintenance',
+        'pool-maintenance': 'pool-maintenance',
+        appliance: 'appliance-repair',
+        'appliance-repair': 'appliance-repair',
+        landscaping: 'landscaping',
+        gardening: 'landscaping',
+        security: 'security',
+        automotive: 'automotive',
       }
-      
-      const serviceId = serviceMap[serviceParam] || serviceParam
-      setSelectedCategory(serviceId)
+
+      const normalized = serviceMap[serviceParam] || serviceParam
+      setSelectedCategory(normalized)
       setShowForm(true)
     }
   }, [searchParams])
@@ -120,7 +124,7 @@ export default function RequestQuotePage() {
                   <Link href="/client">Go to Dashboard</Link>
                 </Button>
                 <Button variant="outline" asChild className="w-full">
-                  <Link href="/request-quote">Submit Another Request</Link>
+                  <Link href="/services">Browse Services</Link>
                 </Button>
               </div>
             </CardContent>
@@ -147,72 +151,84 @@ export default function RequestQuotePage() {
   }
   const serviceCategories = [
     { 
+      slug: "plumbing",
       name: "Plumbing", 
       icon: Wrench, 
       description: "Repairs, installations, maintenance",
       popular: true
     },
     { 
+      slug: "electrical",
       name: "Electrical", 
       icon: Zap, 
       description: "Wiring, installations, repairs",
       popular: true
     },
     { 
+      slug: "painting",
       name: "Painting", 
       icon: Paintbrush, 
       description: "Interior, exterior, commercial",
       popular: true
     },
     { 
+      slug: "cleaning",
       name: "Cleaning", 
       icon: HomeIcon, 
       description: "House, office, deep cleaning",
       popular: false
     },
     { 
+      slug: "landscaping",
       name: "Gardening", 
       icon: Trees, 
       description: "Landscaping, maintenance, design",
       popular: false
     },
     { 
+      slug: "carpentry",
       name: "Carpentry", 
       icon: Hammer, 
       description: "Custom work, repairs, installations",
       popular: false
     },
     { 
+      slug: "roofing",
       name: "Roofing", 
       icon: HomeIcon, 
       description: "Repairs, installations, maintenance",
       popular: false
     },
     { 
+      slug: "pool-maintenance",
       name: "Pool Maintenance", 
       icon: Droplets, 
       description: "Cleaning, repairs, chemical balancing",
       popular: false
     },
     { 
+      slug: "appliance-repair",
       name: "Appliance Repair", 
       icon: Wrench, 
       description: "Washing machines, fridges, ovens",
       popular: false
     },
     { 
+      slug: "handyman",
       name: "General Maintenance", 
       icon: Hammer, 
       description: "Handyman services, repairs",
       popular: true
     },
     { 
+      slug: "security",
       name: "Security", 
       icon: Shield, 
       description: "Alarms, cameras, access control",
       popular: false
     },
     { 
+      slug: "cleaning",
       name: "Cleaning Services", 
       icon: Sparkles, 
       description: "Professional cleaning services",
@@ -288,7 +304,7 @@ export default function RequestQuotePage() {
                     <Button 
                       className="mt-4 w-full group-hover:bg-emerald-600 group-hover:text-white transition-colors" 
                       variant="outline"
-                      onClick={() => handleCategorySelect(service.name)}
+                      onClick={() => handleCategorySelect(service.slug)}
                     >
                       Get Quotes
                       <ArrowRight className="ml-2 h-4 w-4" />
