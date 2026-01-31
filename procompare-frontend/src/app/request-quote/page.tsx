@@ -27,7 +27,7 @@ import {
   Users,
   CheckCircle
 } from "lucide-react"
-import LeadGenerationForm from "@/components/leads/LeadGenerationForm"
+import BarkLeadForm from "@/components/leads/BarkLeadForm"
 import { toast } from "sonner"
 
 export default function RequestQuotePage() {
@@ -48,7 +48,7 @@ export default function RequestQuotePage() {
     if (!searchParams) return
     const serviceParam = searchParams.get('service')
     if (serviceParam) {
-      // Map service ID to service name (matching LeadGenerationForm categories)
+      // Map service ID to backend service slug
       const serviceMap: { [key: string]: string } = {
         'plumbing': 'plumbing',
         'electrical': 'electrical',
@@ -76,49 +76,12 @@ export default function RequestQuotePage() {
   }
 
   const handleFormComplete = async (data: any) => {
-    console.log('🎯 HANDLE FORM COMPLETE CALLED!', data)
-    console.log('🎯 Service category ID:', data.service_category_id)
-    
     try {
-      // Import the API client
-      const { apiClient } = await import('@/lib/api-simple')
-      
-      // Map form data to API format (including client contact details)
-      const leadData = {
-        service_category_id: data.service_category_id || 1, // Default to first category
-        title: data.title,
-        description: data.description,
-        location_address: data.address,
-        location_suburb: data.suburb,
-        location_city: data.city,
-        latitude: data.latitude || null,
-        longitude: data.longitude || null,
-        budget_range: data.budget_range,
-        urgency: data.urgency,
-        preferred_contact_time: data.preferred_contact_time,
-        additional_requirements: data.special_requirements || '',
-        hiring_intent: data.hiring_intent,
-        hiring_timeline: data.hiring_timeline,
-        research_purpose: data.research_purpose || '',
-        source: 'website',
-        utm_source: data.utm_source || '',
-        utm_medium: data.utm_medium || '',
-        utm_campaign: data.utm_campaign || '',
-        // Client contact details
-        client_name: data.client_name || 'Anonymous Client',
-        client_email: data.contact_email,
-        client_phone: data.contact_phone
-      }
-      
-      
-      // Submit to API using public endpoint
-      const response = await apiClient.createPublicLead(leadData)
-      
-      // Don't set formSubmitted here - let the form handle its own success state
       toast.success('🎉 Quote Request Submitted Successfully!', {
         description: 'We\'ll match you with the best providers and you\'ll receive quotes within 24 hours.',
         duration: 6000
       })
+      setFormSubmitted(true)
     } catch (error) {
       console.error('❌ Error submitting lead:', error)
       console.error('❌ Error details:', (error as any).response?.data || (error as Error).message)
@@ -175,11 +138,7 @@ export default function RequestQuotePage() {
         <ClientHeader />
         
         <main className="flex-1">
-          <LeadGenerationForm 
-            onComplete={handleFormComplete}
-            onCancel={handleFormCancel}
-            preselectedCategory={selectedCategory}
-          />
+          <BarkLeadForm onComplete={handleFormComplete} onCancel={handleFormCancel} preselectedCategory={selectedCategory} />
         </main>
         
         <Footer />
