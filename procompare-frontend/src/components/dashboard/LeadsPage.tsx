@@ -20,6 +20,10 @@ interface Lead {
   credits: number;
   verifiedPhone: boolean;
   highIntent?: boolean;
+  hiring_intent?: 'ready_to_hire' | 'planning_to_hire' | 'comparing_quotes' | 'researching' | string;
+  hiring_intent_display?: string;
+  hiring_timeline?: 'asap' | 'this_month' | 'next_month' | 'flexible' | string;
+  hiring_timeline_display?: string;
   details?: string;
   masked_details?: string;
   email?: string;
@@ -485,10 +489,24 @@ const LeadsPage = () => {
                     Verified
                   </span>
                 )}
-                {lead.highIntent && (
-                  <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-orange-100 text-orange-800">
-                    <Zap className="w-3 h-3 mr-1" />
-                    High Intent
+                {(lead.hiring_intent_display || lead.highIntent) && (
+                  <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                    lead.hiring_intent === 'ready_to_hire'
+                      ? 'bg-emerald-100 text-emerald-800'
+                      : lead.hiring_intent === 'planning_to_hire'
+                      ? 'bg-green-100 text-green-800'
+                      : lead.hiring_intent === 'comparing_quotes'
+                      ? 'bg-yellow-100 text-yellow-800'
+                      : 'bg-gray-100 text-gray-800'
+                  }`}>
+                    <Target className="w-3 h-3 mr-1" />
+                    {lead.hiring_intent_display || (lead.highIntent ? 'High Intent' : 'Intent')}
+                  </span>
+                )}
+                {(lead.hiring_timeline_display || lead.timeline) && (
+                  <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-50 text-blue-800">
+                    <Clock className="w-3 h-3 mr-1" />
+                    {lead.hiring_timeline_display || lead.timeline}
                   </span>
                 )}
                 {lead.jobSize && (
