@@ -28,6 +28,22 @@ const URGENCY_OPTIONS = [
   { label: 'Flexible', value: 'flexible' },
 ] as const
 
+// Must match backend `Lead.HIRING_INTENT_CHOICES`
+const HIRING_INTENT_OPTIONS = [
+  { label: "Ready to hire", value: "ready_to_hire" },
+  { label: "Planning to hire soon", value: "planning_to_hire" },
+  { label: "Comparing quotes", value: "comparing_quotes" },
+  { label: "Just researching", value: "researching" },
+] as const
+
+// Must match backend `Lead.HIRING_TIMELINE_CHOICES`
+const HIRING_TIMELINE_OPTIONS = [
+  { label: "ASAP", value: "asap" },
+  { label: "This month", value: "this_month" },
+  { label: "Next month", value: "next_month" },
+  { label: "Flexible", value: "flexible" },
+] as const
+
 export default function BarkLeadForm({ onComplete, onCancel, preselectedCategory }: BarkLeadFormProps) {
   const [step, setStep] = useState<1 | 2 | 3>(1)
   const [categories, setCategories] = useState<ServiceCategory[]>([])
@@ -43,6 +59,8 @@ export default function BarkLeadForm({ onComplete, onCancel, preselectedCategory
   const [description, setDescription] = useState('')
   const [budgetRange, setBudgetRange] = useState<(typeof BUDGET_RANGES)[number]['value']>('1000_5000')
   const [urgency, setUrgency] = useState<(typeof URGENCY_OPTIONS)[number]['value']>('this_week')
+  const [hiringIntent, setHiringIntent] = useState<(typeof HIRING_INTENT_OPTIONS)[number]['value']>('comparing_quotes')
+  const [hiringTimeline, setHiringTimeline] = useState<(typeof HIRING_TIMELINE_OPTIONS)[number]['value']>('this_month')
   const [contactName, setContactName] = useState('')
   const [contactPhone, setContactPhone] = useState('')
   const [contactEmail, setContactEmail] = useState('')
@@ -115,8 +133,8 @@ export default function BarkLeadForm({ onComplete, onCancel, preselectedCategory
         budget_range: budgetRange,
         urgency,
         preferred_contact_time: 'morning',
-        hiring_intent: 'ready_to_hire',
-        hiring_timeline: 'asap',
+        hiring_intent: hiringIntent,
+        hiring_timeline: hiringTimeline,
         additional_requirements: '',
         property_type: 'residential',
         source: 'website',
@@ -258,6 +276,37 @@ export default function BarkLeadForm({ onComplete, onCancel, preselectedCategory
                     {URGENCY_OPTIONS.map((u) => (
                       <option key={u.value} value={u.value}>
                         {u.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                <div>
+                  <label className="block text-sm font-medium text-gray-900">Your intention</label>
+                  <select
+                    className="mt-2 w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
+                    value={hiringIntent}
+                    onChange={(e) => setHiringIntent(e.target.value as any)}
+                  >
+                    {HIRING_INTENT_OPTIONS.map((o) => (
+                      <option key={o.value} value={o.value}>
+                        {o.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-900">When do you want to start?</label>
+                  <select
+                    className="mt-2 w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
+                    value={hiringTimeline}
+                    onChange={(e) => setHiringTimeline(e.target.value as any)}
+                  >
+                    {HIRING_TIMELINE_OPTIONS.map((o) => (
+                      <option key={o.value} value={o.value}>
+                        {o.label}
                       </option>
                     ))}
                   </select>
