@@ -22,7 +22,7 @@ export default async function ServicesPage() {
             </p>
             <div className="mt-8 flex flex-col sm:flex-row gap-3 justify-center">
               <Button asChild className="bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl py-6 px-8">
-                <Link href="/request-quote">Get free quotes</Link>
+                <Link href="/services">Browse services</Link>
               </Button>
               <Button asChild variant="outline" className="rounded-xl py-6 px-8">
                 <Link href="/providers/browse">Browse pros</Link>
