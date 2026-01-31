@@ -863,7 +863,7 @@ Bank details:
 Use the exact reference so we can auto-activate your credits."""
                     )
                 except Exception as e:
-                    logger.error(f"Failed to send EFT instruction email: {str(e)}", exc_info=True)
+                    logger.error(f\"Failed to send EFT instruction email: {str(e)}\", exc_info=True)
                 
                 # Respect UNLOCK_MODE: if strict, don't allow reservation
                 if getattr(settings, 'UNLOCK_MODE', 'hybrid') == 'strict':

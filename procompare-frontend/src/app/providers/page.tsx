@@ -120,15 +120,6 @@ export default function ProvidersPage() {
                   <Link href="/providers/browse">Browse Verified Providers</Link>
                 </Button>
               </div>
-              <div className="mt-6 text-gray-700 text-sm">
-                Quick links:{" "}
-                <Link className="underline underline-offset-4" href="/providers/category/plumbing">Plumbers</Link>{" · "}
-                <Link className="underline underline-offset-4" href="/providers/category/electrical">Electricians</Link>{" · "}
-                <Link className="underline underline-offset-4" href="/providers/category/cleaning">Cleaners</Link>{" · "}
-                <Link className="underline underline-offset-4" href="/providers/city/Johannesburg">Johannesburg</Link>{" · "}
-                <Link className="underline underline-offset-4" href="/providers/city/Cape%20Town">Cape Town</Link>{" · "}
-                <Link className="underline underline-offset-4" href="/providers/city/Durban">Durban</Link>
-              </div>
             </div>
           </div>
         </section>
