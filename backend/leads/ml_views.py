@@ -793,7 +793,9 @@ def purchase_lead_access_view(request, lead_id):
                 from backend.payments.auto_deposit_service import AutoDepositService
                 
                 provider_profile = request.user.provider_profile
-                customer_code = provider_profile.customer_code
+                from backend.users.models import Wallet
+                wallet_obj, _ = Wallet.objects.get_or_create(user=request.user)
+                customer_code = wallet_obj.customer_code
                 
                 # Calculate missing credits and amount due based on configured credit price
                 missing_credits = max(1, int(credit_cost - wallet.credits))
@@ -917,6 +919,16 @@ Use the exact reference so we can auto-activate your credits."""
         from django.db import transaction
         
         with transaction.atomic():
+            # Lock wallet row to prevent double-spend
+            wallet = Wallet.objects.select_for_update().get(id=wallet.id)
+
+            # Re-check access inside the transaction to prevent races
+            if LeadAccess.objects.filter(provider=request.user, lead=lead).exists():
+                return Response({
+                    'error': 'You have already purchased this lead!',
+                    'code': 'ALREADY_PURCHASED'
+                }, status=status.HTTP_409_CONFLICT)
+
             # Deduct credits from wallet
             wallet.credits -= credit_cost
             wallet.save()
