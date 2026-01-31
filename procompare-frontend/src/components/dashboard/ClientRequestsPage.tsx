@@ -192,7 +192,7 @@ export default function ClientRequestsPage() {
             Refresh
           </Button>
           <Button 
-            onClick={() => router.push('/request-quote')}
+            onClick={() => router.push('/services')}
             className="flex items-center gap-2"
           >
             <Plus className="h-4 w-4" />
@@ -212,7 +212,7 @@ export default function ClientRequestsPage() {
             <p className="text-gray-600 mb-6">
               Submit your first service request to get quotes from local providers
             </p>
-            <Button onClick={() => router.push('/request-quote')}>
+            <Button onClick={() => router.push('/services')}>
               <Plus className="h-4 w-4 mr-2" />
               Create Your First Request
             </Button>
