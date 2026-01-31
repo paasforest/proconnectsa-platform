@@ -54,6 +54,8 @@ export async function POST(request: NextRequest) {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        // Required by backend `PublicEndpointPermission` for lead creation
+        'X-API-Key': 'proconnectsa_lead_creation_2024',
       },
       body: JSON.stringify(leadData),
     });
