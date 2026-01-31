@@ -100,9 +100,11 @@ def available_leads(request):
         from backend.leads.models import ServiceCategory
         raw_categories = profile.service_categories if profile.service_categories else []
         cat_ids, cat_slugs = _normalize_provider_category_inputs(raw_categories)
-        category_ids = ServiceCategory.objects.filter(
-            Q(id__in=list(cat_ids)) | Q(slug__in=list(cat_slugs))
-        ).values_list('id', flat=True)
+        category_ids = list(
+            ServiceCategory.objects.filter(
+                Q(id__in=list(cat_ids)) | Q(slug__in=list(cat_slugs))
+            ).values_list('id', flat=True)
+        )
 
         if not category_ids:
             logger.info(
@@ -121,8 +123,10 @@ def available_leads(request):
             })
         
         # Base query
+        # Note: many leads move to `assigned` after distribution, but are still
+        # purchasable/unlockable in the wallet marketplace.
         leads = Lead.objects.filter(
-            status='verified',
+            status__in=['verified', 'assigned'],
             service_category__id__in=category_ids,
             is_available=True,
             expires_at__gt=timezone.now()
@@ -139,13 +143,13 @@ def available_leads(request):
             if service_area_filter:
                 leads = leads.filter(service_area_filter)
         
-        # Exclude already assigned leads
-        from backend.leads.models import LeadAssignment
-        assigned_lead_ids = LeadAssignment.objects.filter(
-            provider=request.user
+        # Exclude leads already unlocked by this provider
+        from backend.leads.models import LeadAccess
+        unlocked_lead_ids = LeadAccess.objects.filter(
+            provider=request.user,
+            is_active=True
         ).values_list('lead_id', flat=True)
-        
-        leads = leads.exclude(id__in=assigned_lead_ids)
+        leads = leads.exclude(id__in=unlocked_lead_ids)
         
         # Order by priority and apply limit
         leads = leads.order_by('-verification_score', '-created_at')[:20]
@@ -168,12 +172,14 @@ def available_leads(request):
         # Basic service category filtering (normalize the same way as main path)
         from backend.leads.models import ServiceCategory
         cat_ids, cat_slugs = _normalize_provider_category_inputs(provider_service_categories)
-        category_ids = ServiceCategory.objects.filter(
-            Q(id__in=list(cat_ids)) | Q(slug__in=list(cat_slugs))
-        ).values_list('id', flat=True)
+        category_ids = list(
+            ServiceCategory.objects.filter(
+                Q(id__in=list(cat_ids)) | Q(slug__in=list(cat_slugs))
+            ).values_list('id', flat=True)
+        )
 
         leads = Lead.objects.filter(
-            status='verified',
+            status__in=['verified', 'assigned'],
             is_available=True,
             expires_at__gt=timezone.now(),
             service_category__id__in=category_ids
@@ -181,10 +187,11 @@ def available_leads(request):
         
         # Basic geographical filtering
         if provider_service_areas:
-            from django.db.models import Q
             geographical_filter = Q()
             for area in provider_service_areas:
-                area_lower = area.lower()
+                area_lower = str(area or '').strip().lower()
+                if not area_lower:
+                    continue
                 geographical_filter |= (
                     Q(location_suburb__icontains=area_lower) |
                     Q(location_city__icontains=area_lower) |
