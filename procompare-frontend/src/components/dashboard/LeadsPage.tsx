@@ -230,6 +230,22 @@ const LeadsPage = () => {
     }
   };
 
+
+  const parseRand = (v?: string) => {
+    if (!v) return 0;
+    const digits = String(v).replace(/[^0-9]/g, '');
+    return digits ? parseInt(digits, 10) : 0;
+  };
+
+  const isHighValueLead = (lead: Lead) => {
+    const intent = lead.hiring_intent;
+    const urgencyHigh = (lead.urgency || '').toLowerCase() === 'high';
+    const est = parseRand(lead.estimatedValue);
+    const budget = parseRand(lead.budget);
+    const value = Math.max(est, budget);
+    return intent === 'ready_to_hire' && urgencyHigh && value >= 8000;
+  };
+
   const getCategoryColor = (category: string) => {
     switch (category) {
       case 'premium': return 'bg-purple-100 text-purple-800';
