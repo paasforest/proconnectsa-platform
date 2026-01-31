@@ -3,6 +3,26 @@
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://api.proconnectsa.co.za'
 
+type ServiceCategory = { id: number; slug: string; name: string }
+
+let _serviceCategoriesPromise: Promise<ServiceCategory[]> | null = null
+
+async function fetchServiceCategories(baseURL: string): Promise<ServiceCategory[]> {
+  if (_serviceCategoriesPromise) return _serviceCategoriesPromise
+
+  _serviceCategoriesPromise = (async () => {
+    const res = await fetch(`${baseURL}/api/leads/categories/`, { method: 'GET' })
+    if (!res.ok) return []
+    const data = await res.json()
+    const items = Array.isArray(data) ? data : (Array.isArray(data?.results) ? data.results : [])
+    return items
+      .filter((c: any) => c && c.id && c.slug)
+      .map((c: any) => ({ id: Number(c.id), slug: String(c.slug), name: String(c.name || c.slug) }))
+  })()
+
+  return _serviceCategoriesPromise
+}
+
 export class SimpleApiClient {
   private baseURL: string
   private token: string | null = null
@@ -114,7 +134,7 @@ export class SimpleApiClient {
 
   // Lead endpoints
   async getServiceCategories() {
-    return this.request('/api/auth/leads/categories/')
+    return this.request('/api/leads/categories/')
   }
 
   async createLead(leadData: any) {
@@ -125,30 +145,58 @@ export class SimpleApiClient {
   }
 
   async createPublicLead(leadData: any) {
-    // Map service category slug/name to ID
-    const serviceCategoryMapping: { [key: string]: number } = {
-      'cleaning': 1,
-      'plumbing': 2,
-      'electrical': 3,
-      'hvac': 4,
-      'carpentry': 5,
-      'painting': 6,
-      'roofing': 7,
-      'flooring': 8,
-      'landscaping': 9,
-      'moving': 10,
-      'appliance-repair': 11,
-      'handyman': 12,
-      'pool-maintenance': 13,
-      'security': 14,
-      'it-support': 15,
-      'web-design': 16,
-      'marketing': 17,
-      'accounting': 18,
-      'legal': 19,
-      'consulting': 20,
-      'other': 21
-    };
+    // Resolve service category IDs dynamically from backend (production IDs vary).
+    const categories = await fetchServiceCategories(this.baseURL)
+    const slugToId: Record<string, number> = {}
+    for (const c of categories) slugToId[c.slug] = c.id
+
+    const normalizeSlug = (s: string) =>
+      (s || '')
+        .toLowerCase()
+        .trim()
+        .replace(/[^a-z0-9\\s-]/g, '')
+        .replace(/[\\s_]+/g, '-')
+        .replace(/-+/g, '-')
+
+    const inferSlug = () => {
+      // Prefer explicit slug-like inputs
+      const direct = String(leadData.service_category || leadData.service_type || '').trim()
+      const maybeSlug = normalizeSlug(direct)
+      if (maybeSlug && slugToId[maybeSlug]) return maybeSlug
+
+      // Common UI labels -> backend slugs
+      const map: Record<string, string> = {
+        plumbing: 'plumbing',
+        electrical: 'electrical',
+        hvac: 'hvac',
+        painting: 'painting',
+        roofing: 'roofing',
+        flooring: 'flooring',
+        landscaping: 'landscaping',
+        cleaning: 'cleaning',
+        automotive: 'automotive',
+        handyman: 'handyman',
+        renovations: 'renovations',
+        renovation: 'renovations',
+        pool: 'pool-maintenance',
+        'pool-maintenance': 'pool-maintenance',
+        appliance: 'appliance-repair',
+        'appliance-repair': 'appliance-repair',
+        security: 'security',
+      }
+      if (map[maybeSlug] && slugToId[map[maybeSlug]]) return map[maybeSlug]
+
+      // fallback: first active category if available
+      return categories[0]?.slug || ''
+    }
+
+    const providedId = Number(leadData.service_category_id) || 0
+    const validIds = new Set(categories.map((c) => c.id))
+    const service_category_id =
+      (providedId && validIds.has(providedId) ? providedId : 0) ||
+      slugToId[inferSlug()] ||
+      categories[0]?.id ||
+      0
 
     // Convert budget range format from "R500 - R1,500" to "500_1500"
     const convertBudgetRange = (budgetStr: string): string => {
@@ -177,10 +225,7 @@ export class SimpleApiClient {
 
     // Map the leadData to Django backend format with correct field values
     const djangoData = {
-      service_category_id: leadData.service_category_id || 
-                          serviceCategoryMapping[leadData.service_category] || 
-                          serviceCategoryMapping[leadData.service_type] || 
-                          1,
+      service_category_id,
       title: leadData.title || leadData.project_title || 'Service Request',
       description: leadData.description || leadData.project_description || 'Service description',
       location_address: leadData.location_address || leadData.location || 'Address not provided',
@@ -189,7 +234,7 @@ export class SimpleApiClient {
       latitude: leadData.latitude || null,
       longitude: leadData.longitude || null,
       budget_range: convertBudgetRange(leadData.budget_range),
-      urgency: leadData.urgency || 'flexible',
+      urgency: (leadData.urgency === 'urgent' ? 'asap' : leadData.urgency) || 'flexible',
       preferred_contact_time: leadData.preferred_contact_time || 'morning',
       additional_requirements: leadData.additional_requirements || '',
       hiring_intent: leadData.hiring_intent || 'ready_to_hire',
