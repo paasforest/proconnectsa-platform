@@ -761,9 +761,43 @@ class EnterpriseLeadFilteringService:
         
         # Service category filter
         if profile.service_categories:
-            filtered_query = filtered_query.filter(
-                service_category_id__in=profile.service_categories
-            )
+            # ProviderProfile.service_categories stores category slugs (legacy data may include IDs/names).
+            # Normalize to ServiceCategory IDs before filtering.
+            try:
+                from backend.leads.models import ServiceCategory
+                from django.utils.text import slugify
+
+                raw = profile.service_categories or []
+                ids = set()
+                slugs = set()
+                for v in raw:
+                    if v is None:
+                        continue
+                    if isinstance(v, int):
+                        if v > 0:
+                            ids.add(v)
+                        continue
+                    s = str(v).strip()
+                    if not s:
+                        continue
+                    if s.isdigit():
+                        ids.add(int(s))
+                        continue
+                    slugs.add(slugify(s))
+
+                category_ids = list(
+                    ServiceCategory.objects.filter(
+                        Q(id__in=list(ids)) | Q(slug__in=list(slugs))
+                    ).values_list('id', flat=True)
+                )
+                if category_ids:
+                    filtered_query = filtered_query.filter(service_category_id__in=category_ids)
+                else:
+                    # Fail closed: no categories => no leads
+                    filtered_query = filtered_query.none()
+            except Exception:
+                # Fail closed on unexpected schema/data problems
+                filtered_query = filtered_query.none()
         
         # Geographic filter
         if profile.service_areas:
