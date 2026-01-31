@@ -248,6 +248,10 @@ def available_leads(request):
                 'credit_required': credits_cost,
                 'verifiedPhone': getattr(lead, 'is_sms_verified', False),
                 'highIntent': lead.hiring_intent in ['ready_to_hire', 'planning_to_hire'],
+                'hiring_intent': getattr(lead, 'hiring_intent', None),
+                'hiring_intent_display': get_intent_display(getattr(lead, 'hiring_intent', None)),
+                'hiring_timeline': getattr(lead, 'hiring_timeline', None),
+                'hiring_timeline_display': get_timeline_display(getattr(lead, 'hiring_timeline', None)),
                 'email': lead.client.email if lead.client else None,
                 'phone': getattr(lead.client, 'phone', '') if lead.client else '',
                 'masked_phone': mask_phone(getattr(lead.client, 'phone', '')) if lead.client else '***-***-****',
@@ -293,9 +297,17 @@ def available_leads(request):
                     'timeAgo': format_time_ago(lead.created_at),
                     'service': f"{lead.service_category.name} • {lead.title}",
                     'credits': credits_cost,
-                'credit_required': credits_cost,
+                    'credit_required': credits_cost,
                     'verifiedPhone': getattr(lead, 'is_sms_verified', False),
                     'highIntent': lead.hiring_intent in ['ready_to_hire', 'planning_to_hire'],
+                    'hiring_intent': getattr(lead, 'hiring_intent', None),
+                    'hiring_intent_display': get_intent_display(getattr(lead, 'hiring_intent', None)),
+                    'hiring_timeline': getattr(lead, 'hiring_timeline', None),
+                    'hiring_timeline_display': get_timeline_display(getattr(lead, 'hiring_timeline', None)),
+                'hiring_intent': getattr(lead, 'hiring_intent', None),
+                'hiring_intent_display': get_intent_display(getattr(lead, 'hiring_intent', None)),
+                'hiring_timeline': getattr(lead, 'hiring_timeline', None),
+                'hiring_timeline_display': get_timeline_display(getattr(lead, 'hiring_timeline', None)),
                     'email': lead.client.email if lead.client else None,  # REAL email
                     'phone': getattr(lead.client, 'phone', '') if lead.client else '',  # REAL phone
                     'masked_phone': mask_phone(getattr(lead.client, 'phone', '')) if lead.client else '***-***-****',
@@ -599,5 +611,16 @@ def get_timeline_display(hiring_timeline):
         'flexible': 'Flexible Timing'
     }
     return timeline_map.get(hiring_timeline, 'Not specified')
+
+
+def get_intent_display(hiring_intent):
+    """Convert hiring intent to a provider-friendly display label"""
+    intent_map = {
+        'ready_to_hire': 'Ready to hire',
+        'planning_to_hire': 'Planning to hire',
+        'comparing_quotes': 'Comparing quotes',
+        'researching': 'Researching',
+    }
+    return intent_map.get(hiring_intent or '', 'Unknown')
 
 
