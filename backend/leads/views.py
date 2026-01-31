@@ -388,9 +388,12 @@ def create_public_lead(request):
                 'message': 'Please select a valid budget range'
             }, status=status.HTTP_400_BAD_REQUEST)
         
-        # Validate urgency
+        # Validate urgency (must match Lead.URGENCY_CHOICES)
         urgency = request.data.get('urgency', '')
-        valid_urgencies = ['asap', 'this_week', 'this_month', 'flexible']
+        # Backward-compat: some clients used `asap` previously
+        if urgency == 'asap':
+            urgency = 'urgent'
+        valid_urgencies = ['urgent', 'this_week', 'this_month', 'flexible']
         if urgency and urgency not in valid_urgencies:
             return Response({
                 'error': 'Invalid urgency level',
