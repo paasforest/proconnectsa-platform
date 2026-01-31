@@ -39,6 +39,7 @@ class ServiceCategoryListView(generics.ListAPIView):
     """List all active service categories"""
     queryset = ServiceCategory.objects.filter(is_active=True)
     serializer_class = ServiceCategorySerializer
+    permission_classes = [AllowAny]
     
     @method_decorator(cache_page(60 * 15))  # Cache for 15 minutes
     def get(self, request, *args, **kwargs):
@@ -401,6 +402,7 @@ def create_public_lead(request):
             }, status=status.HTTP_400_BAD_REQUEST)
         
     except Exception as e:
+        logger.error("create_public_lead invalid request data: %s", str(e), exc_info=True)
         return Response({
             'error': 'Invalid request data',
             'message': 'Request contains invalid or malformed data'
