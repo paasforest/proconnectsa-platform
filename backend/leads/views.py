@@ -39,8 +39,10 @@ class ServiceCategoryListView(generics.ListAPIView):
     """List all active service categories"""
     queryset = ServiceCategory.objects.filter(is_active=True)
     serializer_class = ServiceCategorySerializer
-    permission_classes = [AllowAny]
-    # No caching to ensure fresh category list in production
+    
+    @method_decorator(cache_page(60 * 15))  # Cache for 15 minutes
+    def get(self, request, *args, **kwargs):
+        return super().get(request, *args, **kwargs)
 
 
 class LeadListView(generics.ListAPIView):
