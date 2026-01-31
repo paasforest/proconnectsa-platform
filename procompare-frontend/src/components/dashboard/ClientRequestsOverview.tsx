@@ -157,7 +157,7 @@ export default function ClientRequestsOverview() {
           </p>
         </div>
         <Button 
-          onClick={() => router.push('/request-quote')}
+          onClick={() => router.push('/services')}
           className="bg-blue-600 hover:bg-blue-700"
         >
           <Plus className="h-4 w-4 mr-2" />
@@ -240,7 +240,7 @@ export default function ClientRequestsOverview() {
               Get started by submitting your first service request
             </p>
             <Button 
-              onClick={() => router.push('/request-quote')}
+              onClick={() => router.push('/services')}
               className="bg-blue-600 hover:bg-blue-700"
             >
               <Plus className="h-4 w-4 mr-2" />
@@ -324,7 +324,7 @@ export default function ClientRequestsOverview() {
             <Button 
               variant="outline" 
               className="h-auto p-4 flex flex-col items-center gap-2"
-              onClick={() => router.push('/request-quote')}
+              onClick={() => router.push('/services')}
             >
               <Plus className="h-6 w-6 text-blue-600" />
               <span className="font-medium">New Service Request</span>
