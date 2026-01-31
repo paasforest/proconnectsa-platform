@@ -111,7 +111,7 @@ export default function ProvidersPage() {
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Button size="lg" asChild>
-                  <Link href="/request-quote">Submit Service Request</Link>
+                  <Link href="/services">Submit Service Request</Link>
                 </Button>
                 <Button size="lg" variant="outline" asChild>
                   <Link href="/how-it-works">Learn How It Works</Link>
@@ -240,7 +240,7 @@ export default function ProvidersPage() {
             
             <div className="text-center mt-12">
               <Button size="lg" asChild>
-                <Link href="/request-quote">
+                <Link href="/services">
                   Start Your Request
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Link>
