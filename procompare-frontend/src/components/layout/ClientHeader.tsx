@@ -109,7 +109,7 @@ export function ClientHeader() {
                 <Link href="/for-pros">I’m a pro</Link>
               </Button>
               <Button asChild>
-                <Link href="/request-quote">Get free quotes</Link>
+                <Link href="/services">Get free quotes</Link>
               </Button>
             </div>
           )}
@@ -160,7 +160,7 @@ export function ClientHeader() {
                 For Pros
               </Link>
               <Link
-                href="/request-quote"
+                href="/services"
                 className="text-sm font-semibold text-foreground py-2"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
