@@ -40,47 +40,29 @@ export function Footer() {
             <h3 className="font-semibold">Services</h3>
             <ul className="space-y-2 text-sm">
               <li>
-                <Link href="/request-quote/plumbing" className="text-muted-foreground hover:text-foreground transition-colors">
+                <Link href="/services/plumbing/gauteng" className="text-muted-foreground hover:text-foreground transition-colors">
                   Plumbing
                 </Link>
               </li>
               <li>
-                <Link href="/request-quote/electrical" className="text-muted-foreground hover:text-foreground transition-colors">
+                <Link href="/services/electrical/gauteng" className="text-muted-foreground hover:text-foreground transition-colors">
                   Electrical
                 </Link>
               </li>
               <li>
-                <Link href="/request-quote/painting" className="text-muted-foreground hover:text-foreground transition-colors">
+                <Link href="/services/painting/gauteng" className="text-muted-foreground hover:text-foreground transition-colors">
                   Painting
                 </Link>
               </li>
               <li>
-                <Link href="/request-quote/cleaning" className="text-muted-foreground hover:text-foreground transition-colors">
+                <Link href="/services/cleaning/gauteng" className="text-muted-foreground hover:text-foreground transition-colors">
                   Cleaning
                 </Link>
               </li>
               <li>
-                <Link href="/request-quote/gardening" className="text-muted-foreground hover:text-foreground transition-colors">
-                  Gardening
+                <Link href="/services" className="text-muted-foreground hover:text-foreground transition-colors">
+                  All services
                 </Link>
-              </li>
-              <li>
-                <a 
-                  href="https://www.immigrationai.co.za?utm_source=proconnectsa&utm_medium=website&utm_campaign=immigration_integration&utm_content=footer_link"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  onClick={() => {
-                    if (typeof window !== 'undefined' && (window as any).gtag) {
-                      (window as any).gtag('event', 'click', {
-                        event_category: 'Immigration AI',
-                        event_label: 'Footer Link',
-                      });
-                    }
-                  }}
-                  className="text-muted-foreground hover:text-foreground transition-colors"
-                >
-                  Immigration AI
-                </a>
               </li>
             </ul>
           </div>
@@ -91,27 +73,22 @@ export function Footer() {
             <ul className="space-y-2 text-sm">
               <li>
                 <Link href="/how-it-works" className="text-muted-foreground hover:text-foreground transition-colors">
-                  About Us
-                </Link>
-              </li>
-              <li>
-                <Link href="/how-it-works" className="text-muted-foreground hover:text-foreground transition-colors">
                   How it Works
                 </Link>
               </li>
               <li>
-                <Link href="/providers" className="text-muted-foreground hover:text-foreground transition-colors">
+                <Link href="/providers/browse" className="text-muted-foreground hover:text-foreground transition-colors">
+                  Browse Pros
+                </Link>
+              </li>
+              <li>
+                <Link href="/for-pros" className="text-muted-foreground hover:text-foreground transition-colors">
                   For Providers
                 </Link>
               </li>
               <li>
-                <Link href="/providers" className="text-muted-foreground hover:text-foreground transition-colors">
-                  Join as Provider
-                </Link>
-              </li>
-              <li>
-                <Link href="/how-it-works" className="text-muted-foreground hover:text-foreground transition-colors">
-                  How it Works
+                <Link href="/pricing" className="text-muted-foreground hover:text-foreground transition-colors">
+                  Pricing
                 </Link>
               </li>
             </ul>
