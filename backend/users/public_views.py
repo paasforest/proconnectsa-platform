@@ -52,35 +52,48 @@ def public_providers_list(request):
     from django.db.models import Q
     from datetime import datetime
     now = timezone.now()
-    cutoff_date = timezone.make_aware(datetime(2025, 2, 1))  # Date when new rules apply
+    # Use today's date as cutoff - providers created from today forward need verified AND premium
+    # All existing providers (created before today) are grandfathered
+    cutoff_date = timezone.now().replace(hour=0, minute=0, second=0, microsecond=0)
     
     # Show providers based on creation date:
-    # 1. Existing providers (before cutoff): verified OR premium
-    # 2. New providers (after cutoff): MUST be verified AND premium
+    # 1. Existing providers (created before today): verified OR premium
+    # 2. New providers (created from today): MUST be verified AND premium
     qs = ProviderProfile.objects.filter(
         Q(
-            # Existing providers (grandfathered): verified OR premium
+            # Existing providers (grandfathered): verified
             created_at__lt=cutoff_date,
             verification_status='verified'
         ) |
         Q(
-            # Existing providers: premium (even if not verified yet)
+            # Existing providers: premium monthly (even if not verified yet)
             created_at__lt=cutoff_date,
             is_premium_listing=True,
-            premium_listing_started_at__isnull=False
-        ).filter(
-            Q(premium_listing_expires_at__gt=now) |
-            Q(premium_listing_expires_at__isnull=True)
+            premium_listing_started_at__isnull=False,
+            premium_listing_expires_at__gt=now
         ) |
         Q(
-            # NEW providers: MUST be BOTH verified AND premium
+            # Existing providers: premium lifetime
+            created_at__lt=cutoff_date,
+            is_premium_listing=True,
+            premium_listing_started_at__isnull=False,
+            premium_listing_expires_at__isnull=True
+        ) |
+        Q(
+            # NEW providers: MUST be BOTH verified AND premium (monthly)
             created_at__gte=cutoff_date,
             verification_status='verified',
             is_premium_listing=True,
-            premium_listing_started_at__isnull=False
-        ).filter(
-            Q(premium_listing_expires_at__gt=now) |
-            Q(premium_listing_expires_at__isnull=True)
+            premium_listing_started_at__isnull=False,
+            premium_listing_expires_at__gt=now
+        ) |
+        Q(
+            # NEW providers: MUST be BOTH verified AND premium (lifetime)
+            created_at__gte=cutoff_date,
+            verification_status='verified',
+            is_premium_listing=True,
+            premium_listing_started_at__isnull=False,
+            premium_listing_expires_at__isnull=True
         )
     )
 
