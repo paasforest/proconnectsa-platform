@@ -60,12 +60,14 @@ export default function SubscriptionPlans({ currentTier, onSelectPlan }: Subscri
   const [loading, setLoading] = useState(false);
 
   const handleRequestPremium = async (planType: 'monthly' | 'lifetime') => {
-    if (!user || user.userType !== 'provider') {
+    // If user is not logged in, redirect to login
+    if (!user) {
       router.push('/login');
       return;
     }
 
-    // Redirect to settings page where premium request is handled
+    // If user is logged in, redirect to settings page where premium request is handled
+    // The settings page will handle the premium request properly
     router.push('/dashboard/settings');
   };
 
