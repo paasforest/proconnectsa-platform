@@ -88,6 +88,9 @@ def list_all_providers_debug(request):
             'id': str(p.id),
             'business_name': p.business_name,
             'email': u.email,
+            'first_name': u.first_name,
+            'last_name': u.last_name,
+            'full_name': f"{u.first_name} {u.last_name}".strip(),
             'city': u.city,
             'suburb': u.suburb,
             'service_categories': p.service_categories or [],
@@ -102,5 +105,103 @@ def list_all_providers_debug(request):
         'total': len(data),
         'providers': data,
         'note': 'TEMPORARY endpoint - includes all providers regardless of verification status'
+    })
+
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def search_provider_by_name(request):
+    """
+    TEMPORARY: Search for a provider by name (business name or user name).
+    """
+    search_query = request.GET.get('q', '').strip().lower()
+    
+    if not search_query:
+        return Response({'error': 'Please provide a search query (?q=name)'}, status=400)
+    
+    # Search in provider profiles and user names
+    from django.db.models import Q
+    qs = ProviderProfile.objects.select_related('user').filter(
+        Q(business_name__icontains=search_query) |
+        Q(user__first_name__icontains=search_query) |
+        Q(user__last_name__icontains=search_query) |
+        Q(user__email__icontains=search_query)
+    ).order_by('business_name')
+    
+    data = []
+    for p in qs:
+        u = p.user
+        data.append({
+            'id': str(p.id),
+            'business_name': p.business_name,
+            'email': u.email,
+            'first_name': u.first_name,
+            'last_name': u.last_name,
+            'full_name': f"{u.first_name} {u.last_name}".strip(),
+            'city': u.city,
+            'suburb': u.suburb,
+            'service_categories': p.service_categories or [],
+            'verification_status': p.verification_status,
+        })
+    
+    return Response({
+        'query': search_query,
+        'count': len(data),
+        'results': data
+    })
+
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def search_all_users(request):
+    """
+    TEMPORARY: Search ALL users (including those without provider profiles) by name or email.
+    """
+    search_query = request.GET.get('q', '').strip().lower()
+    
+    if not search_query:
+        return Response({'error': 'Please provide a search query (?q=name)'}, status=400)
+    
+    from django.db.models import Q
+    # Search all users
+    users = User.objects.filter(
+        Q(first_name__icontains=search_query) |
+        Q(last_name__icontains=search_query) |
+        Q(email__icontains=search_query) |
+        Q(username__icontains=search_query)
+    ).order_by('email')
+    
+    data = []
+    for u in users:
+        has_profile = hasattr(u, 'provider_profile')
+        profile_data = None
+        if has_profile:
+            p = u.provider_profile
+            profile_data = {
+                'id': str(p.id),
+                'business_name': p.business_name,
+                'verification_status': p.verification_status,
+                'service_categories': p.service_categories or [],
+            }
+        
+        data.append({
+            'user_id': str(u.id),
+            'email': u.email,
+            'first_name': u.first_name,
+            'last_name': u.last_name,
+            'full_name': f"{u.first_name} {u.last_name}".strip(),
+            'user_type': u.user_type,
+            'is_active': u.is_active,
+            'city': u.city,
+            'suburb': u.suburb,
+            'has_provider_profile': has_profile,
+            'provider_profile': profile_data,
+            'date_joined': u.date_joined.isoformat() if u.date_joined else None,
+        })
+    
+    return Response({
+        'query': search_query,
+        'count': len(data),
+        'results': data
     })
 
