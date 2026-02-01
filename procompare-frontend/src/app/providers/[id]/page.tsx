@@ -15,6 +15,7 @@ type PublicProvider = {
   average_rating: number;
   total_reviews: number;
   verification_status: string;
+  is_premium_listing?: boolean;
   slug: string;
 };
 
@@ -63,9 +64,16 @@ export default async function ProviderDetailPage({ params }: { params: { id: str
                   ))}
                 </div>
               </div>
-              <Badge variant={provider.verification_status === "verified" ? "default" : "secondary"}>
-                {provider.verification_status}
-              </Badge>
+              <div className="flex gap-2">
+                {provider.is_premium_listing && (
+                  <Badge variant="default" className="bg-yellow-500 hover:bg-yellow-600">
+                    Premium
+                  </Badge>
+                )}
+                <Badge variant={provider.verification_status === "verified" ? "default" : "secondary"}>
+                  {provider.verification_status === "verified" ? "Verified" : "Pending"}
+                </Badge>
+              </div>
             </div>
           </div>
         </section>
@@ -76,9 +84,15 @@ export default async function ProviderDetailPage({ params }: { params: { id: str
               <div className="bg-white border rounded p-5">
                 <h2 className="font-semibold text-gray-900 mb-3">About</h2>
                 <p className="text-gray-700 text-sm">
-                  This provider has a verified profile on ProConnectSA. Contact details are shared securely when a
-                  lead is matched and purchased.
+                  {provider.verification_status === "verified" 
+                    ? "This provider has a verified profile on ProConnectSA. Contact details are shared securely when a lead is matched and purchased."
+                    : "This provider profile is pending verification. Contact details are shared securely when a lead is matched and purchased."}
                 </p>
+                {provider.is_premium_listing && (
+                  <p className="text-yellow-700 text-sm mt-2 font-medium">
+                    ⭐ Premium Listing - Featured Provider
+                  </p>
+                )}
               </div>
             </div>
             <div>
