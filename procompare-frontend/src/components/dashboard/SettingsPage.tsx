@@ -67,24 +67,30 @@ const SettingsPage = () => {
     }
 
     let isMounted = true;
-    const timeoutId = setTimeout(() => {
-      if (isMounted) {
-        setLoading(false);
-        console.warn('Settings page loading timeout - showing page anyway');
-      }
-    }, 10000); // 10 second timeout
+    let timeoutId: NodeJS.Timeout | null = null;
 
     const fetchProfile = async () => {
       try {
         setLoading(true);
+        // Set timeout to prevent infinite loading
+        timeoutId = setTimeout(() => {
+          if (isMounted) {
+            setLoading(false);
+            console.warn('Settings page loading timeout - showing page anyway');
+          }
+        }, 10000); // 10 second timeout
+
         const response = await apiClient.get('/api/settings/');
         if (isMounted) {
+          if (timeoutId) clearTimeout(timeoutId);
           setProfile(response);
+          setLoading(false);
         }
       } catch (error) {
         console.error('Failed to fetch profile:', error);
         // Use user data from authentication instead of hardcoded data
         if (isMounted) {
+          if (timeoutId) clearTimeout(timeoutId);
           setProfile({
             id: user?.id?.toString() || '',
             email: user?.email || '',
@@ -100,10 +106,6 @@ const SettingsPage = () => {
             years_experience: 0,
             bio: ''
           });
-        }
-      } finally {
-        if (isMounted) {
-          clearTimeout(timeoutId);
           setLoading(false);
         }
       }
@@ -144,7 +146,7 @@ const SettingsPage = () => {
 
     return () => {
       isMounted = false;
-      clearTimeout(timeoutId);
+      if (timeoutId) clearTimeout(timeoutId);
     };
   }, [user, token]);
 
