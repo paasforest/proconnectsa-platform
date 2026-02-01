@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import {
   User, Mail, Phone, MapPin, Save, Eye, EyeOff, 
   Camera, Upload, CheckCircle, AlertCircle
+  Upload
 } from 'lucide-react';
 import { apiClient } from '@/lib/api-simple';
 import { useAuth } from '@/components/AuthProvider';
@@ -517,6 +518,94 @@ const SettingsPage = () => {
                     {saving ? 'Changing...' : 'Change Password'}
                   </button>
                 </div>
+              </div>
+            </div>
+          )}
+
+          {/* Verification Documents - Provider Only */}
+          {user?.userType === 'provider' && (
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">Verification Documents</h3>
+              
+              {verificationStatus && (
+                <div className={`mb-4 p-3 rounded-lg ${
+                  verificationStatus === 'verified' 
+                    ? 'bg-green-50 text-green-800 border border-green-200' 
+                    : verificationStatus === 'pending'
+                    ? 'bg-yellow-50 text-yellow-800 border border-yellow-200'
+                    : 'bg-red-50 text-red-800 border border-red-200'
+                }`}>
+                  <p className="font-medium">Status: {verificationStatus.charAt(0).toUpperCase() + verificationStatus.slice(1)}</p>
+                </div>
+              )}
+
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Document Type
+                  </label>
+                  <select
+                    value={docType}
+                    onChange={(e) => setDocType(e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  >
+                    <option value="id_document">ID Document (South African ID)</option>
+                    <option value="passport">Passport</option>
+                    <option value="proof_of_address">Proof of Address</option>
+                    <option value="business_registration">Business Registration</option>
+                    <option value="insurance">Insurance Certificate</option>
+                    <option value="other">Other Document</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Upload Document
+                  </label>
+                  <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
+                    <input
+                      type="file"
+                      id="verification-document"
+                      accept=".pdf,.jpg,.jpeg,.png"
+                      onChange={handleVerificationUpload}
+                      className="hidden"
+                    />
+                    <label
+                      htmlFor="verification-document"
+                      className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 cursor-pointer"
+                    >
+                      <Upload className="w-4 h-4 mr-2" />
+                      Choose File (PDF, JPG, PNG - Max 10MB)
+                    </label>
+                    <p className="text-xs text-gray-500 mt-2">
+                      Upload your verification documents. Accepted formats: PDF, JPG, PNG. Maximum file size: 10MB.
+                    </p>
+                  </div>
+                </div>
+
+                {/* Show uploaded documents */}
+                {Object.keys(verificationDocs).length > 0 && (
+                  <div className="mt-4">
+                    <h4 className="text-sm font-medium text-gray-700 mb-2">Uploaded Documents:</h4>
+                    <div className="space-y-2">
+                      {Object.entries(verificationDocs).map(([type, docs]) => (
+                        <div key={type} className="text-sm">
+                          <span className="font-medium capitalize">{type.replace('_', ' ')}:</span>
+                          {Array.isArray(docs) && docs.map((doc: any, idx: number) => (
+                            <div key={idx} className="ml-4 text-gray-600">
+                              <a href={doc.url} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
+                                Document {idx + 1}
+                              </a>
+                              <span className="text-xs text-gray-500 ml-2">
+                                (Uploaded: {new Date(doc.uploaded_at).toLocaleDateString()})
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           )}
