@@ -4,6 +4,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from django.core.paginator import Paginator
 from django.utils.text import slugify
+from django.utils import timezone
 
 from .models import ProviderProfile, User
 from backend.leads.models import ServiceCategory
@@ -11,6 +12,11 @@ from backend.leads.models import ServiceCategory
 
 def _provider_public_dict(p: ProviderProfile):
     u = p.user
+    # Check if premium listing is active
+    is_premium_active = (
+        p.is_premium_listing and
+        (p.premium_listing_expires_at is None or p.premium_listing_expires_at > timezone.now())
+    )
     return {
         'id': str(p.id),
         'business_name': p.business_name,
@@ -20,8 +26,9 @@ def _provider_public_dict(p: ProviderProfile):
         'average_rating': float(p.average_rating or 0),
         'total_reviews': p.total_reviews,
         'verification_status': p.verification_status,
+        'is_premium_listing': is_premium_active,
         'slug': slugify(p.business_name)[:60],
-        # No sensitive contact info exposed here
+        # No sensitive contact info exposed here (email, phone hidden)
     }
 
 
@@ -29,21 +36,46 @@ def _provider_public_dict(p: ProviderProfile):
 @permission_classes([AllowAny])
 def public_providers_list(request):
     """
-    Public: list verified providers with optional filters: category, city, page, page_size
+    Public: list verified providers OR premium listings with optional filters: category, city, page, page_size
+    
+    Visibility rules:
+    - Verified providers are always visible
+    - Premium listings are visible even if pending verification (but must be verified to show contact info)
     """
     category_slug = request.GET.get('category')
     city = request.GET.get('city')
     page = int(request.GET.get('page', 1))
     page_size = int(request.GET.get('page_size', 20))
 
-    qs = ProviderProfile.objects.filter(verification_status='verified')
+    # Show verified providers OR active premium listings
+    from django.db.models import Q
+    now = timezone.now()
+    qs = ProviderProfile.objects.filter(
+        Q(verification_status='verified') |
+        Q(
+            is_premium_listing=True,
+            premium_listing_started_at__isnull=False,
+            premium_listing_expires_at__gt=now
+        ) |
+        Q(
+            is_premium_listing=True,
+            premium_listing_started_at__isnull=False,
+            premium_listing_expires_at__isnull=True  # Lifetime premium
+        )
+    )
 
     if category_slug:
         qs = qs.filter(service_categories__contains=[category_slug])
     if city:
         qs = qs.filter(user__city__iexact=city)
 
-    qs = qs.select_related('user').order_by('-average_rating', '-total_reviews', 'business_name')
+    # Order: premium first, then by rating/reviews
+    qs = qs.select_related('user').order_by(
+        '-is_premium_listing',
+        '-average_rating',
+        '-total_reviews',
+        'business_name'
+    )
     paginator = Paginator(qs, page_size)
     page_obj = paginator.get_page(page)
 
@@ -63,10 +95,35 @@ def public_providers_list(request):
 @permission_classes([AllowAny])
 def public_provider_detail(request, provider_id):
     """
-    Public: provider profile detail (verified only)
+    Public: provider profile detail
+    
+    Visibility rules:
+    - Verified providers are always visible
+    - Premium listings are visible even if pending verification
     """
     try:
-        p = ProviderProfile.objects.select_related('user').get(id=provider_id, verification_status='verified')
+        p = ProviderProfile.objects.select_related('user').get(id=provider_id)
+        
+        # Check visibility: verified OR active premium listing
+        now = timezone.now()
+        is_visible = (
+            p.verification_status == 'verified' or
+            (
+                p.is_premium_listing and
+                p.premium_listing_started_at is not None and
+                (
+                    p.premium_listing_expires_at is None or
+                    p.premium_listing_expires_at > now
+                )
+            )
+        )
+        
+        if not is_visible:
+            return Response({
+                'error': 'Provider profile not available',
+                'message': 'This provider profile is not currently visible in the public directory.'
+            }, status=status.HTTP_404_NOT_FOUND)
+        
         return Response(_provider_public_dict(p))
     except ProviderProfile.DoesNotExist:
         return Response({'error': 'Provider not found'}, status=status.HTTP_404_NOT_FOUND)
