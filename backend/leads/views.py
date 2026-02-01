@@ -37,9 +37,12 @@ logger = logging.getLogger(__name__)
 
 class ServiceCategoryListView(generics.ListAPIView):
     """List all active service categories"""
-    queryset = ServiceCategory.objects.filter(is_active=True)
     serializer_class = ServiceCategorySerializer
     permission_classes = [AllowAny]
+    
+    def get_queryset(self):
+        """Get all active service categories"""
+        return ServiceCategory.objects.filter(is_active=True).order_by('name')
     
     @method_decorator(cache_page(60 * 15))  # Cache for 15 minutes
     def get(self, request, *args, **kwargs):
