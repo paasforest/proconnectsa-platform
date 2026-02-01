@@ -72,12 +72,12 @@ export default function SubscriptionPlans({ currentTier, onSelectPlan }: Subscri
   return (
     <div className="space-y-8">
       <div className="text-center">
-        <h2 className="text-3xl font-bold text-gray-900 mb-4">Premium Listing</h2>
-        <p className="text-gray-600 text-lg">
-          Upgrade to Premium Listing for unlimited FREE leads and enhanced visibility
+        <h2 className="text-3xl font-bold text-gray-900 mb-2">Upgrade plan</h2>
+        <p className="text-gray-600 text-lg mb-2">
+          Request a premium plan for more leads and better value.
         </p>
-        <p className="text-sm text-gray-500 mt-2">
-          Your current plan: <span className="font-semibold">Pay As You Go</span>
+        <p className="text-sm text-gray-500">
+          Your current plan: <span className="font-semibold">pay as you go</span>
         </p>
       </div>
       
