@@ -91,7 +91,8 @@ export default function SubscriptionPlans({ currentTier, onSelectPlan }: Subscri
 
     try {
       apiClient.setToken(token);
-      const response = await apiClient.get('/api/auth/premium-listing/request/');
+      // Call the premium listing request endpoint
+      const response = await apiClient.get('/api/users/premium-listing/request/');
       
       if (response.success) {
         const amount = planType === 'monthly' ? 299.00 : 2990.00;
