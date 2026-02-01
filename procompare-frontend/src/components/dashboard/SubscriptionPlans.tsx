@@ -56,11 +56,16 @@ const premiumPlans: PremiumPlan[] = [
 
 export default function SubscriptionPlans({ currentTier, onSelectPlan }: SubscriptionPlansProps) {
   const router = useRouter();
-  const { user } = useAuth();
+  const { user, isLoading } = useAuth();
   const [loading, setLoading] = useState(false);
 
   const handleRequestPremium = async (planType: 'monthly' | 'lifetime') => {
-    // If user is not logged in, redirect to login
+    // Don't do anything while still loading auth state
+    if (isLoading) {
+      return;
+    }
+
+    // If user is not logged in after loading, redirect to login
     if (!user) {
       router.push('/login');
       return;
