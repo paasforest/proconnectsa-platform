@@ -15,11 +15,19 @@ class Command(BaseCommand):
     help = "Remove test provider accounts, keeping only real providers"
 
     # Real accounts to KEEP (case-insensitive partial match)
-    # Only these 3 are confirmed real providers
+    # Confirmed real providers
     REAL_BUSINESS_NAMES = [
         'TMA Projects',
         'mischeck ndolo',  # Note: might be spelled "mischeck" or "mischeck"
         'Kenneth Nakutepa',
+        'CK SKILLSET',  # Added per user request
+        'SUPREME TV',  # Added per user request
+    ]
+    
+    # Also keep by email (in case business name is different)
+    REAL_EMAILS = [
+        'lonjechisale1@gmail.com',  # CK SKILLSET
+        'supremetv1427@gmail.com',  # SUPREME TV
     ]
 
     # Test account patterns to delete (everything else that's not in REAL_BUSINESS_NAMES)
@@ -43,11 +51,18 @@ class Command(BaseCommand):
         # Find ALL providers
         all_profiles = list(ProviderProfile.objects.select_related('user').all())
         
-        # Identify real accounts (to keep)
+        # Identify real accounts (to keep) - by business name
         real_profiles = []
         for pattern in self.REAL_BUSINESS_NAMES:
             matches = ProviderProfile.objects.filter(
                 business_name__icontains=pattern
+            ).select_related('user')
+            real_profiles.extend(matches)
+        
+        # Also identify by email (in case business name is different)
+        for email in self.REAL_EMAILS:
+            matches = ProviderProfile.objects.filter(
+                user__email__iexact=email
             ).select_related('user')
             real_profiles.extend(matches)
         
