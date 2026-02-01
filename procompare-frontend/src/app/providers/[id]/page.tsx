@@ -230,6 +230,17 @@ export default async function ProviderDetailPage({ params }: { params: { id: str
                     </div>
                     <p className="text-sm text-gray-600">{reviews} {reviews === 1 ? 'review' : 'reviews'}</p>
                   </div>
+                  <div className="mt-4 pt-4 border-t">
+                    <Button asChild variant="outline" className="w-full">
+                      <Link href={`/providers/${provider.id}/review`}>
+                        Write a Review
+                        <Star className="ml-2 h-4 w-4" />
+                      </Link>
+                    </Button>
+                    <p className="text-xs text-gray-500 mt-2 text-center">
+                      Share your experience with {provider.business_name}
+                    </p>
+                  </div>
                 </div>
 
                 {/* Verification Status */}
