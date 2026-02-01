@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import {
   User, Mail, Phone, MapPin, Save, Eye, EyeOff, 
-  Camera, Upload, CheckCircle, AlertCircle
+  Camera, Upload, CheckCircle, AlertCircle, Star
 } from 'lucide-react';
 import { apiClient } from '@/lib/api-simple';
 import { useAuth } from '@/components/AuthProvider';
@@ -57,7 +57,8 @@ const SettingsPage = () => {
   const [verificationDocs, setVerificationDocs] = useState<Record<string, Array<{url: string; path: string; uploaded_at: string}>>>({});
   const [docType, setDocType] = useState<string>('id_document');
   const [premiumDetails, setPremiumDetails] = useState<any>(null);
-  const [showPremiumRequest, setShowPremiumRequest] = useState(false);
+  const [isPremiumActive, setIsPremiumActive] = useState<boolean>(false);
+  const [loadingPremium, setLoadingPremium] = useState(false);
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -100,22 +101,14 @@ const SettingsPage = () => {
           console.warn('Failed to load verification documents', err);
         });
       
-      // Fetch premium listing details
+      // Fetch premium listing status from provider profile
       if (token) {
-        fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://api.proconnectsa.co.za'}/api/auth/premium-listing/request/`, {
-          headers: {
-            'Authorization': `Token ${token}`,
-            'Content-Type': 'application/json',
-          },
-        })
-          .then(res => res.json())
-          .then(data => {
-            if (data.success) {
-              setPremiumDetails(data);
-            }
+        apiClient.get('/api/auth/provider-profile/')
+          .then((res: any) => {
+            setIsPremiumActive(res.is_premium_listing_active || false);
           })
           .catch(err => {
-            console.warn('Failed to load premium details', err);
+            console.warn('Failed to load premium status', err);
           });
       }
     }
@@ -186,6 +179,51 @@ const SettingsPage = () => {
       setMessage({ type: 'error', text: 'Failed to upload verification document.' });
     } finally {
       (event.target as HTMLInputElement).value = '';
+    }
+  };
+
+  const handleRequestPremium = async () => {
+    try {
+      setLoadingPremium(true);
+      const res = await apiClient.post('/api/auth/premium-listing/request/');
+      if (res.success) {
+        setPremiumDetails(res);
+        setMessage({ type: 'success', text: 'Premium listing request generated. Please make your EFT.' });
+      } else {
+        setMessage({ type: 'error', text: res.message || 'Failed to generate premium request.' });
+      }
+    } catch (error: any) {
+      console.error('Failed to request premium:', error);
+      setMessage({ type: 'error', text: error.response?.data?.message || 'Error requesting premium. Please try again.' });
+    } finally {
+      setLoadingPremium(false);
+    }
+  };
+
+  const handleCheckPremiumPayment = async () => {
+    if (!premiumDetails?.premium_details?.reference_number) {
+      setMessage({ type: 'error', text: 'Please request premium listing first to get a reference number.' });
+      return;
+    }
+    try {
+      setLoadingPremium(true);
+      const res = await apiClient.post('/api/payments/dashboard/check-deposit-by-customer-code/', {
+        customer_code: user?.customer_code,
+        amount: premiumDetails.premium_details.monthly_cost || 299.00,
+        reference_number: premiumDetails.premium_details.reference_number,
+      });
+      if (res.success && res.new_status === 'premium_active') {
+        setIsPremiumActive(true);
+        setMessage({ type: 'success', text: '✅ Premium listing activated successfully!' });
+        setPremiumDetails(null);
+      } else {
+        setMessage({ type: 'info', text: res.message || 'Payment not yet detected. Please allow a few minutes for processing.' });
+      }
+    } catch (error: any) {
+      console.error('Failed to check premium payment:', error);
+      setMessage({ type: 'error', text: error.response?.data?.message || 'Error checking payment. Please try again.' });
+    } finally {
+      setLoadingPremium(false);
     }
   };
 
@@ -547,83 +585,61 @@ const SettingsPage = () => {
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
               <h3 className="text-lg font-semibold text-gray-900 mb-4">Premium Listing</h3>
               
-              {premiumDetails && (
+              {isPremiumActive ? (
+                <div className="mb-4 p-4 bg-green-50 border border-green-200 rounded-lg">
+                  <div className="flex items-center mb-2">
+                    <CheckCircle className="w-5 h-5 text-green-600 mr-2" />
+                    <span className="font-semibold text-green-800">Premium Active</span>
+                  </div>
+                  <p className="text-sm text-green-700">
+                    Your premium listing is active. You receive unlimited FREE leads and enhanced visibility.
+                  </p>
+                </div>
+              ) : (
                 <>
-                  {premiumDetails.is_premium_active ? (
-                    <div className="mb-4 p-4 bg-green-50 border border-green-200 rounded-lg">
-                      <div className="flex items-center mb-2">
-                        <CheckCircle className="w-5 h-5 text-green-600 mr-2" />
-                        <span className="font-semibold text-green-800">Premium Active</span>
-                      </div>
-                      {premiumDetails.premium_status.expires_at && (
-                        <p className="text-sm text-green-700">
-                          Expires: {new Date(premiumDetails.premium_status.expires_at).toLocaleDateString()}
-                        </p>
-                      )}
-                      {!premiumDetails.premium_status.expires_at && (
-                        <p className="text-sm text-green-700">Lifetime Premium</p>
-                      )}
-                    </div>
+                  <p className="text-gray-600 mb-4">
+                    Upgrade to a Premium Listing to get unlimited free leads and enhanced visibility in the public directory.
+                  </p>
+                  <ul className="list-disc list-inside text-sm text-gray-700 mb-4 space-y-1">
+                    <li>⭐ Unlimited FREE leads (no credit deductions)</li>
+                    <li>✓ Enhanced visibility in public directory</li>
+                    <li>✓ Priority matching for new leads</li>
+                  </ul>
+                  <p className="text-gray-800 font-semibold mb-4">
+                    Pricing: R299.00/month or R2,990.00 for lifetime.
+                  </p>
+                  {!premiumDetails ? (
+                    <button
+                      onClick={handleRequestPremium}
+                      disabled={loadingPremium}
+                      className="inline-flex items-center px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:opacity-50"
+                    >
+                      {loadingPremium ? 'Requesting...' : 'Request Premium Listing'}
+                    </button>
                   ) : (
-                    <div className="mb-4">
-                      <p className="text-sm text-gray-600 mb-4">
-                        Get unlimited FREE leads, public directory visibility, and featured placement.
+                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mt-4">
+                      <h4 className="font-semibold text-blue-800 mb-2">EFT Payment Details</h4>
+                      <p className="text-sm text-blue-700 mb-3">
+                        Please make an EFT to the following account using the exact reference number.
+                        Your premium listing will be activated automatically once payment is confirmed.
                       </p>
+                      <div className="mt-3 space-y-1 text-sm text-blue-900">
+                        <p><strong>Bank:</strong> {premiumDetails.premium_details?.bank_name || 'Nedbank'}</p>
+                        <p><strong>Account Number:</strong> {premiumDetails.premium_details?.account_number || '1313872032'}</p>
+                        <p><strong>Branch Code:</strong> {premiumDetails.premium_details?.branch_code || '198765'}</p>
+                        <p><strong>Reference:</strong> <span className="font-mono text-lg bg-blue-100 px-2 py-1 rounded">{premiumDetails.premium_details?.reference_number || 'N/A'}</span></p>
+                        <p className="text-xs text-blue-600 mt-2">
+                          (Copy this reference exactly for automatic activation)
+                        </p>
+                      </div>
                       <button
-                        onClick={() => setShowPremiumRequest(!showPremiumRequest)}
-                        className="w-full px-4 py-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 font-medium"
+                        onClick={handleCheckPremiumPayment}
+                        disabled={loadingPremium}
+                        className="mt-4 inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50"
                       >
-                        {showPremiumRequest ? 'Hide Details' : 'Request Premium Listing'}
+                        <CheckCircle className="w-4 h-4 mr-2" />
+                        {loadingPremium ? 'Checking...' : 'Check Payment Status'}
                       </button>
-                    </div>
-                  )}
-                  
-                  {showPremiumRequest && !premiumDetails.is_premium_active && premiumDetails.eft_details && (
-                    <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                      <h4 className="font-semibold text-gray-900 mb-3">EFT Payment Details</h4>
-                      <div className="space-y-2 text-sm">
-                        <div className="flex justify-between">
-                          <span className="text-gray-600">Bank:</span>
-                          <span className="font-medium">{premiumDetails.eft_details.bank_name}</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-gray-600">Account Number:</span>
-                          <span className="font-medium font-mono">{premiumDetails.eft_details.account_number}</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-gray-600">Branch Code:</span>
-                          <span className="font-medium">{premiumDetails.eft_details.branch_code}</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-gray-600">Amount:</span>
-                          <span className="font-medium text-green-600">{premiumDetails.eft_details.amount}</span>
-                        </div>
-                        <div className="mt-3 pt-3 border-t border-blue-300">
-                          <div className="flex justify-between items-center">
-                            <span className="text-gray-600">Reference:</span>
-                            <span className="font-mono font-bold text-blue-700 bg-white px-2 py-1 rounded">
-                              {premiumDetails.eft_details.reference}
-                            </span>
-                          </div>
-                          <p className="text-xs text-gray-500 mt-2">
-                            ⚠️ Use this exact reference when making payment
-                          </p>
-                        </div>
-                      </div>
-                      <div className="mt-4 pt-4 border-t border-blue-300">
-                        <h5 className="font-semibold text-gray-900 mb-2">Benefits:</h5>
-                        <ul className="text-xs text-gray-700 space-y-1">
-                          {premiumDetails.benefits?.map((benefit: string, idx: number) => (
-                            <li key={idx} className="flex items-start">
-                              <span className="mr-2">✓</span>
-                              <span>{benefit}</span>
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                      <p className="text-xs text-gray-600 mt-4 italic">
-                        After payment, contact support to activate your premium listing.
-                      </p>
                     </div>
                   )}
                 </>
