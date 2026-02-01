@@ -39,18 +39,25 @@ class ServiceCategoryListView(generics.ListAPIView):
     """List all active service categories"""
     serializer_class = ServiceCategorySerializer
     permission_classes = [AllowAny]
+    pagination_class = None  # Disable pagination to return all categories
     
     def get_queryset(self):
         """Get all active service categories"""
         queryset = ServiceCategory.objects.filter(is_active=True).order_by('name')
-        logger.info(f"ServiceCategoryListView: Found {queryset.count()} active categories")
+        count = queryset.count()
+        logger.info(f"ServiceCategoryListView: Found {count} active categories")
+        if count == 0:
+            logger.warning("ServiceCategoryListView: No active categories found in database!")
         return queryset
     
     # Temporarily disable cache to debug empty response issue
     # @method_decorator(cache_page(60 * 15))  # Cache for 15 minutes
     def get(self, request, *args, **kwargs):
         response = super().get(request, *args, **kwargs)
-        logger.info(f"ServiceCategoryListView: Returning {len(response.data) if hasattr(response, 'data') else 0} categories")
+        data_len = len(response.data) if hasattr(response, 'data') else 0
+        logger.info(f"ServiceCategoryListView: Returning {data_len} categories")
+        if data_len == 0:
+            logger.warning("ServiceCategoryListView: Response data is empty!")
         return response
 
 
