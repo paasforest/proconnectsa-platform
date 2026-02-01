@@ -75,6 +75,10 @@ app.conf.beat_schedule = {
         'task': 'backend.leads.tasks.reset_monthly_lead_usage',
         'schedule': crontab(hour=1, minute=0, day_of_month=1),
     },
+    'expire-premium-listings': {
+        'task': 'backend.users.tasks.expire_premium_listings',
+        'schedule': crontab(hour=0, minute=0),  # Daily at midnight to expire premium listings
+    },
     'cleanup-prediction-logs': {
         'task': 'backend.leads.tasks.cleanup_old_prediction_logs',
         'schedule': crontab(hour=5, minute=0, day_of_week=1),
