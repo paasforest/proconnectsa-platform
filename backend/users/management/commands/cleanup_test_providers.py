@@ -7,7 +7,13 @@ keeping only real provider accounts.
 from django.core.management.base import BaseCommand
 from django.db import transaction
 from backend.users.models import ProviderProfile, User
-from backend.payments.models import Wallet, WalletTransaction
+# Wallet and WalletTransaction are in backend.users.models, not payments
+try:
+    from backend.users.models import Wallet, WalletTransaction
+except ImportError:
+    # If Wallet doesn't exist, we'll handle it gracefully
+    Wallet = None
+    WalletTransaction = None
 from backend.leads.models import LeadAccess, LeadAssignment
 
 
@@ -42,6 +48,8 @@ class Command(BaseCommand):
         'Lyton plumbing',
         'tmn',
         'tonny plumbing',
+        "Front End's Business",
+        "New Prov's Business",
     ]
     
     # Emails to DELETE (user confirmed these are not real)
@@ -53,6 +61,8 @@ class Command(BaseCommand):
         'lyton@gmail.com',  # Lyton plumbing
         'dancun@gmail.com',  # tmn
         'tonny@gmail.com',  # tonny plumbing
+        'feprov1769674416@proconnectsa.co.za',  # Front End's Business
+        'prov1769685564@proconnectsa.co.za',  # New Prov's Business
     ]
     
     # Test account patterns to DELETE (obvious test accounts only)
