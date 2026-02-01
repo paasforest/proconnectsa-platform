@@ -307,3 +307,82 @@ def upload_verification_document(request):
         logger.error(f"Error uploading verification document: {str(e)}")
         return Response({'success': False, 'message': 'Failed to upload document'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def premium_listing_request(request):
+    """
+    Get premium listing request details with EFT instructions.
+    Returns bank account details and generates a unique reference for premium payment.
+    """
+    try:
+        if request.user.user_type != 'provider':
+            return Response({
+                'success': False,
+                'message': 'Only providers can request premium listing'
+            }, status=status.HTTP_403_FORBIDDEN)
+        
+        profile = request.user.provider_profile
+        from backend.users.models import Wallet
+        wallet, _ = Wallet.objects.get_or_create(user=request.user)
+        
+        # Generate unique premium reference
+        import time
+        import uuid
+        premium_reference = f"PREMIUM{wallet.customer_code[-3:] if wallet.customer_code else 'XXX'}{int(time.time()) % 10000:04d}"
+        
+        # Check current premium status
+        from django.utils import timezone
+        now = timezone.now()
+        is_premium_active = (
+            profile.is_premium_listing and
+            profile.premium_listing_started_at is not None and
+            (
+                profile.premium_listing_expires_at is None or
+                profile.premium_listing_expires_at > now
+            )
+        )
+        
+        # EFT bank details (same as deposit instructions)
+        eft_details = {
+            'bank_name': 'Nedbank',
+            'account_holder': 'ProConnectSA',
+            'account_number': '1313872032',
+            'branch_code': '198765',
+            'account_type': 'Business',
+            'reference': premium_reference,
+            'amount': 'R299.00',  # Monthly premium
+            'note': f'Use reference: {premium_reference} when making payment'
+        }
+        
+        return Response({
+            'success': True,
+            'is_premium_active': is_premium_active,
+            'premium_status': {
+                'is_active': is_premium_active,
+                'started_at': profile.premium_listing_started_at.isoformat() if profile.premium_listing_started_at else None,
+                'expires_at': profile.premium_listing_expires_at.isoformat() if profile.premium_listing_expires_at else None,
+                'payment_reference': profile.premium_listing_payment_reference or None,
+            },
+            'eft_details': eft_details,
+            'pricing': {
+                'monthly': 299.00,
+                'lifetime': 2990.00,
+                'currency': 'ZAR'
+            },
+            'benefits': [
+                'Unlimited FREE leads (no credit charges)',
+                'Public directory visibility',
+                'Featured placement in listings',
+                'Premium badge on profile',
+                'SEO benefits'
+            ]
+        })
+    
+    except Exception as e:
+        logger.error(f"Error getting premium listing request: {str(e)}")
+        return Response({
+            'success': False,
+            'message': 'Failed to get premium listing details'
+        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
