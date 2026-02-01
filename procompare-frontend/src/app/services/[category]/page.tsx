@@ -83,7 +83,7 @@ export default async function ServiceCategoryPage({ params }: Props) {
                   <div className="text-lg font-semibold text-gray-900 mb-2">Why ProConnectSA?</div>
                   <ul className="text-sm text-gray-700 space-y-2">
                     <li>• Verified professionals</li>
-                    <li>• Clear intent & timeline (Bark‑style)</li>
+                    <li>• Clear intent & timeline</li>
                     <li>• Secure and private</li>
                   </ul>
                 </div>
