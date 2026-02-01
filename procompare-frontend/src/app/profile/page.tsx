@@ -119,7 +119,7 @@ export default function ProfilePage() {
 
   const fetchProfile = async () => {
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://api.proconnectsa.co.za'}/api/auth/profile/`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://api.proconnectsa.co.za'}/api/auth/provider-profile/`, {
         headers: {
           'Authorization': `Token ${token}`,
           'Content-Type': 'application/json'
@@ -128,11 +128,13 @@ export default function ProfilePage() {
 
       if (response.ok) {
         const data = await response.json();
-        setProfile(data.provider_profile);
+        setProfile(data);
       } else {
+        console.error('Failed to fetch profile:', response.status);
         toast.error('Failed to fetch profile');
       }
     } catch (error) {
+      console.error('Error fetching profile:', error);
       toast.error('Error fetching profile');
     } finally {
       setLoading(false);
