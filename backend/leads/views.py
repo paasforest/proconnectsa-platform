@@ -42,11 +42,16 @@ class ServiceCategoryListView(generics.ListAPIView):
     
     def get_queryset(self):
         """Get all active service categories"""
-        return ServiceCategory.objects.filter(is_active=True).order_by('name')
+        queryset = ServiceCategory.objects.filter(is_active=True).order_by('name')
+        logger.info(f"ServiceCategoryListView: Found {queryset.count()} active categories")
+        return queryset
     
-    @method_decorator(cache_page(60 * 15))  # Cache for 15 minutes
+    # Temporarily disable cache to debug empty response issue
+    # @method_decorator(cache_page(60 * 15))  # Cache for 15 minutes
     def get(self, request, *args, **kwargs):
-        return super().get(request, *args, **kwargs)
+        response = super().get(request, *args, **kwargs)
+        logger.info(f"ServiceCategoryListView: Returning {len(response.data) if hasattr(response, 'data') else 0} categories")
+        return response
 
 
 class LeadListView(generics.ListAPIView):
