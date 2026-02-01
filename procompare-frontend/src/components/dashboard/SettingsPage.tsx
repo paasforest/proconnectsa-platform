@@ -27,7 +27,7 @@ interface UserProfile {
 }
 
 const SettingsPage = () => {
-  const { user } = useAuth();
+  const { user, token } = useAuth();
   const [profile, setProfile] = useState<UserProfile>({
     id: user?.id?.toString() || '',
     email: user?.email || '',
@@ -57,6 +57,8 @@ const SettingsPage = () => {
   const [verificationStatus, setVerificationStatus] = useState<string>('');
   const [verificationDocs, setVerificationDocs] = useState<Record<string, Array<{url: string; path: string; uploaded_at: string}>>>({});
   const [docType, setDocType] = useState<string>('id_document');
+  const [premiumDetails, setPremiumDetails] = useState<any>(null);
+  const [showPremiumRequest, setShowPremiumRequest] = useState(false);
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -87,7 +89,7 @@ const SettingsPage = () => {
       }
     };
 
-    if (user) {
+    if (user && user.userType === 'provider') {
       fetchProfile();
       apiClient
         .getVerificationDocuments()
@@ -98,6 +100,25 @@ const SettingsPage = () => {
         .catch((err) => {
           console.warn('Failed to load verification documents', err);
         });
+      
+      // Fetch premium listing details
+      if (token) {
+        fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://api.proconnectsa.co.za'}/api/auth/premium-listing/request/`, {
+          headers: {
+            'Authorization': `Token ${token}`,
+            'Content-Type': 'application/json',
+          },
+        })
+          .then(res => res.json())
+          .then(data => {
+            if (data.success) {
+              setPremiumDetails(data);
+            }
+          })
+          .catch(err => {
+            console.warn('Failed to load premium details', err);
+          });
+      }
     }
   }, [user]);
 
@@ -519,6 +540,95 @@ const SettingsPage = () => {
                   </button>
                 </div>
               </div>
+            </div>
+          )}
+
+          {/* Premium Listing - Provider Only */}
+          {user?.userType === 'provider' && (
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">Premium Listing</h3>
+              
+              {premiumDetails && (
+                <>
+                  {premiumDetails.is_premium_active ? (
+                    <div className="mb-4 p-4 bg-green-50 border border-green-200 rounded-lg">
+                      <div className="flex items-center mb-2">
+                        <CheckCircle className="w-5 h-5 text-green-600 mr-2" />
+                        <span className="font-semibold text-green-800">Premium Active</span>
+                      </div>
+                      {premiumDetails.premium_status.expires_at && (
+                        <p className="text-sm text-green-700">
+                          Expires: {new Date(premiumDetails.premium_status.expires_at).toLocaleDateString()}
+                        </p>
+                      )}
+                      {!premiumDetails.premium_status.expires_at && (
+                        <p className="text-sm text-green-700">Lifetime Premium</p>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="mb-4">
+                      <p className="text-sm text-gray-600 mb-4">
+                        Get unlimited FREE leads, public directory visibility, and featured placement.
+                      </p>
+                      <button
+                        onClick={() => setShowPremiumRequest(!showPremiumRequest)}
+                        className="w-full px-4 py-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 font-medium"
+                      >
+                        {showPremiumRequest ? 'Hide Details' : 'Request Premium Listing'}
+                      </button>
+                    </div>
+                  )}
+                  
+                  {showPremiumRequest && !premiumDetails.is_premium_active && premiumDetails.eft_details && (
+                    <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                      <h4 className="font-semibold text-gray-900 mb-3">EFT Payment Details</h4>
+                      <div className="space-y-2 text-sm">
+                        <div className="flex justify-between">
+                          <span className="text-gray-600">Bank:</span>
+                          <span className="font-medium">{premiumDetails.eft_details.bank_name}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-gray-600">Account Number:</span>
+                          <span className="font-medium font-mono">{premiumDetails.eft_details.account_number}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-gray-600">Branch Code:</span>
+                          <span className="font-medium">{premiumDetails.eft_details.branch_code}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-gray-600">Amount:</span>
+                          <span className="font-medium text-green-600">{premiumDetails.eft_details.amount}</span>
+                        </div>
+                        <div className="mt-3 pt-3 border-t border-blue-300">
+                          <div className="flex justify-between items-center">
+                            <span className="text-gray-600">Reference:</span>
+                            <span className="font-mono font-bold text-blue-700 bg-white px-2 py-1 rounded">
+                              {premiumDetails.eft_details.reference}
+                            </span>
+                          </div>
+                          <p className="text-xs text-gray-500 mt-2">
+                            ⚠️ Use this exact reference when making payment
+                          </p>
+                        </div>
+                      </div>
+                      <div className="mt-4 pt-4 border-t border-blue-300">
+                        <h5 className="font-semibold text-gray-900 mb-2">Benefits:</h5>
+                        <ul className="text-xs text-gray-700 space-y-1">
+                          {premiumDetails.benefits?.map((benefit: string, idx: number) => (
+                            <li key={idx} className="flex items-start">
+                              <span className="mr-2">✓</span>
+                              <span>{benefit}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                      <p className="text-xs text-gray-600 mt-4 italic">
+                        After payment, contact support to activate your premium listing.
+                      </p>
+                    </div>
+                  )}
+                </>
+              )}
             </div>
           )}
 
