@@ -24,19 +24,38 @@ type PublicProvider = {
 
 async function fetchProvider(id: string) {
   try {
-    const url = `${API_BASE}/api/public/providers/${id}/`;
+    // Ensure ID is a valid integer string
+    const providerId = id.trim();
+    if (!providerId || isNaN(Number(providerId))) {
+      console.error(`Invalid provider ID: ${id}`);
+      return null;
+    }
+    
+    const url = `${API_BASE}/api/public/providers/${providerId}/`;
+    console.log(`Fetching provider from: ${url}`);
+    
     const res = await fetch(url, { 
       next: { revalidate: 300 },
       headers: {
         'Accept': 'application/json'
       }
     });
-    if (res.status === 404) return null;
-    if (!res.ok) {
-      console.error(`Failed to load provider: ${res.status} ${res.statusText}`);
+    
+    if (res.status === 404) {
+      const errorData = await res.json().catch(() => ({}));
+      console.error(`Provider not found (404): ${providerId}`, errorData);
       return null;
     }
-    return (await res.json()) as PublicProvider;
+    
+    if (!res.ok) {
+      const errorText = await res.text();
+      console.error(`Failed to load provider: ${res.status} ${res.statusText}`, errorText);
+      return null;
+    }
+    
+    const data = await res.json();
+    console.log(`Provider loaded successfully: ${data.business_name}`);
+    return data as PublicProvider;
   } catch (error) {
     console.error('Error fetching provider:', error);
     return null;
