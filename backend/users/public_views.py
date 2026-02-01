@@ -71,3 +71,36 @@ def public_provider_detail(request, provider_id):
     except ProviderProfile.DoesNotExist:
         return Response({'error': 'Provider not found'}, status=status.HTTP_404_NOT_FOUND)
 
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def list_all_providers_debug(request):
+    """
+    TEMPORARY: List ALL providers (including non-verified) for investigation.
+    This endpoint should be removed after cleanup is complete.
+    """
+    qs = ProviderProfile.objects.select_related('user').order_by('business_name')
+    
+    data = []
+    for p in qs:
+        u = p.user
+        data.append({
+            'id': str(p.id),
+            'business_name': p.business_name,
+            'email': u.email,
+            'city': u.city,
+            'suburb': u.suburb,
+            'service_categories': p.service_categories or [],
+            'verification_status': p.verification_status,
+            'average_rating': float(p.average_rating or 0),
+            'total_reviews': p.total_reviews,
+            'credit_balance': p.credit_balance,
+            'created_at': p.created_at.isoformat() if p.created_at else None,
+        })
+    
+    return Response({
+        'total': len(data),
+        'providers': data,
+        'note': 'TEMPORARY endpoint - includes all providers regardless of verification status'
+    })
+
