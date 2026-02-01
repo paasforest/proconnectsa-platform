@@ -4,7 +4,6 @@ import React, { useState, useEffect } from 'react';
 import {
   User, Mail, Phone, MapPin, Save, Eye, EyeOff, 
   Camera, Upload, CheckCircle, AlertCircle
-  Upload
 } from 'lucide-react';
 import { apiClient } from '@/lib/api-simple';
 import { useAuth } from '@/components/AuthProvider';
