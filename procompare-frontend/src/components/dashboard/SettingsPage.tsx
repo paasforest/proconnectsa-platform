@@ -61,41 +61,65 @@ const SettingsPage = () => {
   const [loadingPremium, setLoadingPremium] = useState(false);
 
   useEffect(() => {
+    if (!user) {
+      setLoading(false);
+      return;
+    }
+
+    let isMounted = true;
+    const timeoutId = setTimeout(() => {
+      if (isMounted) {
+        setLoading(false);
+        console.warn('Settings page loading timeout - showing page anyway');
+      }
+    }, 10000); // 10 second timeout
+
     const fetchProfile = async () => {
       try {
         setLoading(true);
         const response = await apiClient.get('/api/settings/');
-        setProfile(response);
+        if (isMounted) {
+          setProfile(response);
+        }
       } catch (error) {
         console.error('Failed to fetch profile:', error);
         // Use user data from authentication instead of hardcoded data
-        setProfile({
-          id: user?.id?.toString() || '',
-          email: user?.email || '',
-          first_name: user?.first_name || '',
-          last_name: user?.last_name || '',
-          phone: user?.phone || '',
-          address: '',
-          city: user?.city || '',
-          province: user?.province || '',
-          postal_code: '',
-          company_name: user?.business_name || '',
-          business_type: user?.primary_service || '',
-          years_experience: 0,
-          bio: ''
-        });
+        if (isMounted) {
+          setProfile({
+            id: user?.id?.toString() || '',
+            email: user?.email || '',
+            first_name: user?.first_name || '',
+            last_name: user?.last_name || '',
+            phone: user?.phone || '',
+            address: '',
+            city: user?.city || '',
+            province: user?.province || '',
+            postal_code: '',
+            company_name: user?.business_name || '',
+            business_type: user?.primary_service || '',
+            years_experience: 0,
+            bio: ''
+          });
+        }
       } finally {
-        setLoading(false);
+        if (isMounted) {
+          clearTimeout(timeoutId);
+          setLoading(false);
+        }
       }
     };
 
-    if (user && user.userType === 'provider') {
+    if (user.userType === 'provider') {
       fetchProfile();
+      
+      // Fetch verification documents
       apiClient
         .getVerificationDocuments()
         .then((res: any) => {
-          setVerificationStatus(res.verification_status || '');
-          setVerificationDocs(res.documents || {});
+          if (isMounted) {
+            setVerificationStatus(res.verification_status || '');
+            setVerificationDocs(res.documents || {});
+          }
         })
         .catch((err) => {
           console.warn('Failed to load verification documents', err);
@@ -105,14 +129,24 @@ const SettingsPage = () => {
       if (token) {
         apiClient.get('/api/auth/provider-profile/')
           .then((res: any) => {
-            setIsPremiumActive(res.is_premium_listing_active || false);
+            if (isMounted) {
+              setIsPremiumActive(res.is_premium_listing_active || false);
+            }
           })
           .catch(err => {
             console.warn('Failed to load premium status', err);
           });
       }
+    } else {
+      // For non-providers, just fetch profile
+      fetchProfile();
     }
-  }, [user]);
+
+    return () => {
+      isMounted = false;
+      clearTimeout(timeoutId);
+    };
+  }, [user, token]);
 
   const handleSaveProfile = async () => {
     try {
