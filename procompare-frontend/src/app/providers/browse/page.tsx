@@ -19,6 +19,7 @@ type PublicProvider = {
   average_rating: number;
   total_reviews: number;
   verification_status: string;
+  is_premium_listing?: boolean;
   slug: string;
 };
 
@@ -81,13 +82,13 @@ function ProvidersBrowseContent() {
     if (category.trim()) params.set("category", category.trim());
     if (city.trim()) params.set("city", city.trim());
     params.set("page", "1");
-    router.push(`/providers/browse?${params.toString()}`);
+    router.replace(`/providers/browse?${params.toString()}`);
   };
 
   const handleReset = () => {
     setCategory("");
     setCity("");
-    router.push("/providers/browse");
+    router.replace("/providers/browse");
   };
 
   return (
