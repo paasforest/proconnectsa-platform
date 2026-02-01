@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import {
   User, Mail, Phone, MapPin, Save, Eye, EyeOff, 
-  Camera, Upload, CheckCircle, AlertCircle, Star
+  Camera, Upload, CheckCircle, AlertCircle, Star, XCircle, Copy
 } from 'lucide-react';
 import { apiClient } from '@/lib/api-simple';
 import { useAuth } from '@/components/AuthProvider';
@@ -218,13 +218,23 @@ const SettingsPage = () => {
     }
   };
 
-  const handleRequestPremium = async () => {
+  const [showPremiumModal, setShowPremiumModal] = useState(false);
+  const [selectedPremiumPlan, setSelectedPremiumPlan] = useState<'monthly' | 'lifetime' | null>(null);
+
+  const handleRequestPremium = async (planType?: 'monthly' | 'lifetime') => {
     try {
       setLoadingPremium(true);
-      const res = await apiClient.post('/api/auth/premium-listing/request/');
+      // Use GET method as per backend endpoint
+      const res = await apiClient.get('/api/auth/premium-listing/request/');
       if (res.success) {
         setPremiumDetails(res);
-        setMessage({ type: 'success', text: 'Premium listing request generated. Please make your EFT.' });
+        // If planType is provided, show modal with that plan selected
+        if (planType) {
+          setSelectedPremiumPlan(planType);
+          setShowPremiumModal(true);
+        } else {
+          setMessage({ type: 'success', text: 'Premium listing request generated. Please make your EFT.' });
+        }
       } else {
         setMessage({ type: 'error', text: res.message || 'Failed to generate premium request.' });
       }
@@ -642,16 +652,30 @@ const SettingsPage = () => {
                     <li>✓ Priority matching for new leads</li>
                   </ul>
                   <p className="text-gray-800 font-semibold mb-4">
-                    Pricing: R299.00/month or R2,990.00 for lifetime.
+                    Choose your plan:
                   </p>
-                  {!premiumDetails ? (
+                  <div className="grid grid-cols-2 gap-4 mb-4">
                     <button
-                      onClick={handleRequestPremium}
+                      onClick={() => handleRequestPremium('monthly')}
                       disabled={loadingPremium}
-                      className="inline-flex items-center px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:opacity-50"
+                      className="px-4 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:opacity-50 text-center"
                     >
-                      {loadingPremium ? 'Requesting...' : 'Request Premium Listing'}
+                      <div className="font-bold text-lg">R299</div>
+                      <div className="text-sm">Monthly</div>
                     </button>
+                    <button
+                      onClick={() => handleRequestPremium('lifetime')}
+                      disabled={loadingPremium}
+                      className="px-4 py-3 bg-gray-900 text-white rounded-lg hover:bg-gray-800 disabled:opacity-50 text-center"
+                    >
+                      <div className="font-bold text-lg">R2,990</div>
+                      <div className="text-sm">Lifetime</div>
+                    </button>
+                  </div>
+                  {!premiumDetails ? (
+                    <p className="text-xs text-gray-500 text-center">
+                      Click a plan above to get payment details
+                    </p>
                   ) : (
                     <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mt-4">
                       <h4 className="font-semibold text-blue-800 mb-2">EFT Payment Details</h4>
@@ -680,6 +704,130 @@ const SettingsPage = () => {
                   )}
                 </>
               )}
+            </div>
+          )}
+
+          {/* Premium Payment Modal */}
+          {showPremiumModal && premiumDetails && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+              <div className="bg-white rounded-lg p-6 w-full max-w-lg mx-4 max-h-[90vh] overflow-y-auto">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-semibold text-gray-900">Premium Listing Payment</h3>
+                  <button
+                    onClick={() => {
+                      setShowPremiumModal(false);
+                      setSelectedPremiumPlan(null);
+                    }}
+                    className="text-gray-400 hover:text-gray-600"
+                  >
+                    <XCircle className="w-6 h-6" />
+                  </button>
+                </div>
+                
+                <div className="space-y-4">
+                  {/* Plan Info */}
+                  <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
+                    <h4 className="font-semibold text-purple-900 mb-2">
+                      {selectedPremiumPlan === 'monthly' ? 'Monthly Premium' : 'Lifetime Premium'}
+                    </h4>
+                    <p className="text-2xl font-bold text-purple-900">
+                      R{selectedPremiumPlan === 'monthly' ? '299' : '2,990'}
+                      {selectedPremiumPlan === 'monthly' && <span className="text-lg font-normal text-purple-700">/month</span>}
+                    </p>
+                    <p className="text-sm text-purple-700 mt-2">
+                      {selectedPremiumPlan === 'monthly' 
+                        ? 'Unlimited FREE leads for 1 month'
+                        : 'Unlimited FREE leads forever (lifetime)'}
+                    </p>
+                  </div>
+
+                  {/* Account Details */}
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                    <h4 className="font-medium text-gray-900 mb-2">Account Details</h4>
+                    <div className="space-y-2">
+                      <div className="flex justify-between">
+                        <span className="text-sm text-gray-600">Bank:</span>
+                        <span className="text-sm font-medium">{premiumDetails.eft_details?.bank_name || 'Nedbank'}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-sm text-gray-600">Account Number:</span>
+                        <div className="flex items-center space-x-2">
+                          <span className="text-sm font-medium">{premiumDetails.eft_details?.account_number || '1313872032'}</span>
+                          <button
+                            onClick={() => navigator.clipboard.writeText(premiumDetails.eft_details?.account_number || '1313872032')}
+                            className="text-blue-600 hover:text-blue-700"
+                            title="Copy account number"
+                          >
+                            <Copy className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-sm text-gray-600">Branch Code:</span>
+                        <span className="text-sm font-medium">{premiumDetails.eft_details?.branch_code || '198765'}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-sm text-gray-600">Account Holder:</span>
+                        <span className="text-sm font-medium">{premiumDetails.eft_details?.account_holder || 'ProConnectSA (Pty) Ltd'}</span>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {/* Reference Number - Most Important */}
+                  <div className="bg-blue-50 border-2 border-blue-300 p-4 rounded-lg">
+                    <h4 className="font-semibold text-blue-900 mb-2">⚠️ Payment Reference (REQUIRED)</h4>
+                    <div className="flex items-center justify-between bg-white border-2 border-blue-400 rounded-lg p-3 mb-2">
+                      <span className="font-mono text-lg font-bold text-blue-600">
+                        {premiumDetails.eft_details?.reference || 'N/A'}
+                      </span>
+                      <button
+                        onClick={() => navigator.clipboard.writeText(premiumDetails.eft_details?.reference || '')}
+                        className="text-blue-600 hover:text-blue-700 ml-2"
+                        title="Copy reference number"
+                      >
+                        <Copy className="w-5 h-5" />
+                      </button>
+                    </div>
+                    <p className="text-xs text-blue-700 font-semibold">
+                      ⚠️ IMPORTANT: Use this EXACT reference when making payment. Premium activates automatically once payment is confirmed.
+                    </p>
+                  </div>
+
+                  {/* Amount */}
+                  <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                    <div className="flex justify-between items-center">
+                      <span className="font-medium text-green-900">Amount to Pay:</span>
+                      <span className="text-2xl font-bold text-green-600">
+                        R{selectedPremiumPlan === 'monthly' ? '299' : '2,990'}
+                      </span>
+                    </div>
+                  </div>
+                  
+                  {/* Instructions */}
+                  <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                    <h4 className="font-medium text-yellow-900 mb-2">Payment Instructions</h4>
+                    <ul className="text-sm text-yellow-800 space-y-1 list-disc list-inside">
+                      <li>Make an EFT payment of <strong>R{selectedPremiumPlan === 'monthly' ? '299' : '2,990'}</strong> to the account above</li>
+                      <li>Use the reference number: <strong className="font-mono">{premiumDetails.eft_details?.reference || 'N/A'}</strong></li>
+                      <li>Premium listing activates automatically within 5 minutes of payment confirmation</li>
+                      <li>You'll receive an email confirmation once activated</li>
+                      <li>Contact support if premium doesn't activate within 30 minutes</li>
+                    </ul>
+                  </div>
+                </div>
+
+                <div className="mt-6 flex justify-end">
+                  <button
+                    onClick={() => {
+                      setShowPremiumModal(false);
+                      setSelectedPremiumPlan(null);
+                    }}
+                    className="px-6 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700"
+                  >
+                    Close
+                  </button>
+                </div>
+              </div>
             </div>
           )}
 
