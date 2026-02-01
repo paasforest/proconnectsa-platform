@@ -97,9 +97,9 @@ function ProvidersBrowseContent() {
       <main className="flex-1">
         <section className="py-10 bg-white border-b">
           <div className="container mx-auto px-4">
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">Find Premium Providers</h1>
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">Find Verified Providers</h1>
             <p className="text-gray-600">
-              Browse public profiles of premium-listed professionals. Filter by category and city.
+              Browse public profiles of verified professionals. Filter by category and city.
             </p>
             <form onSubmit={handleSearch} className="mt-6 grid grid-cols-1 md:grid-cols-4 gap-3">
               <input
