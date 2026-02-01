@@ -15,19 +15,41 @@ class Command(BaseCommand):
     help = "Remove test provider accounts, keeping only real providers"
 
     # Real accounts to KEEP (case-insensitive partial match)
-    # Confirmed real providers
+    # Confirmed real providers - DO NOT DELETE THESE
     REAL_BUSINESS_NAMES = [
         'TMA Projects',
         'mischeck ndolo',  # Note: might be spelled "mischeck" or "mischeck"
         'Kenneth Nakutepa',
         'CK SKILLSET',  # Added per user request
         'SUPREME TV',  # Added per user request
+        'Tinashe',  # Keep Tinashe if found (by name)
+        'Kambudzi',  # Keep Tinashe if found (by surname)
     ]
     
     # Also keep by email (in case business name is different)
     REAL_EMAILS = [
         'lonjechisale1@gmail.com',  # CK SKILLSET
         'supremetv1427@gmail.com',  # SUPREME TV
+        # Tinashe's email will be added once found
+    ]
+    
+    # Test account patterns to DELETE (obvious test accounts only)
+    TEST_PATTERNS = [
+        'AutoTest',
+        'autotest',
+        'Test',
+        'test',
+        'Demo',
+        'demo',
+        'Tester',
+        'tester',
+        'E2E',
+        'Browse Tester',
+        'Res Tester',
+        'Ver Doc',
+        'Marketing Test',
+        'Solar Solutions 1760541682',  # Has test pattern in name
+        'Plumber Only 08f2a7',  # Test pattern
     ]
 
     # Test account patterns to delete (everything else that's not in REAL_BUSINESS_NAMES)
@@ -66,6 +88,17 @@ class Command(BaseCommand):
             ).select_related('user')
             real_profiles.extend(matches)
         
+        # Also check user first/last name for Tinashe
+        tinashe_matches = ProviderProfile.objects.filter(
+            user__first_name__icontains='tinashe'
+        ).select_related('user')
+        real_profiles.extend(tinashe_matches)
+        
+        tinashe_matches = ProviderProfile.objects.filter(
+            user__last_name__icontains='kambudzi'
+        ).select_related('user')
+        real_profiles.extend(tinashe_matches)
+        
         # Remove duplicates from real_profiles
         seen_real_ids = set()
         unique_real_profiles = []
@@ -74,13 +107,50 @@ class Command(BaseCommand):
                 seen_real_ids.add(profile.id)
                 unique_real_profiles.append(profile)
         
-        # Test accounts = everything that's NOT a real account
-        test_profiles = [p for p in all_profiles if p.id not in seen_real_ids]
+        # Identify test accounts by patterns (more conservative - only obvious test accounts)
+        test_profiles = []
+        for profile in all_profiles:
+            if profile.id in seen_real_ids:
+                continue  # Skip real accounts
+            
+            business_name_lower = profile.business_name.lower()
+            email_lower = profile.user.email.lower()
+            
+            # Check if it matches test patterns
+            is_test = any(pattern.lower() in business_name_lower or pattern.lower() in email_lower 
+                         for pattern in self.TEST_PATTERNS)
+            
+            # Also check for obvious test email patterns
+            if any(test_domain in email_lower for test_domain in ['@example.com', '@proconnectsa-test.com', 'test', 'tester', 'demo']):
+                is_test = True
+            
+            # If it's a verified account with location and services, be more careful
+            if profile.verification_status == 'verified' and profile.user.city and profile.service_categories:
+                # Only mark as test if it's clearly a test pattern
+                if not is_test:
+                    # Keep verified accounts that look legitimate
+                    continue
+            
+            if is_test:
+                test_profiles.append(profile)
 
         # Display what will be deleted
         self.stdout.write(f'📋 Found {len(test_profiles)} test provider account(s) to delete:\n')
         for profile in test_profiles:
-            self.stdout.write(f'   - {profile.business_name} (ID: {profile.id}, User: {profile.user.email})')
+            status_icon = '✅' if profile.verification_status == 'verified' else '⏳'
+            self.stdout.write(f'   {status_icon} {profile.business_name} (ID: {profile.id}, User: {profile.user.email}, Status: {profile.verification_status})')
+        
+        # Safety check: warn about verified accounts
+        verified_to_delete = [p for p in test_profiles if p.verification_status == 'verified']
+        if verified_to_delete:
+            self.stdout.write(self.style.WARNING(
+                f'\n⚠️  WARNING: {len(verified_to_delete)} verified account(s) will be deleted. '
+                'Please double-check these are test accounts!'
+            ))
+            for p in verified_to_delete:
+                self.stdout.write(self.style.WARNING(
+                    f'   - {p.business_name} ({p.user.email})'
+                ))
 
         # Display real accounts that will be kept
         if unique_real_profiles:
