@@ -36,36 +36,51 @@ def _provider_public_dict(p: ProviderProfile):
 @permission_classes([AllowAny])
 def public_providers_list(request):
     """
-    Public: list verified providers OR premium listings with optional filters: category, city, page, page_size
+    Public: list providers with optional filters: category, city, page, page_size
     
     Visibility rules:
-    - Verified providers are always visible (existing providers stay visible)
-    - Premium listings are visible even if pending verification (but must be verified to show contact info)
-    - NEW providers (created after 2025-02-01) must be BOTH verified AND premium to appear
+    - EXISTING providers (created before 2025-02-01): Verified providers stay visible (grandfather clause)
+    - NEW providers (created after 2025-02-01): Must be BOTH verified AND premium to appear
+      - If verified but NOT premium → NOT visible
+      - If verified AND premium → Visible
     """
     category_slug = request.GET.get('category')
     city = request.GET.get('city')
     page = int(request.GET.get('page', 1))
     page_size = int(request.GET.get('page_size', 20))
 
-    # Show verified providers OR active premium listings
-    # Original logic: verified OR premium (existing providers stay visible)
-    # Note: For future enforcement, new providers can be required to have both verified AND premium
-    # by adding a filter based on created_at date, but for now keeping original simple logic
     from django.db.models import Q
+    from datetime import datetime
     now = timezone.now()
+    cutoff_date = timezone.make_aware(datetime(2025, 2, 1))  # Date when new rules apply
     
+    # Show providers based on creation date:
+    # 1. Existing providers (before cutoff): verified OR premium
+    # 2. New providers (after cutoff): MUST be verified AND premium
     qs = ProviderProfile.objects.filter(
-        Q(verification_status='verified') |  # Verified providers (existing ones stay)
         Q(
-            is_premium_listing=True,
-            premium_listing_started_at__isnull=False,
-            premium_listing_expires_at__gt=now
-        ) |  # Monthly premium (not expired)
+            # Existing providers (grandfathered): verified OR premium
+            created_at__lt=cutoff_date,
+            verification_status='verified'
+        ) |
         Q(
+            # Existing providers: premium (even if not verified yet)
+            created_at__lt=cutoff_date,
             is_premium_listing=True,
-            premium_listing_started_at__isnull=False,
-            premium_listing_expires_at__isnull=True  # Lifetime premium
+            premium_listing_started_at__isnull=False
+        ).filter(
+            Q(premium_listing_expires_at__gt=now) |
+            Q(premium_listing_expires_at__isnull=True)
+        ) |
+        Q(
+            # NEW providers: MUST be BOTH verified AND premium
+            created_at__gte=cutoff_date,
+            verification_status='verified',
+            is_premium_listing=True,
+            premium_listing_started_at__isnull=False
+        ).filter(
+            Q(premium_listing_expires_at__gt=now) |
+            Q(premium_listing_expires_at__isnull=True)
         )
     )
 
