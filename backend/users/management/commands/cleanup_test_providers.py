@@ -33,6 +33,28 @@ class Command(BaseCommand):
         # Tinashe's email will be added once found
     ]
     
+    # Accounts to DELETE by business name or email (user confirmed these are not real)
+    ACCOUNTS_TO_DELETE = [
+        'rod plumbing',
+        "Ronnie's Multi-Service",
+        'Malawi Hermanus Society One',
+        'jack electrical',
+        'Lyton plumbing',
+        'tmn',
+        'tonny plumbing',
+    ]
+    
+    # Emails to DELETE (user confirmed these are not real)
+    EMAILS_TO_DELETE = [
+        'rod@gmail.com',  # rod plumbing
+        'ronnie@gmail.co',  # Ronnie's Multi-Service
+        'yohanechinthomba@gmail.com',  # Malawi Hermanus Society One
+        'lubi@gmail.com',  # jack electrical
+        'lyton@gmail.com',  # Lyton plumbing
+        'dancun@gmail.com',  # tmn
+        'tonny@gmail.com',  # tonny plumbing
+    ]
+    
     # Test account patterns to DELETE (obvious test accounts only)
     TEST_PATTERNS = [
         'AutoTest',
@@ -107,7 +129,7 @@ class Command(BaseCommand):
                 seen_real_ids.add(profile.id)
                 unique_real_profiles.append(profile)
         
-        # Identify test accounts by patterns (more conservative - only obvious test accounts)
+        # Identify test accounts by patterns and explicit deletion list
         test_profiles = []
         for profile in all_profiles:
             if profile.id in seen_real_ids:
@@ -116,20 +138,24 @@ class Command(BaseCommand):
             business_name_lower = profile.business_name.lower()
             email_lower = profile.user.email.lower()
             
-            # Check if it matches test patterns
-            is_test = any(pattern.lower() in business_name_lower or pattern.lower() in email_lower 
-                         for pattern in self.TEST_PATTERNS)
+            # Check if explicitly marked for deletion
+            is_test = False
             
-            # Also check for obvious test email patterns
-            if any(test_domain in email_lower for test_domain in ['@example.com', '@proconnectsa-test.com', 'test', 'tester', 'demo']):
+            # Check explicit deletion lists
+            if any(name.lower() in business_name_lower for name in self.ACCOUNTS_TO_DELETE):
                 is_test = True
             
-            # If it's a verified account with location and services, be more careful
-            if profile.verification_status == 'verified' and profile.user.city and profile.service_categories:
-                # Only mark as test if it's clearly a test pattern
-                if not is_test:
-                    # Keep verified accounts that look legitimate
-                    continue
+            if profile.user.email.lower() in [e.lower() for e in self.EMAILS_TO_DELETE]:
+                is_test = True
+            
+            # Check if it matches test patterns
+            if any(pattern.lower() in business_name_lower or pattern.lower() in email_lower 
+                   for pattern in self.TEST_PATTERNS):
+                is_test = True
+            
+            # Also check for obvious test email patterns
+            if any(test_domain in email_lower for test_domain in ['@example.com', '@proconnectsa-test.com']):
+                is_test = True
             
             if is_test:
                 test_profiles.append(profile)
