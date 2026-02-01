@@ -35,7 +35,7 @@ class Command(BaseCommand):
             qs = qs.filter(verification_status='verified')
             self.stdout.write(self.style.SUCCESS(f'\n📋 Listing VERIFIED providers only...\n'))
         else:
-            self.stdout.write(self.style.SUCCESS(f'\n📋 Listing ALL providers...\n'))
+            self.stdout.write(self.style.SUCCESS(f'\n📋 Listing ALL providers (including pending/rejected)...\n'))
 
         providers = list(qs)
 
