@@ -37,79 +37,40 @@ interface InstantUpgradeProps {
   loading?: boolean
 }
 
-const subscriptionTiers: SubscriptionTier[] = [
+// Premium Listing Plans - as agreed: R299/month or R2,990 lifetime for unlimited FREE leads
+const premiumPlans: SubscriptionTier[] = [
   {
-    id: 'basic',
-    name: 'Basic',
-    price: 250,
-    monthly_credits: 5, // 5 leads per month
+    id: 'monthly',
+    name: 'Monthly Premium',
+    price: 299,
+    monthly_credits: 999999, // Unlimited (no credit deductions)
     features: [
-      '5 leads per month',
-      'Basic lead access',
-      'Email support',
-      'Standard response time',
-      'Basic analytics',
-      'R50 per additional lead'
-    ],
-    icon: Users,
-    color: 'bg-blue-500'
-  },
-  {
-    id: 'advanced',
-    name: 'Advanced',
-    price: 450,
-    monthly_credits: 12, // 12 leads per month
-    features: [
-      '12 leads per month',
-      'Priority lead access',
-      'Phone + Email support',
-      'Faster response time',
-      'Advanced analytics',
-      'Lead scoring insights',
-      'R50 per additional lead'
+      '⭐ Unlimited FREE leads (no credit deductions)',
+      '✓ Enhanced visibility in public directory',
+      '✓ Priority matching for new leads',
+      '✓ Featured placement in search results',
+      '✓ Premium badge on your profile'
     ],
     icon: Star,
-    color: 'bg-purple-500'
-  },
-  {
-    id: 'pro',
-    name: 'Pro',
-    price: 650,
-    monthly_credits: 30, // 30 leads per month
-    features: [
-      '30 leads per month',
-      'VIP lead access',
-      'Priority support',
-      'Fastest response time',
-      'Premium analytics',
-      'Lead scoring insights',
-      'In-app chat system',
-      'Priority matching',
-      'R50 per additional lead'
-    ],
-    icon: Crown,
-    color: 'bg-gold-500',
+    color: 'bg-purple-500',
     popular: true
   },
   {
-    id: 'enterprise',
-    name: 'Enterprise',
-    price: 850,
-    monthly_credits: 999999, // Unlimited leads
+    id: 'lifetime',
+    name: 'Lifetime Premium',
+    price: 2990,
+    monthly_credits: 999999, // Unlimited forever (no credit deductions)
     features: [
-      'UNLIMITED leads per month',
-      'Unlimited lead access',
-      'Dedicated support',
-      'Instant response time',
-      'Enterprise analytics',
-      'Advanced lead scoring',
-      'In-app chat system',
-      'Priority matching',
-      'Custom integrations',
-      'White-label options'
+      '⭐ Unlimited FREE leads forever (no credit deductions)',
+      '✓ Enhanced visibility in public directory',
+      '✓ Priority matching for new leads',
+      '✓ Featured placement in search results',
+      '✓ Premium badge on your profile',
+      '✓ No monthly renewals needed',
+      '✓ Save R3,588 vs monthly (12 months)'
     ],
-    icon: Zap,
-    color: 'bg-red-500'
+    icon: Crown,
+    color: 'bg-emerald-500'
   }
 ]
 
@@ -137,19 +98,8 @@ export default function InstantUpgrade({ currentTier, onUpgrade, loading = false
     }
   }
 
-  const getCurrentTierIndex = () => {
-    if (!currentTier) return -1
-    return subscriptionTiers.findIndex(tier => tier.id === currentTier)
-  }
-
-  const getUpgradeableTiers = () => {
-    const currentIndex = getCurrentTierIndex()
-    if (currentIndex === -1) return subscriptionTiers // Pay-as-you-go can upgrade to any tier
-    
-    return subscriptionTiers.slice(currentIndex + 1)
-  }
-
-  const upgradeableTiers = getUpgradeableTiers()
+  // Always show premium plans (no tier restrictions)
+  const upgradeableTiers = premiumPlans
 
   if (upgradeableTiers.length === 0) {
     return (
@@ -171,14 +121,17 @@ export default function InstantUpgrade({ currentTier, onUpgrade, loading = false
     <div className="space-y-6">
       <div className="text-center">
         <h2 className="text-2xl font-bold text-gray-900 mb-2">
-          Instant Upgrade Available
+          Premium Listing
         </h2>
-        <p className="text-gray-600">
-          Upgrade instantly and get immediate access to premium features
+        <p className="text-gray-600 mb-2">
+          Upgrade to Premium Listing for unlimited FREE leads and enhanced visibility
+        </p>
+        <p className="text-sm text-gray-500">
+          Your current plan: <span className="font-semibold">Pay As You Go</span>
         </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
         {upgradeableTiers.map((tier) => {
           const Icon = tier.icon
           const isSelected = selectedTier === tier.id
@@ -202,59 +155,55 @@ export default function InstantUpgrade({ currentTier, onUpgrade, loading = false
               
               <CardHeader className="text-center pb-2">
                 <div className={`w-12 h-12 ${
-                  tier.color === 'bg-blue-600' ? 'bg-blue-600' :
-                  tier.color === 'bg-purple-600' ? 'bg-purple-600' :
-                  tier.color === 'bg-emerald-600' ? 'bg-emerald-600' :
-                  tier.color === 'bg-orange-600' ? 'bg-orange-600' :
-                  'bg-gray-600'
+                  tier.color === 'bg-purple-500' ? 'bg-purple-500' :
+                  tier.color === 'bg-emerald-500' ? 'bg-emerald-500' :
+                  'bg-gray-500'
                 } text-white rounded-full flex items-center justify-center mx-auto mb-3`}>
                   <Icon className="h-6 w-6" />
                 </div>
                 <CardTitle className="text-lg">{tier.name}</CardTitle>
                 <div className="text-2xl font-bold text-gray-900">
-                  R{tier.price}
-                  <span className="text-sm font-normal text-gray-500">/month</span>
+                  R{tier.price.toLocaleString()}
+                  <span className="text-sm font-normal text-gray-500">
+                    {tier.id === 'lifetime' ? ' one-time' : '/month'}
+                  </span>
                 </div>
               </CardHeader>
               
               <CardContent className="space-y-4">
                 <div className="text-center">
-                  <div className="text-sm text-gray-600 mb-1">Monthly Credits</div>
-                  <div className="text-xl font-semibold text-blue-600">
-                    {tier.monthly_credits}
+                  <div className="text-sm text-gray-600 mb-1">Leads</div>
+                  <div className="text-xl font-semibold text-green-600">
+                    Unlimited FREE
                   </div>
                 </div>
                 
                 <div className="space-y-2">
-                  {tier.features.slice(0, 4).map((feature, index) => (
-                    <div key={index} className="flex items-center text-sm text-gray-600">
-                      <CheckCircle className="h-4 w-4 text-green-500 mr-2 flex-shrink-0" />
+                  {tier.features.map((feature, index) => (
+                    <div key={index} className="flex items-start text-sm text-gray-700">
+                      <CheckCircle className="h-4 w-4 text-green-500 mr-2 flex-shrink-0 mt-0.5" />
                       <span>{feature}</span>
                     </div>
                   ))}
-                  {tier.features.length > 4 && (
-                    <div className="text-xs text-gray-500">
-                      +{tier.features.length - 4} more features
-                    </div>
-                  )}
                 </div>
                 
                 <Button 
-                  className="w-full"
+                  className="w-full bg-purple-600 hover:bg-purple-700"
                   disabled={isUpgrading || loading}
                   onClick={(e) => {
                     e.stopPropagation()
-                    handleUpgrade(tier.id)
+                    // Redirect to settings for premium request
+                    window.location.href = '/dashboard/settings'
                   }}
                 >
                   {isUpgrading ? (
                     <>
                       <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                      Upgrading...
+                      Processing...
                     </>
                   ) : (
                     <>
-                      Upgrade Now
+                      Request Premium Listing
                       <ArrowRight className="h-4 w-4 ml-2" />
                     </>
                   )}
@@ -265,16 +214,16 @@ export default function InstantUpgrade({ currentTier, onUpgrade, loading = false
         })}
       </div>
 
-      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+      <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
         <div className="flex items-start space-x-3">
-          <Shield className="h-5 w-5 text-blue-600 mt-0.5 flex-shrink-0" />
+          <Shield className="h-5 w-5 text-purple-600 mt-0.5 flex-shrink-0" />
           <div>
-            <h4 className="font-semibold text-blue-900 mb-1">
-              Instant Activation
+            <h4 className="font-semibold text-purple-900 mb-1">
+              Automatic Activation
             </h4>
-            <p className="text-sm text-blue-700">
-              Your upgrade takes effect immediately. No waiting, no delays. 
-              You'll have access to all premium features right away.
+            <p className="text-sm text-purple-700">
+              Premium listing activates automatically once your EFT payment is confirmed. 
+              You'll receive unlimited FREE leads with no credit deductions.
             </p>
           </div>
         </div>
