@@ -58,6 +58,12 @@ export function ClientHeader() {
           >
             For Pros
           </Link>
+          <Link 
+            href="/pricing"
+            className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+          >
+            Pricing
+          </Link>
         </nav>
 
         {/* Desktop Auth */}
@@ -130,38 +136,45 @@ export function ClientHeader() {
       {isMobileMenuOpen && (
         <div className="md:hidden border-t bg-background">
           <div className="container py-4 space-y-4">
-            <nav className="flex flex-col space-y-2">
+            <nav className="flex flex-col space-y-3">
               <Link 
                 href="/services" 
-                className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors py-2"
+                className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors py-3 px-2 -mx-2 rounded-md hover:bg-muted"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 Services
               </Link>
               <Link 
                 href="/providers/browse" 
-                className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors py-2"
+                className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors py-3 px-2 -mx-2 rounded-md hover:bg-muted"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 Browse Pros
               </Link>
               <Link 
                 href="/how-it-works" 
-                className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors py-2"
+                className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors py-3 px-2 -mx-2 rounded-md hover:bg-muted"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 How it Works
               </Link>
               <Link 
                 href="/for-pros" 
-                className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors py-2 font-semibold"
+                className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors py-3 px-2 -mx-2 rounded-md hover:bg-muted font-semibold"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 For Pros
               </Link>
+              <Link 
+                href="/pricing" 
+                className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors py-3 px-2 -mx-2 rounded-md hover:bg-muted"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                Pricing
+              </Link>
               <Link
                 href="/services"
-                className="text-sm font-semibold text-foreground py-2"
+                className="text-sm font-semibold text-foreground py-3 px-2 -mx-2 rounded-md hover:bg-muted"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 Get free quotes
