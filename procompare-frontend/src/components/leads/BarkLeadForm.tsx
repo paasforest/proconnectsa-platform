@@ -109,29 +109,109 @@ export default function BarkLeadForm({ onComplete, onCancel, preselectedCategory
         locationCity.trim().length >= 2 &&
         description.trim().length >= 10
       )
-    if (step === 3)
-      return contactName.trim().length >= 2 && contactPhone.trim().length >= 7 && contactEmail.trim().includes('@')
+    if (step === 3) {
+      const nameValid = contactName.trim().length >= 2
+      const phoneValid = contactPhone.trim().length >= 7
+      const emailValid = contactEmail.trim().includes('@') && contactEmail.trim().includes('.')
+      const isValid = nameValid && phoneValid && emailValid
+      // Debug logging for step 3 validation
+      if (process.env.NODE_ENV === 'development') {
+        console.log('Step 3 validation check:', {
+          name: contactName.trim(),
+          nameLength: contactName.trim().length,
+          nameValid,
+          phone: contactPhone.trim(),
+          phoneLength: contactPhone.trim().length,
+          phoneValid,
+          email: contactEmail.trim(),
+          emailValid,
+          isValid
+        })
+      }
+      return isValid
+    }
     return false
   }, [step, selectedCategory, locationAddress, locationSuburb, locationCity, description, contactName, contactPhone, contactEmail])
 
   const submit = async () => {
+    console.log('🚀 Submit function called')
+    
     if (!selectedCategory) {
+      console.error('❌ No category selected')
       setError('Please select a service')
       setStep(1)
       return
     }
+    
+    // Validate required fields
+    if (!description.trim()) {
+      console.error('❌ No description')
+      setError('Please describe what you need')
+      setStep(2)
+      return
+    }
+    if (!locationAddress.trim() || !locationSuburb.trim() || !locationCity.trim()) {
+      console.error('❌ Incomplete location')
+      setError('Please provide complete location details')
+      setStep(2)
+      return
+    }
+    // More detailed contact validation
+    if (!contactName.trim()) {
+      console.error('❌ Missing contact name')
+      setError('Please provide your full name')
+      setStep(3)
+      return
+    }
+    if (contactName.trim().length < 2) {
+      console.error('❌ Contact name too short')
+      setError('Please provide your full name (at least 2 characters)')
+      setStep(3)
+      return
+    }
+    if (!contactEmail.trim()) {
+      console.error('❌ Missing contact email')
+      setError('Please provide your email address')
+      setStep(3)
+      return
+    }
+    if (!contactEmail.trim().includes('@') || !contactEmail.trim().includes('.')) {
+      console.error('❌ Invalid email format')
+      setError('Please provide a valid email address')
+      setStep(3)
+      return
+    }
+    if (!contactPhone.trim()) {
+      console.error('❌ Missing contact phone')
+      setError('Please provide your phone number')
+      setStep(3)
+      return
+    }
+    if (contactPhone.trim().length < 7) {
+      console.error('❌ Contact phone too short')
+      setError('Please provide a valid phone number (at least 7 digits)')
+      setStep(3)
+      return
+    }
+    
+    console.log('✅ All validations passed, starting submission...')
     setSubmitting(true)
     setError(null)
     try {
+      // Ensure we have a valid category ID
+      if (!selectedCategory.id || isNaN(Number(selectedCategory.id))) {
+        throw new Error('Invalid service category selected. Please refresh the page and try again.')
+      }
+      
       const payload = {
-        service_category_id: selectedCategory.id,
+        service_category_id: Number(selectedCategory.id), // Ensure it's a number
         title: title.trim() || `${selectedCategory.name} request`,
         description: description.trim(),
         location_address: locationAddress.trim(),
         location_suburb: locationSuburb.trim(),
         location_city: locationCity.trim(),
         budget_range: budgetRange,
-        urgency,
+        urgency: urgency === 'asap' ? 'urgent' : urgency, // Backend expects 'urgent' not 'asap'
         preferred_contact_time: 'morning',
         hiring_intent: hiringIntent,
         hiring_timeline: hiringTimeline,
@@ -143,22 +223,84 @@ export default function BarkLeadForm({ onComplete, onCancel, preselectedCategory
         client_phone: contactPhone.trim(),
       }
 
+      console.log('📤 Submitting lead payload:', payload)
+      console.log('📤 Selected category:', selectedCategory)
+      console.log('📤 Category ID type:', typeof selectedCategory.id, 'Value:', selectedCategory.id)
+      
       const res = await fetch('/api/leads/create-public', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
       })
+      
       const data = await res.json().catch(() => ({}))
-      if (!res.ok) {
-        const msg =
-          typeof data?.details === 'string'
-            ? data.details
-            : data?.message || data?.error || `Failed to submit (${res.status})`
-        throw new Error(msg)
+      console.log('📥 Backend response:', { status: res.status, data })
+      
+      // If service_category_id error, try to help user
+      if (!res.ok && data?.service_category_id) {
+        console.error('❌ Service category validation failed. Selected category:', selectedCategory)
+        console.error('❌ Available categories:', categories.map(c => ({ id: c.id, slug: c.slug, name: c.name })))
       }
-      onComplete?.(data)
+      
+      if (!res.ok) {
+        // Handle different error formats
+        let errorMsg = 'Submission failed'
+        
+        if (data?.service_category_id) {
+          // Backend validation error for service category
+          errorMsg = Array.isArray(data.service_category_id) 
+            ? data.service_category_id[0] 
+            : data.service_category_id
+        } else if (data?.details) {
+          errorMsg = typeof data.details === 'string' ? data.details : JSON.stringify(data.details)
+        } else if (data?.message) {
+          errorMsg = data.message
+        } else if (data?.error) {
+          errorMsg = typeof data.error === 'string' ? data.error : JSON.stringify(data.error)
+        } else if (res.status === 503) {
+          errorMsg = 'Service temporarily unavailable. Please try again in a moment.'
+        } else {
+          errorMsg = `Failed to submit (${res.status})`
+        }
+        
+        console.error('❌ Submission error:', errorMsg)
+        throw new Error(errorMsg)
+      }
+      
+      console.log('✅ Lead submitted successfully:', data)
+      
+      // Show success message
+      setError(null)
+      
+      // Call onComplete callback if provided (this will handle navigation/UI updates)
+      if (onComplete) {
+        onComplete(data)
+      } else {
+        // If no callback, show alert and reset form
+        alert('✅ Thank you! Your request has been submitted. We\'ll connect you with qualified professionals shortly.')
+        
+        // Reset form after successful submission
+        setStep(1)
+        setServiceSlug('')
+        setLocationAddress('')
+        setLocationSuburb('')
+        setLocationCity('')
+        setTitle('')
+        setDescription('')
+        setBudgetRange('1000_5000')
+        setUrgency('this_week')
+        setHiringIntent('comparing_quotes')
+        setHiringTimeline('this_month')
+        setContactName('')
+        setContactPhone('')
+        setContactEmail('')
+        setSelectedCategory(null)
+      }
     } catch (e: any) {
-      setError(e?.message || 'Submission failed')
+      console.error('❌ Submission exception:', e)
+      const errorMessage = e?.message || 'Submission failed. Please check your connection and try again.'
+      setError(errorMessage)
+      // Don't use alert - error is already shown in the error div above
     } finally {
       setSubmitting(false)
     }
@@ -174,15 +316,31 @@ export default function BarkLeadForm({ onComplete, onCancel, preselectedCategory
         </div>
 
         {error ? (
-          <div className="mb-4 rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-800">{error}</div>
+          <div className="mb-4 rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-800">
+            <strong>Error:</strong> {error}
+            <button 
+              onClick={() => setError(null)}
+              className="ml-2 text-red-600 hover:text-red-800 underline"
+            >
+              Dismiss
+            </button>
+          </div>
         ) : null}
+        
+        {submitting && (
+          <div className="mb-4 rounded-md border border-blue-200 bg-blue-50 p-3 text-sm text-blue-800">
+            Submitting your request... Please wait.
+          </div>
+        )}
 
         <div className="rounded-xl border border-gray-200 p-5 shadow-sm">
           {step === 1 ? (
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-900">Service</label>
+                <label htmlFor="service-category" className="block text-sm font-medium text-gray-900">Service</label>
                 <select
+                  id="service-category"
+                  name="service_category"
                   className="mt-2 w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
                   value={serviceSlug}
                   onChange={(e) => setServiceSlug(e.target.value)}
@@ -203,8 +361,12 @@ export default function BarkLeadForm({ onComplete, onCancel, preselectedCategory
             <div className="space-y-4">
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 <div className="sm:col-span-2">
-                  <label className="block text-sm font-medium text-gray-900">Address / Area</label>
+                  <label htmlFor="location-address" className="block text-sm font-medium text-gray-900">Address / Area</label>
                   <input
+                    id="location-address"
+                    name="location_address"
+                    type="text"
+                    autoComplete="street-address"
                     className="mt-2 w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
                     value={locationAddress}
                     onChange={(e) => setLocationAddress(e.target.value)}
@@ -212,8 +374,12 @@ export default function BarkLeadForm({ onComplete, onCancel, preselectedCategory
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-900">Suburb</label>
+                  <label htmlFor="location-suburb" className="block text-sm font-medium text-gray-900">Suburb</label>
                   <input
+                    id="location-suburb"
+                    name="location_suburb"
+                    type="text"
+                    autoComplete="address-level2"
                     className="mt-2 w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
                     value={locationSuburb}
                     onChange={(e) => setLocationSuburb(e.target.value)}
@@ -221,8 +387,12 @@ export default function BarkLeadForm({ onComplete, onCancel, preselectedCategory
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-900">City</label>
+                  <label htmlFor="location-city" className="block text-sm font-medium text-gray-900">City</label>
                   <input
+                    id="location-city"
+                    name="location_city"
+                    type="text"
+                    autoComplete="address-level1"
                     className="mt-2 w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
                     value={locationCity}
                     onChange={(e) => setLocationCity(e.target.value)}
@@ -232,8 +402,11 @@ export default function BarkLeadForm({ onComplete, onCancel, preselectedCategory
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-900">Project title (optional)</label>
+                <label htmlFor="project-title" className="block text-sm font-medium text-gray-900">Project title (optional)</label>
                 <input
+                  id="project-title"
+                  name="project_title"
+                  type="text"
                   className="mt-2 w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
@@ -242,8 +415,11 @@ export default function BarkLeadForm({ onComplete, onCancel, preselectedCategory
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-900">Describe what you need</label>
+                <label htmlFor="project-description" className="block text-sm font-medium text-gray-900">Describe what you need</label>
                 <textarea
+                  id="project-description"
+                  name="project_description"
+                  autoComplete="off"
                   className="mt-2 min-h-[120px] w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
@@ -253,8 +429,10 @@ export default function BarkLeadForm({ onComplete, onCancel, preselectedCategory
 
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 <div>
-                  <label className="block text-sm font-medium text-gray-900">Budget</label>
+                  <label htmlFor="budget-range" className="block text-sm font-medium text-gray-900">Budget</label>
                   <select
+                    id="budget-range"
+                    name="budget_range"
                     className="mt-2 w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
                     value={budgetRange}
                     onChange={(e) => setBudgetRange(e.target.value as any)}
@@ -267,8 +445,10 @@ export default function BarkLeadForm({ onComplete, onCancel, preselectedCategory
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-900">Urgency</label>
+                  <label htmlFor="urgency" className="block text-sm font-medium text-gray-900">Urgency</label>
                   <select
+                    id="urgency"
+                    name="urgency"
                     className="mt-2 w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
                     value={urgency}
                     onChange={(e) => setUrgency(e.target.value as any)}
@@ -284,8 +464,10 @@ export default function BarkLeadForm({ onComplete, onCancel, preselectedCategory
 
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 <div>
-                  <label className="block text-sm font-medium text-gray-900">Your intention</label>
+                  <label htmlFor="hiring-intent" className="block text-sm font-medium text-gray-900">Your intention</label>
                   <select
+                    id="hiring-intent"
+                    name="hiring_intent"
                     className="mt-2 w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
                     value={hiringIntent}
                     onChange={(e) => setHiringIntent(e.target.value as any)}
@@ -298,8 +480,10 @@ export default function BarkLeadForm({ onComplete, onCancel, preselectedCategory
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-900">When do you want to start?</label>
+                  <label htmlFor="hiring-timeline" className="block text-sm font-medium text-gray-900">When do you want to start?</label>
                   <select
+                    id="hiring-timeline"
+                    name="hiring_timeline"
                     className="mt-2 w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
                     value={hiringTimeline}
                     onChange={(e) => setHiringTimeline(e.target.value as any)}
@@ -318,30 +502,45 @@ export default function BarkLeadForm({ onComplete, onCancel, preselectedCategory
           {step === 3 ? (
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-900">Full name</label>
+                <label htmlFor="contact-name" className="block text-sm font-medium text-gray-900">Full name</label>
                 <input
+                  id="contact-name"
+                  name="contact_name"
+                  type="text"
+                  autoComplete="name"
                   className="mt-2 w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
                   value={contactName}
                   onChange={(e) => setContactName(e.target.value)}
                   placeholder="e.g. Jane Randy"
+                  required
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-900">Phone number</label>
+                <label htmlFor="contact-phone" className="block text-sm font-medium text-gray-900">Phone number</label>
                 <input
+                  id="contact-phone"
+                  name="contact_phone"
+                  type="tel"
+                  autoComplete="tel"
                   className="mt-2 w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
                   value={contactPhone}
                   onChange={(e) => setContactPhone(e.target.value)}
                   placeholder="e.g. +27679518124"
+                  required
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-900">Email</label>
+                <label htmlFor="contact-email" className="block text-sm font-medium text-gray-900">Email</label>
                 <input
+                  id="contact-email"
+                  name="contact_email"
+                  type="email"
+                  autoComplete="email"
                   className="mt-2 w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
                   value={contactEmail}
                   onChange={(e) => setContactEmail(e.target.value)}
                   placeholder="e.g. jane@gmail.com"
+                  required
                 />
               </div>
             </div>
@@ -373,9 +572,38 @@ export default function BarkLeadForm({ onComplete, onCancel, preselectedCategory
           ) : (
             <button
               type="button"
-              className="rounded-md bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700 disabled:opacity-50"
-              onClick={submit}
-              disabled={!canGoNext || submitting}
+              className="rounded-md bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              onClick={(e) => {
+                e.preventDefault()
+                e.stopPropagation()
+                console.log('🔘 Submit button clicked')
+                console.log('🔘 canGoNext:', canGoNext)
+                console.log('🔘 submitting:', submitting)
+                console.log('🔘 Full form state:', {
+                  step,
+                  selectedCategory: selectedCategory ? { id: selectedCategory.id, name: selectedCategory.name } : null,
+                  description: description.trim(),
+                  descriptionLength: description.trim().length,
+                  locationAddress: locationAddress.trim(),
+                  locationSuburb: locationSuburb.trim(),
+                  locationCity: locationCity.trim(),
+                  contactName: contactName.trim(),
+                  contactNameLength: contactName.trim().length,
+                  contactPhone: contactPhone.trim(),
+                  contactPhoneLength: contactPhone.trim().length,
+                  contactEmail: contactEmail.trim(),
+                  contactEmailValid: contactEmail.trim().includes('@') && contactEmail.trim().includes('.')
+                })
+                
+                // Always try to submit - let submit() function handle validation
+                if (!submitting) {
+                  console.log('✅ Calling submit() function...')
+                  submit()
+                } else {
+                  console.warn('⚠️ Already submitting, please wait...')
+                }
+              }}
+              disabled={submitting}
             >
               {submitting ? 'Submitting…' : 'Get my quotes'}
             </button>
