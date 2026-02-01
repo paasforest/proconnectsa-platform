@@ -14,21 +14,16 @@ from backend.leads.models import LeadAccess, LeadAssignment
 class Command(BaseCommand):
     help = "Remove test provider accounts, keeping only real providers"
 
-    # Test account patterns to delete
-    TEST_BUSINESS_NAMES = [
-        'AutoTest Services',
-        'Malawi Hermanus Society One',
-        'Plumber Only',
-        'rod plumbing',
-        "Ronnie's Multi-Service",
-    ]
-
-    # Real accounts to keep (case-insensitive partial match)
+    # Real accounts to KEEP (case-insensitive partial match)
+    # Only these 3 are confirmed real providers
     REAL_BUSINESS_NAMES = [
         'TMA Projects',
-        'mischeck ndolo',
+        'mischeck ndolo',  # Note: might be spelled "mischeck" or "mischeck"
         'Kenneth Nakutepa',
     ]
+
+    # Test account patterns to delete (everything else that's not in REAL_BUSINESS_NAMES)
+    # We'll identify test accounts by exclusion - anything NOT matching real names
 
     def add_arguments(self, parser):
         parser.add_argument(
@@ -45,55 +40,40 @@ class Command(BaseCommand):
         else:
             self.stdout.write(self.style.WARNING('⚠️  LIVE MODE - Accounts will be permanently deleted\n'))
 
-        # Find test accounts
-        test_profiles = []
-        for pattern in self.TEST_BUSINESS_NAMES:
-            # Case-insensitive search
-            matches = ProviderProfile.objects.filter(
-                business_name__icontains=pattern
-            ).select_related('user')
-            test_profiles.extend(matches)
-
-        # Remove duplicates (in case a profile matches multiple patterns)
-        seen_ids = set()
-        unique_test_profiles = []
-        for profile in test_profiles:
-            if profile.id not in seen_ids:
-                seen_ids.add(profile.id)
-                unique_test_profiles.append(profile)
-
-        # Verify we're not deleting real accounts
+        # Find ALL providers
+        all_profiles = list(ProviderProfile.objects.select_related('user').all())
+        
+        # Identify real accounts (to keep)
         real_profiles = []
         for pattern in self.REAL_BUSINESS_NAMES:
             matches = ProviderProfile.objects.filter(
                 business_name__icontains=pattern
             ).select_related('user')
             real_profiles.extend(matches)
-
-        # Check for overlap
-        test_ids = {p.id for p in unique_test_profiles}
-        real_ids = {p.id for p in real_profiles}
-        overlap = test_ids & real_ids
-
-        if overlap:
-            self.stdout.write(self.style.ERROR(
-                f'❌ ERROR: Found overlap between test and real accounts: {overlap}\n'
-                'Please review the business names and update the command.\n'
-            ))
-            return
+        
+        # Remove duplicates from real_profiles
+        seen_real_ids = set()
+        unique_real_profiles = []
+        for profile in real_profiles:
+            if profile.id not in seen_real_ids:
+                seen_real_ids.add(profile.id)
+                unique_real_profiles.append(profile)
+        
+        # Test accounts = everything that's NOT a real account
+        test_profiles = [p for p in all_profiles if p.id not in seen_real_ids]
 
         # Display what will be deleted
-        self.stdout.write(f'📋 Found {len(unique_test_profiles)} test provider account(s) to delete:\n')
-        for profile in unique_test_profiles:
+        self.stdout.write(f'📋 Found {len(test_profiles)} test provider account(s) to delete:\n')
+        for profile in test_profiles:
             self.stdout.write(f'   - {profile.business_name} (ID: {profile.id}, User: {profile.user.email})')
 
         # Display real accounts that will be kept
-        if real_profiles:
-            self.stdout.write(f'\n✅ Real provider accounts that will be KEPT ({len(real_profiles)}):\n')
-            for profile in real_profiles:
+        if unique_real_profiles:
+            self.stdout.write(f'\n✅ Real provider accounts that will be KEPT ({len(unique_real_profiles)}):\n')
+            for profile in unique_real_profiles:
                 self.stdout.write(f'   - {profile.business_name} (ID: {profile.id})')
 
-        if not unique_test_profiles:
+        if not test_profiles:
             self.stdout.write(self.style.SUCCESS('\n✅ No test accounts found to delete.'))
             return
 
@@ -105,7 +85,7 @@ class Command(BaseCommand):
 
         # Confirm deletion
         self.stdout.write(self.style.WARNING(
-            f'\n⚠️  About to delete {len(unique_test_profiles)} provider account(s) and associated data.'
+            f'\n⚠️  About to delete {len(test_profiles)} provider account(s) and associated data.'
         ))
         confirm = input('Type "DELETE" to confirm: ')
         if confirm != 'DELETE':
@@ -115,7 +95,7 @@ class Command(BaseCommand):
         # Delete test accounts
         deleted_count = 0
         with transaction.atomic():
-            for profile in unique_test_profiles:
+            for profile in test_profiles:
                 user = profile.user
                 business_name = profile.business_name
 
