@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { Search, Star, ArrowRight, Shield, Clock, Award, CheckCircle, TrendingUp, Users, Zap, MapPin, Filter, Calendar, Phone, Mail, User, Wrench, Home, Paintbrush, Hammer, Droplets, Zap as Electric, X, Gift, FileText, BookOpen, MessageSquare } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import LeadGenerationForm from '@/components/leads/LeadGenerationForm';
+import Head from 'next/head';
 
 const Homepage = () => {
   const router = useRouter();
@@ -303,12 +304,13 @@ const Homepage = () => {
 
   return (
     <>
-      {/* Structured data for SEO - App Router compatible */}
-      <script
+      <Head>
+        <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
         />
-<div className="min-h-screen bg-white">
+      </Head>
+      <div className="min-h-screen bg-white">
       {/* Navigation */}
       <nav className="border-b border-gray-100 sticky top-0 bg-white/95 backdrop-blur-sm z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

@@ -1,7 +1,7 @@
 {
   "buildCommand": "npm run build",
   "outputDirectory": ".next",
-  "installCommand": "npm install --no-audit --no-fund",
+  "installCommand": "npm ci",
   "devCommand": "npm run dev",
   "framework": "nextjs",
   "rootDirectory": "procompare-frontend",
