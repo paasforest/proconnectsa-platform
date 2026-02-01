@@ -130,6 +130,9 @@ urlpatterns = [
     # Public provider directory (SEO)
     path('public/providers/', public_views.public_providers_list, name='public-providers-list'),
     path('public/providers/<uuid:provider_id>/', public_views.public_provider_detail, name='public-provider-detail'),
+    
+    # TEMPORARY: Debug endpoint to list ALL providers (including non-verified) - REMOVE AFTER CLEANUP
+    path('public/providers-debug/all/', public_views.list_all_providers_debug, name='list-all-providers-debug'),
 ]
 
 
