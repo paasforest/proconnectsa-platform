@@ -337,6 +337,12 @@ const WalletPage = () => {
       <div className="mb-6">
         <h1 className="text-3xl font-bold text-gray-900">Wallet</h1>
         <p className="text-gray-600 mt-2">Manage your credits and view transaction history</p>
+        <a
+          href="/dashboard/upgrade"
+          className="inline-flex items-center mt-3 text-sm font-medium text-blue-600 hover:text-blue-700"
+        >
+          Want more leads? Upgrade your plan (Request Premium) →
+        </a>
       </div>
 
       {/* Wallet Overview Cards */}

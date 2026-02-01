@@ -6,7 +6,7 @@ import { useRouter, usePathname } from 'next/navigation';
 import {
   LayoutDashboard, Users, ShoppingCart, Wallet, Settings, 
   HelpCircle, LogOut, Bell, Menu, X, ChevronDown, User,
-  Home, Target, CreditCard, Wrench, MessageSquare, BarChart3
+  Home, Target, CreditCard, Wrench, MessageSquare, BarChart3, Crown
 } from 'lucide-react';
 import { apiClient } from '@/lib/api-simple';
 import PersonalizedHeader from './PersonalizedHeader';
@@ -64,6 +64,7 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
     { name: 'My Purchased Leads', href: '/dashboard/my-leads', icon: ShoppingCart, current: pathname === '/dashboard/my-leads' },
     { name: 'Chat', href: '/dashboard/chat', icon: MessageSquare, current: pathname === '/dashboard/chat' },
     { name: 'Credits & Wallet', href: '/dashboard/wallet', icon: Wallet, current: pathname === '/dashboard/wallet' },
+    { name: 'Upgrade plan', href: '/dashboard/upgrade', icon: Crown, current: pathname === '/dashboard/upgrade' },
     { name: 'Services', href: '/dashboard/services', icon: Wrench, current: pathname === '/dashboard/services' },
     { name: 'Settings', href: '/dashboard/settings', icon: Settings, current: pathname === '/dashboard/settings' },
     { name: 'Support', href: '/dashboard/support', icon: HelpCircle, current: pathname === '/dashboard/support' },
