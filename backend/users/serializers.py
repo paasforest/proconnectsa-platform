@@ -223,10 +223,82 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
                 'Other': 'other'
             }
             
-            # Convert primary service to slug
-            service_categories = []
-            if primary_service and primary_service in service_slug_mapping:
-                service_categories.append(service_slug_mapping[primary_service])
+            # Convert service categories from frontend to slugs
+            # Frontend sends category names like "Electrical", "Plumbing", etc.
+            # We need to convert them to slugs like "electrical", "plumbing"
+            category_name_to_slug = {
+                'Cleaning': 'cleaning',
+                'Electrical': 'electrical',
+                'Plumbing': 'plumbing',
+                'Painting': 'painting',
+                'Carpentry': 'carpentry',
+                'Gardening': 'landscaping',
+                'Handyman': 'handyman',
+                'Roofing': 'roofing',
+                'Flooring': 'flooring',
+                'Tiling': 'tiling',
+                'Appliance Repair': 'appliance-repair',
+                'HVAC': 'hvac',
+                'Security': 'security',
+                'Landscaping': 'landscaping',
+                'Pool Maintenance': 'pool-maintenance',
+                'Construction': 'construction',
+                'Renovations': 'renovations',
+            }
+            
+            # Process service_categories from request (convert names to slugs)
+            processed_categories = []
+            if service_categories:
+                for cat in service_categories:
+                    if isinstance(cat, str):
+                        # Try direct mapping first (if already a slug)
+                        if cat in service_slug_mapping.values():
+                            processed_categories.append(cat)
+                        # Try name-to-slug mapping
+                        elif cat in category_name_to_slug:
+                            processed_categories.append(category_name_to_slug[cat])
+                        # Try service_slug_mapping (for primary_service format)
+                        elif cat in service_slug_mapping:
+                            processed_categories.append(service_slug_mapping[cat])
+                        # If it's already a valid slug, use it
+                        else:
+                            # Check if it's a valid slug format
+                            from django.utils.text import slugify
+                            slug = slugify(cat)
+                            if slug:
+                                processed_categories.append(slug)
+            
+            # Also add primary_service if provided and not already in list
+            if primary_service:
+                if primary_service in service_slug_mapping:
+                    primary_slug = service_slug_mapping[primary_service]
+                    if primary_slug not in processed_categories:
+                        processed_categories.append(primary_slug)
+                elif primary_service in category_name_to_slug:
+                    primary_slug = category_name_to_slug[primary_service]
+                    if primary_slug not in processed_categories:
+                        processed_categories.append(primary_slug)
+            
+            # Validate that we have at least one category
+            if not processed_categories:
+                # Fallback: use primary_service or default to handyman
+                if primary_service and primary_service in service_slug_mapping:
+                    processed_categories = [service_slug_mapping[primary_service]]
+                else:
+                    # Default to handyman if nothing provided (shouldn't happen if frontend validation works)
+                    processed_categories = ['handyman']
+                    import logging
+                    logger = logging.getLogger(__name__)
+                    logger.warning(f"Provider {user.email} registered with no service categories, defaulting to 'handyman'")
+            
+            # Remove duplicates and ensure valid slugs
+            from backend.leads.models import ServiceCategory
+            valid_slugs = set(ServiceCategory.objects.filter(is_active=True).values_list('slug', flat=True))
+            final_categories = [cat for cat in processed_categories if cat in valid_slugs]
+            
+            # If still empty after validation, use handyman as fallback
+            if not final_categories:
+                final_categories = ['handyman'] if 'handyman' in valid_slugs else []
             
             ProviderProfile.objects.create(
                 user=user,
@@ -238,7 +310,7 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
                 business_phone=business_phone or user.phone or "+27123456789",
                 business_email=business_email or user.email,
                 service_areas=service_areas or ([user.city] if user.city else []),
-                service_categories=service_categories,
+                service_categories=final_categories,
                 max_travel_distance=max_travel_distance,
                 verification_status='pending',
                 subscription_tier='pay_as_you_go',
