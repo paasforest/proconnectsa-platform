@@ -49,14 +49,12 @@ def public_providers_list(request):
     page_size = int(request.GET.get('page_size', 20))
 
     # Show verified providers OR active premium listings
-    # Grandfather clause: existing verified providers (created before cutoff) stay visible
-    # New providers (after cutoff) need both verified AND premium
+    # Original logic: verified OR premium (existing providers stay visible)
+    # Note: For future enforcement, new providers can be required to have both verified AND premium
+    # by adding a filter based on created_at date, but for now keeping original simple logic
     from django.db.models import Q
-    from datetime import datetime
     now = timezone.now()
-    cutoff_date = timezone.make_aware(datetime(2025, 2, 1))  # Date when premium requirement started for new providers
     
-    # Base query: verified OR premium
     qs = ProviderProfile.objects.filter(
         Q(verification_status='verified') |  # Verified providers (existing ones stay)
         Q(
@@ -69,14 +67,6 @@ def public_providers_list(request):
             premium_listing_started_at__isnull=False,
             premium_listing_expires_at__isnull=True  # Lifetime premium
         )
-    )
-    
-    # For NEW providers (created after cutoff), require BOTH verified AND premium
-    # Exclude new providers that are not both verified AND premium
-    qs = qs.exclude(
-        created_at__gte=cutoff_date,  # Created after cutoff
-        ~Q(verification_status='verified'),  # AND not verified
-        ~Q(is_premium_listing=True)  # AND not premium
     )
 
     if category_slug:
