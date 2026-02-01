@@ -68,11 +68,50 @@ export default function ProviderReviewPage({ params }: { params: { id: string } 
     fetchProvider();
   }, [params.id, user, token, authLoading, router]);
 
+  const [completedJobs, setCompletedJobs] = useState<any[]>([]);
+  const [loadingJobs, setLoadingJobs] = useState(true);
+
+  useEffect(() => {
+    if (!user || !token || !provider) return;
+
+    // Check for completed jobs with this provider
+    const fetchCompletedJobs = async () => {
+      try {
+        const res = await fetch(`${API_BASE}/api/reviews/`, {
+          headers: {
+            'Authorization': `Token ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
+        
+        if (res.ok) {
+          const reviews = await res.json();
+          // Filter for jobs with this provider that don't have reviews yet
+          const jobsWithProvider = reviews.filter((r: any) => 
+            r.provider?.id === parseInt(params.id) || r.provider?.id === params.id
+          );
+          setCompletedJobs(jobsWithProvider);
+        }
+      } catch (error) {
+        console.error("Error fetching completed jobs:", error);
+      } finally {
+        setLoadingJobs(false);
+      }
+    };
+
+    fetchCompletedJobs();
+  }, [user, token, provider, params.id]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!user || !token) {
       toast.error("Please log in to submit a review");
+      return;
+    }
+
+    if (completedJobs.length === 0) {
+      toast.error("You need to complete a job with this provider before you can leave a review");
       return;
     }
 
@@ -94,19 +133,53 @@ export default function ProviderReviewPage({ params }: { params: { id: string } 
     setSubmitting(true);
 
     try {
-      // Note: This requires a completed job (LeadAssignment) in the backend
-      // For now, we'll show a message that reviews require a completed job
-      toast.info("Reviews can only be submitted after completing a job with this provider. Please submit a service request first.");
+      // Find the first completed job without a review
+      const jobToReview = completedJobs.find((job: any) => !job.review);
+      
+      if (!jobToReview) {
+        toast.error("You have already reviewed all your completed jobs with this provider");
+        setSubmitting(false);
+        return;
+      }
+
+      const reviewData = {
+        lead_assignment: jobToReview.lead_assignment?.id || jobToReview.id,
+        rating: rating,
+        title: title.trim(),
+        comment: comment.trim(),
+        quality_rating: qualityRating || rating,
+        communication_rating: communicationRating || rating,
+        timeliness_rating: timelinessRating || rating,
+        value_rating: valueRating || rating,
+        would_recommend: wouldRecommend !== null ? wouldRecommend : true,
+        job_completed: true
+      };
+
+      const res = await fetch(`${API_BASE}/api/reviews/create/`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Token ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(reviewData)
+      });
+
+      if (!res.ok) {
+        const error = await res.json();
+        throw new Error(error.error || error.detail || 'Failed to submit review');
+      }
+
+      toast.success("Review submitted successfully!");
       router.push(`/providers/${params.id}`);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error submitting review:", error);
-      toast.error("Failed to submit review. Please try again.");
+      toast.error(error.message || "Failed to submit review. Please try again.");
     } finally {
       setSubmitting(false);
     }
   };
 
-  if (authLoading || loading) {
+  if (authLoading || loading || loadingJobs) {
     return (
       <div className="min-h-screen flex flex-col">
         <ClientHeader />
@@ -135,6 +208,10 @@ export default function ProviderReviewPage({ params }: { params: { id: string } 
     );
   }
 
+  // Check if user has completed jobs with this provider
+  const hasCompletedJobs = completedJobs.length > 0;
+  const hasUnreviewedJobs = completedJobs.some((job: any) => !job.review);
+
   const location = [provider.suburb, provider.city].filter(Boolean).join(", ") || "Location not specified";
 
   return (
@@ -156,9 +233,75 @@ export default function ProviderReviewPage({ params }: { params: { id: string } 
             <p className="text-sm text-gray-500 mt-1">{location}</p>
           </div>
 
+          {!hasCompletedJobs ? (
+            <Card>
+              <CardHeader>
+                <CardTitle>Review Not Available</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                  <div className="flex items-start gap-2">
+                    <AlertCircle className="h-5 w-5 text-yellow-600 mt-0.5" />
+                    <div className="text-sm text-yellow-800">
+                      <p className="font-semibold mb-1">Complete a Job First</p>
+                      <p>You can only review {provider.business_name} after completing a job with them.</p>
+                    </div>
+                  </div>
+                </div>
+                <div className="space-y-3">
+                  <p className="text-gray-700">
+                    To leave a review, you need to:
+                  </p>
+                  <ol className="list-decimal list-inside space-y-2 text-sm text-gray-600">
+                    <li>Submit a service request</li>
+                    <li>Get matched with {provider.business_name}</li>
+                    <li>Complete the job</li>
+                    <li>Then come back here to leave your review</li>
+                  </ol>
+                </div>
+                <div className="flex gap-3 pt-4">
+                  <Button asChild variant="outline" className="flex-1">
+                    <Link href={`/providers/${params.id}`}>
+                      Back to Profile
+                    </Link>
+                  </Button>
+                  <Button asChild className="flex-1 bg-blue-600 hover:bg-blue-700">
+                    <Link href="/services">
+                      Submit Service Request
+                    </Link>
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          ) : !hasUnreviewedJobs ? (
+            <Card>
+              <CardHeader>
+                <CardTitle>All Jobs Reviewed</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                  <div className="flex items-start gap-2">
+                    <AlertCircle className="h-5 w-5 text-green-600 mt-0.5" />
+                    <div className="text-sm text-green-800">
+                      <p className="font-semibold mb-1">Thank You!</p>
+                      <p>You have already reviewed all your completed jobs with {provider.business_name}.</p>
+                    </div>
+                  </div>
+                </div>
+                <Button asChild variant="outline" className="w-full">
+                  <Link href={`/providers/${params.id}`}>
+                    Back to Profile
+                  </Link>
+                </Button>
+              </CardContent>
+            </Card>
+          ) : (
           <Card>
             <CardHeader>
               <CardTitle>Your Review</CardTitle>
+              <p className="text-sm text-gray-600 mt-2">
+                Review your completed job with {provider.business_name}
+              </p>
             </CardHeader>
             <CardContent>
               <form onSubmit={handleSubmit} className="space-y-6">
@@ -352,10 +495,10 @@ export default function ProviderReviewPage({ params }: { params: { id: string } 
                     <div className="text-sm text-blue-800">
                       <p className="font-semibold mb-1">Review Guidelines:</p>
                       <ul className="space-y-1 text-xs list-disc list-inside">
-                        <li>Reviews can only be submitted after completing a job with this provider</li>
                         <li>Be honest and constructive in your feedback</li>
                         <li>Focus on the work quality and service experience</li>
                         <li>Your review will be visible to other clients</li>
+                        <li>Reviews help other clients make informed decisions</li>
                       </ul>
                     </div>
                   </div>
@@ -382,6 +525,7 @@ export default function ProviderReviewPage({ params }: { params: { id: string } 
               </form>
             </CardContent>
           </Card>
+          )}
         </div>
       </main>
       <Footer />
