@@ -21,7 +21,7 @@ interface WalletData {
 }
 
 function DashboardPage({ user }: { user: any }) {
-  const { user: authUser } = useAuth();
+  const { user: authUser, token } = useAuth();
   const [stats, setStats] = useState<UserStats>({
     active_leads: 0,
     completed_leads: 0,
@@ -46,20 +46,28 @@ function DashboardPage({ user }: { user: any }) {
     loadDashboardData();
     
     // Check premium status
-    if (authUser?.userType === 'provider') {
+    if (authUser?.userType === 'provider' && token) {
       fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://api.proconnectsa.co.za'}/api/auth/provider-profile/`, {
         headers: {
-          'Authorization': `Token ${localStorage.getItem('token') || ''}`,
+          'Authorization': `Token ${token}`,
           'Content-Type': 'application/json'
         }
       })
-        .then(res => res.json())
+        .then(res => {
+          if (res.ok) {
+            return res.json();
+          }
+          throw new Error('Failed to fetch premium status');
+        })
         .then(data => {
           setIsPremiumActive(data.is_premium_listing_active || false);
         })
-        .catch(err => console.warn('Failed to load premium status', err));
+        .catch(err => {
+          console.warn('Failed to load premium status', err);
+          setIsPremiumActive(false);
+        });
     }
-  }, [authUser]);
+  }, [authUser, token]);
 
   const loadDashboardData = async () => {
     try {
@@ -184,7 +192,7 @@ function DashboardPage({ user }: { user: any }) {
 
           <div className="mb-8">
             <h1 className="text-3xl font-bold text-gray-900">ProConnectSA</h1>
-            <p className="text-gray-600">Welcome back to your Lead Marketplace, {userProfile?.business_name || 'Professional'}</p>
+            <p className="text-gray-600">Welcome back to your Lead Marketplace, {authUser?.business_name || authUser?.first_name || 'Professional'}</p>
           </div>
 
           {/* Stats Grid */}
@@ -218,39 +226,39 @@ function DashboardPage({ user }: { user: any }) {
             </div>
           </div>
 
-          {/* Premium Listing Card - Prominent */}
-          {authUser?.userType === 'provider' && (
+          {/* Premium Listing Card - Prominent - Always show for providers */}
+          {(authUser?.userType === 'provider' || user?.userType === 'provider') && (
             <div className={`mb-8 p-6 rounded-lg shadow-lg border-2 ${
               isPremiumActive 
                 ? 'bg-gradient-to-r from-green-50 to-emerald-50 border-green-300' 
                 : 'bg-gradient-to-r from-purple-50 to-pink-50 border-purple-300'
             }`}>
-              <div className="flex items-center justify-between">
+              <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
                 <div className="flex items-center space-x-4">
                   <div className={`p-3 rounded-full ${isPremiumActive ? 'bg-green-100' : 'bg-purple-100'}`}>
                     <Star className={`w-6 h-6 ${isPremiumActive ? 'text-green-600' : 'text-purple-600'}`} />
                   </div>
                   <div>
                     <h3 className={`text-xl font-bold ${isPremiumActive ? 'text-green-800' : 'text-purple-800'}`}>
-                      {isPremiumActive ? '⭐ Premium Active' : 'Upgrade to Premium Listing'}
+                      {isPremiumActive ? '⭐ Premium Active' : '⭐ Upgrade to Premium Listing'}
                     </h3>
                     <p className={`text-sm ${isPremiumActive ? 'text-green-700' : 'text-purple-700'}`}>
                       {isPremiumActive 
                         ? 'You receive unlimited FREE leads and enhanced visibility'
-                        : 'Get unlimited FREE leads, enhanced visibility, and priority matching'
+                        : 'Get unlimited FREE leads, enhanced visibility, and priority matching. R299/month or R2,990 lifetime.'
                       }
                     </p>
                   </div>
                 </div>
                 <button
                   onClick={() => router.push('/dashboard/settings')}
-                  className={`px-6 py-3 rounded-lg font-semibold transition-colors ${
+                  className={`px-6 py-3 rounded-lg font-semibold transition-colors whitespace-nowrap ${
                     isPremiumActive
                       ? 'bg-green-600 text-white hover:bg-green-700'
                       : 'bg-purple-600 text-white hover:bg-purple-700'
                   }`}
                 >
-                  {isPremiumActive ? 'Manage Premium' : 'Upgrade Now'}
+                  {isPremiumActive ? 'Manage Premium' : 'Request Premium →'}
                 </button>
               </div>
             </div>
