@@ -128,7 +128,12 @@ export default function ProfilePage() {
 
       if (response.ok) {
         const data = await response.json();
-        setProfile(data);
+        // Ensure arrays are initialized
+        setProfile({
+          ...data,
+          service_categories: data.service_categories || [],
+          service_areas: data.service_areas || []
+        });
       } else {
         console.error('Failed to fetch profile:', response.status);
         toast.error('Failed to fetch profile');
@@ -214,37 +219,45 @@ export default function ProfilePage() {
   };
 
   const addServiceArea = (area: string) => {
-    if (profile && !profile.service_areas.includes(area)) {
-      setProfile({
-        ...profile,
-        service_areas: [...profile.service_areas, area]
-      });
+    if (profile) {
+      const currentAreas = profile.service_areas || [];
+      if (!currentAreas.includes(area)) {
+        setProfile({
+          ...profile,
+          service_areas: [...currentAreas, area]
+        });
+      }
     }
   };
 
   const removeServiceArea = (area: string) => {
     if (profile) {
+      const currentAreas = profile.service_areas || [];
       setProfile({
         ...profile,
-        service_areas: profile.service_areas.filter(a => a !== area)
+        service_areas: currentAreas.filter(a => a !== area)
       });
     }
   };
 
   const addServiceCategory = (category: string) => {
-    if (profile && !profile.service_categories.includes(category)) {
-      setProfile({
-        ...profile,
-        service_categories: [...profile.service_categories, category]
-      });
+    if (profile) {
+      const currentCategories = profile.service_categories || [];
+      if (!currentCategories.includes(category)) {
+        setProfile({
+          ...profile,
+          service_categories: [...currentCategories, category]
+        });
+      }
     }
   };
 
   const removeServiceCategory = (category: string) => {
     if (profile) {
+      const currentCategories = profile.service_categories || [];
       setProfile({
         ...profile,
-        service_categories: profile.service_categories.filter(c => c !== category)
+        service_categories: currentCategories.filter(c => c !== category)
       });
     }
   };
@@ -453,7 +466,7 @@ export default function ProfilePage() {
                 <div>
                   <Label>Current Services</Label>
                   <div className="flex flex-wrap gap-2 mt-2">
-                    {profile.service_categories.map((category) => {
+                    {(profile.service_categories || []).map((category) => {
                       const serviceInfo = SERVICE_CATEGORIES.find(s => s.value === category);
                       return (
                         <Badge key={category} variant="secondary" className="flex items-center gap-1">
@@ -467,6 +480,9 @@ export default function ProfilePage() {
                         </Badge>
                       );
                     })}
+                    {(!profile.service_categories || profile.service_categories.length === 0) && (
+                      <p className="text-sm text-gray-500">No services added yet</p>
+                    )}
                   </div>
                 </div>
 
@@ -478,7 +494,7 @@ export default function ProfilePage() {
                     </SelectTrigger>
                     <SelectContent>
                       {SERVICE_CATEGORIES
-                        .filter(service => !profile.service_categories.includes(service.value))
+                        .filter(service => !(profile.service_categories || []).includes(service.value))
                         .map((service) => (
                           <SelectItem key={service.value} value={service.value}>
                             {service.label}
@@ -504,7 +520,7 @@ export default function ProfilePage() {
                 <div>
                   <Label>Current Service Areas</Label>
                   <div className="flex flex-wrap gap-2 mt-2">
-                    {profile.service_areas.map((area) => (
+                    {(profile.service_areas || []).map((area) => (
                       <Badge key={area} variant="secondary" className="flex items-center gap-1">
                         {area}
                         <button
@@ -515,6 +531,9 @@ export default function ProfilePage() {
                         </button>
                       </Badge>
                     ))}
+                    {(!profile.service_areas || profile.service_areas.length === 0) && (
+                      <p className="text-sm text-gray-500">No service areas added yet</p>
+                    )}
                   </div>
                 </div>
 
@@ -526,7 +545,7 @@ export default function ProfilePage() {
                     </SelectTrigger>
                     <SelectContent>
                       {CAPE_TOWN_AREAS
-                        .filter(area => !profile.service_areas.includes(area))
+                        .filter(area => !(profile.service_areas || []).includes(area))
                         .map((area) => (
                           <SelectItem key={area} value={area}>
                             {area}
