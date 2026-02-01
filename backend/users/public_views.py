@@ -36,32 +36,27 @@ def _provider_public_dict(p: ProviderProfile):
 @permission_classes([AllowAny])
 def public_providers_list(request):
     """
-    Public: list verified providers OR premium listings with optional filters: category, city, page, page_size
+    Public: list ONLY premium listings with optional filters: category, city, page, page_size
     
     Visibility rules:
-    - Verified providers are always visible
-    - Premium listings are visible even if pending verification (but must be verified to show contact info)
+    - ONLY active premium listings are visible on the browse page
+    - This is a premium feature - providers must pay to be listed publicly
+    - Premium listings must be active (not expired) to appear
     """
     category_slug = request.GET.get('category')
     city = request.GET.get('city')
     page = int(request.GET.get('page', 1))
     page_size = int(request.GET.get('page_size', 20))
 
-    # Show verified providers OR active premium listings
+    # Show ONLY active premium listings
     from django.db.models import Q
     now = timezone.now()
     qs = ProviderProfile.objects.filter(
-        Q(verification_status='verified') |
-        Q(
-            is_premium_listing=True,
-            premium_listing_started_at__isnull=False,
-            premium_listing_expires_at__gt=now
-        ) |
-        Q(
-            is_premium_listing=True,
-            premium_listing_started_at__isnull=False,
-            premium_listing_expires_at__isnull=True  # Lifetime premium
-        )
+        is_premium_listing=True,
+        premium_listing_started_at__isnull=False
+    ).filter(
+        Q(premium_listing_expires_at__gt=now) |  # Monthly premium (not expired)
+        Q(premium_listing_expires_at__isnull=True)  # Lifetime premium
     )
 
     if category_slug:
