@@ -39,7 +39,7 @@ def public_providers_list(request):
     Public: list verified providers OR premium listings with optional filters: category, city, page, page_size
     
     Visibility rules:
-    - Verified providers are always visible (grandfathered - existing providers)
+    - Verified providers are always visible (existing providers stay visible)
     - Premium listings are visible even if pending verification (but must be verified to show contact info)
     - NEW providers (created after 2025-02-01) must be BOTH verified AND premium to appear
     """
@@ -49,15 +49,16 @@ def public_providers_list(request):
     page_size = int(request.GET.get('page_size', 20))
 
     # Show verified providers OR active premium listings
-    # Grandfather clause: existing verified providers stay visible
-    # New providers (after cutoff date) need both verified AND premium
+    # Grandfather clause: existing verified providers (created before cutoff) stay visible
+    # New providers (after cutoff) need both verified AND premium
     from django.db.models import Q
     from datetime import datetime
     now = timezone.now()
-    cutoff_date = timezone.make_aware(datetime(2025, 2, 1))  # Date when premium requirement started
+    cutoff_date = timezone.make_aware(datetime(2025, 2, 1))  # Date when premium requirement started for new providers
     
+    # Base query: verified OR premium
     qs = ProviderProfile.objects.filter(
-        Q(verification_status='verified') |  # Grandfathered: verified providers always visible
+        Q(verification_status='verified') |  # Verified providers (existing ones stay)
         Q(
             is_premium_listing=True,
             premium_listing_started_at__isnull=False,
@@ -71,11 +72,11 @@ def public_providers_list(request):
     )
     
     # For NEW providers (created after cutoff), require BOTH verified AND premium
-    # This ensures future providers need premium, but existing ones stay
+    # Exclude new providers that are not both verified AND premium
     qs = qs.exclude(
-        ~Q(verification_status='verified'),  # Not verified
         created_at__gte=cutoff_date,  # Created after cutoff
-        is_premium_listing=False  # And not premium
+        ~Q(verification_status='verified'),  # AND not verified
+        ~Q(is_premium_listing=True)  # AND not premium
     )
 
     if category_slug:
