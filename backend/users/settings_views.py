@@ -329,7 +329,39 @@ def request_premium_listing(request):
                 'error': 'Invalid plan_type. Must be "monthly" or "lifetime"'
             }, status=status.HTTP_400_BAD_REQUEST)
         
-        provider = request.user.provider_profile
+        # Get provider profile - handle if it doesn't exist
+        try:
+            provider = request.user.provider_profile
+        except Exception as e:
+            logger.error(f"Provider profile not found for {request.user.email}: {str(e)}")
+            return Response({
+                'success': False,
+                'error': 'Provider profile not found. Please complete your profile setup first.'
+            }, status=status.HTTP_400_BAD_REQUEST)
+        
+        # Get or generate customer code
+        customer_code = None
+        if hasattr(provider, 'customer_code') and provider.customer_code:
+            customer_code = provider.customer_code
+        else:
+            # Try to get from Wallet
+            from backend.users.models import Wallet
+            try:
+                wallet = Wallet.objects.get(user=request.user)
+                if wallet.customer_code:
+                    customer_code = wallet.customer_code
+            except Wallet.DoesNotExist:
+                pass
+        
+        # If still no customer code, generate one
+        if not customer_code:
+            if hasattr(provider, 'generate_customer_code'):
+                customer_code = provider.generate_customer_code()
+                provider.customer_code = customer_code
+                provider.save(update_fields=['customer_code'])
+            else:
+                # Fallback: use user ID
+                customer_code = f"PC{str(request.user.id)[:8].upper()}"
         
         # Calculate amount and duration
         if plan_type == 'monthly':
@@ -346,36 +378,58 @@ def request_premium_listing(request):
         unique_id = str(uuid.uuid4().hex[:6]).upper()
         reference_number = f"PREMIUM{unique_id}{timestamp}"
         
-        # Get banking details
-        from backend.payments.auto_deposit_service import AutoDepositService
-        auto_service = AutoDepositService()
-        deposit_instructions = auto_service.get_deposit_instructions(provider.customer_code)
-        
-        banking_details = deposit_instructions.get('instructions', {
+        # Get banking details - use defaults if service fails
+        banking_details = {
             'bank_name': 'Nedbank',
             'account_number': '1313872032',
             'branch_code': '198765',
             'account_holder': 'ProConnectSA (Pty) Ltd'
-        })
+        }
+        
+        try:
+            from backend.payments.auto_deposit_service import AutoDepositService
+            auto_service = AutoDepositService()
+            deposit_instructions = auto_service.get_deposit_instructions(customer_code)
+            if deposit_instructions.get('success') and deposit_instructions.get('instructions'):
+                banking_details = deposit_instructions['instructions']
+        except Exception as e:
+            logger.warning(f"Could not get deposit instructions, using defaults: {str(e)}")
+            # Use defaults already set above
         
         # Create deposit request for premium payment
-        from backend.payments.models import DepositRequest, PaymentAccount
+        from backend.payments.models import DepositRequest
         from backend.payments.payment_service import PaymentService
         
-        payment_service = PaymentService()
-        account = payment_service.get_or_create_payment_account(request.user)
+        try:
+            payment_service = PaymentService()
+            account = payment_service.get_or_create_payment_account(request.user)
+        except Exception as e:
+            logger.error(f"Error creating payment account: {str(e)}")
+            return Response({
+                'success': False,
+                'error': 'Failed to create payment account',
+                'message': str(e)
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         
         # Create deposit request with PREMIUM reference
-        deposit_request = DepositRequest.objects.create(
-            account=account,
-            amount=amount,
-            bank_reference=reference_number,
-            reference_number=reference_number,
-            customer_code=provider.customer_code,
-            credits_to_activate=0,  # Premium doesn't give credits, it gives free leads
-            status='pending',
-            verification_notes=f'Premium listing request - {plan_type} plan'
-        )
+        try:
+            deposit_request = DepositRequest.objects.create(
+                account=account,
+                amount=amount,
+                bank_reference=reference_number,
+                reference_number=reference_number,
+                customer_code=customer_code,
+                credits_to_activate=0,  # Premium doesn't give credits, it gives free leads
+                status='pending',
+                verification_notes=f'Premium listing request - {plan_type} plan'
+            )
+        except Exception as e:
+            logger.error(f"Error creating deposit request: {str(e)}")
+            return Response({
+                'success': False,
+                'error': 'Failed to create deposit request',
+                'message': str(e)
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         
         # Instructions for user
         instructions = [
@@ -396,13 +450,15 @@ def request_premium_listing(request):
             'amount': amount,
             'plan_type': plan_type,
             'banking_details': banking_details,
-            'customer_code': provider.customer_code,
+            'customer_code': customer_code,
             'instructions': instructions,
             'deposit_id': str(deposit_request.id)
         }, status=status.HTTP_201_CREATED)
         
     except Exception as e:
+        import traceback
         logger.error(f"Error creating premium listing request: {str(e)}")
+        logger.error(f"Traceback: {traceback.format_exc()}")
         return Response({
             'success': False,
             'error': 'Failed to create premium listing request',
