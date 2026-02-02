@@ -69,7 +69,7 @@ export default async function ProvidersBrowsePage({
             <p className="text-gray-600">
               Browse public profiles of verified professionals. Filter by category and city.
             </p>
-            <form className="mt-6 grid grid-cols-1 md:grid-cols-4 gap-3">
+            <form method="get" action="/providers/browse" className="mt-6 grid grid-cols-1 md:grid-cols-4 gap-3">
               <input
                 name="category"
                 placeholder="Category slug (e.g. plumbing)"
@@ -83,7 +83,7 @@ export default async function ProvidersBrowsePage({
                 className="border rounded px-3 py-2"
               />
               <input type="hidden" name="page" value="1" />
-              <button className="bg-blue-600 text-white rounded px-4 py-2">Search</button>
+              <button type="submit" className="bg-blue-600 text-white rounded px-4 py-2 hover:bg-blue-700">Search</button>
               <Link
                 href="/providers/browse"
                 className="text-sm text-gray-600 underline underline-offset-4 self-center"
