@@ -78,21 +78,26 @@ async function fetchProvider(id: string): Promise<PublicProvider | null> {
   };
 }
 
-export async function generateMetadata({ params }: { params: { id: string } }): Promise<Metadata> {
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
   try {
-    const provider = await fetchProvider(params.id);
+    const { id } = await params;
+    const provider = await fetchProvider(id);
     if (!provider) return { title: "Provider not found | ProConnectSA" };
+    const categoryNames = provider.service_category_names && provider.service_category_names.length > 0 
+      ? provider.service_category_names.join(', ') 
+      : 'service';
     return {
       title: `${provider.business_name} | Provider Profile`,
-      description: provider.bio || `Verified ${provider.service_category_names.join(', ')} provider in ${[provider.suburb, provider.city].filter(Boolean).join(", ") || "South Africa"}.`,
+      description: provider.bio || `Verified ${categoryNames} provider in ${[provider.suburb, provider.city].filter(Boolean).join(", ") || "South Africa"}.`,
     };
   } catch {
     return { title: "Provider | ProConnectSA" };
   }
 }
 
-export default async function ProviderDetailPage({ params }: { params: { id: string } }) {
-  const provider = await fetchProvider(params.id);
+export default async function ProviderDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  const provider = await fetchProvider(id);
   if (!provider) return notFound();
 
   const location = [provider.suburb, provider.city].filter(Boolean).join(", ") || "Location not specified";
