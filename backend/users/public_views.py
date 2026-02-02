@@ -53,29 +53,14 @@ def _provider_public_dict(p: ProviderProfile):
 @permission_classes([AllowAny])
 def public_providers_list(request):
     """
-    Public: list verified providers OR providers with active premium subscriptions
-    Optional filters: category, city, page, page_size
+    Public: list verified providers with optional filters: category, city, page, page_size
     """
-    from django.utils import timezone
-    from django.db.models import Q
-    
     category_slug = request.GET.get('category')
     city = request.GET.get('city')
     page = int(request.GET.get('page', 1))
     page_size = int(request.GET.get('page_size', 20))
 
-    # Show verified providers OR providers with active premium subscriptions (pro/enterprise)
-    # Premium tiers: 'pro', 'enterprise', 'advanced' are considered premium
-    premium_tiers = ['pro', 'enterprise', 'advanced']
-    
-    qs = ProviderProfile.objects.filter(
-        Q(verification_status='verified') |
-        Q(
-            verification_status__in=['pending', 'verified'],
-            subscription_tier__in=premium_tiers,
-            subscription_end_date__gt=timezone.now()
-        )
-    ).exclude(verification_status='rejected').exclude(verification_status='suspended')
+    qs = ProviderProfile.objects.filter(verification_status='verified')
 
     if category_slug:
         qs = qs.filter(service_categories__contains=[category_slug])
