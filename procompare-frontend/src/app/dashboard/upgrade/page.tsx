@@ -23,8 +23,9 @@ function UpgradePageContent() {
         apiClient.setToken(token);
         const data = await apiClient.get('/api/auth/profile/');
         // Handle different response structures
-        const profile = data?.data?.provider_profile || data?.provider_profile || data?.data || data;
-        const tier = profile?.subscription_tier || 'pay_as_you_go';
+        const userData = data?.data?.user || data?.user || data?.data || data;
+        const profile = userData?.provider_profile || data?.data?.provider_profile || data?.provider_profile;
+        const tier = profile?.subscription_tier || userData?.subscription_tier || 'pay_as_you_go';
         setCurrentTier(tier);
       } catch (error: any) {
         console.error('Error fetching profile:', error);

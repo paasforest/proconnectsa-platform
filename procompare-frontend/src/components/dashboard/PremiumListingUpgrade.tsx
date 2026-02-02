@@ -92,16 +92,36 @@ export default function PremiumListingUpgrade({
         plan_type: planType
       });
 
-      if (response.success) {
-        setPremiumRequest(response);
+      // Handle different response structures
+      const responseData = response?.data || response;
+      
+      if (responseData.success || response.success) {
+        setPremiumRequest(responseData);
         setShowBankingDetails(true);
         toast.success('Premium request created! Please complete the EFT payment.');
       } else {
-        toast.error(response.error || 'Failed to create premium request');
+        const errorMsg = responseData.error || response.error || 'Failed to create premium request';
+        toast.error(errorMsg);
       }
     } catch (error: any) {
       console.error('Premium request error:', error);
-      const errorMessage = error.response?.data?.error || error.message || 'Failed to request premium listing';
+      // Better error handling
+      let errorMessage = 'Failed to request premium listing';
+      
+      if (error.response?.data) {
+        errorMessage = error.response.data.error || 
+                      error.response.data.message || 
+                      error.response.data.detail ||
+                      errorMessage;
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+      
+      // Check for network errors
+      if (error.message?.includes('Failed to fetch') || error.message?.includes('NetworkError')) {
+        errorMessage = 'Network error: Please check your internet connection and try again';
+      }
+      
       toast.error(errorMessage);
     } finally {
       setLoading(null);

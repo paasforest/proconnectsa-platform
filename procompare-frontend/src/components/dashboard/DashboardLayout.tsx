@@ -97,9 +97,43 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
       try {
         apiClient.setToken(token);
         const response = await apiClient.get('/api/auth/profile/');
-        setUserProfile(response);
+        // Handle different response structures
+        const profileData = response?.data?.user || response?.user || response?.data || response;
+        if (profileData) {
+          setUserProfile({
+            id: profileData.id || user?.id || '',
+            email: profileData.email || user?.email || '',
+            first_name: profileData.first_name || user?.first_name || '',
+            last_name: profileData.last_name || user?.last_name || '',
+            business_name: profileData.provider_profile?.business_name || profileData.business_name || '',
+            phone: profileData.phone || user?.phone || '',
+            location: profileData.provider_profile?.location || profileData.location || '',
+            services: profileData.provider_profile?.service_categories || profileData.services || [],
+            subscription_tier: profileData.provider_profile?.subscription_tier || profileData.subscription_tier || 'pay_as_you_go',
+            customer_code: profileData.provider_profile?.customer_code || profileData.customer_code || '',
+            credit_balance: profileData.provider_profile?.credit_balance || profileData.credit_balance || 0,
+            is_verified: profileData.provider_profile?.verification_status === 'verified' || profileData.is_verified || false
+          });
+        }
       } catch (error) {
-        // Handle error silently
+        console.error('Error fetching user profile:', error);
+        // Fallback to user data from auth
+        if (user) {
+          setUserProfile({
+            id: user.id || '',
+            email: user.email || '',
+            first_name: user.first_name || '',
+            last_name: user.last_name || '',
+            business_name: user.business_name || '',
+            phone: user.phone || '',
+            location: user.city || '',
+            services: [],
+            subscription_tier: 'pay_as_you_go',
+            customer_code: '',
+            credit_balance: 0,
+            is_verified: false
+          });
+        }
       }
     };
 
@@ -338,10 +372,15 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
                   </div>
                   <div className="hidden sm:block">
                     <span className="text-sm font-medium text-gray-700">
-                      {userProfile?.business_name || `${userProfile?.first_name} ${userProfile?.last_name}` || user?.email}
+                      {userProfile?.business_name || 
+                       (userProfile?.first_name || userProfile?.last_name 
+                         ? `${userProfile.first_name || ''} ${userProfile.last_name || ''}`.trim()
+                         : '') || 
+                       user?.email || 
+                       'User'}
                     </span>
-                    {userProfile?.business_name && (
-                      <p className="text-xs text-gray-500">{userProfile.email}</p>
+                    {(userProfile?.business_name || userProfile?.email) && (
+                      <p className="text-xs text-gray-500">{userProfile.email || user?.email}</p>
                     )}
                   </div>
                   <ChevronDown className="w-4 h-4 text-gray-400" />
