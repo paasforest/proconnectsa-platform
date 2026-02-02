@@ -44,27 +44,47 @@ async function handleRequest(
     
     // Get request body for POST/PUT requests
     let body: string | undefined
-    if (method === 'POST' || method === 'PUT') {
+    if (method === 'POST' || method === 'PUT' || method === 'PATCH') {
       body = await request.text()
     }
 
+    // Extract authorization header from request
+    const authHeader = request.headers.get('authorization')
+    
     // Forward the request to the backend
+    const headers: HeadersInit = {
+      'Content-Type': 'application/json',
+    }
+    
+    // Add authorization if present
+    if (authHeader) {
+      headers['Authorization'] = authHeader
+    }
+
     const response = await fetch(url, {
       method,
-      headers: {
-        'Content-Type': 'application/json',
-        ...Object.fromEntries(request.headers.entries()),
-      },
+      headers,
       body,
     })
 
-    const data = await response.json()
+    // Handle non-JSON responses
+    const contentType = response.headers.get('content-type')
+    let data
+    if (contentType && contentType.includes('application/json')) {
+      data = await response.json()
+    } else {
+      const text = await response.text()
+      return NextResponse.json(
+        { error: `Server returned non-JSON: ${text}` },
+        { status: response.status }
+      )
+    }
     
     return NextResponse.json(data, { status: response.status })
-  } catch (error) {
+  } catch (error: any) {
     console.error('Backend proxy error:', error)
     return NextResponse.json(
-      { error: 'Failed to connect to backend service' },
+      { error: error.message || 'Failed to connect to backend service' },
       { status: 503 }
     )
   }
