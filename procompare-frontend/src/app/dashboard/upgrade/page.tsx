@@ -15,6 +15,7 @@ function UpgradePageContent() {
   useEffect(() => {
     const fetchProfile = async () => {
       if (!token) {
+        setCurrentTier('pay_as_you_go');
         setLoading(false);
         return;
       }
@@ -25,8 +26,10 @@ function UpgradePageContent() {
         const profile = data?.data?.provider_profile || data?.provider_profile || data?.data || data;
         const tier = profile?.subscription_tier || 'pay_as_you_go';
         setCurrentTier(tier);
-      } catch (error) {
+      } catch (error: any) {
         console.error('Error fetching profile:', error);
+        // If profile fetch fails, default to pay_as_you_go and continue
+        // The PremiumListingUpgrade component will handle its own API calls
         setCurrentTier('pay_as_you_go');
       } finally {
         setLoading(false);
