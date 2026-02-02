@@ -5,7 +5,17 @@ import { Button } from "@/components/ui/button";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import type { Metadata } from "next";
-import { Star, MapPin, Shield, Award, CheckCircle, ArrowRight } from "lucide-react";
+import { 
+  Star, 
+  MapPin, 
+  Clock, 
+  Award, 
+  Shield, 
+  DollarSign, 
+  CheckCircle,
+  Briefcase,
+  Image as ImageIcon
+} from "lucide-react";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "https://api.proconnectsa.co.za";
 
@@ -15,51 +25,31 @@ type PublicProvider = {
   city: string | null;
   suburb: string | null;
   service_categories: string[] | null;
+  service_category_names: string[];
   average_rating: number;
   total_reviews: number;
   verification_status: string;
-  is_premium_listing?: boolean;
   slug: string;
+  bio: string;
+  years_experience: number | null;
+  service_areas: string[];
+  max_travel_distance: number;
+  hourly_rate_min: number | null;
+  hourly_rate_max: number | null;
+  minimum_job_value: number | null;
+  response_time_hours: number | null;
+  job_completion_rate: number | null;
+  profile_image: string;
+  portfolio_images: string[];
+  insurance_valid_until: string | null;
 };
 
 async function fetchProvider(id: string) {
-  try {
-    // Ensure ID is a valid integer string
-    const providerId = id.trim();
-    if (!providerId || isNaN(Number(providerId))) {
-      console.error(`Invalid provider ID: ${id}`);
-      return null;
-    }
-    
-    const url = `${API_BASE}/api/public/providers/${providerId}/`;
-    console.log(`Fetching provider from: ${url}`);
-    
-    const res = await fetch(url, { 
-      next: { revalidate: 300 },
-      headers: {
-        'Accept': 'application/json'
-      }
-    });
-    
-    if (res.status === 404) {
-      const errorData = await res.json().catch(() => ({}));
-      console.error(`Provider not found (404): ${providerId}`, errorData);
-      return null;
-    }
-    
-    if (!res.ok) {
-      const errorText = await res.text();
-      console.error(`Failed to load provider: ${res.status} ${res.statusText}`, errorText);
-      return null;
-    }
-    
-    const data = await res.json();
-    console.log(`Provider loaded successfully: ${data.business_name}`);
-    return data as PublicProvider;
-  } catch (error) {
-    console.error('Error fetching provider:', error);
-    return null;
-  }
+  const url = `${API_BASE}/api/public/providers/${id}/`;
+  const res = await fetch(url, { next: { revalidate: 300 } });
+  if (res.status === 404) return null;
+  if (!res.ok) throw new Error(`Failed to load provider (${res.status})`);
+  return (await res.json()) as PublicProvider;
 }
 
 export async function generateMetadata({ params }: { params: { id: string } }): Promise<Metadata> {
@@ -68,7 +58,7 @@ export async function generateMetadata({ params }: { params: { id: string } }): 
     if (!provider) return { title: "Provider not found | ProConnectSA" };
     return {
       title: `${provider.business_name} | Provider Profile`,
-      description: `Verified provider in ${[provider.suburb, provider.city].filter(Boolean).join(", ") || "South Africa"}.`,
+      description: provider.bio || `Verified ${provider.service_category_names.join(', ')} provider in ${[provider.suburb, provider.city].filter(Boolean).join(", ") || "South Africa"}.`,
     };
   } catch {
     return { title: "Provider | ProConnectSA" };
@@ -80,130 +70,140 @@ export default async function ProviderDetailPage({ params }: { params: { id: str
   if (!provider) return notFound();
 
   const location = [provider.suburb, provider.city].filter(Boolean).join(", ") || "Location not specified";
-  const rating = provider.average_rating?.toFixed(1) ?? "0.0";
-  const reviews = provider.total_reviews || 0;
+  const hasPricing = provider.hourly_rate_min || provider.hourly_rate_max || provider.minimum_job_value;
+  const hasInsurance = provider.insurance_valid_until && new Date(provider.insurance_valid_until) > new Date();
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col bg-gray-50">
       <ClientHeader />
       <main className="flex-1">
-        {/* Hero Section */}
-        <section className="bg-gradient-to-br from-blue-50 to-indigo-100 border-b">
-          <div className="container mx-auto px-4 py-12">
+        {/* Header Section */}
+        <section className="bg-white border-b">
+          <div className="container mx-auto px-4 py-8">
             <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-6">
               <div className="flex-1">
-                <div className="flex items-center gap-3 mb-4">
-                  <h1 className="text-4xl font-bold text-gray-900">{provider.business_name}</h1>
-                  {provider.is_premium_listing && (
-                    <Badge variant="default" className="bg-yellow-500 hover:bg-yellow-600 text-white">
-                      ⭐ Premium
-                    </Badge>
-                  )}
+                <div className="flex items-center gap-3 mb-2">
+                  <h1 className="text-3xl font-bold text-gray-900">{provider.business_name}</h1>
                   {provider.verification_status === "verified" && (
-                    <Badge variant="default" className="bg-green-600 hover:bg-green-700 text-white">
+                    <Badge variant="default" className="bg-green-100 text-green-800 border-green-300">
                       <Shield className="w-3 h-3 mr-1" />
                       Verified
                     </Badge>
                   )}
                 </div>
                 
-                <div className="flex items-center gap-4 text-gray-600 mb-4">
+                <div className="flex items-center gap-4 text-gray-600 mt-2">
                   <div className="flex items-center gap-1">
                     <MapPin className="w-4 h-4" />
                     <span>{location}</span>
                   </div>
-                  <div className="flex items-center gap-1">
-                    <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                    <span className="font-semibold">{rating}</span>
-                    <span className="text-sm">({reviews} {reviews === 1 ? 'review' : 'reviews'})</span>
-                  </div>
+                  {provider.years_experience && (
+                    <div className="flex items-center gap-1">
+                      <Briefcase className="w-4 h-4" />
+                      <span>{provider.years_experience} years experience</span>
+                    </div>
+                  )}
                 </div>
 
-                <div className="flex flex-wrap gap-2 mt-4">
-                  {(provider.service_categories || []).map((c) => (
-                    <Badge key={c} variant="outline" className="bg-white">
-                      {c}
-                    </Badge>
-                  ))}
+                {/* Service Categories */}
+                {provider.service_category_names && provider.service_category_names.length > 0 && (
+                  <div className="mt-4 flex flex-wrap gap-2">
+                    {provider.service_category_names.map((category, idx) => (
+                      <Badge key={idx} variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
+                        {category}
+                      </Badge>
+                    ))}
+                  </div>
+                )}
+
+                {/* Rating */}
+                <div className="mt-4 flex items-center gap-2">
+                  <div className="flex items-center">
+                    <Star className="w-5 h-5 fill-yellow-400 text-yellow-400" />
+                    <span className="ml-1 font-semibold text-lg">{provider.average_rating?.toFixed(1) ?? "0.0"}</span>
+                  </div>
+                  <span className="text-gray-600">
+                    ({provider.total_reviews} {provider.total_reviews === 1 ? 'review' : 'reviews'})
+                  </span>
                 </div>
               </div>
 
-              <div className="md:w-80">
-                <div className="bg-white rounded-lg shadow-lg border p-6">
-                  <h3 className="font-semibold text-gray-900 mb-4">Get a Quote</h3>
-                  <p className="text-sm text-gray-600 mb-4">
-                    Submit a service request and we'll connect you with {provider.business_name} along with other verified providers.
-                  </p>
-                  <Button asChild className="w-full bg-blue-600 hover:bg-blue-700">
-                    <Link href="/services">
-                      Request a Quote
-                      <ArrowRight className="ml-2 h-4 w-4" />
-                    </Link>
+              {/* CTA Button */}
+              <div className="flex flex-col gap-3">
+                <Link href={`/request-quote?provider=${provider.id}`}>
+                  <Button size="lg" className="w-full md:w-auto bg-blue-600 hover:bg-blue-700">
+                    Get a Quote
                   </Button>
-                  <p className="text-xs text-gray-500 mt-3 text-center">
-                    Free service • Get multiple quotes
-                  </p>
-                </div>
+                </Link>
+                <p className="text-xs text-gray-500 text-center md:text-left">
+                  Free service • Get multiple quotes
+                </p>
               </div>
             </div>
           </div>
         </section>
 
         {/* Main Content */}
-        <section className="py-12">
+        <section className="py-8">
           <div className="container mx-auto px-4">
-            <div className="grid md:grid-cols-3 gap-8">
-              {/* Left Column - Main Info */}
+            <div className="grid md:grid-cols-3 gap-6">
+              {/* Left Column - Main Content */}
               <div className="md:col-span-2 space-y-6">
                 {/* About Section */}
                 <div className="bg-white border rounded-lg p-6">
-                  <h2 className="text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                    <Award className="w-5 h-5 text-blue-600" />
-                    About This Provider
-                  </h2>
-                  <div className="space-y-3 text-gray-700">
-                    <p>
-                      {provider.verification_status === "verified" 
-                        ? `${provider.business_name} is a verified professional on ProConnectSA. This provider has been background checked and meets our quality standards.`
-                        : `${provider.business_name} is a professional on ProConnectSA. This profile is pending verification.`}
+                  <h2 className="text-xl font-semibold text-gray-900 mb-4">About {provider.business_name}</h2>
+                  {provider.bio ? (
+                    <p className="text-gray-700 leading-relaxed whitespace-pre-line">{provider.bio}</p>
+                  ) : (
+                    <p className="text-gray-600 italic">
+                      This provider has a verified profile on ProConnectSA. Contact details are shared securely when a
+                      lead is matched and purchased.
                     </p>
-                    <p className="text-sm">
-                      Contact details are shared securely when you submit a service request and the provider responds to your quote.
-                    </p>
-                    {provider.is_premium_listing && (
-                      <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mt-4">
-                        <p className="text-yellow-800 text-sm font-medium">
-                          ⭐ Premium Listing - This provider has enhanced visibility and priority matching for new leads.
-                        </p>
-                      </div>
-                    )}
-                  </div>
+                  )}
                 </div>
 
-                {/* Services Section */}
-                {(provider.service_categories && provider.service_categories.length > 0) && (
+                {/* Services & Coverage */}
+                {(provider.service_areas.length > 0 || provider.max_travel_distance) && (
                   <div className="bg-white border rounded-lg p-6">
-                    <h2 className="text-xl font-semibold text-gray-900 mb-4">Services Offered</h2>
-                    <div className="flex flex-wrap gap-2">
-                      {provider.service_categories.map((category) => (
-                        <Badge key={category} variant="secondary" className="text-sm py-1 px-3">
-                          {category}
-                        </Badge>
+                    <h2 className="text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                      <MapPin className="w-5 h-5" />
+                      Service Areas
+                    </h2>
+                    {provider.service_areas.length > 0 ? (
+                      <div className="flex flex-wrap gap-2 mb-3">
+                        {provider.service_areas.map((area, idx) => (
+                          <Badge key={idx} variant="outline">{area}</Badge>
+                        ))}
+                      </div>
+                    ) : null}
+                    {provider.max_travel_distance && (
+                      <p className="text-sm text-gray-600">
+                        Maximum travel distance: {provider.max_travel_distance} km
+                      </p>
+                    )}
+                  </div>
+                )}
+
+                {/* Portfolio Images */}
+                {provider.portfolio_images && provider.portfolio_images.length > 0 && (
+                  <div className="bg-white border rounded-lg p-6">
+                    <h2 className="text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                      <ImageIcon className="w-5 h-5" />
+                      Portfolio
+                    </h2>
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                      {provider.portfolio_images.slice(0, 6).map((img, idx) => (
+                        <div key={idx} className="aspect-square rounded-lg overflow-hidden bg-gray-100">
+                          <img 
+                            src={img} 
+                            alt={`${provider.business_name} portfolio ${idx + 1}`}
+                            className="w-full h-full object-cover hover:scale-105 transition-transform"
+                          />
+                        </div>
                       ))}
                     </div>
                   </div>
                 )}
-
-                {/* How It Works */}
-                <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
-                  <h3 className="font-semibold text-blue-900 mb-3">How to Get a Quote</h3>
-                  <ol className="space-y-2 text-sm text-blue-800 list-decimal list-inside">
-                    <li>Click "Request a Quote" above</li>
-                    <li>Submit your service request with details</li>
-                    <li>We'll match you with {provider.business_name} and other verified providers</li>
-                    <li>Compare quotes and choose the best option</li>
-                  </ol>
-                </div>
               </div>
 
               {/* Right Column - Sidebar */}
@@ -211,73 +211,117 @@ export default async function ProviderDetailPage({ params }: { params: { id: str
                 {/* Ratings Card */}
                 <div className="bg-white border rounded-lg p-6">
                   <h3 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                    <Star className="w-5 h-5 text-yellow-500 fill-yellow-500" />
+                    <Star className="w-5 h-5 text-yellow-500" />
                     Ratings & Reviews
                   </h3>
                   <div className="text-center mb-4">
-                    <div className="text-4xl font-bold text-gray-900 mb-1">{rating}</div>
-                    <div className="flex items-center justify-center gap-1 mb-2">
+                    <div className="text-4xl font-bold text-gray-900">{provider.average_rating?.toFixed(1) ?? "0.0"}</div>
+                    <div className="flex items-center justify-center gap-1 mt-1">
                       {[1, 2, 3, 4, 5].map((star) => (
                         <Star
                           key={star}
                           className={`w-5 h-5 ${
-                            star <= Math.round(parseFloat(rating))
+                            star <= Math.round(provider.average_rating)
                               ? "fill-yellow-400 text-yellow-400"
                               : "text-gray-300"
                           }`}
                         />
                       ))}
                     </div>
-                    <p className="text-sm text-gray-600">{reviews} {reviews === 1 ? 'review' : 'reviews'}</p>
-                  </div>
-                  <div className="mt-4 pt-4 border-t">
-                    <Button asChild variant="outline" className="w-full">
-                      <Link href={`/providers/${provider.id}/review`}>
-                        Write a Review
-                        <Star className="ml-2 h-4 w-4" />
-                      </Link>
-                    </Button>
-                    <p className="text-xs text-gray-500 mt-2 text-center">
-                      Share your experience with {provider.business_name}
+                    <p className="text-sm text-gray-600 mt-2">
+                      {provider.total_reviews} {provider.total_reviews === 1 ? 'review' : 'reviews'}
                     </p>
                   </div>
+                  <Link href={`/providers/${provider.id}/reviews`}>
+                    <Button variant="outline" className="w-full">
+                      View All Reviews
+                    </Button>
+                  </Link>
                 </div>
 
-                {/* Verification Status */}
+                {/* Performance Metrics */}
                 <div className="bg-white border rounded-lg p-6">
                   <h3 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                    <Shield className="w-5 h-5 text-green-600" />
-                    Verification Status
+                    <Award className="w-5 h-5" />
+                    Performance
                   </h3>
-                  <div className="space-y-2">
-                    {provider.verification_status === "verified" ? (
-                      <div className="flex items-center gap-2 text-green-700">
-                        <CheckCircle className="w-5 h-5" />
-                        <span className="font-medium">Verified Professional</span>
-                      </div>
-                    ) : (
-                      <div className="flex items-center gap-2 text-yellow-700">
-                        <span className="font-medium">Pending Verification</span>
+                  <div className="space-y-4">
+                    {provider.response_time_hours && (
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2 text-sm text-gray-600">
+                          <Clock className="w-4 h-4" />
+                          <span>Response Time</span>
+                        </div>
+                        <span className="font-medium text-gray-900">
+                          {provider.response_time_hours < 1 
+                            ? `${Math.round(provider.response_time_hours * 60)} min`
+                            : `${provider.response_time_hours.toFixed(1)} hrs`}
+                        </span>
                       </div>
                     )}
-                    <p className="text-xs text-gray-600 mt-2">
-                      Verified providers have been background checked and meet our quality standards.
-                    </p>
+                    {provider.job_completion_rate && (
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2 text-sm text-gray-600">
+                          <CheckCircle className="w-4 h-4" />
+                          <span>Completion Rate</span>
+                        </div>
+                        <span className="font-medium text-gray-900">
+                          {provider.job_completion_rate.toFixed(0)}%
+                        </span>
+                      </div>
+                    )}
+                    {hasInsurance && (
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2 text-sm text-gray-600">
+                          <Shield className="w-4 h-4" />
+                          <span>Insurance</span>
+                        </div>
+                        <span className="font-medium text-green-600">Valid</span>
+                      </div>
+                    )}
                   </div>
                 </div>
 
-                {/* CTA Card */}
-                <div className="bg-gradient-to-br from-blue-600 to-indigo-700 rounded-lg p-6 text-white">
-                  <h3 className="font-semibold mb-2">Ready to Get Started?</h3>
-                  <p className="text-sm text-blue-100 mb-4">
-                    Submit a service request and get quotes from {provider.business_name} and other verified providers.
+                {/* Pricing Information */}
+                {hasPricing && (
+                  <div className="bg-white border rounded-lg p-6">
+                    <h3 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                      <DollarSign className="w-5 h-5" />
+                      Pricing
+                    </h3>
+                    <div className="space-y-3 text-sm">
+                      {provider.hourly_rate_min && provider.hourly_rate_max && (
+                        <div>
+                          <span className="text-gray-600">Hourly Rate:</span>
+                          <span className="font-medium text-gray-900 ml-2">
+                            R{provider.hourly_rate_min.toFixed(0)} - R{provider.hourly_rate_max.toFixed(0)}
+                          </span>
+                        </div>
+                      )}
+                      {provider.minimum_job_value && (
+                        <div>
+                          <span className="text-gray-600">Minimum Job Value:</span>
+                          <span className="font-medium text-gray-900 ml-2">
+                            R{provider.minimum_job_value.toFixed(0)}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {/* Get Quote CTA */}
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 text-center">
+                  <h3 className="font-semibold text-gray-900 mb-2">Need a Quote?</h3>
+                  <p className="text-sm text-gray-600 mb-4">
+                    Submit a service request and we'll connect you with {provider.business_name} along with other verified providers.
                   </p>
-                  <Button asChild variant="secondary" className="w-full">
-                    <Link href="/services">
+                  <Link href={`/request-quote?provider=${provider.id}`}>
+                    <Button className="w-full bg-blue-600 hover:bg-blue-700">
                       Request a Quote
-                      <ArrowRight className="ml-2 h-4 w-4" />
-                    </Link>
-                  </Button>
+                    </Button>
+                  </Link>
+                  <p className="text-xs text-gray-500 mt-2">Free service • Get multiple quotes</p>
                 </div>
               </div>
             </div>
