@@ -46,22 +46,34 @@ type PublicProvider = {
 
 async function fetchProvider(id: string): Promise<PublicProvider | null> {
   try {
+    if (!id) {
+      console.error('No provider ID provided');
+      return null;
+    }
+    
     const url = `${API_BASE}/api/public/providers/${id}/`;
+    console.log('Fetching provider from:', url);
+    
     const res = await fetch(url, { 
-      next: { revalidate: 300 },
-      cache: 'no-store' // Temporarily disable cache to debug
+      next: { revalidate: 300 }
     });
     
+    console.log('API response status:', res.status);
+    
     if (res.status === 404) {
+      console.log('Provider not found (404)');
       return null;
     }
     
     if (!res.ok) {
       console.error(`API error: ${res.status} ${res.statusText}`);
+      const errorText = await res.text();
+      console.error('Error response:', errorText);
       return null;
     }
     
     const data = await res.json();
+    console.log('Provider data received:', { id: data.id, name: data.business_name });
     
     // Ensure all required fields have defaults
     return {
