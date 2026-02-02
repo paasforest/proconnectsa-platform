@@ -44,12 +44,53 @@ type PublicProvider = {
   insurance_valid_until: string | null;
 };
 
-async function fetchProvider(id: string) {
-  const url = `${API_BASE}/api/public/providers/${id}/`;
-  const res = await fetch(url, { next: { revalidate: 300 } });
-  if (res.status === 404) return null;
-  if (!res.ok) throw new Error(`Failed to load provider (${res.status})`);
-  return (await res.json()) as PublicProvider;
+async function fetchProvider(id: string): Promise<PublicProvider | null> {
+  try {
+    const url = `${API_BASE}/api/public/providers/${id}/`;
+    const res = await fetch(url, { 
+      next: { revalidate: 300 },
+      headers: {
+        'Accept': 'application/json',
+      }
+    });
+    
+    if (res.status === 404) return null;
+    if (!res.ok) {
+      console.error(`Failed to fetch provider: ${res.status} ${res.statusText}`);
+      return null;
+    }
+    
+    const data = await res.json();
+    
+    // Ensure all required fields have defaults
+    return {
+      id: data.id || '',
+      business_name: data.business_name || 'Unknown Provider',
+      city: data.city || null,
+      suburb: data.suburb || null,
+      service_categories: data.service_categories || [],
+      service_category_names: data.service_category_names || (data.service_categories || []).map((c: string) => c.replace('-', ' ').replace(/\b\w/g, (l: string) => l.toUpperCase())),
+      average_rating: data.average_rating ?? 0,
+      total_reviews: data.total_reviews || 0,
+      verification_status: data.verification_status || 'pending',
+      slug: data.slug || '',
+      bio: data.bio || '',
+      years_experience: data.years_experience || null,
+      service_areas: data.service_areas || [],
+      max_travel_distance: data.max_travel_distance || 0,
+      hourly_rate_min: data.hourly_rate_min || null,
+      hourly_rate_max: data.hourly_rate_max || null,
+      minimum_job_value: data.minimum_job_value || null,
+      response_time_hours: data.response_time_hours || null,
+      job_completion_rate: data.job_completion_rate || null,
+      profile_image: data.profile_image || '',
+      portfolio_images: data.portfolio_images || [],
+      insurance_valid_until: data.insurance_valid_until || null,
+    };
+  } catch (error) {
+    console.error('Error fetching provider:', error);
+    return null;
+  }
 }
 
 export async function generateMetadata({ params }: { params: { id: string } }): Promise<Metadata> {
@@ -120,10 +161,12 @@ export default async function ProviderDetailPage({ params }: { params: { id: str
                 <div className="mt-4 flex items-center gap-2">
                   <div className="flex items-center">
                     <Star className="w-5 h-5 fill-yellow-400 text-yellow-400" />
-                    <span className="ml-1 font-semibold text-lg">{provider.average_rating?.toFixed(1) ?? "0.0"}</span>
+                    <span className="ml-1 font-semibold text-lg">
+                      {typeof provider.average_rating === 'number' ? provider.average_rating.toFixed(1) : "0.0"}
+                    </span>
                   </div>
                   <span className="text-gray-600">
-                    ({provider.total_reviews} {provider.total_reviews === 1 ? 'review' : 'reviews'})
+                    ({provider.total_reviews || 0} {provider.total_reviews === 1 ? 'review' : 'reviews'})
                   </span>
                 </div>
               </div>
@@ -215,21 +258,26 @@ export default async function ProviderDetailPage({ params }: { params: { id: str
                     Ratings & Reviews
                   </h3>
                   <div className="text-center mb-4">
-                    <div className="text-4xl font-bold text-gray-900">{provider.average_rating?.toFixed(1) ?? "0.0"}</div>
+                    <div className="text-4xl font-bold text-gray-900">
+                      {typeof provider.average_rating === 'number' ? provider.average_rating.toFixed(1) : "0.0"}
+                    </div>
                     <div className="flex items-center justify-center gap-1 mt-1">
-                      {[1, 2, 3, 4, 5].map((star) => (
-                        <Star
-                          key={star}
-                          className={`w-5 h-5 ${
-                            star <= Math.round(provider.average_rating)
-                              ? "fill-yellow-400 text-yellow-400"
-                              : "text-gray-300"
-                          }`}
-                        />
-                      ))}
+                      {[1, 2, 3, 4, 5].map((star) => {
+                        const rating = typeof provider.average_rating === 'number' ? provider.average_rating : 0;
+                        return (
+                          <Star
+                            key={star}
+                            className={`w-5 h-5 ${
+                              star <= Math.round(rating)
+                                ? "fill-yellow-400 text-yellow-400"
+                                : "text-gray-300"
+                            }`}
+                          />
+                        );
+                      })}
                     </div>
                     <p className="text-sm text-gray-600 mt-2">
-                      {provider.total_reviews} {provider.total_reviews === 1 ? 'review' : 'reviews'}
+                      {provider.total_reviews || 0} {(provider.total_reviews || 0) === 1 ? 'review' : 'reviews'}
                     </p>
                   </div>
                   <Link href={`/providers/${provider.id}/reviews`}>
@@ -246,7 +294,7 @@ export default async function ProviderDetailPage({ params }: { params: { id: str
                     Performance
                   </h3>
                   <div className="space-y-4">
-                    {provider.response_time_hours && (
+                    {provider.response_time_hours && typeof provider.response_time_hours === 'number' && (
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2 text-sm text-gray-600">
                           <Clock className="w-4 h-4" />
@@ -259,7 +307,7 @@ export default async function ProviderDetailPage({ params }: { params: { id: str
                         </span>
                       </div>
                     )}
-                    {provider.job_completion_rate && (
+                    {provider.job_completion_rate && typeof provider.job_completion_rate === 'number' && (
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2 text-sm text-gray-600">
                           <CheckCircle className="w-4 h-4" />
@@ -290,7 +338,8 @@ export default async function ProviderDetailPage({ params }: { params: { id: str
                       Pricing
                     </h3>
                     <div className="space-y-3 text-sm">
-                      {provider.hourly_rate_min && provider.hourly_rate_max && (
+                      {provider.hourly_rate_min && provider.hourly_rate_max && 
+                     typeof provider.hourly_rate_min === 'number' && typeof provider.hourly_rate_max === 'number' && (
                         <div>
                           <span className="text-gray-600">Hourly Rate:</span>
                           <span className="font-medium text-gray-900 ml-2">
@@ -298,7 +347,7 @@ export default async function ProviderDetailPage({ params }: { params: { id: str
                           </span>
                         </div>
                       )}
-                      {provider.minimum_job_value && (
+                      {provider.minimum_job_value && typeof provider.minimum_job_value === 'number' && (
                         <div>
                           <span className="text-gray-600">Minimum Job Value:</span>
                           <span className="font-medium text-gray-900 ml-2">
