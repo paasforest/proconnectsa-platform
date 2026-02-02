@@ -54,13 +54,27 @@ def _provider_public_dict(p: ProviderProfile):
 def public_providers_list(request):
     """
     Public: list verified providers with optional filters: category, city, page, page_size
+    Shows verified providers, or pending providers if no verified providers exist (for debugging)
     """
+    import logging
+    logger = logging.getLogger(__name__)
+    
     category_slug = request.GET.get('category')
     city = request.GET.get('city')
     page = int(request.GET.get('page', 1))
     page_size = int(request.GET.get('page_size', 20))
 
+    # First try to get verified providers
     qs = ProviderProfile.objects.filter(verification_status='verified')
+    
+    # If no verified providers, show pending ones (temporary for debugging)
+    verified_count = qs.count()
+    if verified_count == 0:
+        logger.warning("No verified providers found, showing pending providers")
+        qs = ProviderProfile.objects.filter(verification_status='pending')
+    
+    # Exclude rejected and suspended
+    qs = qs.exclude(verification_status='rejected').exclude(verification_status='suspended')
 
     if category_slug:
         qs = qs.filter(service_categories__contains=[category_slug])
@@ -72,6 +86,9 @@ def public_providers_list(request):
     page_obj = paginator.get_page(page)
 
     data = [_provider_public_dict(p) for p in page_obj.object_list]
+    
+    logger.info(f"Returning {len(data)} providers (verified_count: {verified_count})")
+    
     return Response({
         'results': data,
         'pagination': {
