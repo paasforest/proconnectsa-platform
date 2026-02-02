@@ -106,6 +106,9 @@ urlpatterns = [
     path('provider-profile/documents/', settings_views.list_verification_documents, name='list_verification_documents'),
     path('provider-profile/documents/upload/', settings_views.upload_verification_document, name='upload_verification_document'),
     
+    # Premium Listing
+    path('request-premium-listing/', settings_views.request_premium_listing, name='request_premium_listing'),
+    
     # Support APIs
     path('support/', support_views.support_tickets, name='support_tickets'),
     path('support/create/', support_views.create_ticket, name='create_ticket'),

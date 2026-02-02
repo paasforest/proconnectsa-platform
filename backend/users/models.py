@@ -262,11 +262,28 @@ class ProviderProfile(models.Model):
         return self.subscription_end_date > timezone.now()
     
     @property
+    def is_premium_listing_active(self):
+        """Check if premium listing is currently active"""
+        if not hasattr(self, 'is_premium_listing') or not self.is_premium_listing:
+            return False
+        
+        if not hasattr(self, 'premium_listing_started_at') or not self.premium_listing_started_at:
+            return False
+        
+        # Check expiration
+        if hasattr(self, 'premium_listing_expires_at'):
+            if self.premium_listing_expires_at is None:
+                return True  # Lifetime premium
+            return self.premium_listing_expires_at > timezone.now()
+        
+        return False
+    
+    @property
     def can_receive_leads(self):
         """Check if provider can receive new leads"""
         return (
             self.verification_status == 'verified' and
-            self.credit_balance > 0  # Only need credits, no monthly limits
+            (self.credit_balance > 0 or self.is_premium_listing_active)  # Premium providers don't need credits
         )
     
     def subscription_tier_weight(self):

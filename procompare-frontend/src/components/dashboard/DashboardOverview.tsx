@@ -11,6 +11,7 @@ import { useAuth } from '@/components/AuthProvider';
 import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import PremiumListingUpgrade from './PremiumListingUpgrade';
 
 interface DashboardStats {
   total_leads: number;
@@ -396,7 +397,7 @@ const DashboardOverview = () => {
       </div>
 
       {/* Performance Metrics */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-lg font-semibold text-gray-900">Response Time</h3>
@@ -424,6 +425,19 @@ const DashboardOverview = () => {
           <p className="text-sm text-gray-600 mt-1">This month</p>
         </div>
       </div>
+
+      {/* Premium Listing Upgrade Section - Show only for pay-as-you-go users */}
+      {profile?.subscription_tier === 'pay_as_you_go' && (
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+          <PremiumListingUpgrade 
+            currentTier={profile.subscription_tier}
+            onUpgradeComplete={() => {
+              // Refresh profile data after upgrade request
+              window.location.reload();
+            }}
+          />
+        </div>
+      )}
     </div>
   );
 };

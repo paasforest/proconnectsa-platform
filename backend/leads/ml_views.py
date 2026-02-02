@@ -778,12 +778,17 @@ def purchase_lead_access_view(request, lead_id):
                 'details': validation_result.get('details', {})
             }, status=status.HTTP_400_BAD_REQUEST)
 
-        # Step 4: Check user credits (use Wallet system, not ProviderProfile)
+        # Step 4: Check if provider has active premium listing (FREE leads)
+        provider_profile = request.user.provider_profile
+        is_premium_active = provider_profile.is_premium_listing_active if hasattr(provider_profile, 'is_premium_listing_active') else False
+        
+        # Step 5: Check user credits (use Wallet system, not ProviderProfile) - Skip if premium
         from backend.users.models import Wallet
         wallet, created = Wallet.objects.get_or_create(user=request.user)
         credit_cost = calculate_lead_credit_cost(lead, request.user)
         
-        if wallet.credits < credit_cost:
+        # Premium providers don't need credits
+        if not is_premium_active and wallet.credits < credit_cost:
             logger.error(f"💰 Insufficient credits: User has {wallet.credits}, needs {credit_cost}")
             # Hybrid flow (configurable): create a temporary reservation and provide manual EFT instructions
             try:
@@ -913,42 +918,75 @@ Use the exact reference so we can auto-activate your credits."""
                 'help_text': 'This lead has reached its limit of providers. Check for other similar leads in your dashboard or try again later for new leads.'
             }, status=status.HTTP_410_GONE)
 
-        # Step 6: Process the purchase (atomic transaction)
+        # Step 6: Check if provider has active premium listing (FREE leads)
+        provider_profile = request.user.provider_profile
+        is_premium_active = provider_profile.is_premium_listing_active if hasattr(provider_profile, 'is_premium_listing_active') else False
+        
+        # Step 7: Process the purchase (atomic transaction)
         from django.db import transaction
         
         with transaction.atomic():
-            # Deduct credits from wallet
-            wallet.credits -= credit_cost
-            wallet.save()
-            logger.info(f"💳 Deducted {credit_cost} credits from wallet. New balance: {wallet.credits}")
+            actual_credit_cost = 0 if is_premium_active else credit_cost
             
-            # Create wallet transaction record
-            from backend.users.models import WalletTransaction
-            import time
-            import uuid
+            # Only deduct credits if NOT premium
+            if not is_premium_active:
+                # Deduct credits from wallet
+                wallet.credits -= credit_cost
+                wallet.save()
+                logger.info(f"💳 Deducted {credit_cost} credits from wallet. New balance: {wallet.credits}")
+                
+                # Create wallet transaction record
+                from backend.users.models import WalletTransaction
+                import time
+                import uuid
+                
+                # Generate unique reference for transaction
+                transaction_reference = f"UNLOCK_{int(time.time() * 1000)}_{str(uuid.uuid4())[:8]}"
+                
+                WalletTransaction.objects.create(
+                    wallet=wallet,
+                    transaction_type='unlock',
+                    amount=credit_cost * getattr(settings, 'DEFAULT_CREDIT_PRICE', 50),  # Convert credits to Rands
+                    credits=credit_cost,      # Number of credits
+                    reference=transaction_reference,
+                    description=f'Lead unlock: {lead.title}',
+                    lead_id=str(lead.id),
+                    lead_title=lead.title,
+                    status='confirmed'
+                )
+            else:
+                logger.info(f"⭐ Premium provider - FREE lead unlock (no credits deducted)")
             
-            # Generate unique reference for transaction
-            transaction_reference = f"UNLOCK_{int(time.time() * 1000)}_{str(uuid.uuid4())[:8]}"
-            
-            WalletTransaction.objects.create(
-                wallet=wallet,
-                transaction_type='unlock',
-                amount=credit_cost * getattr(settings, 'DEFAULT_CREDIT_PRICE', 50),  # Convert credits to Rands
-                credits=credit_cost,      # Number of credits
-                reference=transaction_reference,
-                description=f'Lead unlock: {lead.title}',
-                lead_id=str(lead.id),
-                lead_title=lead.title,
-                status='confirmed'
-            )
-            
-            # Create lead access
+            # Create lead access (credit_cost=0 for premium)
             lead_access = LeadAccess.objects.create(
                 provider=request.user,
                 lead=lead,
-                credit_cost=credit_cost
+                credit_cost=actual_credit_cost
             )
             logger.info(f"✅ Lead access granted: ID {lead_access.id}")
+            
+            # Create or update LeadAssignment to track this purchase in "My Leads"
+            from django.utils import timezone
+            lead_assignment, created = LeadAssignment.objects.get_or_create(
+                provider=request.user,
+                lead=lead,
+                defaults={
+                    'status': 'purchased',
+                    'purchased_at': timezone.now(),
+                    'credit_cost': actual_credit_cost,
+                    'assigned_at': timezone.now()
+                }
+            )
+            
+            # If assignment already exists, update it to purchased status
+            if not created:
+                lead_assignment.status = 'purchased'
+                lead_assignment.purchased_at = timezone.now()
+                lead_assignment.credit_cost = actual_credit_cost
+                lead_assignment.save()
+                logger.info(f"✅ Updated LeadAssignment {lead_assignment.id} to 'purchased' status")
+            else:
+                logger.info(f"✅ Created LeadAssignment {lead_assignment.id} with 'purchased' status")
             
             # Update lead response count
             lead.assigned_providers_count = LeadAccess.objects.filter(lead=lead).count()
@@ -980,10 +1018,11 @@ Use the exact reference so we can auto-activate your credits."""
         # Step 8: Return success response with unlocked data
         return Response({
             'success': True,
-            'message': 'Lead access purchased successfully',
+            'message': 'Lead access purchased successfully' if not is_premium_active else 'Lead unlocked for FREE (Premium Listing)',
             'lead_access_id': str(lead_access.id),
-            'credits_deducted': credit_cost,
+            'credits_deducted': actual_credit_cost,
             'remaining_credits': wallet.credits,
+            'is_premium_unlock': is_premium_active,
             'unlocked_data': {
                 'client_name': f"{lead.client.first_name} {lead.client.last_name}",
                 'client_phone': getattr(lead.client, 'phone', 'Not provided'),

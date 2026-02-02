@@ -307,3 +307,105 @@ def upload_verification_document(request):
         logger.error(f"Error uploading verification document: {str(e)}")
         return Response({'success': False, 'message': 'Failed to upload document'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def request_premium_listing(request):
+    """
+    Request premium listing - generates payment reference and banking details
+    """
+    try:
+        if request.user.user_type != 'provider':
+            return Response({
+                'success': False,
+                'error': 'Only providers can request premium listing'
+            }, status=status.HTTP_403_FORBIDDEN)
+        
+        plan_type = request.data.get('plan_type')  # 'monthly' or 'lifetime'
+        
+        if plan_type not in ['monthly', 'lifetime']:
+            return Response({
+                'success': False,
+                'error': 'Invalid plan_type. Must be "monthly" or "lifetime"'
+            }, status=status.HTTP_400_BAD_REQUEST)
+        
+        provider = request.user.provider_profile
+        
+        # Calculate amount and duration
+        if plan_type == 'monthly':
+            amount = 299.00
+            months = 1
+        else:  # lifetime
+            amount = 2990.00
+            months = 0  # 0 = lifetime
+        
+        # Generate unique reference number
+        import uuid
+        import time
+        timestamp = int(time.time())
+        unique_id = str(uuid.uuid4().hex[:6]).upper()
+        reference_number = f"PREMIUM{unique_id}{timestamp}"
+        
+        # Get banking details
+        from backend.payments.auto_deposit_service import AutoDepositService
+        auto_service = AutoDepositService()
+        deposit_instructions = auto_service.get_deposit_instructions(provider.customer_code)
+        
+        banking_details = deposit_instructions.get('instructions', {
+            'bank_name': 'Nedbank',
+            'account_number': '1313872032',
+            'branch_code': '198765',
+            'account_holder': 'ProConnectSA (Pty) Ltd'
+        })
+        
+        # Create deposit request for premium payment
+        from backend.payments.models import DepositRequest, PaymentAccount
+        from backend.payments.payment_service import PaymentService
+        
+        payment_service = PaymentService()
+        account = payment_service.get_or_create_payment_account(request.user)
+        
+        # Create deposit request with PREMIUM reference
+        deposit_request = DepositRequest.objects.create(
+            account=account,
+            amount=amount,
+            bank_reference=reference_number,
+            reference_number=reference_number,
+            customer_code=provider.customer_code,
+            credits_to_activate=0,  # Premium doesn't give credits, it gives free leads
+            status='pending',
+            verification_notes=f'Premium listing request - {plan_type} plan'
+        )
+        
+        # Instructions for user
+        instructions = [
+            f'Make an EFT payment of R{amount:.2f} to the bank account below',
+            f'IMPORTANT: Use the exact reference: {reference_number}',
+            f'Bank: {banking_details.get("bank_name", "Nedbank")}',
+            f'Account: {banking_details.get("account_number", "1313872032")}',
+            f'Branch Code: {banking_details.get("branch_code", "198765")}',
+            'Premium will activate automatically within 5 minutes of payment detection',
+            'You will receive an email confirmation when premium is activated'
+        ]
+        
+        logger.info(f"Premium listing request created for {request.user.email}: {plan_type} plan, reference {reference_number}")
+        
+        return Response({
+            'success': True,
+            'reference_number': reference_number,
+            'amount': amount,
+            'plan_type': plan_type,
+            'banking_details': banking_details,
+            'customer_code': provider.customer_code,
+            'instructions': instructions,
+            'deposit_id': str(deposit_request.id)
+        }, status=status.HTTP_201_CREATED)
+        
+    except Exception as e:
+        logger.error(f"Error creating premium listing request: {str(e)}")
+        return Response({
+            'success': False,
+            'error': 'Failed to create premium listing request',
+            'message': str(e)
+        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
