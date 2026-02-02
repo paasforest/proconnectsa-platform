@@ -45,60 +45,37 @@ type PublicProvider = {
 };
 
 async function fetchProvider(id: string): Promise<PublicProvider | null> {
-  try {
-    const url = `${API_BASE}/api/public/providers/${id}/`;
-    const res = await fetch(url, { 
-      next: { revalidate: 300 },
-      headers: {
-        'Accept': 'application/json',
-      }
-    });
-    
-    // Only return null for actual 404 - provider doesn't exist
-    if (res.status === 404) {
-      return null;
-    }
-    
-    // For other errors, log but don't fail - might be temporary
-    if (!res.ok) {
-      console.error(`Failed to fetch provider: ${res.status} ${res.statusText}`);
-      // Don't return null for non-404 errors - let the component handle it
-      throw new Error(`API returned ${res.status}: ${res.statusText}`);
-    }
-    
-    const data = await res.json();
-    
-    // Ensure all required fields have defaults
-    return {
-      id: data.id || id,
-      business_name: data.business_name || 'Unknown Provider',
-      city: data.city || null,
-      suburb: data.suburb || null,
-      service_categories: data.service_categories || [],
-      service_category_names: data.service_category_names || (data.service_categories || []).map((c: string) => c.replace('-', ' ').replace(/\b\w/g, (l: string) => l.toUpperCase())),
-      average_rating: data.average_rating ?? 0,
-      total_reviews: data.total_reviews || 0,
-      verification_status: data.verification_status || 'pending',
-      slug: data.slug || '',
-      bio: data.bio || '',
-      years_experience: data.years_experience || null,
-      service_areas: data.service_areas || [],
-      max_travel_distance: data.max_travel_distance || 0,
-      hourly_rate_min: data.hourly_rate_min || null,
-      hourly_rate_max: data.hourly_rate_max || null,
-      minimum_job_value: data.minimum_job_value || null,
-      response_time_hours: data.response_time_hours || null,
-      job_completion_rate: data.job_completion_rate || null,
-      profile_image: data.profile_image || '',
-      portfolio_images: data.portfolio_images || [],
-      insurance_valid_until: data.insurance_valid_until || null,
-    };
-  } catch (error) {
-    // Only log the error, don't return null unless it's a 404
-    console.error('Error fetching provider:', error);
-    // Re-throw to let the component decide what to do
-    throw error;
-  }
+  const url = `${API_BASE}/api/public/providers/${id}/`;
+  const res = await fetch(url, { next: { revalidate: 300 } });
+  if (res.status === 404) return null;
+  if (!res.ok) throw new Error(`Failed to load provider (${res.status})`);
+  const data = await res.json();
+  
+  // Ensure all required fields have defaults
+  return {
+    id: data.id || id,
+    business_name: data.business_name || 'Unknown Provider',
+    city: data.city || null,
+    suburb: data.suburb || null,
+    service_categories: data.service_categories || [],
+    service_category_names: data.service_category_names || (data.service_categories || []).map((c: string) => c.replace('-', ' ').replace(/\b\w/g, (l: string) => l.toUpperCase())),
+    average_rating: data.average_rating ?? 0,
+    total_reviews: data.total_reviews || 0,
+    verification_status: data.verification_status || 'pending',
+    slug: data.slug || '',
+    bio: data.bio || '',
+    years_experience: data.years_experience || null,
+    service_areas: data.service_areas || [],
+    max_travel_distance: data.max_travel_distance || 0,
+    hourly_rate_min: data.hourly_rate_min || null,
+    hourly_rate_max: data.hourly_rate_max || null,
+    minimum_job_value: data.minimum_job_value || null,
+    response_time_hours: data.response_time_hours || null,
+    job_completion_rate: data.job_completion_rate || null,
+    profile_image: data.profile_image || '',
+    portfolio_images: data.portfolio_images || [],
+    insurance_valid_until: data.insurance_valid_until || null,
+  };
 }
 
 export async function generateMetadata({ params }: { params: { id: string } }): Promise<Metadata> {
@@ -115,24 +92,8 @@ export async function generateMetadata({ params }: { params: { id: string } }): 
 }
 
 export default async function ProviderDetailPage({ params }: { params: { id: string } }) {
-  let provider: PublicProvider | null = null;
-  
-  try {
-    provider = await fetchProvider(params.id);
-  } catch (error) {
-    // If it's not a 404, log but don't show 404 page - might be temporary API issue
-    console.error('Error loading provider:', error);
-    // Only show 404 if provider is explicitly null (404 from API)
-    if (provider === null) {
-      return notFound();
-    }
-    // For other errors, we'll show an error state in the component
-  }
-  
-  // Only show 404 if provider is null (actual 404 from API)
-  if (!provider) {
-    return notFound();
-  }
+  const provider = await fetchProvider(params.id);
+  if (!provider) return notFound();
 
   const location = [provider.suburb, provider.city].filter(Boolean).join(", ") || "Location not specified";
   const hasPricing = provider.hourly_rate_min || provider.hourly_rate_max || provider.minimum_job_value;
