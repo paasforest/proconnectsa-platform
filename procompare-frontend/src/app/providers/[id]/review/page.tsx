@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Star, ArrowLeft, Send, AlertCircle } from "lucide-react";
 import Link from "next/link";
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
 import { useAuth } from "@/components/AuthProvider";
 import { toast } from "sonner";
 
@@ -22,7 +22,8 @@ type Provider = {
   suburb: string | null;
 };
 
-export default function ProviderReviewPage({ params }: { params: { id: string } }) {
+export default function ProviderReviewPage() {
+  const params = useParams<{ id: string }>();
   const router = useRouter();
   const { user, token, isLoading: authLoading } = useAuth();
   const [provider, setProvider] = useState<Provider | null>(null);
@@ -40,7 +41,7 @@ export default function ProviderReviewPage({ params }: { params: { id: string } 
   const [wouldRecommend, setWouldRecommend] = useState<boolean | null>(null);
 
   useEffect(() => {
-    if (authLoading) return;
+    if (authLoading || !params?.id) return;
     
     if (!user || !token) {
       toast.error("Please log in to write a review");

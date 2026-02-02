@@ -155,9 +155,9 @@ export default async function ProviderDetailPage({ params }: { params: Promise<{
                       {typeof provider.average_rating === 'number' ? provider.average_rating.toFixed(1) : "0.0"}
                     </span>
                   </div>
-                  <span className="text-gray-600">
+                  <Link href={`/providers/${provider.id}/reviews`} className="text-gray-600 hover:text-blue-600 hover:underline">
                     ({provider.total_reviews || 0} {provider.total_reviews === 1 ? 'review' : 'reviews'})
-                  </span>
+                  </Link>
                 </div>
               </div>
 
@@ -285,10 +285,17 @@ export default async function ProviderDetailPage({ params }: { params: Promise<{
                         );
                       })}
                     </div>
-                    <p className="text-sm text-gray-600 mt-2">
+                    <Link href={`/providers/${provider.id}/reviews`} className="text-sm text-gray-600 hover:text-blue-600 hover:underline mt-2 inline-block">
                       {provider.total_reviews || 0} {(provider.total_reviews || 0) === 1 ? 'review' : 'reviews'}
-                    </p>
+                    </Link>
                   </div>
+                  <div className="mt-4 pt-4 border-t space-y-3">
+                    <Button asChild variant="outline" className="w-full">
+                      <Link href={`/providers/${provider.id}/review`}>
+                        Write a Review
+                        <Star className="ml-2 h-4 w-4" />
+                      </Link>
+                    </Button>
                   <Link href={`/providers/${provider.id}/reviews`}>
                     <Button variant="outline" className="w-full">
                       View All Reviews
