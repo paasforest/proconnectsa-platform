@@ -50,6 +50,7 @@ export default function BarkLeadForm({ onComplete, onCancel, preselectedCategory
   const [loadingCategories, setLoadingCategories] = useState(true)
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [submitted, setSubmitted] = useState(false)
 
   const [serviceSlug, setServiceSlug] = useState<string>(preselectedCategory || '')
   const [locationAddress, setLocationAddress] = useState('')
@@ -223,34 +224,23 @@ export default function BarkLeadForm({ onComplete, onCancel, preselectedCategory
         client_phone: contactPhone.trim(),
       }
 
-      console.log('📤 Submitting lead payload:', payload)
-      console.log('📤 Selected category:', selectedCategory)
-      console.log('📤 Category ID type:', typeof selectedCategory.id, 'Value:', selectedCategory.id)
-      
-      const res = await fetch('/api/leads/create-public', {
+      // Submit directly to backend (same as categories) - avoids Next.js proxy/health-check failures
+      const res = await fetch(`${API_BASE_URL}/api/leads/create-public/`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'X-API-Key': 'proconnectsa_lead_creation_2024',
+        },
         body: JSON.stringify(payload),
       })
       
       const data = await res.json().catch(() => ({}))
-      console.log('📥 Backend response:', { status: res.status, data })
-      
-      // If service_category_id error, try to help user
-      if (!res.ok && data?.service_category_id) {
-        console.error('❌ Service category validation failed. Selected category:', selectedCategory)
-        console.error('❌ Available categories:', categories.map(c => ({ id: c.id, slug: c.slug, name: c.name })))
-      }
       
       if (!res.ok) {
-        // Handle different error formats
+        // Surface backend validation errors (Django REST framework format)
         let errorMsg = 'Submission failed'
-        
         if (data?.service_category_id) {
-          // Backend validation error for service category
-          errorMsg = Array.isArray(data.service_category_id) 
-            ? data.service_category_id[0] 
-            : data.service_category_id
+          errorMsg = Array.isArray(data.service_category_id) ? data.service_category_id[0] : String(data.service_category_id)
         } else if (data?.details) {
           errorMsg = typeof data.details === 'string' ? data.details : JSON.stringify(data.details)
         } else if (data?.message) {
@@ -260,42 +250,19 @@ export default function BarkLeadForm({ onComplete, onCancel, preselectedCategory
         } else if (res.status === 503) {
           errorMsg = 'Service temporarily unavailable. Please try again in a moment.'
         } else {
-          errorMsg = `Failed to submit (${res.status})`
+          const serializerErrors = data && typeof data === 'object' && !Array.isArray(data)
+            ? Object.entries(data)
+                .filter(([k]) => !['details', 'message', 'error'].includes(k))
+                .map(([field, errs]) => `${field}: ${Array.isArray(errs) ? errs.join(', ') : errs}`)
+                .join('; ')
+            : ''
+          errorMsg = serializerErrors || `Failed to submit (${res.status})`
         }
-        
-        console.error('❌ Submission error:', errorMsg)
         throw new Error(errorMsg)
       }
       
-      console.log('✅ Lead submitted successfully:', data)
-      
-      // Show success message
-      setError(null)
-      
-      // Call onComplete callback if provided (this will handle navigation/UI updates)
-      if (onComplete) {
-        onComplete(data)
-      } else {
-        // If no callback, show alert and reset form
-        alert('✅ Thank you! Your request has been submitted. We\'ll connect you with qualified professionals shortly.')
-        
-        // Reset form after successful submission
-        setStep(1)
-        setServiceSlug('')
-        setLocationAddress('')
-        setLocationSuburb('')
-        setLocationCity('')
-        setTitle('')
-        setDescription('')
-        setBudgetRange('1000_5000')
-        setUrgency('this_week')
-        setHiringIntent('comparing_quotes')
-        setHiringTimeline('this_month')
-        setContactName('')
-        setContactPhone('')
-        setContactEmail('')
-        setSelectedCategory(null)
-      }
+      setSubmitted(true)
+      onComplete?.(data)
     } catch (e: any) {
       console.error('❌ Submission exception:', e)
       const errorMessage = e?.message || 'Submission failed. Please check your connection and try again.'
@@ -304,6 +271,18 @@ export default function BarkLeadForm({ onComplete, onCancel, preselectedCategory
     } finally {
       setSubmitting(false)
     }
+  }
+
+  if (submitted) {
+    return (
+      <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-8 text-center">
+        <div className="mb-4 text-5xl">✓</div>
+        <h2 className="text-xl font-bold text-gray-900 mb-2">Request submitted successfully!</h2>
+        <p className="text-gray-600">
+          We&apos;ve received your request and will connect you with verified professionals. You&apos;ll receive quotes within 24 hours.
+        </p>
+      </div>
+    )
   }
 
   return (

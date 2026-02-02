@@ -265,7 +265,7 @@ CORS_ALLOWED_ORIGIN_REGEXES = [
 # SECURITY: Only allow specific origins
 CORS_ALLOW_ALL_ORIGINS = False
 
-# CORS headers
+# CORS headers (x-api-key required for public lead creation from frontend)
 CORS_ALLOW_HEADERS = [
     'accept',
     'accept-encoding',
@@ -274,6 +274,7 @@ CORS_ALLOW_HEADERS = [
     'dnt',
     'origin',
     'user-agent',
+    'x-api-key',
     'x-csrftoken',
     'x-requested-with',
 ]
