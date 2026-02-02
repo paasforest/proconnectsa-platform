@@ -48,67 +48,13 @@ const MyLeadsPage = () => {
         setLoading(true);
         apiClient.setToken(token);
         
-        // Try to fetch from API, fallback to mock data
+        // Fetch from My Leads API (returns format: { leads: [...], total: N })
         try {
-          const response = await apiClient.get('/api/leads/assignments/');
-          setLeads(response.data?.leads || response.leads || []);
+          const response = await apiClient.get('/api/auth/my-leads/');
+          setLeads(response.leads || response.data?.leads || []);
         } catch (apiError) {
-          // For now, show mock data since API endpoint might not exist
-          setLeads([
-          {
-            id: '1',
-            name: 'John Smith',
-            location: 'Cape Town, Western Cape',
-            service: 'Plumbing',
-            budget: 'R2,500 - R5,000',
-            credits_spent: 2,
-            unlocked_at: '2024-01-15T10:30:00Z',
-            status: 'contacted',
-            phone: '+27 82 123 4567',
-            email: 'john.smith@email.com',
-            description: 'Need a plumber to fix a leaking pipe in the kitchen. The leak is getting worse and needs immediate attention.',
-            urgency: 'high',
-            timeline: 'ASAP',
-            notes: 'Called twice, very interested. Wants quote by tomorrow.',
-            last_contact: '2024-01-15T14:30:00Z',
-            next_follow_up: '2024-01-16T09:00:00Z'
-          },
-          {
-            id: '2',
-            name: 'Sarah Johnson',
-            location: 'Johannesburg, Gauteng',
-            service: 'Web Design',
-            budget: 'R10,000 - R25,000',
-            credits_spent: 3,
-            unlocked_at: '2024-01-14T16:45:00Z',
-            status: 'quoted',
-            phone: '+27 83 987 6543',
-            email: 'sarah.j@company.co.za',
-            description: 'Looking for a web designer to create a new company website. Need e-commerce functionality.',
-            urgency: 'medium',
-            timeline: 'Within 2 weeks',
-            notes: 'Sent detailed proposal. Waiting for feedback.',
-            last_contact: '2024-01-15T11:00:00Z',
-            next_follow_up: '2024-01-17T10:00:00Z'
-          },
-          {
-            id: '3',
-            name: 'Mike Wilson',
-            location: 'Durban, KwaZulu-Natal',
-            service: 'Electrical',
-            budget: 'R1,500 - R3,000',
-            credits_spent: 1,
-            unlocked_at: '2024-01-13T09:15:00Z',
-            status: 'won',
-            phone: '+27 84 555 1234',
-            email: 'mike.wilson@home.co.za',
-            description: 'Need electrical work for new outdoor lighting installation.',
-            urgency: 'low',
-            timeline: 'Next month',
-            notes: 'Job completed successfully. Very happy with the work.',
-            last_contact: '2024-01-15T08:00:00Z'
-          }
-        ]);
+          console.error('Failed to fetch my leads:', apiError);
+          setLeads([]);
         }
       } catch (error) {
         console.error('Failed to fetch my leads:', error);
