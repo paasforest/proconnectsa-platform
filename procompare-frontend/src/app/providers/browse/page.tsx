@@ -20,15 +20,27 @@ type PublicProvider = {
 };
 
 async function fetchProviders(searchParams: { category?: string; city?: string; page?: string; page_size?: string }) {
-  const params = new URLSearchParams();
-  if (searchParams.category) params.set("category", searchParams.category);
-  if (searchParams.city) params.set("city", searchParams.city);
-  if (searchParams.page) params.set("page", searchParams.page);
-  if (searchParams.page_size) params.set("page_size", searchParams.page_size);
-  const url = `${API_BASE}/api/public/providers/${params.toString() ? `?${params.toString()}` : ""}`;
-  const res = await fetch(url, { next: { revalidate: 300 } });
-  if (!res.ok) throw new Error(`Failed to load providers (${res.status})`);
-  return res.json() as Promise<{ results: PublicProvider[]; pagination: { page: number; pages: number; total: number; page_size: number } }>;
+  try {
+    const params = new URLSearchParams();
+    if (searchParams.category) params.set("category", searchParams.category);
+    if (searchParams.city) params.set("city", searchParams.city);
+    if (searchParams.page) params.set("page", searchParams.page);
+    if (searchParams.page_size) params.set("page_size", searchParams.page_size);
+    const url = `${API_BASE}/api/public/providers/${params.toString() ? `?${params.toString()}` : ""}`;
+    const res = await fetch(url, { next: { revalidate: 300 } });
+    if (!res.ok) {
+      console.error(`Failed to load providers: ${res.status}`);
+      return { results: [], pagination: { page: 1, pages: 1, total: 0, page_size: 20 } };
+    }
+    const data = await res.json();
+    return {
+      results: data.results || [],
+      pagination: data.pagination || { page: 1, pages: 1, total: 0, page_size: 20 }
+    };
+  } catch (error) {
+    console.error("Error fetching providers:", error);
+    return { results: [], pagination: { page: 1, pages: 1, total: 0, page_size: 20 } };
+  }
 }
 
 export const metadata: Metadata = {
@@ -41,9 +53,10 @@ export default async function ProvidersBrowsePage({
 }: {
   searchParams: Promise<{ category?: string; city?: string; page?: string; page_size?: string }>;
 }) {
-  const params = await searchParams;
-  const data = await fetchProviders(params);
-  const providers = data.results || [];
+  try {
+    const params = await searchParams;
+    const data = await fetchProviders(params);
+    const providers = Array.isArray(data.results) ? data.results : [];
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -125,5 +138,31 @@ export default async function ProvidersBrowsePage({
       <Footer />
     </div>
   );
+  } catch (error) {
+    console.error("Error rendering browse page:", error);
+    return (
+      <div className="min-h-screen flex flex-col">
+        <ClientHeader />
+        <main className="flex-1">
+          <section className="py-10 bg-white border-b">
+            <div className="container mx-auto px-4">
+              <h1 className="text-3xl font-bold text-gray-900 mb-2">Find Verified Providers</h1>
+              <p className="text-gray-600">
+                Browse public profiles of verified professionals. Filter by category and city.
+              </p>
+            </div>
+          </section>
+          <section className="py-8">
+            <div className="container mx-auto px-4">
+              <div className="text-center text-gray-600">
+                <p>Unable to load providers at this time. Please try again later.</p>
+              </div>
+            </div>
+          </section>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
 }
 
