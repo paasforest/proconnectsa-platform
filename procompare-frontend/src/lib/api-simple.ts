@@ -57,12 +57,25 @@ export class SimpleApiClient {
     const url = `${this.baseURL}${endpoint}`
     
     try {
+      console.log(`[API] ${options.method || 'GET'} ${url}`, options.body ? JSON.parse(options.body as string) : '');
+      
       const response = await fetch(url, {
         ...options,
         headers,
+        // Add credentials for CORS
+        credentials: 'include',
       })
 
-      const data = await response.json()
+      // Check if response is JSON before parsing
+      let data;
+      const contentType = response.headers.get('content-type');
+      if (contentType && contentType.includes('application/json')) {
+        data = await response.json()
+      } else {
+        const text = await response.text();
+        console.error('Non-JSON response:', text);
+        throw new Error(`Server returned non-JSON response: ${response.status} ${response.statusText}`);
+      }
 
       if (!response.ok) {
         const error = new Error(`HTTP error! status: ${response.status}`)
@@ -76,7 +89,16 @@ export class SimpleApiClient {
       }
 
       return data as T
-    } catch (error) {
+    } catch (error: any) {
+      // Enhanced error logging
+      console.error(`[API Error] ${options.method || 'GET'} ${url}:`, error);
+      
+      // Re-throw with more context
+      if (error.name === 'TypeError' && error.message.includes('fetch')) {
+        const networkError = new Error('Network error: Unable to connect to server. Please check your internet connection.');
+        (networkError as any).originalError = error;
+        throw networkError;
+      }
       throw error
     }
   }

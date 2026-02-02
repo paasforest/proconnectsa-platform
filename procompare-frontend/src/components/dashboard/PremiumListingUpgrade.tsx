@@ -86,40 +86,50 @@ export default function PremiumListingUpgrade({
 
     try {
       setLoading(planType);
-      apiClient.setToken(token);
 
-      const response = await apiClient.post('/api/auth/request-premium-listing/', {
-        plan_type: planType
+      // Use Next.js API route proxy to avoid CORS issues
+      const response = await fetch('/api/backend-proxy/auth/request-premium-listing/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Token ${token}`
+        },
+        body: JSON.stringify({
+          plan_type: planType
+        })
       });
 
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+        throw new Error(errorData.error || `HTTP ${response.status}: ${response.statusText}`);
+      }
+
+      const responseData = await response.json();
+
       // Handle different response structures
-      const responseData = response?.data || response;
+      const data = responseData?.data || responseData;
       
-      if (responseData.success || response.success) {
-        setPremiumRequest(responseData);
+      if (data.success || responseData.success) {
+        setPremiumRequest(data);
         setShowBankingDetails(true);
         toast.success('Premium request created! Please complete the EFT payment.');
       } else {
-        const errorMsg = responseData.error || response.error || 'Failed to create premium request';
+        const errorMsg = data.error || responseData.error || 'Failed to create premium request';
         toast.error(errorMsg);
       }
     } catch (error: any) {
       console.error('Premium request error:', error);
+      
       // Better error handling
       let errorMessage = 'Failed to request premium listing';
       
-      if (error.response?.data) {
+      if (error.message) {
+        errorMessage = error.message;
+      } else if (error.response?.data) {
         errorMessage = error.response.data.error || 
                       error.response.data.message || 
                       error.response.data.detail ||
                       errorMessage;
-      } else if (error.message) {
-        errorMessage = error.message;
-      }
-      
-      // Check for network errors
-      if (error.message?.includes('Failed to fetch') || error.message?.includes('NetworkError')) {
-        errorMessage = 'Network error: Please check your internet connection and try again';
       }
       
       toast.error(errorMessage);
