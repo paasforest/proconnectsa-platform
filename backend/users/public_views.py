@@ -4,7 +4,6 @@ from rest_framework.response import Response
 from rest_framework import status
 from django.core.paginator import Paginator
 from django.utils.text import slugify
-from django.utils import timezone
 
 from .models import ProviderProfile, User
 from backend.leads.models import ServiceCategory
@@ -12,23 +11,41 @@ from backend.leads.models import ServiceCategory
 
 def _provider_public_dict(p: ProviderProfile):
     u = p.user
-    # Check if premium listing is active
-    is_premium_active = (
-        p.is_premium_listing and
-        (p.premium_listing_expires_at is None or p.premium_listing_expires_at > timezone.now())
-    )
+    # Get service category names from slugs
+    service_category_names = []
+    if p.service_categories:
+        for slug in p.service_categories:
+            try:
+                cat = ServiceCategory.objects.get(slug=slug, is_active=True)
+                service_category_names.append(cat.name)
+            except ServiceCategory.DoesNotExist:
+                service_category_names.append(slug.replace('-', ' ').title())
+    
     return {
         'id': str(p.id),
         'business_name': p.business_name,
         'city': u.city,
         'suburb': u.suburb,
         'service_categories': p.service_categories or [],
+        'service_category_names': service_category_names,
         'average_rating': float(p.average_rating or 0),
         'total_reviews': p.total_reviews,
         'verification_status': p.verification_status,
-        'is_premium_listing': is_premium_active,
         'slug': slugify(p.business_name)[:60],
-        # No sensitive contact info exposed here (email, phone hidden)
+        # Enhanced company details
+        'bio': p.bio or '',
+        'years_experience': p.years_experience,
+        'service_areas': p.service_areas or [],
+        'max_travel_distance': p.max_travel_distance,
+        'hourly_rate_min': float(p.hourly_rate_min) if p.hourly_rate_min else None,
+        'hourly_rate_max': float(p.hourly_rate_max) if p.hourly_rate_max else None,
+        'minimum_job_value': float(p.minimum_job_value) if p.minimum_job_value else None,
+        'response_time_hours': float(p.response_time_hours) if p.response_time_hours else None,
+        'job_completion_rate': float(p.job_completion_rate) if p.job_completion_rate else None,
+        'profile_image': p.profile_image or '',
+        'portfolio_images': p.portfolio_images or [],
+        'insurance_valid_until': p.insurance_valid_until.isoformat() if p.insurance_valid_until else None,
+        # No sensitive contact info exposed here
     }
 
 
@@ -36,79 +53,21 @@ def _provider_public_dict(p: ProviderProfile):
 @permission_classes([AllowAny])
 def public_providers_list(request):
     """
-    Public: list providers with optional filters: category, city, page, page_size
-    
-    Visibility rules:
-    - EXISTING providers (created before 2025-02-01): Verified providers stay visible (grandfather clause)
-    - NEW providers (created after 2025-02-01): Must be BOTH verified AND premium to appear
-      - If verified but NOT premium → NOT visible
-      - If verified AND premium → Visible
+    Public: list verified providers with optional filters: category, city, page, page_size
     """
     category_slug = request.GET.get('category')
     city = request.GET.get('city')
     page = int(request.GET.get('page', 1))
     page_size = int(request.GET.get('page_size', 20))
 
-    from django.db.models import Q
-    from datetime import datetime
-    now = timezone.now()
-    # Use today's date as cutoff - providers created from today forward need verified AND premium
-    # All existing providers (created before today) are grandfathered
-    cutoff_date = timezone.now().replace(hour=0, minute=0, second=0, microsecond=0)
-    
-    # Show providers based on creation date:
-    # 1. Existing providers (created before today): verified OR premium
-    # 2. New providers (created from today): MUST be verified AND premium
-    qs = ProviderProfile.objects.filter(
-        Q(
-            # Existing providers (grandfathered): verified
-            created_at__lt=cutoff_date,
-            verification_status='verified'
-        ) |
-        Q(
-            # Existing providers: premium monthly (even if not verified yet)
-            created_at__lt=cutoff_date,
-            is_premium_listing=True,
-            premium_listing_started_at__isnull=False,
-            premium_listing_expires_at__gt=now
-        ) |
-        Q(
-            # Existing providers: premium lifetime
-            created_at__lt=cutoff_date,
-            is_premium_listing=True,
-            premium_listing_started_at__isnull=False,
-            premium_listing_expires_at__isnull=True
-        ) |
-        Q(
-            # NEW providers: MUST be BOTH verified AND premium (monthly)
-            created_at__gte=cutoff_date,
-            verification_status='verified',
-            is_premium_listing=True,
-            premium_listing_started_at__isnull=False,
-            premium_listing_expires_at__gt=now
-        ) |
-        Q(
-            # NEW providers: MUST be BOTH verified AND premium (lifetime)
-            created_at__gte=cutoff_date,
-            verification_status='verified',
-            is_premium_listing=True,
-            premium_listing_started_at__isnull=False,
-            premium_listing_expires_at__isnull=True
-        )
-    )
+    qs = ProviderProfile.objects.filter(verification_status='verified')
 
     if category_slug:
         qs = qs.filter(service_categories__contains=[category_slug])
     if city:
         qs = qs.filter(user__city__iexact=city)
 
-    # Order: premium first, then by rating/reviews
-    qs = qs.select_related('user').order_by(
-        '-is_premium_listing',
-        '-average_rating',
-        '-total_reviews',
-        'business_name'
-    )
+    qs = qs.select_related('user').order_by('-average_rating', '-total_reviews', 'business_name')
     paginator = Paginator(qs, page_size)
     page_obj = paginator.get_page(page)
 
@@ -128,170 +87,11 @@ def public_providers_list(request):
 @permission_classes([AllowAny])
 def public_provider_detail(request, provider_id):
     """
-    Public: provider profile detail
-    
-    Visibility rules:
-    - Verified providers are always visible
-    - Premium listings are visible even if pending verification
+    Public: provider profile detail (verified only)
     """
     try:
-        p = ProviderProfile.objects.select_related('user').get(id=provider_id)
-        
-        # Check visibility: verified OR active premium listing
-        now = timezone.now()
-        is_visible = (
-            p.verification_status == 'verified' or
-            (
-                p.is_premium_listing and
-                p.premium_listing_started_at is not None and
-                (
-                    p.premium_listing_expires_at is None or
-                    p.premium_listing_expires_at > now
-                )
-            )
-        )
-        
-        if not is_visible:
-            return Response({
-                'error': 'Provider profile not available',
-                'message': 'This provider profile is not currently visible in the public directory.'
-            }, status=status.HTTP_404_NOT_FOUND)
-        
+        p = ProviderProfile.objects.select_related('user').get(id=provider_id, verification_status='verified')
         return Response(_provider_public_dict(p))
     except ProviderProfile.DoesNotExist:
         return Response({'error': 'Provider not found'}, status=status.HTTP_404_NOT_FOUND)
-
-
-@api_view(['GET'])
-@permission_classes([AllowAny])
-def list_all_providers_debug(request):
-    """
-    TEMPORARY: List ALL providers (including non-verified) for investigation.
-    This endpoint should be removed after cleanup is complete.
-    """
-    qs = ProviderProfile.objects.select_related('user').order_by('business_name')
-    
-    data = []
-    for p in qs:
-        u = p.user
-        data.append({
-            'id': str(p.id),
-            'business_name': p.business_name,
-            'email': u.email,
-            'first_name': u.first_name,
-            'last_name': u.last_name,
-            'full_name': f"{u.first_name} {u.last_name}".strip(),
-            'city': u.city,
-            'suburb': u.suburb,
-            'service_categories': p.service_categories or [],
-            'verification_status': p.verification_status,
-            'average_rating': float(p.average_rating or 0),
-            'total_reviews': p.total_reviews,
-            'credit_balance': p.credit_balance,
-            'created_at': p.created_at.isoformat() if p.created_at else None,
-        })
-    
-    return Response({
-        'total': len(data),
-        'providers': data,
-        'note': 'TEMPORARY endpoint - includes all providers regardless of verification status'
-    })
-
-
-@api_view(['GET'])
-@permission_classes([AllowAny])
-def search_provider_by_name(request):
-    """
-    TEMPORARY: Search for a provider by name (business name or user name).
-    """
-    search_query = request.GET.get('q', '').strip().lower()
-    
-    if not search_query:
-        return Response({'error': 'Please provide a search query (?q=name)'}, status=400)
-    
-    # Search in provider profiles and user names
-    from django.db.models import Q
-    qs = ProviderProfile.objects.select_related('user').filter(
-        Q(business_name__icontains=search_query) |
-        Q(user__first_name__icontains=search_query) |
-        Q(user__last_name__icontains=search_query) |
-        Q(user__email__icontains=search_query)
-    ).order_by('business_name')
-    
-    data = []
-    for p in qs:
-        u = p.user
-        data.append({
-            'id': str(p.id),
-            'business_name': p.business_name,
-            'email': u.email,
-            'first_name': u.first_name,
-            'last_name': u.last_name,
-            'full_name': f"{u.first_name} {u.last_name}".strip(),
-            'city': u.city,
-            'suburb': u.suburb,
-            'service_categories': p.service_categories or [],
-            'verification_status': p.verification_status,
-        })
-    
-    return Response({
-        'query': search_query,
-        'count': len(data),
-        'results': data
-    })
-
-
-@api_view(['GET'])
-@permission_classes([AllowAny])
-def search_all_users(request):
-    """
-    TEMPORARY: Search ALL users (including those without provider profiles) by name or email.
-    """
-    search_query = request.GET.get('q', '').strip().lower()
-    
-    if not search_query:
-        return Response({'error': 'Please provide a search query (?q=name)'}, status=400)
-    
-    from django.db.models import Q
-    # Search all users
-    users = User.objects.filter(
-        Q(first_name__icontains=search_query) |
-        Q(last_name__icontains=search_query) |
-        Q(email__icontains=search_query) |
-        Q(username__icontains=search_query)
-    ).order_by('email')
-    
-    data = []
-    for u in users:
-        has_profile = hasattr(u, 'provider_profile')
-        profile_data = None
-        if has_profile:
-            p = u.provider_profile
-            profile_data = {
-                'id': str(p.id),
-                'business_name': p.business_name,
-                'verification_status': p.verification_status,
-                'service_categories': p.service_categories or [],
-            }
-        
-        data.append({
-            'user_id': str(u.id),
-            'email': u.email,
-            'first_name': u.first_name,
-            'last_name': u.last_name,
-            'full_name': f"{u.first_name} {u.last_name}".strip(),
-            'user_type': u.user_type,
-            'is_active': u.is_active,
-            'city': u.city,
-            'suburb': u.suburb,
-            'has_provider_profile': has_profile,
-            'provider_profile': profile_data,
-            'date_joined': u.date_joined.isoformat() if u.date_joined else None,
-        })
-    
-    return Response({
-        'query': search_query,
-        'count': len(data),
-        'results': data
-    })
 
