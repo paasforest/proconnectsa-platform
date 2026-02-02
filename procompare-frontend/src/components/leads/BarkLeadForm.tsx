@@ -224,13 +224,10 @@ export default function BarkLeadForm({ onComplete, onCancel, preselectedCategory
         client_phone: contactPhone.trim(),
       }
 
-      // Submit directly to backend (same as categories) - avoids Next.js proxy/health-check failures
-      const res = await fetch(`${API_BASE_URL}/api/leads/create-public/`, {
+      // Submit via Next.js API proxy (keeps API key server-side for security)
+      const res = await fetch('/api/leads/create-public', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-API-Key': 'proconnectsa_lead_creation_2024',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
       })
       
