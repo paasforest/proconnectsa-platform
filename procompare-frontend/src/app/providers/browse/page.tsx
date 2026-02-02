@@ -26,7 +26,8 @@ async function fetchProviders(searchParams: { category?: string; city?: string; 
     if (searchParams.city) params.set("city", searchParams.city);
     if (searchParams.page) params.set("page", searchParams.page);
     if (searchParams.page_size) params.set("page_size", searchParams.page_size);
-    const url = `${API_BASE}/api/public/providers/${params.toString() ? `?${params.toString()}` : ""}`;
+    const queryString = params.toString();
+    const url = `${API_BASE}/api/public/providers/${queryString ? `?${queryString}` : ""}`;
     const res = await fetch(url, { next: { revalidate: 300 } });
     if (!res.ok) {
       console.error(`Failed to load providers: ${res.status}`);
