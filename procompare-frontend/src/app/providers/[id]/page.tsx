@@ -198,34 +198,53 @@ export default async function ProviderDetailPage({ params }: { params: { id: str
                   {provider.bio ? (
                     <p className="text-gray-700 leading-relaxed whitespace-pre-line">{provider.bio}</p>
                   ) : (
-                    <p className="text-gray-600 italic">
-                      This provider has a verified profile on ProConnectSA. Contact details are shared securely when a
-                      lead is matched and purchased.
-                    </p>
+                    <div className="space-y-3 text-gray-700">
+                      <p>
+                        {provider.business_name} is a verified {provider.service_category_names?.[0] || 'service'} provider 
+                        {provider.years_experience ? ` with ${provider.years_experience} years of experience` : ''} 
+                        {' '}based in {[provider.suburb, provider.city].filter(Boolean).join(", ") || "South Africa"}.
+                      </p>
+                      <p>
+                        This provider has a verified profile on ProConnectSA. Contact details are shared securely when a
+                        lead is matched and purchased.
+                      </p>
+                      <p className="text-sm text-gray-600 mt-4">
+                        <strong>Why choose this provider?</strong>
+                      </p>
+                      <ul className="list-disc list-inside text-sm text-gray-600 space-y-1 ml-2">
+                        <li>Verified business profile</li>
+                        <li>Secure contact sharing</li>
+                        <li>Get multiple quotes to compare</li>
+                        <li>Free service - no obligation</li>
+                      </ul>
+                    </div>
                   )}
                 </div>
 
                 {/* Services & Coverage */}
-                {(provider.service_areas.length > 0 || provider.max_travel_distance) && (
-                  <div className="bg-white border rounded-lg p-6">
-                    <h2 className="text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                      <MapPin className="w-5 h-5" />
-                      Service Areas
-                    </h2>
-                    {provider.service_areas.length > 0 ? (
-                      <div className="flex flex-wrap gap-2 mb-3">
-                        {provider.service_areas.map((area, idx) => (
-                          <Badge key={idx} variant="outline">{area}</Badge>
-                        ))}
-                      </div>
-                    ) : null}
-                    {provider.max_travel_distance && (
-                      <p className="text-sm text-gray-600">
-                        Maximum travel distance: {provider.max_travel_distance} km
-                      </p>
-                    )}
-                  </div>
-                )}
+                <div className="bg-white border rounded-lg p-6">
+                  <h2 className="text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                    <MapPin className="w-5 h-5" />
+                    Service Areas
+                  </h2>
+                  {provider.service_areas && provider.service_areas.length > 0 ? (
+                    <div className="flex flex-wrap gap-2 mb-3">
+                      {provider.service_areas.map((area, idx) => (
+                        <Badge key={idx} variant="outline">{area}</Badge>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-gray-600">
+                      Serves {[provider.suburb, provider.city].filter(Boolean).join(", ") || "South Africa"}
+                      {provider.max_travel_distance ? ` and surrounding areas (up to ${provider.max_travel_distance} km)` : ''}
+                    </p>
+                  )}
+                  {provider.max_travel_distance && provider.max_travel_distance > 0 && (
+                    <p className="text-sm text-gray-600 mt-2">
+                      Maximum travel distance: {provider.max_travel_distance} km
+                    </p>
+                  )}
+                </div>
 
                 {/* Portfolio Images */}
                 {provider.portfolio_images && provider.portfolio_images.length > 0 && (
@@ -294,7 +313,7 @@ export default async function ProviderDetailPage({ params }: { params: { id: str
                     Performance
                   </h3>
                   <div className="space-y-4">
-                    {provider.response_time_hours && typeof provider.response_time_hours === 'number' && (
+                    {provider.response_time_hours && typeof provider.response_time_hours === 'number' ? (
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2 text-sm text-gray-600">
                           <Clock className="w-4 h-4" />
@@ -306,8 +325,16 @@ export default async function ProviderDetailPage({ params }: { params: { id: str
                             : `${provider.response_time_hours.toFixed(1)} hrs`}
                         </span>
                       </div>
+                    ) : (
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2 text-sm text-gray-600">
+                          <Clock className="w-4 h-4" />
+                          <span>Response Time</span>
+                        </div>
+                        <span className="font-medium text-gray-400 text-xs">Not available</span>
+                      </div>
                     )}
-                    {provider.job_completion_rate && typeof provider.job_completion_rate === 'number' && (
+                    {provider.job_completion_rate && typeof provider.job_completion_rate === 'number' ? (
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2 text-sm text-gray-600">
                           <CheckCircle className="w-4 h-4" />
@@ -317,8 +344,16 @@ export default async function ProviderDetailPage({ params }: { params: { id: str
                           {provider.job_completion_rate.toFixed(0)}%
                         </span>
                       </div>
+                    ) : (
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2 text-sm text-gray-600">
+                          <CheckCircle className="w-4 h-4" />
+                          <span>Completion Rate</span>
+                        </div>
+                        <span className="font-medium text-gray-400 text-xs">Not available</span>
+                      </div>
                     )}
-                    {hasInsurance && (
+                    {hasInsurance ? (
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2 text-sm text-gray-600">
                           <Shield className="w-4 h-4" />
@@ -326,38 +361,54 @@ export default async function ProviderDetailPage({ params }: { params: { id: str
                         </div>
                         <span className="font-medium text-green-600">Valid</span>
                       </div>
+                    ) : (
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2 text-sm text-gray-600">
+                          <Shield className="w-4 h-4" />
+                          <span>Insurance</span>
+                        </div>
+                        <span className="font-medium text-gray-400 text-xs">Not verified</span>
+                      </div>
                     )}
                   </div>
                 </div>
 
                 {/* Pricing Information */}
-                {hasPricing && (
-                  <div className="bg-white border rounded-lg p-6">
-                    <h3 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                      <DollarSign className="w-5 h-5" />
-                      Pricing
-                    </h3>
-                    <div className="space-y-3 text-sm">
-                      {provider.hourly_rate_min && provider.hourly_rate_max && 
-                     typeof provider.hourly_rate_min === 'number' && typeof provider.hourly_rate_max === 'number' && (
-                        <div>
-                          <span className="text-gray-600">Hourly Rate:</span>
-                          <span className="font-medium text-gray-900 ml-2">
-                            R{provider.hourly_rate_min.toFixed(0)} - R{provider.hourly_rate_max.toFixed(0)}
-                          </span>
-                        </div>
-                      )}
-                      {provider.minimum_job_value && typeof provider.minimum_job_value === 'number' && (
-                        <div>
-                          <span className="text-gray-600">Minimum Job Value:</span>
-                          <span className="font-medium text-gray-900 ml-2">
-                            R{provider.minimum_job_value.toFixed(0)}
-                          </span>
-                        </div>
-                      )}
-                    </div>
+                <div className="bg-white border rounded-lg p-6">
+                  <h3 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                    <DollarSign className="w-5 h-5" />
+                    Pricing
+                  </h3>
+                  <div className="space-y-3 text-sm">
+                    {provider.hourly_rate_min && provider.hourly_rate_max && 
+                     typeof provider.hourly_rate_min === 'number' && typeof provider.hourly_rate_max === 'number' ? (
+                      <div>
+                        <span className="text-gray-600">Hourly Rate:</span>
+                        <span className="font-medium text-gray-900 ml-2">
+                          R{provider.hourly_rate_min.toFixed(0)} - R{provider.hourly_rate_max.toFixed(0)}
+                        </span>
+                      </div>
+                    ) : (
+                      <div>
+                        <span className="text-gray-600">Hourly Rate:</span>
+                        <span className="font-medium text-gray-400 ml-2 text-xs">Contact for pricing</span>
+                      </div>
+                    )}
+                    {provider.minimum_job_value && typeof provider.minimum_job_value === 'number' ? (
+                      <div>
+                        <span className="text-gray-600">Minimum Job Value:</span>
+                        <span className="font-medium text-gray-900 ml-2">
+                          R{provider.minimum_job_value.toFixed(0)}
+                        </span>
+                      </div>
+                    ) : null}
+                    {!hasPricing && (
+                      <p className="text-xs text-gray-500 italic">
+                        Pricing varies by project. Get a free quote to see competitive rates.
+                      </p>
+                    )}
                   </div>
-                )}
+                </div>
 
                 {/* Get Quote CTA */}
                 <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 text-center">
