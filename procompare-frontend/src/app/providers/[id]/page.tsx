@@ -45,17 +45,11 @@ type PublicProvider = {
 };
 
 async function fetchProvider(id: string): Promise<PublicProvider | null> {
-  if (!id) return null;
-  
   try {
     const url = `${API_BASE}/api/public/providers/${id}/`;
-    const res = await fetch(url, { 
-      next: { revalidate: 300 }
-    });
-    
+    const res = await fetch(url, { next: { revalidate: 300 } });
     if (res.status === 404) return null;
     if (!res.ok) return null;
-    
     const data = await res.json();
     
     // Ensure all required fields have defaults
@@ -84,7 +78,6 @@ async function fetchProvider(id: string): Promise<PublicProvider | null> {
       insurance_valid_until: data.insurance_valid_until || null,
     };
   } catch (error) {
-    console.error('Error in fetchProvider:', error);
     return null;
   }
 }
@@ -107,24 +100,15 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
 }
 
 export default async function ProviderDetailPage({ params }: { params: Promise<{ id: string }> }) {
-  try {
-    const { id } = await params;
-    
-    if (!id) {
-      return notFound();
-    }
-    
-    const provider = await fetchProvider(id);
-    
-    if (!provider) {
-      return notFound();
-    }
+  const { id } = await params;
+  const provider = await fetchProvider(id);
+  if (!provider) return notFound();
 
-    const location = [provider.suburb, provider.city].filter(Boolean).join(", ") || "Location not specified";
-    const hasPricing = provider.hourly_rate_min || provider.hourly_rate_max || provider.minimum_job_value;
-    const hasInsurance = provider.insurance_valid_until && new Date(provider.insurance_valid_until) > new Date();
+  const location = [provider.suburb, provider.city].filter(Boolean).join(", ") || "Location not specified";
+  const hasPricing = provider.hourly_rate_min || provider.hourly_rate_max || provider.minimum_job_value;
+  const hasInsurance = provider.insurance_valid_until && new Date(provider.insurance_valid_until) > new Date();
 
-    return (
+  return (
     <div className="min-h-screen flex flex-col bg-gray-50">
       <ClientHeader />
       <main className="flex-1">
@@ -246,7 +230,7 @@ export default async function ProviderDetailPage({ params }: { params: Promise<{
                   ) : (
                     <p className="text-gray-600">
                       Serves {[provider.suburb, provider.city].filter(Boolean).join(", ") || "South Africa"}
-                      {provider.max_travel_distance ? ` and surrounding areas (up to ${provider.max_travel_distance} km)` : ''}
+                      {provider.max_travel_distance && provider.max_travel_distance > 0 ? ` and surrounding areas (up to ${provider.max_travel_distance} km)` : ''}
                     </p>
                   )}
                   {provider.max_travel_distance && provider.max_travel_distance > 0 && (
@@ -308,12 +292,21 @@ export default async function ProviderDetailPage({ params }: { params: Promise<{
                     <p className="text-sm text-gray-600 mt-2">
                       {provider.total_reviews || 0} {(provider.total_reviews || 0) === 1 ? 'review' : 'reviews'}
                     </p>
+                    {(provider.total_reviews || 0) === 0 && (
+                      <p className="text-xs text-gray-500 mt-1">No reviews yet</p>
+                    )}
                   </div>
-                  <Link href={`/providers/${provider.id}/reviews`}>
-                    <Button variant="outline" className="w-full">
-                      View All Reviews
+                  {(provider.total_reviews || 0) > 0 ? (
+                    <Link href={`/providers/${provider.id}/reviews`}>
+                      <Button variant="outline" className="w-full">
+                        View All Reviews
+                      </Button>
+                    </Link>
+                  ) : (
+                    <Button variant="outline" className="w-full" disabled>
+                      No Reviews Yet
                     </Button>
-                  </Link>
+                  )}
                 </div>
 
                 {/* Performance Metrics */}
@@ -440,10 +433,5 @@ export default async function ProviderDetailPage({ params }: { params: Promise<{
       </main>
       <Footer />
     </div>
-    );
-  } catch (error) {
-    console.error('Error rendering provider page:', error);
-    return notFound();
-  }
+  );
 }
-
