@@ -267,8 +267,8 @@ const SupportPage = () => {
           </div>
           <p className="text-gray-600 mb-4">Get in touch with our support team</p>
           <div className="space-y-2 text-sm text-gray-600">
-            <p>📞 +27 21 123 4567</p>
-            <p>✉️ support@procompare.co.za</p>
+            <p>📞 +27 67 951 8124</p>
+            <p>✉️ support@proconnectsa.co.za</p>
           </div>
         </div>
 

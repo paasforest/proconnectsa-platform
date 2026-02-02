@@ -20,15 +20,29 @@ type PublicProvider = {
 };
 
 async function fetchProviders(searchParams: { category?: string; city?: string; page?: string; page_size?: string }) {
-  const params = new URLSearchParams();
-  if (searchParams.category) params.set("category", searchParams.category);
-  if (searchParams.city) params.set("city", searchParams.city);
-  if (searchParams.page) params.set("page", searchParams.page);
-  if (searchParams.page_size) params.set("page_size", searchParams.page_size);
-  const url = `${API_BASE}/api/public/providers/${params.toString() ? `?${params.toString()}` : ""}`;
-  const res = await fetch(url, { next: { revalidate: 300 } });
-  if (!res.ok) throw new Error(`Failed to load providers (${res.status})`);
-  return res.json() as Promise<{ results: PublicProvider[]; pagination: { page: number; pages: number; total: number; page_size: number } }>;
+  try {
+    const params = new URLSearchParams();
+    if (searchParams.category) params.set("category", searchParams.category);
+    if (searchParams.city) params.set("city", searchParams.city);
+    if (searchParams.page) params.set("page", searchParams.page);
+    if (searchParams.page_size) params.set("page_size", searchParams.page_size);
+    const queryString = params.toString();
+    const baseUrl = `${API_BASE}/api/public/providers/`;
+    const url = queryString ? `${baseUrl}?${queryString}` : baseUrl;
+    const res = await fetch(url, { next: { revalidate: 300 } });
+    if (!res.ok) {
+      console.error(`Failed to load providers: ${res.status}`);
+      return { results: [], pagination: { page: 1, pages: 1, total: 0, page_size: 20 } };
+    }
+    const data = await res.json();
+    return {
+      results: data.results || [],
+      pagination: data.pagination || { page: 1, pages: 1, total: 0, page_size: 20 }
+    };
+  } catch (error) {
+    console.error("Error fetching providers:", error);
+    return { results: [], pagination: { page: 1, pages: 1, total: 0, page_size: 20 } };
+  }
 }
 
 export const metadata: Metadata = {
@@ -39,90 +53,117 @@ export const metadata: Metadata = {
 export default async function ProvidersBrowsePage({
   searchParams,
 }: {
-  searchParams: { category?: string; city?: string; page?: string; page_size?: string };
+  searchParams: Promise<{ category?: string; city?: string; page?: string; page_size?: string }>;
 }) {
-  const data = await fetchProviders(searchParams);
-  const providers = data.results || [];
+  try {
+    const params = await searchParams;
+    const data = await fetchProviders(params);
+    const providers = Array.isArray(data.results) ? data.results : [];
 
-  return (
-    <div className="min-h-screen flex flex-col">
-      <ClientHeader />
-      <main className="flex-1">
-        <section className="py-10 bg-white border-b">
-          <div className="container mx-auto px-4">
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">Find Verified Providers</h1>
-            <p className="text-gray-600">
-              Browse public profiles of verified professionals. Filter by category and city.
-            </p>
-            <form className="mt-6 grid grid-cols-1 md:grid-cols-4 gap-3">
-              <input
-                name="category"
-                placeholder="Category slug (e.g. plumbing)"
-                defaultValue={searchParams.category || ""}
-                className="border rounded px-3 py-2"
-              />
-              <input
-                name="city"
-                placeholder="City (e.g. Johannesburg)"
-                defaultValue={searchParams.city || ""}
-                className="border rounded px-3 py-2"
-              />
-              <input type="hidden" name="page" value="1" />
-              <button className="bg-blue-600 text-white rounded px-4 py-2">Search</button>
-              <Link
-                href="/providers/browse"
-                className="text-sm text-gray-600 underline underline-offset-4 self-center"
-              >
-                Reset
-              </Link>
-            </form>
-          </div>
-        </section>
+    return (
+      <div className="min-h-screen flex flex-col">
+        <ClientHeader />
+        <main className="flex-1">
+          <section className="py-10 bg-white border-b">
+            <div className="container mx-auto px-4">
+              <h1 className="text-3xl font-bold text-gray-900 mb-2">Find Verified Providers</h1>
+              <p className="text-gray-600">
+                Browse public profiles of verified professionals. Filter by category and city.
+              </p>
+              <form method="get" action="/providers/browse" className="mt-6 grid grid-cols-1 md:grid-cols-4 gap-3">
+                <input
+                  name="category"
+                  placeholder="Category slug (e.g. plumbing)"
+                  defaultValue={params.category || ""}
+                  className="border rounded px-3 py-2"
+                />
+                <input
+                  name="city"
+                  placeholder="City (e.g. Johannesburg)"
+                  defaultValue={params.city || ""}
+                  className="border rounded px-3 py-2"
+                />
+                <input type="hidden" name="page" value="1" />
+                <button type="submit" className="bg-blue-600 text-white rounded px-4 py-2 hover:bg-blue-700">Search</button>
+                <Link
+                  href="/providers/browse"
+                  className="text-sm text-gray-600 underline underline-offset-4 self-center"
+                >
+                  Reset
+                </Link>
+              </form>
+            </div>
+          </section>
 
-        <section className="py-8">
-          <div className="container mx-auto px-4 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {providers.length === 0 && (
-              <div className="col-span-full text-gray-600">No providers found for your filters.</div>
-            )}
-            {providers.map((p) => (
-              <Card key={p.id} className="hover:shadow-md transition-shadow">
-                <CardContent className="p-5">
-                  <div className="flex items-start justify-between gap-3">
-                    <div>
-                      <h3 className="text-lg font-semibold text-gray-900">{p.business_name}</h3>
-                      <p className="text-sm text-gray-600">{[p.suburb, p.city].filter(Boolean).join(", ")}</p>
+          <section className="py-8">
+            <div className="container mx-auto px-4 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+              {providers.length === 0 && (
+                <div className="col-span-full text-gray-600">No providers found for your filters.</div>
+              )}
+              {providers.map((p) => (
+                <Card key={p.id} className="hover:shadow-md transition-shadow">
+                  <CardContent className="p-5">
+                    <div className="flex items-start justify-between gap-3">
+                      <div>
+                        <h3 className="text-lg font-semibold text-gray-900">{p.business_name}</h3>
+                        <p className="text-sm text-gray-600">{[p.suburb, p.city].filter(Boolean).join(", ")}</p>
+                      </div>
+                      <Badge variant={p.verification_status === "verified" ? "default" : "secondary"}>
+                        {p.verification_status}
+                      </Badge>
                     </div>
-                    <Badge variant={p.verification_status === "verified" ? "default" : "secondary"}>
-                      {p.verification_status}
-                    </Badge>
-                  </div>
-                  <div className="mt-3 flex flex-wrap gap-1">
-                    {(p.service_categories || []).slice(0, 4).map((c) => (
-                      <span key={c} className="text-xs bg-gray-100 text-gray-800 px-2 py-1 rounded">
-                        {c}
-                      </span>
-                    ))}
-                  </div>
-                  <div className="mt-3 text-sm text-gray-700">
-                    <span className="font-medium">{p.average_rating?.toFixed(1) ?? "0.0"}</span> / 5.0 ·{" "}
-                    <span>{p.total_reviews} reviews</span>
-                  </div>
-                  <div className="mt-4">
-                    <Link
-                      href={`/providers/${p.id}`}
-                      className="inline-flex items-center text-blue-700 hover:text-blue-900 font-medium"
-                    >
-                      View profile →
-                    </Link>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </section>
-      </main>
-      <Footer />
-    </div>
-  );
+                    <div className="mt-3 flex flex-wrap gap-1">
+                      {(p.service_categories || []).slice(0, 4).map((c) => (
+                        <span key={c} className="text-xs bg-gray-100 text-gray-800 px-2 py-1 rounded">
+                          {c}
+                        </span>
+                      ))}
+                    </div>
+                    <div className="mt-3 text-sm text-gray-700">
+                      <span className="font-medium">{p.average_rating?.toFixed(1) ?? "0.0"}</span> / 5.0 ·{" "}
+                      <span>{p.total_reviews} reviews</span>
+                    </div>
+                    <div className="mt-4">
+                      <Link
+                        href={`/providers/${p.id}`}
+                        className="inline-flex items-center text-blue-700 hover:text-blue-900 font-medium"
+                      >
+                        View profile →
+                      </Link>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </section>
+        </main>
+        <Footer />
+      </div>
+    );
+  } catch (error) {
+    console.error("Error rendering browse page:", error);
+    return (
+      <div className="min-h-screen flex flex-col">
+        <ClientHeader />
+        <main className="flex-1">
+          <section className="py-10 bg-white border-b">
+            <div className="container mx-auto px-4">
+              <h1 className="text-3xl font-bold text-gray-900 mb-2">Find Verified Providers</h1>
+              <p className="text-gray-600">
+                Browse public profiles of verified professionals. Filter by category and city.
+              </p>
+            </div>
+          </section>
+          <section className="py-8">
+            <div className="container mx-auto px-4">
+              <div className="text-center text-gray-600">
+                <p>Unable to load providers at this time. Please try again later.</p>
+              </div>
+            </div>
+          </section>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
 }
-

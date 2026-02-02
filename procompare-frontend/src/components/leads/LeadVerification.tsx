@@ -316,7 +316,7 @@ export default function LeadVerification({ leadId, onVerificationComplete, onCan
               <a href="/client">Go to Dashboard</a>
             </Button>
             <Button variant="outline" asChild className="w-full">
-              <a href="/request-quote">Submit Another Request</a>
+              <a href="/services">Browse Services</a>
             </Button>
           </div>
         </CardContent>

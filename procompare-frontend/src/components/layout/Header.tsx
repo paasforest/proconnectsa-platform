@@ -54,7 +54,7 @@ export function Header() {
             Find Providers
           </Link>
           <Link 
-            href="/subscription" 
+            href="/pricing" 
             className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
           >
             Pricing
@@ -175,31 +175,31 @@ export function Header() {
       {isMobileMenuOpen && (
         <div className="md:hidden border-t bg-background">
           <div className="container py-4 space-y-4">
-            <nav className="flex flex-col space-y-2">
+            <nav className="flex flex-col space-y-3">
               <Link 
                 href="/how-it-works" 
-                className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors py-2"
+                className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors py-3 px-2 -mx-2 rounded-md hover:bg-muted"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 How it Works
               </Link>
               <Link 
                 href="/services" 
-                className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors py-2"
+                className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors py-3 px-2 -mx-2 rounded-md hover:bg-muted"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 Services
               </Link>
               <Link 
                 href="/providers" 
-                className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors py-2"
+                className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors py-3 px-2 -mx-2 rounded-md hover:bg-muted"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 Find Providers
               </Link>
               <Link 
-                href="/subscription" 
-                className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors py-2"
+                href="/pricing" 
+                className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors py-3 px-2 -mx-2 rounded-md hover:bg-muted"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 Pricing

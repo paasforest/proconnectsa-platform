@@ -37,12 +37,28 @@ logger = logging.getLogger(__name__)
 
 class ServiceCategoryListView(generics.ListAPIView):
     """List all active service categories"""
-    queryset = ServiceCategory.objects.filter(is_active=True)
     serializer_class = ServiceCategorySerializer
+    permission_classes = [AllowAny]
+    pagination_class = None  # Disable pagination to return all categories
     
-    @method_decorator(cache_page(60 * 15))  # Cache for 15 minutes
+    def get_queryset(self):
+        """Get all active service categories"""
+        queryset = ServiceCategory.objects.filter(is_active=True).order_by('name')
+        count = queryset.count()
+        logger.info(f"ServiceCategoryListView: Found {count} active categories")
+        if count == 0:
+            logger.warning("ServiceCategoryListView: No active categories found in database!")
+        return queryset
+    
+    # Temporarily disable cache to debug empty response issue
+    # @method_decorator(cache_page(60 * 15))  # Cache for 15 minutes
     def get(self, request, *args, **kwargs):
-        return super().get(request, *args, **kwargs)
+        response = super().get(request, *args, **kwargs)
+        data_len = len(response.data) if hasattr(response, 'data') else 0
+        logger.info(f"ServiceCategoryListView: Returning {data_len} categories")
+        if data_len == 0:
+            logger.warning("ServiceCategoryListView: Response data is empty!")
+        return response
 
 
 class LeadListView(generics.ListAPIView):
@@ -120,11 +136,11 @@ class LeadAssignmentListView(generics.ListAPIView):
         if not self.request.user.is_provider:
             return LeadAssignment.objects.none()
         
-        # Only show purchased leads (BARK-STYLE)
+        # Show purchased leads and their history (purchased, contacted, quoted, won, lost)
         return LeadAssignment.objects.filter(
             provider=self.request.user,
-            status='purchased'  # Only purchased/unlocked leads
-        ).order_by('-purchased_at')
+            status__in=['purchased', 'contacted', 'quoted', 'won', 'lost']
+        ).order_by('-purchased_at', '-assigned_at')
 
 
 class LeadAssignmentDetailView(generics.RetrieveUpdateAPIView):
@@ -388,9 +404,12 @@ def create_public_lead(request):
                 'message': 'Please select a valid budget range'
             }, status=status.HTTP_400_BAD_REQUEST)
         
-        # Validate urgency
+        # Validate urgency (must match Lead.URGENCY_CHOICES)
         urgency = request.data.get('urgency', '')
-        valid_urgencies = ['asap', 'this_week', 'this_month', 'flexible']
+        # Backward-compat: some clients used `asap` previously
+        if urgency == 'asap':
+            urgency = 'urgent'
+        valid_urgencies = ['urgent', 'this_week', 'this_month', 'flexible']
         if urgency and urgency not in valid_urgencies:
             return Response({
                 'error': 'Invalid urgency level',
@@ -398,6 +417,7 @@ def create_public_lead(request):
             }, status=status.HTTP_400_BAD_REQUEST)
         
     except Exception as e:
+        logger.error("create_public_lead invalid request data: %s", str(e), exc_info=True)
         return Response({
             'error': 'Invalid request data',
             'message': 'Request contains invalid or malformed data'
@@ -756,9 +776,43 @@ class EnterpriseLeadFilteringService:
         
         # Service category filter
         if profile.service_categories:
-            filtered_query = filtered_query.filter(
-                service_category_id__in=profile.service_categories
-            )
+            # ProviderProfile.service_categories stores category slugs (legacy data may include IDs/names).
+            # Normalize to ServiceCategory IDs before filtering.
+            try:
+                from backend.leads.models import ServiceCategory
+                from django.utils.text import slugify
+
+                raw = profile.service_categories or []
+                ids = set()
+                slugs = set()
+                for v in raw:
+                    if v is None:
+                        continue
+                    if isinstance(v, int):
+                        if v > 0:
+                            ids.add(v)
+                        continue
+                    s = str(v).strip()
+                    if not s:
+                        continue
+                    if s.isdigit():
+                        ids.add(int(s))
+                        continue
+                    slugs.add(slugify(s))
+
+                category_ids = list(
+                    ServiceCategory.objects.filter(
+                        Q(id__in=list(ids)) | Q(slug__in=list(slugs))
+                    ).values_list('id', flat=True)
+                )
+                if category_ids:
+                    filtered_query = filtered_query.filter(service_category_id__in=category_ids)
+                else:
+                    # Fail closed: no categories => no leads
+                    filtered_query = filtered_query.none()
+            except Exception:
+                # Fail closed on unexpected schema/data problems
+                filtered_query = filtered_query.none()
         
         # Geographic filter
         if profile.service_areas:

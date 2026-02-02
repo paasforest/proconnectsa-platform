@@ -207,7 +207,7 @@ export default function HowItWorksPage() {
               Join thousands of satisfied customers who have found their perfect service provider through ProConnectSA
             </p>
             <Button size="lg" variant="secondary" asChild>
-              <Link href="/request-quote">
+              <Link href="/services">
                 Request Your Free Quote
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Link>

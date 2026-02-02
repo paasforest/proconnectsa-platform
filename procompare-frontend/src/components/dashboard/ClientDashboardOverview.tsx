@@ -126,7 +126,7 @@ export default function ClientDashboardOverview() {
       title: 'New Service Request',
       description: 'Get quotes from local providers',
       icon: Plus,
-      href: '/request-quote',
+      href: '/services',
       color: 'blue',
       primary: true
     },
@@ -165,7 +165,7 @@ export default function ClientDashboardOverview() {
             )}
           </div>
           <Button 
-            onClick={() => router.push('/request-quote')}
+            onClick={() => router.push('/services')}
             className="bg-white text-blue-600 hover:bg-blue-50"
           >
             <Plus className="h-4 w-4 mr-2" />
@@ -357,7 +357,7 @@ export default function ClientDashboardOverview() {
                 </p>
               </div>
               <Button 
-                onClick={() => router.push('/request-quote')}
+                onClick={() => router.push('/services')}
                 className="bg-blue-600 hover:bg-blue-700"
               >
                 <Plus className="h-4 w-4 mr-2" />

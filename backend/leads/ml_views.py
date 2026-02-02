@@ -798,7 +798,9 @@ def purchase_lead_access_view(request, lead_id):
                 from backend.payments.auto_deposit_service import AutoDepositService
                 
                 provider_profile = request.user.provider_profile
-                customer_code = provider_profile.customer_code
+                from backend.users.models import Wallet
+                wallet_obj, _ = Wallet.objects.get_or_create(user=request.user)
+                customer_code = wallet_obj.customer_code
                 
                 # Calculate missing credits and amount due based on configured credit price
                 missing_credits = max(1, int(credit_cost - wallet.credits))
@@ -928,6 +930,16 @@ Use the exact reference so we can auto-activate your credits."""
         with transaction.atomic():
             actual_credit_cost = 0 if is_premium_active else credit_cost
             
+            # Lock wallet row to prevent double-spend
+            wallet = Wallet.objects.select_for_update().get(id=wallet.id)
+
+            # Re-check access inside the transaction to prevent races
+            if LeadAccess.objects.filter(provider=request.user, lead=lead).exists():
+                return Response({
+                    'error': 'You have already purchased this lead!',
+                    'code': 'ALREADY_PURCHASED'
+                }, status=status.HTTP_409_CONFLICT)
+            
             # Only deduct credits if NOT premium
             if not is_premium_active:
                 # Deduct credits from wallet
@@ -965,28 +977,23 @@ Use the exact reference so we can auto-activate your credits."""
             )
             logger.info(f"✅ Lead access granted: ID {lead_access.id}")
             
-            # Create or update LeadAssignment to track this purchase in "My Leads"
+            # Create/update LeadAssignment so purchased lead appears in My Leads for history
             from django.utils import timezone
-            lead_assignment, created = LeadAssignment.objects.get_or_create(
+            assignment, created = LeadAssignment.objects.get_or_create(
                 provider=request.user,
                 lead=lead,
                 defaults={
                     'status': 'purchased',
                     'purchased_at': timezone.now(),
                     'credit_cost': actual_credit_cost,
-                    'assigned_at': timezone.now()
                 }
             )
-            
-            # If assignment already exists, update it to purchased status
             if not created:
-                lead_assignment.status = 'purchased'
-                lead_assignment.purchased_at = timezone.now()
-                lead_assignment.credit_cost = actual_credit_cost
-                lead_assignment.save()
-                logger.info(f"✅ Updated LeadAssignment {lead_assignment.id} to 'purchased' status")
-            else:
-                logger.info(f"✅ Created LeadAssignment {lead_assignment.id} with 'purchased' status")
+                assignment.status = 'purchased'
+                assignment.purchased_at = timezone.now()
+                assignment.credit_cost = actual_credit_cost
+                assignment.save(update_fields=['status', 'purchased_at', 'credit_cost'])
+            logger.info(f"✅ Lead assignment updated for My Leads: {assignment.id} ({'created' if created else 'updated'})")
             
             # Update lead response count
             lead.assigned_providers_count = LeadAccess.objects.filter(lead=lead).count()

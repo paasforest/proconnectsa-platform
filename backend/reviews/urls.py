@@ -8,8 +8,11 @@ urlpatterns = [
     path('<uuid:pk>/', views.ReviewDetailView.as_view(), name='review-detail'),
     path('<uuid:pk>/moderate/', views.ReviewModerationView.as_view(), name='review-moderate'),
     
-    # Provider reviews
+    # Provider reviews (by User UUID - for authenticated/internal use)
     path('provider/<uuid:provider_id>/', views.provider_reviews_view, name='provider-reviews'),
     path('provider/<uuid:provider_id>/stats/', views.review_stats_view, name='provider-review-stats'),
+    # Provider reviews by profile id (public - for frontend /providers/[id]/reviews)
+    path('provider-by-profile/<int:profile_id>/', views.provider_reviews_by_profile_view, name='provider-reviews-by-profile'),
+    path('provider-by-profile/<int:profile_id>/stats/', views.review_stats_by_profile_view, name='provider-review-stats-by-profile'),
 ]
 

@@ -13,8 +13,8 @@ urlpatterns = [
     
     # API endpoints
     path('api/auth/', include('backend.users.urls')),
+    path('api/leads/', include('backend.leads.urls')),  # Must come before 'api/' to avoid shadowing
     path('api/', include('backend.users.urls')),  # Direct API access for client dashboard
-    path('api/leads/', include('backend.leads.urls')),
     path('api/reviews/', include('backend.reviews.urls')),
     path('api/notifications/', include('backend.notifications.urls')),
     path('api/payments/', include('backend.payments.urls')),

@@ -111,7 +111,7 @@ export default function ProvidersPage() {
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Button size="lg" asChild>
-                  <Link href="/request-quote">Submit Service Request</Link>
+                  <Link href="/services">Submit Service Request</Link>
                 </Button>
                 <Button size="lg" variant="outline" asChild>
                   <Link href="/how-it-works">Learn How It Works</Link>
@@ -131,9 +131,15 @@ export default function ProvidersPage() {
               <h2 className="text-3xl font-bold text-gray-900 mb-4">
                 Why Choose ProConnectSA Providers?
               </h2>
-              <p className="text-gray-600 max-w-2xl mx-auto">
+              <p className="text-gray-600 max-w-2xl mx-auto mb-4">
                 Every provider on our platform meets strict quality and safety standards
               </p>
+              <Link 
+                href="/providers/browse" 
+                className="inline-flex items-center text-blue-600 hover:text-blue-700 font-medium text-sm"
+              >
+                View all verified pros <ArrowRight className="ml-1 h-4 w-4" />
+              </Link>
             </div>
             
             <div className="grid md:grid-cols-4 gap-6">
@@ -240,7 +246,7 @@ export default function ProvidersPage() {
             
             <div className="text-center mt-12">
               <Button size="lg" asChild>
-                <Link href="/request-quote">
+                <Link href="/services">
                   Start Your Request
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Link>

@@ -55,9 +55,9 @@ export default function ClientDashboardLayout({ children }: ClientDashboardLayou
     },
     { 
       name: 'New Request', 
-      href: '/request-quote', 
+      href: '/services', 
       icon: Plus, 
-      current: pathname === '/request-quote' 
+      current: pathname === '/services' 
     },
     { 
       name: 'Settings', 

@@ -131,7 +131,7 @@ export default function ClientSupportPage() {
                 <Button variant="outline" className="w-full justify-start" onClick={() => router.push('/client/requests')}>
                   View My Requests
                 </Button>
-                <Button variant="outline" className="w-full justify-start" onClick={() => router.push('/request-quote')}>
+                <Button variant="outline" className="w-full justify-start" onClick={() => router.push('/services')}>
                   Create New Request
                 </Button>
                 <Button variant="outline" className="w-full justify-start">

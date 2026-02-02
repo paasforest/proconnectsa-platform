@@ -7,6 +7,7 @@ from .serializers import (
     ReviewSerializer, ReviewCreateSerializer, ReviewModerationSerializer,
     ReviewSearchSerializer
 )
+from backend.users.models import ProviderProfile
 
 
 class ReviewListView(generics.ListAPIView):
@@ -101,9 +102,56 @@ def provider_reviews_view(request, provider_id):
 
 
 @api_view(['GET'])
+@permission_classes([permissions.AllowAny])
+def provider_reviews_by_profile_view(request, profile_id):
+    """Get public reviews for a provider by ProviderProfile id (used by frontend /providers/[id]/reviews)"""
+    try:
+        profile = ProviderProfile.objects.select_related('user').get(id=profile_id)
+        user_id = profile.user_id
+    except ProviderProfile.DoesNotExist:
+        return Response({'error': 'Provider not found'}, status=status.HTTP_404_NOT_FOUND)
+    reviews = Review.objects.filter(
+        provider_id=user_id,
+        is_public=True
+    ).order_by('-created_at')
+    serializer = ReviewSerializer(reviews, many=True)
+    return Response(serializer.data)
+
+
+@api_view(['GET'])
+@permission_classes([permissions.AllowAny])
+def review_stats_by_profile_view(request, profile_id):
+    """Get review statistics for a provider by ProviderProfile id"""
+    try:
+        profile = ProviderProfile.objects.select_related('user').get(id=profile_id)
+        user_id = profile.user_id
+    except ProviderProfile.DoesNotExist:
+        return Response({'error': 'Provider not found'}, status=status.HTTP_404_NOT_FOUND)
+    reviews = Review.objects.filter(provider_id=user_id, is_public=True)
+    if not reviews.exists():
+        return Response({
+            'total_reviews': 0,
+            'average_rating': 0,
+            'rating_distribution': {},
+            'recommendation_rate': 0
+        })
+    total_reviews = reviews.count()
+    average_rating = sum(r.rating for r in reviews) / total_reviews
+    rating_distribution = {i: reviews.filter(rating=i).count() for i in range(1, 6)}
+    recommended = reviews.filter(would_recommend=True).count()
+    recommendation_rate = (recommended / total_reviews) * 100
+    return Response({
+        'total_reviews': total_reviews,
+        'average_rating': round(average_rating, 2),
+        'rating_distribution': rating_distribution,
+        'recommendation_rate': round(recommendation_rate, 2)
+    })
+
+
+@api_view(['GET'])
 @permission_classes([permissions.IsAuthenticated])
 def review_stats_view(request, provider_id):
-    """Get review statistics for a provider"""
+    """Get review statistics for a provider (by User UUID)"""
     reviews = Review.objects.filter(provider_id=provider_id, is_public=True)
     
     if not reviews.exists():

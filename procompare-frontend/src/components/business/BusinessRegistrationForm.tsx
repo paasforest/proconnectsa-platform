@@ -1177,7 +1177,7 @@ export default function BusinessRegistrationForm({ onComplete, onCancel }: Busin
             </div>
 
             <p className="text-center text-xs text-gray-500">
-              Need help? Contact us at <strong>support@proconnectsa.co.za</strong> or <strong>0800 123 456</strong>
+              Need help? Contact us at <strong>support@proconnectsa.co.za</strong> or <strong>+27 67 951 8124</strong>
             </p>
           </div>
         </DialogContent>

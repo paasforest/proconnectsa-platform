@@ -47,12 +47,34 @@ const ServicesPage = () => {
 
   useEffect(() => {
     const fetchServices = async () => {
-      if (!user || !token) return;
+      if (!user || !token) {
+        setLoading(false);
+        return;
+      }
       
       try {
         setLoading(true);
-        const response = await apiClient.get('/api/auth/services/');
-        setServices(response.services || response || []);
+        // Try provider profile endpoint to get service categories
+        const profileResponse = await apiClient.get('/api/auth/provider-profile/');
+        if (profileResponse && profileResponse.service_categories) {
+          // Convert service categories to services format
+          const categories = Array.isArray(profileResponse.service_categories) 
+            ? profileResponse.service_categories 
+            : [];
+          const servicesList = categories.map((cat: string, idx: number) => ({
+            id: `cat-${idx}`,
+            name: cat.charAt(0).toUpperCase() + cat.slice(1).replace(/-/g, ' '),
+            category: cat,
+            description: `Service category: ${cat}`,
+            is_active: true,
+            created_at: new Date().toISOString(),
+            lead_count: 0,
+            success_rate: 0
+          }));
+          setServices(servicesList);
+        } else {
+          setServices([]);
+        }
       } catch (error) {
         console.error('Failed to fetch services:', error);
         setServices([]);
@@ -63,6 +85,8 @@ const ServicesPage = () => {
 
     if (user && token) {
       fetchServices();
+    } else {
+      setLoading(false);
     }
   }, [user, token]);
 

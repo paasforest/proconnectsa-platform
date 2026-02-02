@@ -9,7 +9,7 @@ It also provides automatic deposit detection that runs in the background without
 import logging
 from django.utils import timezone
 from django.db import transaction
-from backend.users.models import ProviderProfile
+from backend.users.models import ProviderProfile, Wallet, WalletTransaction
 from backend.payments.models import DepositRequest, Transaction, TransactionType, TransactionStatus
 from backend.leads.ml_services import LeadAccessControlMLService
 from datetime import timedelta
@@ -38,11 +38,20 @@ class AutoDepositService:
             dict: Processing result with success status and details
         """
         try:
-            # Find provider by customer code
-            provider = ProviderProfile.objects.get(customer_code=customer_code)
+            # Find the provider + wallet by customer code.
+            # Prefer Wallet.customer_code (what the wallet UI shows), but fall back to
+            # ProviderProfile.customer_code for legacy setups.
+            try:
+                wallet = Wallet.objects.select_related('user').get(customer_code=customer_code)
+                provider = wallet.user.provider_profile
+            except Wallet.DoesNotExist:
+                provider = ProviderProfile.objects.get(customer_code=customer_code)
+                wallet, _ = Wallet.objects.get_or_create(user=provider.user)
             
-            # Calculate credits based on amount
-            credits = self._calculate_credits_for_amount(amount, provider)
+            # Calculate credits (deterministic): DEFAULT_CREDIT_PRICE (R50) = 1 credit
+            from django.conf import settings
+            credit_price = float(getattr(settings, 'DEFAULT_CREDIT_PRICE', 50))
+            credits = max(1, int(float(amount) // credit_price))
             
             # Create deposit request record
             deposit = self._create_auto_deposit_record(
@@ -65,11 +74,12 @@ class AutoDepositService:
                 'message': f'Deposit processed successfully. {credits} credits activated.',
                 'deposit_id': str(deposit.id),
                 'credits_activated': credits,
-                'new_balance': provider.credit_balance,
+                'new_balance': wallet.credits,
+                'wallet_customer_code': wallet.customer_code,
                 'provider_email': provider.user.email
             }
             
-        except ProviderProfile.DoesNotExist:
+        except (Wallet.DoesNotExist, ProviderProfile.DoesNotExist):
             logger.warning(f"Customer code not found: {customer_code}")
             return {
                 'success': False,
@@ -130,8 +140,8 @@ class AutoDepositService:
             amount=amount,
             credits_to_activate=credits_to_activate,
             reference_number=reference_number,
-            customer_code=provider.provider_profile.customer_code,
-            status='verified',  # Auto-verified
+            customer_code=(getattr(provider, "provider_profile", None) and (provider.provider_profile.customer_code or "")[:10]) or ("" if not reference_number else str(reference_number)[:10]),
+            status=TransactionStatus.COMPLETED,  # Auto-processed
             is_auto_verified=True,
             verification_notes='Automatically verified by customer code match'
         )
@@ -139,15 +149,34 @@ class AutoDepositService:
     def _process_auto_deposit(self, deposit):
         """Process the auto deposit and activate credits"""
         with transaction.atomic():
-            # Update provider credit balance
+            # Update wallet credits (authoritative)
+            from django.conf import settings
+            wallet = Wallet.objects.select_for_update().get(user=deposit.account.user)
+            wallet.credits += int(deposit.credits_to_activate)
+            wallet.save(update_fields=['credits'])
+
+            # Backward-compat: mirror to provider_profile.credit_balance
             provider = deposit.account.user.provider_profile
-            provider.credit_balance += deposit.credits_to_activate
+            provider.credit_balance += int(deposit.credits_to_activate)
             provider.save(update_fields=['credit_balance'])
+
+            # Wallet transaction record
+            WalletTransaction.objects.create(
+                wallet=wallet,
+                amount=deposit.amount,
+                credits=int(deposit.credits_to_activate),
+                transaction_type='deposit',
+                reference=f'DEPOSIT_{deposit.reference_number}',
+                status='confirmed',
+                description=f'Auto deposit processed - {deposit.reference_number}',
+                bank_reference=deposit.reference_number,
+                payment_method='eft',
+            )
             
             # Create credit transaction
             Transaction.objects.create(
                 account=deposit.account,
-                amount=deposit.credits_to_activate,
+                amount=deposit.amount,
                 transaction_type=TransactionType.DEPOSIT,
                 status=TransactionStatus.COMPLETED,
                 reference=deposit.reference_number,
@@ -156,12 +185,14 @@ class AutoDepositService:
             )
             
             # Update deposit status
-            deposit.verified_at = timezone.now()
-            deposit.save(update_fields=['verified_at'])
+            deposit.status = TransactionStatus.COMPLETED
+            deposit.processed_at = timezone.now()
+            deposit.save(update_fields=['status', 'processed_at'])
             
             return {
                 'credits_added': deposit.credits_to_activate,
-                'new_balance': provider.credit_balance,
+                'new_balance': wallet.credits,
+                'wallet_customer_code': wallet.customer_code,
                 'transaction_id': deposit.id
             }
     

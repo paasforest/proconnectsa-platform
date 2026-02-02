@@ -177,7 +177,8 @@ const BUDGET_RANGES = [
 ]
 
 const URGENCY_OPTIONS = [
-  { label: 'Urgent (ASAP)', value: 'urgent' },
+  // Backend expects: asap, this_week, this_month, flexible
+  { label: 'Urgent (ASAP)', value: 'asap' },
   { label: 'This Week', value: 'this_week' },
   { label: 'This Month', value: 'this_month' },
   { label: 'Flexible', value: 'flexible' }
@@ -393,9 +394,9 @@ export default function LeadGenerationForm({ onComplete, onCancel, preselectedCa
     let score = 50 // Base score
     
     // Urgency scoring
-    if (data.urgency === 'urgent') score += 20
-    else if (data.urgency === 'this-week') score += 15
-    else if (data.urgency === 'this-month') score += 10
+    if (data.urgency === 'asap') score += 20
+    else if (data.urgency === 'this_week') score += 15
+    else if (data.urgency === 'this_month') score += 10
     
     // Budget scoring  
     if (data.budget_range.includes('50,000')) score += 15

@@ -11,16 +11,40 @@ from backend.leads.models import ServiceCategory
 
 def _provider_public_dict(p: ProviderProfile):
     u = p.user
+    # Get service category names from slugs
+    service_category_names = []
+    if p.service_categories:
+        for slug in p.service_categories:
+            try:
+                cat = ServiceCategory.objects.get(slug=slug, is_active=True)
+                service_category_names.append(cat.name)
+            except ServiceCategory.DoesNotExist:
+                service_category_names.append(slug.replace('-', ' ').title())
+    
     return {
         'id': str(p.id),
         'business_name': p.business_name,
         'city': u.city,
         'suburb': u.suburb,
         'service_categories': p.service_categories or [],
+        'service_category_names': service_category_names,
         'average_rating': float(p.average_rating or 0),
         'total_reviews': p.total_reviews,
         'verification_status': p.verification_status,
         'slug': slugify(p.business_name)[:60],
+        # Enhanced company details
+        'bio': p.bio or '',
+        'years_experience': p.years_experience,
+        'service_areas': p.service_areas or [],
+        'max_travel_distance': p.max_travel_distance,
+        'hourly_rate_min': float(p.hourly_rate_min) if p.hourly_rate_min else None,
+        'hourly_rate_max': float(p.hourly_rate_max) if p.hourly_rate_max else None,
+        'minimum_job_value': float(p.minimum_job_value) if p.minimum_job_value else None,
+        'response_time_hours': float(p.response_time_hours) if p.response_time_hours else None,
+        'job_completion_rate': float(p.job_completion_rate) if p.job_completion_rate else None,
+        'profile_image': p.profile_image or '',
+        'portfolio_images': p.portfolio_images or [],
+        'insurance_valid_until': p.insurance_valid_until.isoformat() if p.insurance_valid_until else None,
         # No sensitive contact info exposed here
     }
 
@@ -30,13 +54,27 @@ def _provider_public_dict(p: ProviderProfile):
 def public_providers_list(request):
     """
     Public: list verified providers with optional filters: category, city, page, page_size
+    Shows verified providers, or pending providers if no verified providers exist (for debugging)
     """
+    import logging
+    logger = logging.getLogger(__name__)
+    
     category_slug = request.GET.get('category')
     city = request.GET.get('city')
     page = int(request.GET.get('page', 1))
     page_size = int(request.GET.get('page_size', 20))
 
+    # First try to get verified providers
     qs = ProviderProfile.objects.filter(verification_status='verified')
+    
+    # If no verified providers, show pending ones (temporary for debugging)
+    verified_count = qs.count()
+    if verified_count == 0:
+        logger.warning("No verified providers found, showing pending providers")
+        qs = ProviderProfile.objects.filter(verification_status='pending')
+    
+    # Exclude rejected and suspended
+    qs = qs.exclude(verification_status='rejected').exclude(verification_status='suspended')
 
     if category_slug:
         qs = qs.filter(service_categories__contains=[category_slug])
@@ -48,6 +86,9 @@ def public_providers_list(request):
     page_obj = paginator.get_page(page)
 
     data = [_provider_public_dict(p) for p in page_obj.object_list]
+    
+    logger.info(f"Returning {len(data)} providers (verified_count: {verified_count})")
+    
     return Response({
         'results': data,
         'pagination': {

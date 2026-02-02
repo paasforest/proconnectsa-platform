@@ -1,51 +1,125 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url>
-    <loc>https://proconnectsa.co.za</loc>
-    <lastmod>2025-09-17</lastmod>
-    <priority>1.0</priority>
-    <changefreq>daily</changefreq>
-  </url>
-  <url>
-    <loc>https://proconnectsa.co.za/how-it-works</loc>
-    <lastmod>2025-09-17</lastmod>
-    <priority>0.8</priority>
-    <changefreq>weekly</changefreq>
-  </url>
-  <url>
-    <loc>https://proconnectsa.co.za/services</loc>
-    <lastmod>2025-09-17</lastmod>
-    <priority>0.8</priority>
-    <changefreq>weekly</changefreq>
-  </url>
-  <url>
-    <loc>https://proconnectsa.co.za/providers</loc>
-    <lastmod>2025-09-17</lastmod>
-    <priority>0.7</priority>
-    <changefreq>weekly</changefreq>
-  </url>
-  <url>
-    <loc>https://proconnectsa.co.za/business-services</loc>
-    <lastmod>2025-09-17</lastmod>
-    <priority>0.7</priority>
-    <changefreq>monthly</changefreq>
-  </url>
-  <url>
-    <loc>https://proconnectsa.co.za/register</loc>
-    <lastmod>2025-09-17</lastmod>
-    <priority>0.9</priority>
-    <changefreq>monthly</changefreq>
-  </url>
-  <url>
-    <loc>https://proconnectsa.co.za/login</loc>
-    <lastmod>2025-09-17</lastmod>
-    <priority>0.6</priority>
-    <changefreq>monthly</changefreq>
-  </url>
+  <!-- Core pages -->
+  <url><loc>https://www.proconnectsa.co.za/</loc></url>
+  <url><loc>https://www.proconnectsa.co.za/services</loc></url>
+  <url><loc>https://www.proconnectsa.co.za/request-quote</loc></url>
+  <url><loc>https://www.proconnectsa.co.za/how-it-works</loc></url>
+  <url><loc>https://www.proconnectsa.co.za/providers/browse</loc></url>
+  <url><loc>https://www.proconnectsa.co.za/for-pros</loc></url>
+  <url><loc>https://www.proconnectsa.co.za/pricing</loc></url>
+
+  <!-- Service category hubs -->
+  <url><loc>https://www.proconnectsa.co.za/services/plumbing</loc></url>
+  <url><loc>https://www.proconnectsa.co.za/services/electrical</loc></url>
+  <url><loc>https://www.proconnectsa.co.za/services/cleaning</loc></url>
+  <url><loc>https://www.proconnectsa.co.za/services/painting</loc></url>
+  <url><loc>https://www.proconnectsa.co.za/services/roofing</loc></url>
+  <url><loc>https://www.proconnectsa.co.za/services/hvac</loc></url>
+  <url><loc>https://www.proconnectsa.co.za/services/landscaping</loc></url>
+  <url><loc>https://www.proconnectsa.co.za/services/handyman</loc></url>
+  <url><loc>https://www.proconnectsa.co.za/services/renovations</loc></url>
+  <url><loc>https://www.proconnectsa.co.za/services/appliance-repair</loc></url>
+
+  <!-- Province pages (top categories × provinces) -->
+  <url><loc>https://www.proconnectsa.co.za/services/plumbing/gauteng</loc></url>
+  <url><loc>https://www.proconnectsa.co.za/services/plumbing/western-cape</loc></url>
+  <url><loc>https://www.proconnectsa.co.za/services/plumbing/kwazulu-natal</loc></url>
+  <url><loc>https://www.proconnectsa.co.za/services/plumbing/eastern-cape</loc></url>
+  <url><loc>https://www.proconnectsa.co.za/services/plumbing/free-state</loc></url>
+  <url><loc>https://www.proconnectsa.co.za/services/plumbing/mpumalanga</loc></url>
+  <url><loc>https://www.proconnectsa.co.za/services/plumbing/limpopo</loc></url>
+  <url><loc>https://www.proconnectsa.co.za/services/plumbing/north-west</loc></url>
+  <url><loc>https://www.proconnectsa.co.za/services/plumbing/northern-cape</loc></url>
+
+  <url><loc>https://www.proconnectsa.co.za/services/electrical/gauteng</loc></url>
+  <url><loc>https://www.proconnectsa.co.za/services/electrical/western-cape</loc></url>
+  <url><loc>https://www.proconnectsa.co.za/services/electrical/kwazulu-natal</loc></url>
+  <url><loc>https://www.proconnectsa.co.za/services/electrical/eastern-cape</loc></url>
+  <url><loc>https://www.proconnectsa.co.za/services/electrical/free-state</loc></url>
+  <url><loc>https://www.proconnectsa.co.za/services/electrical/mpumalanga</loc></url>
+  <url><loc>https://www.proconnectsa.co.za/services/electrical/limpopo</loc></url>
+  <url><loc>https://www.proconnectsa.co.za/services/electrical/north-west</loc></url>
+  <url><loc>https://www.proconnectsa.co.za/services/electrical/northern-cape</loc></url>
+
+  <url><loc>https://www.proconnectsa.co.za/services/cleaning/gauteng</loc></url>
+  <url><loc>https://www.proconnectsa.co.za/services/cleaning/western-cape</loc></url>
+  <url><loc>https://www.proconnectsa.co.za/services/cleaning/kwazulu-natal</loc></url>
+  <url><loc>https://www.proconnectsa.co.za/services/cleaning/eastern-cape</loc></url>
+  <url><loc>https://www.proconnectsa.co.za/services/cleaning/free-state</loc></url>
+  <url><loc>https://www.proconnectsa.co.za/services/cleaning/mpumalanga</loc></url>
+  <url><loc>https://www.proconnectsa.co.za/services/cleaning/limpopo</loc></url>
+  <url><loc>https://www.proconnectsa.co.za/services/cleaning/north-west</loc></url>
+  <url><loc>https://www.proconnectsa.co.za/services/cleaning/northern-cape</loc></url>
+
+  <url><loc>https://www.proconnectsa.co.za/services/painting/gauteng</loc></url>
+  <url><loc>https://www.proconnectsa.co.za/services/painting/western-cape</loc></url>
+  <url><loc>https://www.proconnectsa.co.za/services/painting/kwazulu-natal</loc></url>
+  <url><loc>https://www.proconnectsa.co.za/services/painting/eastern-cape</loc></url>
+  <url><loc>https://www.proconnectsa.co.za/services/painting/free-state</loc></url>
+  <url><loc>https://www.proconnectsa.co.za/services/painting/mpumalanga</loc></url>
+  <url><loc>https://www.proconnectsa.co.za/services/painting/limpopo</loc></url>
+  <url><loc>https://www.proconnectsa.co.za/services/painting/north-west</loc></url>
+  <url><loc>https://www.proconnectsa.co.za/services/painting/northern-cape</loc></url>
+
+  <url><loc>https://www.proconnectsa.co.za/services/roofing/gauteng</loc></url>
+  <url><loc>https://www.proconnectsa.co.za/services/roofing/western-cape</loc></url>
+  <url><loc>https://www.proconnectsa.co.za/services/roofing/kwazulu-natal</loc></url>
+  <url><loc>https://www.proconnectsa.co.za/services/roofing/eastern-cape</loc></url>
+  <url><loc>https://www.proconnectsa.co.za/services/roofing/free-state</loc></url>
+  <url><loc>https://www.proconnectsa.co.za/services/roofing/mpumalanga</loc></url>
+  <url><loc>https://www.proconnectsa.co.za/services/roofing/limpopo</loc></url>
+  <url><loc>https://www.proconnectsa.co.za/services/roofing/north-west</loc></url>
+  <url><loc>https://www.proconnectsa.co.za/services/roofing/northern-cape</loc></url>
+
+  <url><loc>https://www.proconnectsa.co.za/services/hvac/gauteng</loc></url>
+  <url><loc>https://www.proconnectsa.co.za/services/hvac/western-cape</loc></url>
+  <url><loc>https://www.proconnectsa.co.za/services/hvac/kwazulu-natal</loc></url>
+  <url><loc>https://www.proconnectsa.co.za/services/hvac/eastern-cape</loc></url>
+  <url><loc>https://www.proconnectsa.co.za/services/hvac/free-state</loc></url>
+  <url><loc>https://www.proconnectsa.co.za/services/hvac/mpumalanga</loc></url>
+  <url><loc>https://www.proconnectsa.co.za/services/hvac/limpopo</loc></url>
+  <url><loc>https://www.proconnectsa.co.za/services/hvac/north-west</loc></url>
+  <url><loc>https://www.proconnectsa.co.za/services/hvac/northern-cape</loc></url>
+
+  <url><loc>https://www.proconnectsa.co.za/services/landscaping/gauteng</loc></url>
+  <url><loc>https://www.proconnectsa.co.za/services/landscaping/western-cape</loc></url>
+  <url><loc>https://www.proconnectsa.co.za/services/landscaping/kwazulu-natal</loc></url>
+  <url><loc>https://www.proconnectsa.co.za/services/landscaping/eastern-cape</loc></url>
+  <url><loc>https://www.proconnectsa.co.za/services/landscaping/free-state</loc></url>
+  <url><loc>https://www.proconnectsa.co.za/services/landscaping/mpumalanga</loc></url>
+  <url><loc>https://www.proconnectsa.co.za/services/landscaping/limpopo</loc></url>
+  <url><loc>https://www.proconnectsa.co.za/services/landscaping/north-west</loc></url>
+  <url><loc>https://www.proconnectsa.co.za/services/landscaping/northern-cape</loc></url>
+
+  <url><loc>https://www.proconnectsa.co.za/services/handyman/gauteng</loc></url>
+  <url><loc>https://www.proconnectsa.co.za/services/handyman/western-cape</loc></url>
+  <url><loc>https://www.proconnectsa.co.za/services/handyman/kwazulu-natal</loc></url>
+  <url><loc>https://www.proconnectsa.co.za/services/handyman/eastern-cape</loc></url>
+  <url><loc>https://www.proconnectsa.co.za/services/handyman/free-state</loc></url>
+  <url><loc>https://www.proconnectsa.co.za/services/handyman/mpumalanga</loc></url>
+  <url><loc>https://www.proconnectsa.co.za/services/handyman/limpopo</loc></url>
+  <url><loc>https://www.proconnectsa.co.za/services/handyman/north-west</loc></url>
+  <url><loc>https://www.proconnectsa.co.za/services/handyman/northern-cape</loc></url>
+
+  <url><loc>https://www.proconnectsa.co.za/services/renovations/gauteng</loc></url>
+  <url><loc>https://www.proconnectsa.co.za/services/renovations/western-cape</loc></url>
+  <url><loc>https://www.proconnectsa.co.za/services/renovations/kwazulu-natal</loc></url>
+  <url><loc>https://www.proconnectsa.co.za/services/renovations/eastern-cape</loc></url>
+  <url><loc>https://www.proconnectsa.co.za/services/renovations/free-state</loc></url>
+  <url><loc>https://www.proconnectsa.co.za/services/renovations/mpumalanga</loc></url>
+  <url><loc>https://www.proconnectsa.co.za/services/renovations/limpopo</loc></url>
+  <url><loc>https://www.proconnectsa.co.za/services/renovations/north-west</loc></url>
+  <url><loc>https://www.proconnectsa.co.za/services/renovations/northern-cape</loc></url>
+
+  <url><loc>https://www.proconnectsa.co.za/services/appliance-repair/gauteng</loc></url>
+  <url><loc>https://www.proconnectsa.co.za/services/appliance-repair/western-cape</loc></url>
+  <url><loc>https://www.proconnectsa.co.za/services/appliance-repair/kwazulu-natal</loc></url>
+  <url><loc>https://www.proconnectsa.co.za/services/appliance-repair/eastern-cape</loc></url>
+  <url><loc>https://www.proconnectsa.co.za/services/appliance-repair/free-state</loc></url>
+  <url><loc>https://www.proconnectsa.co.za/services/appliance-repair/mpumalanga</loc></url>
+  <url><loc>https://www.proconnectsa.co.za/services/appliance-repair/limpopo</loc></url>
+  <url><loc>https://www.proconnectsa.co.za/services/appliance-repair/north-west</loc></url>
+  <url><loc>https://www.proconnectsa.co.za/services/appliance-repair/northern-cape</loc></url>
 </urlset>
-
-
-
-
-
 

@@ -253,7 +253,7 @@ def upload_verification_document(request):
     """
     Upload a verification document for provider profile.
     Form fields:
-      - document_type: one of ['id_document','proof_of_address','business_registration','insurance','other']
+      - document_type: one of ['id_document','passport','proof_of_address','business_registration','insurance','other']
       - file: the uploaded file
     """
     try:
@@ -264,7 +264,7 @@ def upload_verification_document(request):
             return Response({'success': False, 'message': 'No file provided'}, status=status.HTTP_400_BAD_REQUEST)
         
         document_type = request.POST.get('document_type', 'other')
-        allowed_types = {'id_document', 'proof_of_address', 'business_registration', 'insurance', 'other'}
+        allowed_types = {'id_document', 'passport', 'proof_of_address', 'business_registration', 'insurance', 'other'}
         if document_type not in allowed_types:
             return Response({'success': False, 'message': 'Invalid document_type'}, status=status.HTTP_400_BAD_REQUEST)
         

@@ -105,6 +105,7 @@ urlpatterns = [
     path('settings/delete-image/', settings_views.delete_profile_image, name='delete_profile_image'),
     path('provider-profile/documents/', settings_views.list_verification_documents, name='list_verification_documents'),
     path('provider-profile/documents/upload/', settings_views.upload_verification_document, name='upload_verification_document'),
+    path('premium-listing/request/', settings_views.premium_listing_request, name='premium_listing_request'),
     
     # Premium Listing
     path('request-premium-listing/', settings_views.request_premium_listing, name='request_premium_listing'),
@@ -132,7 +133,12 @@ urlpatterns = [
     
     # Public provider directory (SEO)
     path('public/providers/', public_views.public_providers_list, name='public-providers-list'),
-    path('public/providers/<uuid:provider_id>/', public_views.public_provider_detail, name='public-provider-detail'),
+    path('public/providers/<int:provider_id>/', public_views.public_provider_detail, name='public-provider-detail'),
+    
+    # TEMPORARY: Debug endpoint to list ALL providers (including non-verified) - REMOVE AFTER CLEANUP
+    path('public/providers-debug/all/', public_views.list_all_providers_debug, name='list-all-providers-debug'),
+    path('public/providers-debug/search/', public_views.search_provider_by_name, name='search-provider-by-name'),
+    path('public/users-debug/search/', public_views.search_all_users, name='search-all-users'),
 ]
 
 

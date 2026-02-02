@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import {
   User, Mail, Phone, MapPin, Save, Eye, EyeOff, 
-  Camera, Upload, CheckCircle, AlertCircle
+  Camera, Upload, CheckCircle, AlertCircle, Star, XCircle, Copy
 } from 'lucide-react';
 import { apiClient } from '@/lib/api-simple';
 import { useAuth } from '@/components/AuthProvider';
@@ -26,7 +26,7 @@ interface UserProfile {
 }
 
 const SettingsPage = () => {
-  const { user } = useAuth();
+  const { user, token } = useAuth();
   const [profile, setProfile] = useState<UserProfile>({
     id: user?.id?.toString() || '',
     email: user?.email || '',
@@ -56,49 +56,99 @@ const SettingsPage = () => {
   const [verificationStatus, setVerificationStatus] = useState<string>('');
   const [verificationDocs, setVerificationDocs] = useState<Record<string, Array<{url: string; path: string; uploaded_at: string}>>>({});
   const [docType, setDocType] = useState<string>('id_document');
+  const [premiumDetails, setPremiumDetails] = useState<any>(null);
+  const [isPremiumActive, setIsPremiumActive] = useState<boolean>(false);
+  const [loadingPremium, setLoadingPremium] = useState(false);
 
   useEffect(() => {
+    if (!user) {
+      setLoading(false);
+      return;
+    }
+
+    let isMounted = true;
+    let timeoutId: NodeJS.Timeout | null = null;
+
     const fetchProfile = async () => {
       try {
         setLoading(true);
+        // Set timeout to prevent infinite loading
+        timeoutId = setTimeout(() => {
+          if (isMounted) {
+            setLoading(false);
+            console.warn('Settings page loading timeout - showing page anyway');
+          }
+        }, 10000); // 10 second timeout
+
         const response = await apiClient.get('/api/settings/');
-        setProfile(response);
+        if (isMounted) {
+          if (timeoutId) clearTimeout(timeoutId);
+          setProfile(response);
+          setLoading(false);
+        }
       } catch (error) {
         console.error('Failed to fetch profile:', error);
         // Use user data from authentication instead of hardcoded data
-        setProfile({
-          id: user?.id?.toString() || '',
-          email: user?.email || '',
-          first_name: user?.first_name || '',
-          last_name: user?.last_name || '',
-          phone: user?.phone || '',
-          address: '',
-          city: user?.city || '',
-          province: user?.province || '',
-          postal_code: '',
-          company_name: user?.business_name || '',
-          business_type: user?.primary_service || '',
-          years_experience: 0,
-          bio: ''
-        });
-      } finally {
-        setLoading(false);
+        if (isMounted) {
+          if (timeoutId) clearTimeout(timeoutId);
+          setProfile({
+            id: user?.id?.toString() || '',
+            email: user?.email || '',
+            first_name: user?.first_name || '',
+            last_name: user?.last_name || '',
+            phone: user?.phone || '',
+            address: '',
+            city: user?.city || '',
+            province: user?.province || '',
+            postal_code: '',
+            company_name: user?.business_name || '',
+            business_type: user?.primary_service || '',
+            years_experience: 0,
+            bio: ''
+          });
+          setLoading(false);
+        }
       }
     };
 
-    if (user) {
+    if (user.userType === 'provider') {
       fetchProfile();
+      
+      // Fetch verification documents
       apiClient
         .getVerificationDocuments()
         .then((res: any) => {
-          setVerificationStatus(res.verification_status || '');
-          setVerificationDocs(res.documents || {});
+          if (isMounted) {
+            setVerificationStatus(res.verification_status || '');
+            setVerificationDocs(res.documents || {});
+          }
         })
         .catch((err) => {
           console.warn('Failed to load verification documents', err);
         });
+      
+      // Fetch premium listing status from provider profile
+      if (token) {
+        apiClient.get('/api/auth/provider-profile/')
+          .then((res: any) => {
+            if (isMounted) {
+              setIsPremiumActive(res.is_premium_listing_active || false);
+            }
+          })
+          .catch(err => {
+            console.warn('Failed to load premium status', err);
+          });
+      }
+    } else {
+      // For non-providers, just fetch profile
+      fetchProfile();
     }
-  }, [user]);
+
+    return () => {
+      isMounted = false;
+      if (timeoutId) clearTimeout(timeoutId);
+    };
+  }, [user, token]);
 
   const handleSaveProfile = async () => {
     try {
@@ -165,6 +215,61 @@ const SettingsPage = () => {
       setMessage({ type: 'error', text: 'Failed to upload verification document.' });
     } finally {
       (event.target as HTMLInputElement).value = '';
+    }
+  };
+
+  const [showPremiumModal, setShowPremiumModal] = useState(false);
+  const [selectedPremiumPlan, setSelectedPremiumPlan] = useState<'monthly' | 'lifetime' | null>(null);
+
+  const handleRequestPremium = async (planType?: 'monthly' | 'lifetime') => {
+    try {
+      setLoadingPremium(true);
+      // Use GET method as per backend endpoint
+      const res = await apiClient.get('/api/auth/premium-listing/request/');
+      if (res.success) {
+        setPremiumDetails(res);
+        // If planType is provided, show modal with that plan selected
+        if (planType) {
+          setSelectedPremiumPlan(planType);
+          setShowPremiumModal(true);
+        } else {
+          setMessage({ type: 'success', text: 'Premium listing request generated. Please make your EFT.' });
+        }
+      } else {
+        setMessage({ type: 'error', text: res.message || 'Failed to generate premium request.' });
+      }
+    } catch (error: any) {
+      console.error('Failed to request premium:', error);
+      setMessage({ type: 'error', text: error.response?.data?.message || 'Error requesting premium. Please try again.' });
+    } finally {
+      setLoadingPremium(false);
+    }
+  };
+
+  const handleCheckPremiumPayment = async () => {
+    if (!premiumDetails?.premium_details?.reference_number) {
+      setMessage({ type: 'error', text: 'Please request premium listing first to get a reference number.' });
+      return;
+    }
+    try {
+      setLoadingPremium(true);
+      const res = await apiClient.post('/api/payments/dashboard/check-deposit-by-customer-code/', {
+        customer_code: user?.customer_code,
+        amount: premiumDetails.premium_details.monthly_cost || 299.00,
+        reference_number: premiumDetails.premium_details.reference_number,
+      });
+      if (res.success && res.new_status === 'premium_active') {
+        setIsPremiumActive(true);
+        setMessage({ type: 'success', text: '✅ Premium listing activated successfully!' });
+        setPremiumDetails(null);
+      } else {
+        setMessage({ type: 'info', text: res.message || 'Payment not yet detected. Please allow a few minutes for processing.' });
+      }
+    } catch (error: any) {
+      console.error('Failed to check premium payment:', error);
+      setMessage({ type: 'error', text: error.response?.data?.message || 'Error checking payment. Please try again.' });
+    } finally {
+      setLoadingPremium(false);
     }
   };
 
@@ -517,6 +622,299 @@ const SettingsPage = () => {
                     {saving ? 'Changing...' : 'Change Password'}
                   </button>
                 </div>
+              </div>
+            </div>
+          )}
+
+          {/* Premium Listing - Provider Only */}
+          {user?.userType === 'provider' && (
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">Premium Listing</h3>
+              
+              {isPremiumActive ? (
+                <div className="mb-4 p-4 bg-green-50 border border-green-200 rounded-lg">
+                  <div className="flex items-center mb-2">
+                    <CheckCircle className="w-5 h-5 text-green-600 mr-2" />
+                    <span className="font-semibold text-green-800">Premium Active</span>
+                  </div>
+                  <p className="text-sm text-green-700">
+                    Your premium listing is active. You receive unlimited FREE leads and enhanced visibility.
+                  </p>
+                </div>
+              ) : (
+                <>
+                  <p className="text-gray-600 mb-4">
+                    Upgrade to a Premium Listing to get unlimited free leads and enhanced visibility in the public directory.
+                  </p>
+                  <ul className="list-disc list-inside text-sm text-gray-700 mb-4 space-y-1">
+                    <li>⭐ Unlimited FREE leads (no credit deductions)</li>
+                    <li>✓ Enhanced visibility in public directory</li>
+                    <li>✓ Priority matching for new leads</li>
+                  </ul>
+                  <p className="text-gray-800 font-semibold mb-4">
+                    Choose your plan:
+                  </p>
+                  <div className="grid grid-cols-2 gap-4 mb-4">
+                    <button
+                      onClick={() => handleRequestPremium('monthly')}
+                      disabled={loadingPremium}
+                      className="px-4 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:opacity-50 text-center"
+                    >
+                      <div className="font-bold text-lg">R299</div>
+                      <div className="text-sm">Monthly</div>
+                    </button>
+                    <button
+                      onClick={() => handleRequestPremium('lifetime')}
+                      disabled={loadingPremium}
+                      className="px-4 py-3 bg-gray-900 text-white rounded-lg hover:bg-gray-800 disabled:opacity-50 text-center"
+                    >
+                      <div className="font-bold text-lg">R2,990</div>
+                      <div className="text-sm">Lifetime</div>
+                    </button>
+                  </div>
+                  {!premiumDetails ? (
+                    <p className="text-xs text-gray-500 text-center">
+                      Click a plan above to get payment details
+                    </p>
+                  ) : (
+                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mt-4">
+                      <h4 className="font-semibold text-blue-800 mb-2">EFT Payment Details</h4>
+                      <p className="text-sm text-blue-700 mb-3">
+                        Please make an EFT to the following account using the exact reference number.
+                        Your premium listing will be activated automatically once payment is confirmed.
+                      </p>
+                      <div className="mt-3 space-y-1 text-sm text-blue-900">
+                        <p><strong>Bank:</strong> {premiumDetails.premium_details?.bank_name || 'Nedbank'}</p>
+                        <p><strong>Account Number:</strong> {premiumDetails.premium_details?.account_number || '1313872032'}</p>
+                        <p><strong>Branch Code:</strong> {premiumDetails.premium_details?.branch_code || '198765'}</p>
+                        <p><strong>Reference:</strong> <span className="font-mono text-lg bg-blue-100 px-2 py-1 rounded">{premiumDetails.premium_details?.reference_number || 'N/A'}</span></p>
+                        <p className="text-xs text-blue-600 mt-2">
+                          (Copy this reference exactly for automatic activation)
+                        </p>
+                      </div>
+                      <button
+                        onClick={handleCheckPremiumPayment}
+                        disabled={loadingPremium}
+                        className="mt-4 inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50"
+                      >
+                        <CheckCircle className="w-4 h-4 mr-2" />
+                        {loadingPremium ? 'Checking...' : 'Check Payment Status'}
+                      </button>
+                    </div>
+                  )}
+                </>
+              )}
+            </div>
+          )}
+
+          {/* Premium Payment Modal */}
+          {showPremiumModal && premiumDetails && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+              <div className="bg-white rounded-lg p-6 w-full max-w-lg mx-4 max-h-[90vh] overflow-y-auto">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-semibold text-gray-900">Premium Listing Payment</h3>
+                  <button
+                    onClick={() => {
+                      setShowPremiumModal(false);
+                      setSelectedPremiumPlan(null);
+                    }}
+                    className="text-gray-400 hover:text-gray-600"
+                  >
+                    <XCircle className="w-6 h-6" />
+                  </button>
+                </div>
+                
+                <div className="space-y-4">
+                  {/* Plan Info */}
+                  <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
+                    <h4 className="font-semibold text-purple-900 mb-2">
+                      {selectedPremiumPlan === 'monthly' ? 'Monthly Premium' : 'Lifetime Premium'}
+                    </h4>
+                    <p className="text-2xl font-bold text-purple-900">
+                      R{selectedPremiumPlan === 'monthly' ? '299' : '2,990'}
+                      {selectedPremiumPlan === 'monthly' && <span className="text-lg font-normal text-purple-700">/month</span>}
+                    </p>
+                    <p className="text-sm text-purple-700 mt-2">
+                      {selectedPremiumPlan === 'monthly' 
+                        ? 'Unlimited FREE leads for 1 month'
+                        : 'Unlimited FREE leads forever (lifetime)'}
+                    </p>
+                  </div>
+
+                  {/* Account Details */}
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                    <h4 className="font-medium text-gray-900 mb-2">Account Details</h4>
+                    <div className="space-y-2">
+                      <div className="flex justify-between">
+                        <span className="text-sm text-gray-600">Bank:</span>
+                        <span className="text-sm font-medium">{premiumDetails.eft_details?.bank_name || 'Nedbank'}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-sm text-gray-600">Account Number:</span>
+                        <div className="flex items-center space-x-2">
+                          <span className="text-sm font-medium">{premiumDetails.eft_details?.account_number || '1313872032'}</span>
+                          <button
+                            onClick={() => navigator.clipboard.writeText(premiumDetails.eft_details?.account_number || '1313872032')}
+                            className="text-blue-600 hover:text-blue-700"
+                            title="Copy account number"
+                          >
+                            <Copy className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-sm text-gray-600">Branch Code:</span>
+                        <span className="text-sm font-medium">{premiumDetails.eft_details?.branch_code || '198765'}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-sm text-gray-600">Account Holder:</span>
+                        <span className="text-sm font-medium">{premiumDetails.eft_details?.account_holder || 'ProConnectSA (Pty) Ltd'}</span>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {/* Reference Number - Most Important */}
+                  <div className="bg-blue-50 border-2 border-blue-300 p-4 rounded-lg">
+                    <h4 className="font-semibold text-blue-900 mb-2">⚠️ Payment Reference (REQUIRED)</h4>
+                    <div className="flex items-center justify-between bg-white border-2 border-blue-400 rounded-lg p-3 mb-2">
+                      <span className="font-mono text-lg font-bold text-blue-600">
+                        {premiumDetails.eft_details?.reference || 'N/A'}
+                      </span>
+                      <button
+                        onClick={() => navigator.clipboard.writeText(premiumDetails.eft_details?.reference || '')}
+                        className="text-blue-600 hover:text-blue-700 ml-2"
+                        title="Copy reference number"
+                      >
+                        <Copy className="w-5 h-5" />
+                      </button>
+                    </div>
+                    <p className="text-xs text-blue-700 font-semibold">
+                      ⚠️ IMPORTANT: Use this EXACT reference when making payment. Premium activates automatically once payment is confirmed.
+                    </p>
+                  </div>
+
+                  {/* Amount */}
+                  <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                    <div className="flex justify-between items-center">
+                      <span className="font-medium text-green-900">Amount to Pay:</span>
+                      <span className="text-2xl font-bold text-green-600">
+                        R{selectedPremiumPlan === 'monthly' ? '299' : '2,990'}
+                      </span>
+                    </div>
+                  </div>
+                  
+                  {/* Instructions */}
+                  <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                    <h4 className="font-medium text-yellow-900 mb-2">Payment Instructions</h4>
+                    <ul className="text-sm text-yellow-800 space-y-1 list-disc list-inside">
+                      <li>Make an EFT payment of <strong>R{selectedPremiumPlan === 'monthly' ? '299' : '2,990'}</strong> to the account above</li>
+                      <li>Use the reference number: <strong className="font-mono">{premiumDetails.eft_details?.reference || 'N/A'}</strong></li>
+                      <li>Premium listing activates automatically within 5 minutes of payment confirmation</li>
+                      <li>You'll receive an email confirmation once activated</li>
+                      <li>Contact support if premium doesn't activate within 30 minutes</li>
+                    </ul>
+                  </div>
+                </div>
+
+                <div className="mt-6 flex justify-end">
+                  <button
+                    onClick={() => {
+                      setShowPremiumModal(false);
+                      setSelectedPremiumPlan(null);
+                    }}
+                    className="px-6 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700"
+                  >
+                    Close
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Verification Documents - Provider Only */}
+          {user?.userType === 'provider' && (
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">Verification Documents</h3>
+              
+              {verificationStatus && (
+                <div className={`mb-4 p-3 rounded-lg ${
+                  verificationStatus === 'verified' 
+                    ? 'bg-green-50 text-green-800 border border-green-200' 
+                    : verificationStatus === 'pending'
+                    ? 'bg-yellow-50 text-yellow-800 border border-yellow-200'
+                    : 'bg-red-50 text-red-800 border border-red-200'
+                }`}>
+                  <p className="font-medium">Status: {verificationStatus.charAt(0).toUpperCase() + verificationStatus.slice(1)}</p>
+                </div>
+              )}
+
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Document Type
+                  </label>
+                  <select
+                    value={docType}
+                    onChange={(e) => setDocType(e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  >
+                    <option value="id_document">ID Document (South African ID)</option>
+                    <option value="passport">Passport</option>
+                    <option value="proof_of_address">Proof of Address</option>
+                    <option value="business_registration">Business Registration</option>
+                    <option value="insurance">Insurance Certificate</option>
+                    <option value="other">Other Document</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Upload Document
+                  </label>
+                  <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
+                    <input
+                      type="file"
+                      id="verification-document"
+                      accept=".pdf,.jpg,.jpeg,.png"
+                      onChange={handleVerificationUpload}
+                      className="hidden"
+                    />
+                    <label
+                      htmlFor="verification-document"
+                      className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 cursor-pointer"
+                    >
+                      <Upload className="w-4 h-4 mr-2" />
+                      Choose File (PDF, JPG, PNG - Max 10MB)
+                    </label>
+                    <p className="text-xs text-gray-500 mt-2">
+                      Upload your verification documents. Accepted formats: PDF, JPG, PNG. Maximum file size: 10MB.
+                    </p>
+                  </div>
+                </div>
+
+                {/* Show uploaded documents */}
+                {Object.keys(verificationDocs).length > 0 && (
+                  <div className="mt-4">
+                    <h4 className="text-sm font-medium text-gray-700 mb-2">Uploaded Documents:</h4>
+                    <div className="space-y-2">
+                      {Object.entries(verificationDocs).map(([type, docs]) => (
+                        <div key={type} className="text-sm">
+                          <span className="font-medium capitalize">{type.replace('_', ' ')}:</span>
+                          {Array.isArray(docs) && docs.map((doc: any, idx: number) => (
+                            <div key={idx} className="ml-4 text-gray-600">
+                              <a href={doc.url} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
+                                Document {idx + 1}
+                              </a>
+                              <span className="text-xs text-gray-500 ml-2">
+                                (Uploaded: {new Date(doc.uploaded_at).toLocaleDateString()})
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           )}

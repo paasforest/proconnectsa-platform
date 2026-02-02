@@ -29,8 +29,8 @@ def my_leads(request):
         # Only show leads that have been manually unlocked with credits
         assignments = LeadAssignment.objects.filter(
             provider=user,
-            status__in=['purchased', 'contacted', 'quoted', 'won', 'lost']  # Only purchased/unlocked leads
-        ).select_related('lead').order_by('-assigned_at')
+            status__in=['purchased', 'contacted', 'quoted', 'won', 'lost']
+        ).select_related('lead', 'lead__client', 'lead__service_category').order_by('-purchased_at', '-assigned_at')
         
         leads_data = []
         for assignment in assignments:
@@ -45,17 +45,17 @@ def my_leads(request):
                 'name': f"{lead.client.first_name} {lead.client.last_name}".strip() or lead.client.email,
                 'location': f"{lead.location_suburb}, {lead.location_city}",
                 'service': lead.service_category.name if lead.service_category else 'General Service',
-                'budget': lead.get_budget_range_display() if hasattr(lead, 'get_budget_range_display') else lead.budget_range,
-                'credits_spent': 1,  # Default credit cost
-                'unlocked_at': assignment.assigned_at.isoformat(),
+                'budget': lead.get_budget_display_range() if hasattr(lead, 'get_budget_display_range') else lead.budget_range,
+                'credits_spent': getattr(assignment, 'credit_cost', 1) or 1,
+                'unlocked_at': (assignment.purchased_at or assignment.assigned_at).isoformat(),
                 'status': status,
                 'phone': getattr(lead.client, 'phone', 'Not provided'),
                 'email': lead.client.email,
                 'description': lead.description,
                 'urgency': lead.urgency,
                 'timeline': lead.hiring_timeline,
-                'notes': '',  # No notes in assignments yet
-                'last_contact': None,  # Not tracked in assignments yet
+                'notes': assignment.provider_notes or '',
+                'last_contact': assignment.contacted_at.isoformat() if assignment.contacted_at else None,
                 'next_follow_up': None,  # Not tracked in assignments yet
                 'created_at': lead.created_at.isoformat(),
                 'updated_at': assignment.updated_at.isoformat()
@@ -77,7 +77,7 @@ def my_leads(request):
 @permission_classes([IsAuthenticated])
 def update_lead_status(request, lead_id):
     """
-    Update the status of a purchased lead
+    Update the status of a purchased lead (uses LeadAssignment)
     """
     try:
         user = request.user
@@ -85,40 +85,45 @@ def update_lead_status(request, lead_id):
         
         if not new_status:
             return Response(
-                {'error': 'Status is required'}, 
+                {'error': 'Status is required'},
                 status=status.HTTP_400_BAD_REQUEST
             )
         
-        # Get the lead purchase
-        purchase = get_object_or_404(
-            LeadPurchase, 
-            user=user, 
+        valid_statuses = ['purchased', 'contacted', 'quoted', 'won', 'lost']
+        if new_status not in valid_statuses:
+            return Response(
+                {'error': f'Invalid status. Must be one of: {", ".join(valid_statuses)}'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        assignment = get_object_or_404(
+            LeadAssignment,
+            provider=user,
             lead_id=lead_id
         )
         
-        # Update status based on new_status
         now = timezone.now()
-        if new_status == 'contacted' and not purchase.contacted_at:
-            purchase.contacted_at = now
-        elif new_status == 'quoted' and not purchase.quoted_at:
-            purchase.quoted_at = now
-        elif new_status == 'won' and not purchase.won_at:
-            purchase.won_at = now
-        elif new_status == 'lost' and not purchase.lost_at:
-            purchase.lost_at = now
+        update_fields = ['status', 'updated_at']
+        assignment.status = new_status
+        if new_status == 'contacted' and not assignment.contacted_at:
+            assignment.contacted_at = now
+            update_fields.append('contacted_at')
+        elif new_status == 'quoted' and not assignment.quote_provided_at:
+            assignment.quote_provided_at = now
+            update_fields.append('quote_provided_at')
         
-        purchase.save()
+        assignment.save(update_fields=update_fields)
         
         return Response({
             'success': True,
             'status': new_status,
-            'updated_at': purchase.updated_at.isoformat()
+            'updated_at': assignment.updated_at.isoformat()
         })
         
     except Exception as e:
         logger.error(f"Failed to update lead status for user {request.user.email}: {str(e)}")
         return Response(
-            {'error': 'Failed to update lead status'}, 
+            {'error': 'Failed to update lead status'},
             status=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
 
@@ -126,7 +131,7 @@ def update_lead_status(request, lead_id):
 @permission_classes([IsAuthenticated])
 def add_lead_note(request, lead_id):
     """
-    Add a note to a purchased lead
+    Add a note to a purchased lead (uses LeadAssignment.provider_notes)
     """
     try:
         user = request.user
@@ -134,31 +139,30 @@ def add_lead_note(request, lead_id):
         
         if not note:
             return Response(
-                {'error': 'Note is required'}, 
+                {'error': 'Note is required'},
                 status=status.HTTP_400_BAD_REQUEST
             )
         
-        # Get the lead purchase
-        purchase = get_object_or_404(
-            LeadPurchase, 
-            user=user, 
+        assignment = get_object_or_404(
+            LeadAssignment,
+            provider=user,
             lead_id=lead_id
         )
         
-        # Update notes
-        purchase.notes = note
-        purchase.save()
+        existing = (assignment.provider_notes or '').strip()
+        assignment.provider_notes = f"{existing}\n{note}".strip() if existing else note
+        assignment.save(update_fields=['provider_notes', 'updated_at'])
         
         return Response({
             'success': True,
             'note': note,
-            'updated_at': purchase.updated_at.isoformat()
+            'updated_at': assignment.updated_at.isoformat()
         })
         
     except Exception as e:
         logger.error(f"Failed to add lead note for user {request.user.email}: {str(e)}")
         return Response(
-            {'error': 'Failed to add note'}, 
+            {'error': 'Failed to add note'},
             status=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
 
@@ -166,25 +170,22 @@ def add_lead_note(request, lead_id):
 @permission_classes([IsAuthenticated])
 def lead_stats(request):
     """
-    Get lead statistics for the user
+    Get lead statistics for the user (uses LeadAssignment)
     """
     try:
         user = request.user
         
-        # Get all purchases for this user
-        purchases = LeadPurchase.objects.filter(user=user)
+        assignments = LeadAssignment.objects.filter(
+            provider=user,
+            status__in=['purchased', 'contacted', 'quoted', 'won', 'lost']
+        )
         
-        total_leads = purchases.count()
-        won_leads = purchases.filter(won_at__isnull=False).count()
-        in_progress = purchases.filter(
-            Q(contacted_at__isnull=False) | 
-            Q(quoted_at__isnull=False)
-        ).exclude(
-            Q(won_at__isnull=False) | 
-            Q(lost_at__isnull=False)
+        total_leads = assignments.count()
+        won_leads = assignments.filter(status='won').count()
+        in_progress = assignments.filter(
+            status__in=['contacted', 'quoted']
         ).count()
-        
-        total_credits_spent = sum(p.credits_spent for p in purchases)
+        total_credits_spent = sum(getattr(a, 'credit_cost', 1) or 1 for a in assignments)
         
         return Response({
             'total_leads': total_leads,

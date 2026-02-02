@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import {
   Users, ShoppingCart, Wallet, MessageSquare, TrendingUp, 
   Clock, Target, DollarSign, Activity, BarChart3, Zap,
-  ArrowUpRight, ArrowDownRight, Eye, Star, CheckCircle, Wrench
+  ArrowUpRight, ArrowDownRight, Eye, Star, CheckCircle, Wrench, Crown
 } from 'lucide-react';
 import { apiClient } from '@/lib/api-simple';
 import { useAuth } from '@/components/AuthProvider';
@@ -228,6 +228,13 @@ const DashboardOverview = () => {
       color: 'purple'
     },
     {
+      title: 'Upgrade plan',
+      description: 'Request premium for more leads',
+      icon: Crown,
+      href: '/dashboard/upgrade',
+      color: 'amber'
+    },
+    {
       title: 'Manage Services',
       description: 'Update your services',
       icon: Target,
@@ -372,7 +379,8 @@ const DashboardOverview = () => {
                   blue: 'bg-blue-50 text-blue-600',
                   green: 'bg-green-50 text-green-600',
                   purple: 'bg-purple-50 text-purple-600',
-                  orange: 'bg-orange-50 text-orange-600'
+                  orange: 'bg-orange-50 text-orange-600',
+                  amber: 'bg-amber-50 text-amber-600'
                 };
                 
                 return (

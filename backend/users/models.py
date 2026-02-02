@@ -239,6 +239,24 @@ class ProviderProfile(models.Model):
         help_text="When ML scores were last updated"
     )
     
+    # Premium Listing (for public directory visibility)
+    is_premium_listing = models.BooleanField(
+        default=False,
+        help_text="Provider has paid for premium listing in public directory"
+    )
+    premium_listing_started_at = models.DateTimeField(
+        null=True, blank=True,
+        help_text="When premium listing was activated"
+    )
+    premium_listing_expires_at = models.DateTimeField(
+        null=True, blank=True,
+        help_text="When premium listing expires (null = lifetime)"
+    )
+    premium_listing_payment_reference = models.CharField(
+        max_length=100, blank=True,
+        help_text="EFT reference number for premium listing payment"
+    )
+    
     # Timestamps
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -285,6 +303,18 @@ class ProviderProfile(models.Model):
             self.verification_status == 'verified' and
             (self.credit_balance > 0 or self.is_premium_listing_active)  # Premium providers don't need credits
         )
+    
+    @property
+    def is_premium_listing_active(self):
+        """Check if premium listing is currently active (for free lead access)"""
+        if not self.is_premium_listing:
+            return False
+        if not self.premium_listing_started_at:
+            return False
+        # Check if expired (null expiry = lifetime)
+        if self.premium_listing_expires_at is None:
+            return True  # Lifetime premium
+        return self.premium_listing_expires_at > timezone.now()
     
     def subscription_tier_weight(self):
         """Get numeric weight for subscription tier (for ranking)"""

@@ -3,12 +3,55 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
+from django.utils.text import slugify
+from django.db.models import Q
 from datetime import timedelta
 import random
 import re
 
 from ..users.models import Wallet, LeadUnlock
 from .models import Lead
+
+CATEGORY_SLUG_ALIASES = {
+    # legacy -> canonical
+    "appliance": "appliance-repair",
+    "pool": "pool-maintenance",
+    "renovation": "renovations",
+    "general": "handyman",
+}
+
+
+def _normalize_provider_category_inputs(values):
+    """
+    ProviderProfile.service_categories is supposed to store slugs, but older data
+    sometimes contains IDs or human names. Normalize robustly.
+    Returns (ids: set[int], slugs: set[str])
+    """
+    ids = set()
+    slugs = set()
+    if not values:
+        return ids, slugs
+
+    for v in values:
+        if v is None:
+            continue
+        if isinstance(v, int):
+            if v > 0:
+                ids.add(v)
+            continue
+        s = str(v).strip()
+        if not s:
+            continue
+        if s.isdigit():
+            ids.add(int(s))
+            continue
+        norm = slugify(s)
+        if not norm:
+            continue
+        norm = CATEGORY_SLUG_ALIASES.get(norm, norm)
+        slugs.add(norm)
+
+    return ids, slugs
 
 def mask_text_content(text):
     """Mask sensitive information in text content"""
@@ -53,37 +96,60 @@ def available_leads(request):
         # Direct lead filtering (replacing broken LeadFilteringService)
         profile = request.user.provider_profile
         
-        # Convert service category slugs to IDs
+        # Convert provider categories (slugs/ids/names) -> category IDs
         from backend.leads.models import ServiceCategory
-        category_slugs = profile.service_categories if profile.service_categories else []
-        category_ids = ServiceCategory.objects.filter(slug__in=category_slugs).values_list('id', flat=True)
+        raw_categories = profile.service_categories if profile.service_categories else []
+        cat_ids, cat_slugs = _normalize_provider_category_inputs(raw_categories)
+        category_ids = list(
+            ServiceCategory.objects.filter(
+                Q(id__in=list(cat_ids)) | Q(slug__in=list(cat_slugs))
+            ).values_list('id', flat=True)
+        )
+
+        if not category_ids:
+            logger.info(
+                "Provider %s has no resolvable service categories (raw=%s); returning 0 available leads",
+                request.user.id,
+                raw_categories,
+            )
+            return Response({
+                'leads': [],
+                'wallet': {
+                    'credits': wallet.credits,
+                    'balance': float(wallet.balance),
+                    'customer_code': wallet.customer_code
+                },
+                'message': 'Please select your service categories in your profile to see matching leads.'
+            })
         
         # Base query
+        # Note: many leads move to `assigned` after distribution, but are still
+        # purchasable/unlockable in the wallet marketplace.
         leads = Lead.objects.filter(
-            status='verified',
+            status__in=['verified', 'assigned'],
             service_category__id__in=category_ids,
             is_available=True,
             expires_at__gt=timezone.now()
         ).select_related('service_category', 'client')
         
-        # Apply geographical filter
+        # Apply geographical filter (case-insensitive, trimmed)
         if profile.service_areas:
-            from django.db.models import Q
             service_area_filter = Q()
             for area in profile.service_areas:
-                service_area_filter |= (
-                    Q(location_suburb__icontains=area) |
-                    Q(location_city__icontains=area)
-                )
-            leads = leads.filter(service_area_filter)
+                a = str(area or '').strip()
+                if not a:
+                    continue
+                service_area_filter |= (Q(location_suburb__icontains=a) | Q(location_city__icontains=a))
+            if service_area_filter:
+                leads = leads.filter(service_area_filter)
         
-        # Exclude already assigned leads
-        from backend.leads.models import LeadAssignment
-        assigned_lead_ids = LeadAssignment.objects.filter(
-            provider=request.user
+        # Exclude leads already unlocked by this provider
+        from backend.leads.models import LeadAccess
+        unlocked_lead_ids = LeadAccess.objects.filter(
+            provider=request.user,
+            is_active=True
         ).values_list('lead_id', flat=True)
-        
-        leads = leads.exclude(id__in=assigned_lead_ids)
+        leads = leads.exclude(id__in=unlocked_lead_ids)
         
         # Order by priority and apply limit
         leads = leads.order_by('-verification_score', '-created_at')[:20]
@@ -103,20 +169,29 @@ def available_leads(request):
             provider_service_categories = request.user.provider_profile.service_categories or []
             provider_service_areas = request.user.provider_profile.service_areas or []
         
-        # Basic service category filtering
+        # Basic service category filtering (normalize the same way as main path)
+        from backend.leads.models import ServiceCategory
+        cat_ids, cat_slugs = _normalize_provider_category_inputs(provider_service_categories)
+        category_ids = list(
+            ServiceCategory.objects.filter(
+                Q(id__in=list(cat_ids)) | Q(slug__in=list(cat_slugs))
+            ).values_list('id', flat=True)
+        )
+
         leads = Lead.objects.filter(
-            status='verified',
+            status__in=['verified', 'assigned'],
             is_available=True,
             expires_at__gt=timezone.now(),
-            service_category__id__in=provider_service_categories
+            service_category__id__in=category_ids
         ).select_related('client', 'service_category').order_by('-created_at')[:20]
         
         # Basic geographical filtering
         if provider_service_areas:
-            from django.db.models import Q
             geographical_filter = Q()
             for area in provider_service_areas:
-                area_lower = area.lower()
+                area_lower = str(area or '').strip().lower()
+                if not area_lower:
+                    continue
                 geographical_filter |= (
                     Q(location_suburb__icontains=area_lower) |
                     Q(location_city__icontains=area_lower) |
@@ -173,6 +248,10 @@ def available_leads(request):
                 'credit_required': credits_cost,
                 'verifiedPhone': getattr(lead, 'is_sms_verified', False),
                 'highIntent': lead.hiring_intent in ['ready_to_hire', 'planning_to_hire'],
+                'hiring_intent': getattr(lead, 'hiring_intent', None),
+                'hiring_intent_display': get_intent_display(getattr(lead, 'hiring_intent', None)),
+                'hiring_timeline': getattr(lead, 'hiring_timeline', None),
+                'hiring_timeline_display': get_timeline_display(getattr(lead, 'hiring_timeline', None)),
                 'email': lead.client.email if lead.client else None,
                 'phone': getattr(lead.client, 'phone', '') if lead.client else '',
                 'masked_phone': mask_phone(getattr(lead.client, 'phone', '')) if lead.client else '***-***-****',
@@ -218,9 +297,17 @@ def available_leads(request):
                     'timeAgo': format_time_ago(lead.created_at),
                     'service': f"{lead.service_category.name} • {lead.title}",
                     'credits': credits_cost,
-                'credit_required': credits_cost,
+                    'credit_required': credits_cost,
                     'verifiedPhone': getattr(lead, 'is_sms_verified', False),
                     'highIntent': lead.hiring_intent in ['ready_to_hire', 'planning_to_hire'],
+                    'hiring_intent': getattr(lead, 'hiring_intent', None),
+                    'hiring_intent_display': get_intent_display(getattr(lead, 'hiring_intent', None)),
+                    'hiring_timeline': getattr(lead, 'hiring_timeline', None),
+                    'hiring_timeline_display': get_timeline_display(getattr(lead, 'hiring_timeline', None)),
+                'hiring_intent': getattr(lead, 'hiring_intent', None),
+                'hiring_intent_display': get_intent_display(getattr(lead, 'hiring_intent', None)),
+                'hiring_timeline': getattr(lead, 'hiring_timeline', None),
+                'hiring_timeline_display': get_timeline_display(getattr(lead, 'hiring_timeline', None)),
                     'email': lead.client.email if lead.client else None,  # REAL email
                     'phone': getattr(lead.client, 'phone', '') if lead.client else '',  # REAL phone
                     'masked_phone': mask_phone(getattr(lead.client, 'phone', '')) if lead.client else '***-***-****',
@@ -524,5 +611,16 @@ def get_timeline_display(hiring_timeline):
         'flexible': 'Flexible Timing'
     }
     return timeline_map.get(hiring_timeline, 'Not specified')
+
+
+def get_intent_display(hiring_intent):
+    """Convert hiring intent to a provider-friendly display label"""
+    intent_map = {
+        'ready_to_hire': 'Ready to hire',
+        'planning_to_hire': 'Planning to hire',
+        'comparing_quotes': 'Comparing quotes',
+        'researching': 'Researching',
+    }
+    return intent_map.get(hiring_intent or '', 'Unknown')
 
 
