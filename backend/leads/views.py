@@ -136,11 +136,11 @@ class LeadAssignmentListView(generics.ListAPIView):
         if not self.request.user.is_provider:
             return LeadAssignment.objects.none()
         
-        # Only show purchased leads (BARK-STYLE)
+        # Show purchased leads and their history (purchased, contacted, quoted, won, lost)
         return LeadAssignment.objects.filter(
             provider=self.request.user,
-            status='purchased'  # Only purchased/unlocked leads
-        ).order_by('-purchased_at')
+            status__in=['purchased', 'contacted', 'quoted', 'won', 'lost']
+        ).order_by('-purchased_at', '-assigned_at')
 
 
 class LeadAssignmentDetailView(generics.RetrieveUpdateAPIView):

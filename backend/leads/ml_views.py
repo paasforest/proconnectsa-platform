@@ -962,6 +962,23 @@ Use the exact reference so we can auto-activate your credits."""
             )
             logger.info(f"✅ Lead access granted: ID {lead_access.id}")
             
+            # Create/update LeadAssignment so purchased lead appears in My Leads for history
+            assignment, created = LeadAssignment.objects.get_or_create(
+                provider=request.user,
+                lead=lead,
+                defaults={
+                    'status': 'purchased',
+                    'purchased_at': timezone.now(),
+                    'credit_cost': credit_cost,
+                }
+            )
+            if not created:
+                assignment.status = 'purchased'
+                assignment.purchased_at = timezone.now()
+                assignment.credit_cost = credit_cost
+                assignment.save(update_fields=['status', 'purchased_at', 'credit_cost'])
+            logger.info(f"✅ Lead assignment updated for My Leads: {assignment.id} ({'created' if created else 'updated'})")
+            
             # Update lead response count
             lead.assigned_providers_count = LeadAccess.objects.filter(lead=lead).count()
             lead.save()
