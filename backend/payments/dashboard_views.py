@@ -399,7 +399,7 @@ def upgrade_subscription(request):
             status=status.HTTP_400_BAD_REQUEST
         )
     
-    valid_tiers = ['basic', 'advanced', 'pro', 'enterprise']
+    valid_tiers = ['pay_as_you_go', 'basic', 'advanced', 'pro', 'enterprise']
     if new_tier not in valid_tiers:
         return Response(
             {'error': f'Invalid subscription tier. Valid options: {valid_tiers}'}, 
