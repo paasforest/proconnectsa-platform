@@ -125,11 +125,11 @@ export default async function ProviderDetailPage({ params }: { params: Promise<{
       return notFound();
     }
 
-  const location = [provider.suburb, provider.city].filter(Boolean).join(", ") || "Location not specified";
-  const hasPricing = provider.hourly_rate_min || provider.hourly_rate_max || provider.minimum_job_value;
-  const hasInsurance = provider.insurance_valid_until && new Date(provider.insurance_valid_until) > new Date();
+    const location = [provider.suburb, provider.city].filter(Boolean).join(", ") || "Location not specified";
+    const hasPricing = provider.hourly_rate_min || provider.hourly_rate_max || provider.minimum_job_value;
+    const hasInsurance = provider.insurance_valid_until && new Date(provider.insurance_valid_until) > new Date();
 
-  return (
+    return (
     <div className="min-h-screen flex flex-col bg-gray-50">
       <ClientHeader />
       <main className="flex-1">
@@ -445,6 +445,10 @@ export default async function ProviderDetailPage({ params }: { params: Promise<{
       </main>
       <Footer />
     </div>
-  );
+    );
+  } catch (error) {
+    console.error('Error rendering provider page:', error);
+    return notFound();
+  }
 }
 
