@@ -45,37 +45,53 @@ type PublicProvider = {
 };
 
 async function fetchProvider(id: string): Promise<PublicProvider | null> {
-  const url = `${API_BASE}/api/public/providers/${id}/`;
-  const res = await fetch(url, { next: { revalidate: 300 } });
-  if (res.status === 404) return null;
-  if (!res.ok) throw new Error(`Failed to load provider (${res.status})`);
-  const data = await res.json();
-  
-  // Ensure all required fields have defaults
-  return {
-    id: data.id || id,
-    business_name: data.business_name || 'Unknown Provider',
-    city: data.city || null,
-    suburb: data.suburb || null,
-    service_categories: data.service_categories || [],
-    service_category_names: data.service_category_names || (data.service_categories || []).map((c: string) => c.replace('-', ' ').replace(/\b\w/g, (l: string) => l.toUpperCase())),
-    average_rating: data.average_rating ?? 0,
-    total_reviews: data.total_reviews || 0,
-    verification_status: data.verification_status || 'pending',
-    slug: data.slug || '',
-    bio: data.bio || '',
-    years_experience: data.years_experience || null,
-    service_areas: data.service_areas || [],
-    max_travel_distance: data.max_travel_distance || 0,
-    hourly_rate_min: data.hourly_rate_min || null,
-    hourly_rate_max: data.hourly_rate_max || null,
-    minimum_job_value: data.minimum_job_value || null,
-    response_time_hours: data.response_time_hours || null,
-    job_completion_rate: data.job_completion_rate || null,
-    profile_image: data.profile_image || '',
-    portfolio_images: data.portfolio_images || [],
-    insurance_valid_until: data.insurance_valid_until || null,
-  };
+  try {
+    const url = `${API_BASE}/api/public/providers/${id}/`;
+    const res = await fetch(url, { 
+      next: { revalidate: 300 },
+      cache: 'no-store' // Temporarily disable cache to debug
+    });
+    
+    if (res.status === 404) {
+      return null;
+    }
+    
+    if (!res.ok) {
+      console.error(`API error: ${res.status} ${res.statusText}`);
+      return null;
+    }
+    
+    const data = await res.json();
+    
+    // Ensure all required fields have defaults
+    return {
+      id: data.id || id,
+      business_name: data.business_name || 'Unknown Provider',
+      city: data.city || null,
+      suburb: data.suburb || null,
+      service_categories: data.service_categories || [],
+      service_category_names: data.service_category_names || (data.service_categories || []).map((c: string) => c.replace('-', ' ').replace(/\b\w/g, (l: string) => l.toUpperCase())),
+      average_rating: data.average_rating ?? 0,
+      total_reviews: data.total_reviews || 0,
+      verification_status: data.verification_status || 'pending',
+      slug: data.slug || '',
+      bio: data.bio || '',
+      years_experience: data.years_experience || null,
+      service_areas: data.service_areas || [],
+      max_travel_distance: data.max_travel_distance || 0,
+      hourly_rate_min: data.hourly_rate_min || null,
+      hourly_rate_max: data.hourly_rate_max || null,
+      minimum_job_value: data.minimum_job_value || null,
+      response_time_hours: data.response_time_hours || null,
+      job_completion_rate: data.job_completion_rate || null,
+      profile_image: data.profile_image || '',
+      portfolio_images: data.portfolio_images || [],
+      insurance_valid_until: data.insurance_valid_until || null,
+    };
+  } catch (error) {
+    console.error('Error in fetchProvider:', error);
+    return null;
+  }
 }
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
@@ -96,9 +112,18 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
 }
 
 export default async function ProviderDetailPage({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params;
-  const provider = await fetchProvider(id);
-  if (!provider) return notFound();
+  try {
+    const { id } = await params;
+    
+    if (!id) {
+      return notFound();
+    }
+    
+    const provider = await fetchProvider(id);
+    
+    if (!provider) {
+      return notFound();
+    }
 
   const location = [provider.suburb, provider.city].filter(Boolean).join(", ") || "Location not specified";
   const hasPricing = provider.hourly_rate_min || provider.hourly_rate_max || provider.minimum_job_value;
@@ -155,9 +180,9 @@ export default async function ProviderDetailPage({ params }: { params: Promise<{
                       {typeof provider.average_rating === 'number' ? provider.average_rating.toFixed(1) : "0.0"}
                     </span>
                   </div>
-                  <Link href={`/providers/${provider.id}/reviews`} className="text-gray-600 hover:text-blue-600 hover:underline">
+                  <span className="text-gray-600">
                     ({provider.total_reviews || 0} {provider.total_reviews === 1 ? 'review' : 'reviews'})
-                  </Link>
+                  </span>
                 </div>
               </div>
 
@@ -285,17 +310,10 @@ export default async function ProviderDetailPage({ params }: { params: Promise<{
                         );
                       })}
                     </div>
-                    <Link href={`/providers/${provider.id}/reviews`} className="text-sm text-gray-600 hover:text-blue-600 hover:underline mt-2 inline-block">
+                    <p className="text-sm text-gray-600 mt-2">
                       {provider.total_reviews || 0} {(provider.total_reviews || 0) === 1 ? 'review' : 'reviews'}
-                    </Link>
+                    </p>
                   </div>
-                  <div className="mt-4 pt-4 border-t space-y-3">
-                    <Button asChild variant="outline" className="w-full">
-                      <Link href={`/providers/${provider.id}/review`}>
-                        Write a Review
-                        <Star className="ml-2 h-4 w-4" />
-                      </Link>
-                    </Button>
                   <Link href={`/providers/${provider.id}/reviews`}>
                     <Button variant="outline" className="w-full">
                       View All Reviews
