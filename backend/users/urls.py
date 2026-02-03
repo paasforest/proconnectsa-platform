@@ -105,7 +105,6 @@ urlpatterns = [
     path('settings/delete-image/', settings_views.delete_profile_image, name='delete_profile_image'),
     path('provider-profile/documents/', settings_views.list_verification_documents, name='list_verification_documents'),
     path('provider-profile/documents/upload/', settings_views.upload_verification_document, name='upload_verification_document'),
-    path('premium-listing/request/', settings_views.premium_listing_request, name='premium_listing_request'),
     
     # Premium Listing
     path('request-premium-listing/', settings_views.request_premium_listing, name='request_premium_listing'),
