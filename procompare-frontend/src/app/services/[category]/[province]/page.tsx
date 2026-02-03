@@ -6,73 +6,11 @@ import { ClientHeader } from "@/components/layout/ClientHeader"
 import { Footer } from "@/components/layout/Footer"
 import { fetchServiceCategories } from "@/lib/service-categories"
 import { getProvinceBySlug } from "@/lib/seo-locations"
+import { SEO_SERVICE_PROVINCE_PAGES } from "@/lib/seo-service-pages"
 
 export const dynamic = "force-dynamic"
 
 type Props = { params: Promise<{ category: string; province: string }> }
-
-const SEO_PAGE_COPY: Record<
-  string,
-  {
-    seoTitle: string
-    metaDescription: string
-    h1: string
-    intro: string
-    sections: Array<{ h2: string; body: string }>
-    internalLinks: Array<{ href: string; text: string }>
-  }
-> = {
-  "plumbing/gauteng": {
-    seoTitle: "Plumbing in Gauteng: Free Quotes from Verified Pros",
-    metaDescription:
-      "Get plumbing in Gauteng sorted fast—request free quotes from verified professionals on ProConnectSA. Compare options with no obligation to hire.",
-    h1: "Plumbing in Gauteng – Get Free Quotes from Verified Professionals",
-    intro:
-      "Finding a reliable plumber in Gauteng can feel urgent—burst pipes, a leaking geyser, blocked drains, or a sudden loss of water pressure rarely wait for “next week.” From high-density complexes in Johannesburg to family homes in Pretoria and new builds across fast-growing suburbs, plumbing problems can disrupt your day and damage your property quickly. ProConnectSA helps you request free quotes from verified professionals in Gauteng so you can compare options, response times, and experience before you choose. Submit your job once, confirm by SMS, and we’ll connect you with trusted providers who match your needs—without sharing your contact details publicly and with no obligation to hire.",
-    sections: [
-      {
-        h2: "Common Plumbing Jobs in Gauteng",
-        body:
-          "Gauteng properties range from older brick homes with ageing pipework to modern townhouses with shared water lines and strict body corporate rules. That mix creates a few common plumbing requests in Gauteng. Geyser repairs and replacements are frequent, including pressure control valve issues, dripping overflow pipes, and burst geysers after power interruptions or temperature swings. Blocked drains and sewer lines are also common in Gauteng homes, restaurants, and office parks—often caused by grease build-up, tree roots, or older piping. Many customers need leak detection for concealed pipes behind walls or under paving, where small leaks can become expensive water loss and structural damage. In Gauteng multi-storey buildings, garden flats, and complexes, low water pressure and inconsistent hot water are regular call-outs. Summer downpours in Gauteng also trigger stormwater and drainage fixes—overflowing gutters, pooling water, and blocked channels. Renovations add their own needs, like moving water points, installing new basins and mixers, and checking compliance for insurance or resale.",
-      },
-      {
-        h2: "How ProConnectSA Connects You with Trusted Plumbing Providers",
-        body:
-          "Start by describing your plumbing job—blocked drain, geyser replacement, leak detection, installation, or maintenance—along with your area in Gauteng and your preferred timing. We confirm your request with SMS verification to reduce spam and fake enquiries. Our matching logic then connects you with verified plumbing providers who serve your location and can handle the type of work you need. Your personal contact details aren’t posted publicly; providers only receive access once they’re matched and choose to purchase the lead, which helps prevent your phone from being flooded. You can compare quotes, ask questions, and choose who to hire. There’s no obligation to proceed if pricing, availability, or approach isn’t right for you.",
-      },
-      {
-        h2: "Why Use ProConnectSA for Plumbing in Gauteng",
-        body:
-          "When you need plumbing in Gauteng, speed matters—but so does trust. ProConnectSA focuses on quality control by listing verified professionals and keeping requests tied to real customers through SMS verification. You’ll save time by submitting one request instead of calling around, and you’ll have clearer options to compare. Because providers are matched based on location and service fit in Gauteng, you’re more likely to get responses that make sense for your suburb, access rules, and property type. The process is transparent: you request free quotes, review the responses, and decide whether to hire. If you’re dealing with an urgent plumbing issue in Gauteng, fast responses and a structured process can reduce downtime and prevent further damage.",
-      },
-      {
-        h2: "Pricing Expectations for Plumbing in Gauteng",
-        body:
-          "Plumbing pricing in Gauteng varies widely depending on the job type, access, parts, and urgency. For smaller repairs (like a leaking tap, toilet mechanism, or minor pipe fix), costs often depend on call-out fees, labour time, and whether parts are required. For larger work—geyser replacement, drain jetting, leak detection, or renovations—pricing is influenced by equipment needs, compliance requirements, and whether walls, paving, or ceilings must be opened and repaired afterwards. Your Gauteng location can also affect pricing if after-hours work, security access, parking, or travel time is involved. The best approach is to request a few quotes, confirm what’s included (labour, parts, VAT, guarantees), and choose the plumber who offers the right balance of experience, timeline, and value.",
-      },
-      {
-        h2: "Get Free Quotes from Plumbing Providers in Gauteng",
-        body:
-          "If you need plumbing in Gauteng, request free quotes on ProConnectSA in minutes. Describe the issue, confirm by SMS, and we’ll connect you with verified professionals who can help. You’ll be able to compare options quickly, ask for clarity on pricing, and choose the provider that fits your timeline. It’s free to request quotes, there’s no obligation to hire, and your contact details stay protected throughout the process.",
-      },
-    ],
-    internalLinks: [
-      { href: "/services/plumbing", text: "You can also browse our main plumbing page at /services/plumbing." },
-      {
-        href: "/services/plumbing/western-cape",
-        text: "If you’re outside Gauteng, we also help customers find plumbing providers in the Western Cape.",
-      },
-      {
-        href: "/services/plumbing/kwazulu-natal",
-        text: "For coastal areas, see plumbing in KwaZulu-Natal for region-specific needs and availability.",
-      },
-      {
-        href: "/services/plumbing/eastern-cape",
-        text: "We also support plumbing requests in the Eastern Cape if your property is based there.",
-      },
-    ],
-  },
-}
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { category, province } = await params
@@ -83,7 +21,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const provinceName = p?.name || province
 
   const key = `${category}/${province}`
-  const custom = SEO_PAGE_COPY[key]
+  const custom = SEO_SERVICE_PROVINCE_PAGES[key]
   if (custom) {
     return {
       title: custom.seoTitle,
@@ -94,6 +32,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title: `${name} in ${provinceName} | Get Free Quotes | ProConnectSA`,
     description: `Compare free quotes from verified ${name.toLowerCase()} professionals in ${provinceName}. Fast matching and no obligation.`,
+    robots: { index: false, follow: true },
   }
 }
 
@@ -108,7 +47,7 @@ export default async function ServiceProvincePage({ params }: Props) {
 
   const serviceName = c?.name || category
   const key = `${category}/${province}`
-  const custom = SEO_PAGE_COPY[key]
+  const custom = SEO_SERVICE_PROVINCE_PAGES[key]
 
   const faq = [
     {
