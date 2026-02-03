@@ -87,8 +87,10 @@ export default function PremiumListingUpgrade({
     try {
       setLoading(planType);
 
-      // Use Next.js API route proxy to avoid CORS issues
-      const response = await fetch('/api/backend-proxy/auth/request-premium-listing/', {
+      // Use Next.js API route proxy to avoid CORS issues.
+      // IMPORTANT: Do not use a trailing slash here — Vercel redirects (308) which breaks browser preflight.
+      const proxyUrl = '/api/backend-proxy/auth/request-premium-listing'
+      const response = await fetch(proxyUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -115,7 +117,7 @@ export default function PremiumListingUpgrade({
           status: response.status,
           statusText: response.statusText,
           errorData,
-          url: '/api/backend-proxy/auth/request-premium-listing/'
+          url: proxyUrl
         });
         
         throw new Error(errorData.error || errorData.message || `HTTP ${response.status}: ${response.statusText}`);
