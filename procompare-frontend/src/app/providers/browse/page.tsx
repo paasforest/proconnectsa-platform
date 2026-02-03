@@ -16,8 +16,19 @@ type PublicProvider = {
   average_rating: number;
   total_reviews: number;
   verification_status: string;
+  is_premium_listing?: boolean;
+  is_premium_listing_active?: boolean;
   slug: string;
 };
+
+function formatVerificationStatus(s?: string | null) {
+  const status = (s || "").toLowerCase();
+  if (status === "verified") return "Verified";
+  if (status === "pending") return "Verification pending";
+  if (status === "rejected") return "Rejected";
+  if (status === "suspended") return "Suspended";
+  return status ? status.replace(/_/g, " ") : "Unknown";
+}
 
 async function fetchProviders(searchParams: { category?: string; city?: string; page?: string; page_size?: string }) {
   try {
@@ -108,9 +119,24 @@ export default async function ProvidersBrowsePage({
                         <h3 className="text-lg font-semibold text-gray-900">{p.business_name}</h3>
                         <p className="text-sm text-gray-600">{[p.suburb, p.city].filter(Boolean).join(", ")}</p>
                       </div>
-                      <Badge variant={p.verification_status === "verified" ? "default" : "secondary"}>
-                        {p.verification_status}
-                      </Badge>
+                      <div className="flex items-center gap-2">
+                        {p.is_premium_listing_active && (
+                          <Badge className="bg-amber-100 text-amber-900 border border-amber-300 hover:bg-amber-100">
+                            Premium
+                          </Badge>
+                        )}
+                        <Badge
+                          className={
+                            p.verification_status === "verified"
+                              ? "bg-green-100 text-green-800 border border-green-300 hover:bg-green-100"
+                              : p.verification_status === "pending"
+                                ? "bg-yellow-50 text-yellow-900 border border-yellow-300 hover:bg-yellow-50"
+                                : "bg-gray-100 text-gray-800 border border-gray-300 hover:bg-gray-100"
+                          }
+                        >
+                          {formatVerificationStatus(p.verification_status)}
+                        </Badge>
+                      </div>
                     </div>
                     <div className="mt-3 flex flex-wrap gap-1">
                       {(p.service_categories || []).slice(0, 4).map((c) => (

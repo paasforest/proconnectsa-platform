@@ -4,6 +4,8 @@ from rest_framework.response import Response
 from rest_framework import status
 from django.core.paginator import Paginator
 from django.utils.text import slugify
+from django.utils import timezone
+from django.db.models import Case, When, Value, BooleanField
 
 from .models import ProviderProfile, User
 from backend.leads.models import ServiceCategory
@@ -31,6 +33,11 @@ def _provider_public_dict(p: ProviderProfile):
         'average_rating': float(p.average_rating or 0),
         'total_reviews': p.total_reviews,
         'verification_status': p.verification_status,
+        'is_premium_listing': bool(p.is_premium_listing),
+        # Active if lifetime (expires_at is null) OR expires_at is in the future.
+        'is_premium_listing_active': bool(p.is_premium_listing) and (
+            p.premium_listing_expires_at is None or p.premium_listing_expires_at > timezone.now()
+        ),
         'slug': slugify(p.business_name)[:60],
         # Enhanced company details
         'bio': p.bio or '',
@@ -54,7 +61,7 @@ def _provider_public_dict(p: ProviderProfile):
 def public_providers_list(request):
     """
     Public: list verified providers with optional filters: category, city, page, page_size
-    Shows verified providers, or pending providers if no verified providers exist (for debugging)
+    Shows verified + pending providers (excludes rejected/suspended). Premium providers are flagged in response.
     """
     import logging
     logger = logging.getLogger(__name__)
@@ -64,30 +71,41 @@ def public_providers_list(request):
     page = int(request.GET.get('page', 1))
     page_size = int(request.GET.get('page_size', 20))
 
-    # First try to get verified providers
-    qs = ProviderProfile.objects.filter(verification_status='verified')
-    
-    # If no verified providers, show pending ones (temporary for debugging)
-    verified_count = qs.count()
-    if verified_count == 0:
-        logger.warning("No verified providers found, showing pending providers")
-        qs = ProviderProfile.objects.filter(verification_status='pending')
-    
-    # Exclude rejected and suspended
-    qs = qs.exclude(verification_status='rejected').exclude(verification_status='suspended')
+    qs = ProviderProfile.objects.filter(verification_status__in=['verified', 'pending']).exclude(
+        verification_status__in=['rejected', 'suspended']
+    )
 
     if category_slug:
         qs = qs.filter(service_categories__contains=[category_slug])
     if city:
         qs = qs.filter(user__city__iexact=city)
 
-    qs = qs.select_related('user').order_by('-average_rating', '-total_reviews', 'business_name')
+    now = timezone.now()
+    qs = qs.annotate(
+        premium_active=Case(
+            When(is_premium_listing=True, premium_listing_expires_at__isnull=True, then=Value(True)),
+            When(is_premium_listing=True, premium_listing_expires_at__gt=now, then=Value(True)),
+            default=Value(False),
+            output_field=BooleanField(),
+        )
+    ).select_related('user').order_by(
+        '-premium_active',
+        # Verified providers first, then pending
+        Case(
+            When(verification_status='verified', then=Value(0)),
+            When(verification_status='pending', then=Value(1)),
+            default=Value(2),
+        ),
+        '-average_rating',
+        '-total_reviews',
+        'business_name',
+    )
     paginator = Paginator(qs, page_size)
     page_obj = paginator.get_page(page)
 
     data = [_provider_public_dict(p) for p in page_obj.object_list]
     
-    logger.info(f"Returning {len(data)} providers (verified_count: {verified_count})")
+    logger.info(f"Returning {len(data)} providers")
     
     return Response({
         'results': data,
@@ -104,10 +122,15 @@ def public_providers_list(request):
 @permission_classes([AllowAny])
 def public_provider_detail(request, provider_id):
     """
-    Public: provider profile detail (verified only)
+    Public: provider profile detail (verified or pending; excludes rejected/suspended)
     """
     try:
-        p = ProviderProfile.objects.select_related('user').get(id=provider_id, verification_status='verified')
+        p = ProviderProfile.objects.select_related('user').get(
+            id=provider_id,
+            verification_status__in=['verified', 'pending'],
+        )
+        if p.verification_status in ['rejected', 'suspended']:
+            return Response({'error': 'Provider not found'}, status=status.HTTP_404_NOT_FOUND)
         return Response(_provider_public_dict(p))
     except ProviderProfile.DoesNotExist:
         return Response({'error': 'Provider not found'}, status=status.HTTP_404_NOT_FOUND)
