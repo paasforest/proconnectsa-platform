@@ -1,7 +1,7 @@
 'use client';
 
-import { useState } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { redirectToDashboard } from '@/lib/auth-utils';
 import ForgotPasswordModal from '@/components/auth/ForgotPasswordModal';
@@ -37,9 +37,8 @@ const majorCities = [
 
 export default function RegisterPage() {
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const redirectParam = searchParams?.get('redirect') || '';
-  const safeRedirect = redirectParam.startsWith('/') ? redirectParam : '';
+  // IMPORTANT: don't use useSearchParams() here; it requires a Suspense boundary and breaks Vercel prerender.
+  const [safeRedirect, setSafeRedirect] = useState('');
   const [authMode, setAuthMode] = useState<'login' | 'signup'>('signup'); // Add auth mode state
   const [currentStep, setCurrentStep] = useState(1);
   const [formData, setFormData] = useState({
@@ -86,6 +85,16 @@ export default function RegisterPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [showPasswordConfirm, setShowPasswordConfirm] = useState(false);
   const [showLoginPassword, setShowLoginPassword] = useState(false);
+
+  useEffect(() => {
+    try {
+      const sp = new URLSearchParams(window.location.search || '');
+      const redirectParam = sp.get('redirect') || '';
+      setSafeRedirect(redirectParam.startsWith('/') ? redirectParam : '');
+    } catch {
+      setSafeRedirect('');
+    }
+  }, []);
   
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value, type } = e.target;
