@@ -1414,6 +1414,26 @@ def validate_purchase_rules(user, lead):
             'reason': 'Only providers can purchase leads',
             'code': 'NOT_A_PROVIDER'
         }
+
+    # Rule 6: Provider must be verified to purchase/unlock leads (premium does NOT bypass verification)
+    try:
+        profile = user.provider_profile
+        if getattr(profile, 'verification_status', None) != 'verified':
+            return {
+                'valid': False,
+                'reason': 'Your account is not verified yet. Please upload your documents and wait for admin approval before purchasing leads.',
+                'code': 'PROVIDER_NOT_VERIFIED',
+                'details': {
+                    'verification_status': getattr(profile, 'verification_status', None)
+                },
+                'help_text': 'Go to your dashboard → Settings → Verification Documents, upload your documents, then wait for approval.'
+            }
+    except Exception:
+        return {
+            'valid': False,
+            'reason': 'Provider profile missing. Please complete your provider profile before purchasing leads.',
+            'code': 'PROVIDER_PROFILE_MISSING'
+        }
     
     logger.info("✅ All validation rules passed")
     return {'valid': True}

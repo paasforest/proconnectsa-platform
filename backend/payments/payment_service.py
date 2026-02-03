@@ -74,6 +74,10 @@ class PaymentService:
         
         provider = user.provider_profile
 
+        # SECURITY/BUSINESS: provider must be verified to purchase leads (premium does NOT bypass verification)
+        if getattr(provider, "verification_status", None) != "verified":
+            raise ValueError("Your account is not verified yet. Please upload your documents and wait for admin approval before purchasing leads.")
+
         # Premium listing: FREE leads while active (no credit deductions)
         is_premium_active = False
         try:

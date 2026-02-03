@@ -76,6 +76,20 @@ def unlock_lead(request, lead_id):
     SECURITY: Only providers assigned to the lead can unlock it
     """
     try:
+        # Only verified providers can unlock leads (premium does NOT bypass verification)
+        if request.user.user_type != 'provider':
+            return Response({'error': 'Only providers can unlock leads'}, status=403)
+        try:
+            profile = request.user.provider_profile
+        except Exception:
+            return Response({'error': 'Provider profile not found'}, status=400)
+        if getattr(profile, 'verification_status', None) != 'verified':
+            return Response({
+                'error': 'Your account is not verified yet.',
+                'message': 'Please upload your documents and wait for admin approval before unlocking leads.',
+                'code': 'PROVIDER_NOT_VERIFIED'
+            }, status=403)
+
         # Get user wallet
         wallet = get_object_or_404(Wallet, user=request.user)
         
