@@ -8,8 +8,110 @@ from django.conf import settings
 
 from .models import Wallet, WalletTransaction
 from backend.utils.sendgrid_service import sendgrid_service
+from backend.payments.models import DepositRequest, TransactionStatus
+from datetime import timedelta
 
 logger = logging.getLogger(__name__)
+
+def _activate_premium_listing_from_deposit(deposit: DepositRequest):
+    """
+    Activate premium listing on the provider profile once a PREMIUM deposit is detected.
+    Premium listing gives FREE lead unlocks while active.
+    """
+    provider = deposit.account.user.provider_profile
+
+    notes = (deposit.verification_notes or "").lower()
+    plan_type = "monthly" if "monthly" in notes else ("lifetime" if "lifetime" in notes else None)
+
+    # Fallback based on amount if plan_type wasn't captured in notes
+    if not plan_type:
+        try:
+            amt = float(deposit.amount)
+            if abs(amt - 299.0) < 1.0:
+                plan_type = "monthly"
+            elif abs(amt - 2990.0) < 5.0:
+                plan_type = "lifetime"
+        except Exception:
+            plan_type = "monthly"
+
+    now = timezone.now()
+    provider.is_premium_listing = True
+    provider.premium_listing_started_at = now
+    provider.premium_listing_payment_reference = deposit.reference_number or deposit.bank_reference or ""
+    if plan_type == "lifetime":
+        provider.premium_listing_expires_at = None
+    else:
+        provider.premium_listing_expires_at = now + timedelta(days=30)
+
+    provider.save(update_fields=[
+        "is_premium_listing",
+        "premium_listing_started_at",
+        "premium_listing_expires_at",
+        "premium_listing_payment_reference",
+    ])
+
+def _process_deposit_request_match(deposit: DepositRequest, bank_tx: dict):
+    """
+    Mark a pending DepositRequest as completed when we see a matching bank transaction.
+    Handles both credit top-ups and premium listing deposits.
+    """
+    if deposit.status != TransactionStatus.PENDING:
+        return False
+
+    ref = (bank_tx.get("reference") or "").strip()
+    bank_tx_id = bank_tx.get("id") or ""
+
+    # Mark deposit as completed + attach bank txn id for dedupe/tracing
+    deposit.status = TransactionStatus.COMPLETED
+    deposit.processed_at = timezone.now()
+    deposit.is_auto_verified = True
+    deposit.bank_reference = bank_tx_id or ref
+    deposit.verification_notes = (deposit.verification_notes or "") + f"\nAuto-reconciled from bank tx: {bank_tx_id}"
+    deposit.save(update_fields=[
+        "status",
+        "processed_at",
+        "is_auto_verified",
+        "bank_reference",
+        "verification_notes",
+    ])
+
+    # Premium listing deposits: no credits, activate premium listing
+    if (deposit.credits_to_activate or 0) == 0 and "premium listing request" in (deposit.verification_notes or "").lower():
+        _activate_premium_listing_from_deposit(deposit)
+        try:
+            sendgrid_service.send_email(
+                deposit.account.user.email,
+                "Premium listing activated",
+                f"<p>Your premium listing payment was detected and your premium listing is now active.</p><p>Reference: <strong>{ref}</strong></p>",
+                f"Your premium listing payment was detected and your premium listing is now active.\nReference: {ref}",
+            )
+        except Exception as e:
+            logger.warning(f"Failed to send premium activation email: {e}")
+        return True
+
+    # Credit top-up deposit requests: activate credits in wallet like normal reconciliation
+    try:
+        wallet, _ = Wallet.objects.get_or_create(user=deposit.account.user)
+        credits_added = int(deposit.credits_to_activate or 0)
+        if credits_added > 0:
+            wallet.credits += credits_added
+            wallet.save(update_fields=["credits"])
+
+            WalletTransaction.objects.create(
+                wallet=wallet,
+                amount=Decimal(str(bank_tx.get("amount", deposit.amount))),
+                credits=credits_added,
+                transaction_type="deposit",
+                reference=f"DEP_{timezone.now().strftime('%Y%m%d%H%M%S')}_{wallet.customer_code}",
+                bank_reference=bank_tx_id,
+                status="confirmed",
+                description=f"Auto-reconciled deposit for deposit request {deposit.reference_number}",
+                confirmed_at=timezone.now(),
+            )
+    except Exception as e:
+        logger.error(f"Failed to apply credits for deposit request {deposit.reference_number}: {e}")
+
+    return True
 
 @shared_task
 def reconcile_bank_deposits():
@@ -32,12 +134,34 @@ def reconcile_bank_deposits():
         
         for bank_tx in bank_transactions:
             try:
-                # Extract customer code from reference
-                customer_code = bank_tx['reference'].strip()
-                
-                # Validate customer code format (should start with CUS)
+                # Extract reference from bank transaction
+                reference = (bank_tx.get('reference') or '').strip()
+                if not reference:
+                    unmatched_count += 1
+                    continue
+
+                # First: try to match a pending DepositRequest by reference_number.
+                # This supports PREMIUM... references and any other DepositRequest-driven payments.
+                matching_deposit = DepositRequest.objects.filter(
+                    reference_number=reference,
+                    status=TransactionStatus.PENDING
+                ).select_related("account", "account__user").first()
+
+                if matching_deposit:
+                    # Dedupe using bank tx id
+                    bank_tx_id = bank_tx.get("id")
+                    if bank_tx_id and DepositRequest.objects.filter(bank_reference=bank_tx_id).exists():
+                        logger.info(f"Bank tx {bank_tx_id} already linked to a deposit request, skipping")
+                        continue
+                    _process_deposit_request_match(matching_deposit, bank_tx)
+                    reconciled_count += 1
+                    logger.info(f"✅ Reconciled deposit request {matching_deposit.reference_number} for {matching_deposit.account.user.email}")
+                    continue
+
+                # Otherwise: treat reference as a wallet customer code (CUS...)
+                customer_code = reference
                 if not customer_code.startswith('CUS'):
-                    logger.warning(f"Invalid customer code format: {customer_code}")
+                    logger.warning(f"Unmatched bank reference (not CUS and no DepositRequest match): {customer_code}")
                     unmatched_count += 1
                     continue
                 

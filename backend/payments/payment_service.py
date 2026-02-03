@@ -72,27 +72,39 @@ class PaymentService:
         if not hasattr(user, 'provider_profile'):
             raise ValueError("Only providers can purchase leads")
         
+        provider = user.provider_profile
+
+        # Premium listing: FREE leads while active (no credit deductions)
+        is_premium_active = False
+        try:
+            is_premium_active = bool(getattr(provider, "is_premium_listing_active"))
+        except Exception:
+            is_premium_active = False
+
         # Use simple fixed pricing for credits (1-3 credits max)
-        credit_cost = assignment.credit_cost if assignment else 1
+        credit_cost = 0 if is_premium_active else (assignment.credit_cost if assignment else 1)
         
-        # Ensure reasonable pricing (1-3 credits = R50-R150)
-        credit_cost = max(1, min(credit_cost, 3))
+        # Ensure reasonable pricing (1-3 credits = R50-R150) when not premium
+        if not is_premium_active:
+            credit_cost = max(1, min(credit_cost, 3))
         
         # Check if user can afford the lead
-        provider = user.provider_profile
-        if provider.credit_balance < credit_cost:
+        if not is_premium_active and provider.credit_balance < credit_cost:
             raise ValueError(f"Insufficient credits. Need {credit_cost}, have {provider.credit_balance}")
         
         with transaction.atomic():
-            # Deduct credits from both provider profile and wallet
-            provider.credit_balance -= credit_cost
-            provider.save(update_fields=['credit_balance'])
-            
-            # Also update wallet credits for consistency
-            from backend.users.models import Wallet
-            wallet, created = Wallet.objects.get_or_create(user=user)
-            wallet.credits -= credit_cost
-            wallet.save(update_fields=['credits'])
+            previous_balance = provider.credit_balance
+
+            if not is_premium_active:
+                # Deduct credits from both provider profile and wallet
+                provider.credit_balance -= credit_cost
+                provider.save(update_fields=['credit_balance'])
+                
+                # Also update wallet credits for consistency
+                from backend.users.models import Wallet
+                wallet, _created = Wallet.objects.get_or_create(user=user)
+                wallet.credits -= credit_cost
+                wallet.save(update_fields=['credits'])
             
             # Create transaction record
             account = self.get_or_create_payment_account(user)
@@ -101,7 +113,11 @@ class PaymentService:
                 amount=-credit_cost,  # Negative for deduction
                 transaction_type=TransactionType.LEAD_PURCHASE,
                 status=TransactionStatus.COMPLETED,
-                description=f"Lead purchase - {lead.title} ({credit_cost} credits)",
+                description=(
+                    f"Lead purchase (Premium - FREE) - {lead.title} (0 credits)"
+                    if is_premium_active
+                    else f"Lead purchase - {lead.title} ({credit_cost} credits)"
+                ),
                 reference=str(lead.id)
             )
             
@@ -119,7 +135,7 @@ class PaymentService:
             NotificationConsumer.send_balance_update(
                 user_id=user.id,
                 new_balance=provider.credit_balance,
-                previous_balance=provider.credit_balance + credit_cost
+                previous_balance=previous_balance
             )
             
             return {
