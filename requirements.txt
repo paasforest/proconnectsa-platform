@@ -6,7 +6,7 @@ django-filter==23.3
 django-extensions==3.2.3
 
 # Database
-psycopg2-binary==2.9.7
+psycopg2-binary==2.9.10
 
 # Authentication and security
 djangorestframework-simplejwt==5.3.0
@@ -77,5 +77,4 @@ joblib==1.3.2
 # Payment processing
 paypalrestsdk==1.13.3
 
-psycopg2-binary==2.9.10
-python-decouple==3.8
+# (deduped) psycopg2-binary + python-decouple already pinned above
