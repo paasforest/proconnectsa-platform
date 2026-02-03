@@ -12,6 +12,16 @@ from .models import ProviderProfile, User
 from backend.leads.models import ServiceCategory
 
 
+CATEGORY_SLUG_ALIASES = {
+    # legacy -> canonical
+    "cctv": "cctv-installation",
+    "electric-fence": "electric-fencing",
+    "gate": "gate-motors",
+    "gates": "gate-motors",
+    "solar": "solar-installation",
+}
+
+
 def _provider_public_dict(p: ProviderProfile):
     u = p.user
     # Get service category names from slugs
@@ -84,12 +94,16 @@ def public_providers_list(request):
     )
 
     if category_slug:
-        qs = qs.filter(service_categories__contains=[category_slug])
+        # Normalize incoming slug (be tolerant of legacy/short forms)
+        cat = slugify(str(category_slug).strip())
+        cat = CATEGORY_SLUG_ALIASES.get(cat, cat)
+        qs = qs.filter(service_categories__contains=[cat])
     if city:
         # Providers don't always store location consistently (some put the main city in `suburb`).
         # Match either field to make city filters on the frontend behave as users expect.
         city_clean = city.strip()
-        qs = qs.filter(Q(user__city__iexact=city_clean) | Q(user__suburb__iexact=city_clean))
+        # Use icontains so "Cape Town CBD" still matches "Cape Town", etc.
+        qs = qs.filter(Q(user__city__icontains=city_clean) | Q(user__suburb__icontains=city_clean))
 
     qs = qs.annotate(
         premium_active=Case(
