@@ -6,6 +6,7 @@ from django.core.paginator import Paginator
 from django.utils.text import slugify
 from django.utils import timezone
 from django.db.models import Case, When, Value, BooleanField
+from django.db.models import Q
 
 from .models import ProviderProfile, User
 from backend.leads.models import ServiceCategory
@@ -71,8 +72,14 @@ def public_providers_list(request):
     page = int(request.GET.get('page', 1))
     page_size = int(request.GET.get('page_size', 20))
 
-    qs = ProviderProfile.objects.filter(verification_status__in=['verified', 'pending']).exclude(
-        verification_status__in=['rejected', 'suspended']
+    now = timezone.now()
+    premium_active_q = Q(is_premium_listing=True) & (
+        Q(premium_listing_expires_at__isnull=True) | Q(premium_listing_expires_at__gt=now)
+    )
+    # Show verified/pending providers, plus any active-premium providers (grandfather/testing),
+    # while always excluding rejected/suspended.
+    qs = ProviderProfile.objects.exclude(verification_status__in=['rejected', 'suspended']).filter(
+        Q(verification_status__in=['verified', 'pending']) | premium_active_q
     )
 
     if category_slug:
@@ -80,7 +87,6 @@ def public_providers_list(request):
     if city:
         qs = qs.filter(user__city__iexact=city)
 
-    now = timezone.now()
     qs = qs.annotate(
         premium_active=Case(
             When(is_premium_listing=True, premium_listing_expires_at__isnull=True, then=Value(True)),
@@ -125,12 +131,15 @@ def public_provider_detail(request, provider_id):
     Public: provider profile detail (verified or pending; excludes rejected/suspended)
     """
     try:
-        p = ProviderProfile.objects.select_related('user').get(
-            id=provider_id,
-            verification_status__in=['verified', 'pending'],
+        now = timezone.now()
+        premium_active_q = Q(is_premium_listing=True) & (
+            Q(premium_listing_expires_at__isnull=True) | Q(premium_listing_expires_at__gt=now)
         )
-        if p.verification_status in ['rejected', 'suspended']:
-            return Response({'error': 'Provider not found'}, status=status.HTTP_404_NOT_FOUND)
+        p = ProviderProfile.objects.select_related('user').exclude(
+            verification_status__in=['rejected', 'suspended']
+        ).get(
+            Q(id=provider_id) & (Q(verification_status__in=['verified', 'pending']) | premium_active_q)
+        )
         return Response(_provider_public_dict(p))
     except ProviderProfile.DoesNotExist:
         return Response({'error': 'Provider not found'}, status=status.HTTP_404_NOT_FOUND)
