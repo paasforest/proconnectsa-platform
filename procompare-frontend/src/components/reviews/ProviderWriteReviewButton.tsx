@@ -89,12 +89,14 @@ export default function ProviderWriteReviewButton({
   if (!isLoading && token && !isClient) {
     return (
       <div className="space-y-2">
-        <Button variant={variant} className={className} disabled>
-          <Star className="h-4 w-4 mr-2" />
-          Write a Review
+        <Button asChild variant={variant} className={className}>
+          <Link href={`/providers/${providerProfileId}/review`}>
+            <Star className="h-4 w-4 mr-2" />
+            Write a Review
+          </Link>
         </Button>
         <p className="text-xs text-gray-500">
-          Only clients can write reviews.
+          Only clients can submit reviews. If you completed a job, sign in using the client account you used to request the service.
         </p>
       </div>
     )
@@ -104,7 +106,7 @@ export default function ProviderWriteReviewButton({
   const canReview = (eligible?.length || 0) > 0
   return (
     <div className="space-y-2">
-      <Button asChild variant={variant} className={className} disabled={loading || !canReview}>
+      <Button asChild variant={variant} className={className}>
         <Link href={`/providers/${providerProfileId}/review`}>
           <Star className="h-4 w-4 mr-2" />
           {loading ? 'Checking…' : 'Write a Review'}
