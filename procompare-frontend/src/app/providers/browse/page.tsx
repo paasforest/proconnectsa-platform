@@ -121,7 +121,9 @@ export default async function ProvidersBrowsePage({
                       </div>
                       <div className="flex items-center gap-2">
                         {p.is_premium_listing_active && (
-                          <Badge className="bg-[#FFD700] text-[#4a3500] border border-[#D4AF37] hover:bg-[#FFD700]">
+                          <Badge
+                            className="border border-amber-700/50 bg-[linear-gradient(135deg,#FFF3B0_0%,#FFD700_42%,#D4AF37_100%)] text-amber-950 shadow-sm ring-1 ring-amber-400/30 shadow-[inset_0_1px_0_rgba(255,255,255,0.65)] hover:bg-[linear-gradient(135deg,#FFF3B0_0%,#FFD700_42%,#D4AF37_100%)]"
+                          >
                             Premium
                           </Badge>
                         )}
