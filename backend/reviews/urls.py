@@ -14,5 +14,7 @@ urlpatterns = [
     # Provider reviews by profile id (public - for frontend /providers/[id]/reviews)
     path('provider-by-profile/<int:profile_id>/', views.provider_reviews_by_profile_view, name='provider-reviews-by-profile'),
     path('provider-by-profile/<int:profile_id>/stats/', views.review_stats_by_profile_view, name='provider-review-stats-by-profile'),
+    # Eligible review assignments (authenticated client only)
+    path('provider-by-profile/<int:profile_id>/eligible/', views.eligible_review_assignments_by_profile_view, name='provider-review-eligible-by-profile'),
 ]
 

@@ -8,6 +8,7 @@ from .serializers import (
     ReviewSearchSerializer
 )
 from backend.users.models import ProviderProfile
+from backend.leads.models import LeadAssignment
 
 
 class ReviewListView(generics.ListAPIView):
@@ -116,6 +117,46 @@ def provider_reviews_by_profile_view(request, profile_id):
     ).order_by('-created_at')
     serializer = ReviewSerializer(reviews, many=True)
     return Response(serializer.data)
+
+
+@api_view(['GET'])
+@permission_classes([permissions.IsAuthenticated])
+def eligible_review_assignments_by_profile_view(request, profile_id):
+    """
+    Returns lead assignments the current client is allowed to review for a given provider profile.
+    This is used to show a "Write a review" button only when the client has completed a job with the provider.
+    """
+    if not request.user.is_client:
+        return Response({'error': 'Only clients can review providers'}, status=status.HTTP_403_FORBIDDEN)
+
+    try:
+        profile = ProviderProfile.objects.select_related('user').get(id=profile_id)
+        provider_user_id = profile.user_id
+    except ProviderProfile.DoesNotExist:
+        return Response({'error': 'Provider not found'}, status=status.HTTP_404_NOT_FOUND)
+
+    qs = LeadAssignment.objects.filter(
+        provider_id=provider_user_id,
+        lead__client_id=request.user.id,
+        status='won',
+    ).select_related('lead').order_by('-updated_at')
+
+    # Exclude assignments already reviewed (Review is OneToOne)
+    qs = qs.exclude(review__isnull=False)
+
+    data = [
+        {
+            'lead_assignment_id': str(a.id),
+            'lead_id': str(a.lead_id),
+            'lead_title': a.lead.title,
+            'status': a.status,
+            'won_job': a.won_job,
+            'updated_at': a.updated_at.isoformat() if a.updated_at else None,
+        }
+        for a in qs
+    ]
+
+    return Response({'eligible': data, 'count': len(data)})
 
 
 @api_view(['GET'])

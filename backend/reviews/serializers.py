@@ -82,13 +82,31 @@ class ReviewCreateSerializer(serializers.ModelSerializer):
         ]
     
     def validate_lead_assignment_id(self, value):
-        """Validate lead assignment exists and is completed"""
+        """
+        Validate lead assignment exists and is eligible for review.
+
+        Anti-fake-review rules:
+        - Only the *client who created the lead* can review it
+        - Only when the provider has *won* the job (represents completion for now)
+        - Only one review per assignment (OneToOne)
+        """
         from backend.leads.models import LeadAssignment
         
         try:
             assignment = LeadAssignment.objects.get(id=value)
-            if assignment.status not in ['won', 'completed']:
-                raise serializers.ValidationError("Can only review completed assignments")
+            request = self.context.get('request')
+            if not request or not request.user or not request.user.is_authenticated:
+                raise serializers.ValidationError("Authentication required")
+
+            # Enforce that ONLY the actual client can review this job
+            if assignment.lead.client_id != request.user.id:
+                raise serializers.ValidationError("You can only review jobs that you requested")
+
+            # Only allow reviews after job is won (completion gate)
+            # NOTE: LeadAssignment does not currently have a 'completed' status.
+            if assignment.status != 'won':
+                raise serializers.ValidationError("You can only review after the job is marked as won/completed")
+
             if hasattr(assignment, 'review'):
                 raise serializers.ValidationError("Review already exists for this assignment")
             return value
@@ -101,8 +119,11 @@ class ReviewCreateSerializer(serializers.ModelSerializer):
         
         assignment = LeadAssignment.objects.get(id=lead_assignment_id)
         validated_data['lead_assignment'] = assignment
-        validated_data['client'] = assignment.lead.client
+        request = self.context.get('request')
+        validated_data['client'] = request.user if request and request.user and request.user.is_authenticated else assignment.lead.client
         validated_data['provider'] = assignment.provider
+        # Assignment-backed reviews are inherently "verified" (job relationship proven in DB)
+        validated_data['is_verified'] = True
         
         return super().create(validated_data)
 
