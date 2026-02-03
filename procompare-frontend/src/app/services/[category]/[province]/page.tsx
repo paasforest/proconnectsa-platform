@@ -12,6 +12,58 @@ export const dynamic = "force-dynamic"
 
 type Props = { params: Promise<{ category: string; province: string }> }
 
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || "https://api.proconnectsa.co.za"
+
+type PublicProvider = {
+  id: string
+  business_name: string
+  city: string | null
+  suburb: string | null
+  service_categories: string[] | null
+  average_rating: number
+  total_reviews: number
+  verification_status: string
+  is_premium_listing_active?: boolean
+}
+
+async function fetchTopVerifiedProvidersForProvinceService(args: {
+  categorySlug: string
+  provinceTopCities: string[]
+  limit: number
+}): Promise<PublicProvider[]> {
+  const { categorySlug, provinceTopCities, limit } = args
+
+  const results: PublicProvider[] = []
+  const seen = new Set<string>()
+
+  // Query by city because our public providers endpoint supports city filtering.
+  // We iterate top cities for the province to approximate province-wide coverage.
+  for (const city of provinceTopCities) {
+    if (results.length >= limit) break
+    try {
+      const url = `${API_BASE}/api/public/providers/?category=${encodeURIComponent(categorySlug)}&city=${encodeURIComponent(
+        city
+      )}&page=1&page_size=${Math.max(6, limit)}`
+      const res = await fetch(url, { next: { revalidate: 300 } })
+      if (!res.ok) continue
+      const data = await res.json()
+      const providers: PublicProvider[] = Array.isArray(data?.results) ? data.results : []
+
+      for (const p of providers) {
+        if (results.length >= limit) break
+        if (!p?.id || seen.has(p.id)) continue
+        if ((p.verification_status || "").toLowerCase() !== "verified") continue
+        seen.add(p.id)
+        results.push(p)
+      }
+    } catch {
+      // ignore and keep trying other cities
+    }
+  }
+
+  return results
+}
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { category, province } = await params
   const categories = await fetchServiceCategories()
@@ -48,6 +100,11 @@ export default async function ServiceProvincePage({ params }: Props) {
   const serviceName = c?.name || category
   const key = `${category}/${province}`
   const custom = SEO_SERVICE_PROVINCE_PAGES[key]
+  const topProviders = await fetchTopVerifiedProvidersForProvinceService({
+    categorySlug: category,
+    provinceTopCities: p.topCities || [],
+    limit: 6,
+  })
 
   const faq = [
     {
@@ -143,6 +200,67 @@ export default async function ServiceProvincePage({ params }: Props) {
                       </span>
                     ))}
                   </div>
+                </div>
+
+                <div className="border rounded-2xl p-6 bg-white">
+                  <div className="text-lg font-semibold text-gray-900 mb-2">
+                    Top verified {serviceName.toLowerCase()} pros in {p.name}
+                  </div>
+                  <p className="text-gray-600 text-sm mb-4">
+                    These are verified professionals currently visible in our public directory for {p.name}. Requesting quotes is still free and
+                    there’s no obligation to hire.
+                  </p>
+
+                  {topProviders.length === 0 ? (
+                    <div className="text-sm text-gray-700">
+                      We’re growing our network of verified providers in {p.name}. Submit your request and we’ll route it to matching pros as they
+                      become available.
+                      <div className="mt-3">
+                        <Link href={`/services/${category}`} className="text-emerald-700 font-semibold hover:text-emerald-800">
+                          Back to {serviceName} →
+                        </Link>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      {topProviders.map((pro) => (
+                        <div key={pro.id} className="rounded-xl border bg-gray-50 p-4">
+                          <div className="flex items-start justify-between gap-3">
+                            <div>
+                              <div className="font-semibold text-gray-900">{pro.business_name}</div>
+                              <div className="text-sm text-gray-600 mt-1">
+                                {[pro.suburb, pro.city].filter(Boolean).join(", ")}
+                              </div>
+                              <div className="text-sm text-gray-700 mt-2">
+                                <span className="font-medium">{typeof pro.average_rating === "number" ? pro.average_rating.toFixed(1) : "0.0"}</span>{" "}
+                                / 5.0 · {pro.total_reviews || 0} {(pro.total_reviews || 0) === 1 ? "review" : "reviews"}
+                              </div>
+                            </div>
+                            <div className="text-xs font-semibold px-2.5 py-1 rounded-full bg-green-100 text-green-800 border border-green-300">
+                              Verified
+                            </div>
+                          </div>
+                          <div className="mt-3 flex items-center gap-4 text-sm">
+                            <Link href={`/providers/${pro.id}`} className="text-emerald-700 font-semibold hover:text-emerald-800">
+                              View profile →
+                            </Link>
+                            <Link href={`/providers/${pro.id}/reviews`} className="text-gray-700 font-semibold hover:text-gray-900">
+                              Reviews →
+                            </Link>
+                          </div>
+                        </div>
+                      ))}
+
+                      <div className="pt-2">
+                        <Link
+                          href={`/providers/browse?category=${encodeURIComponent(category)}`}
+                          className="text-emerald-700 font-semibold hover:text-emerald-800"
+                        >
+                          Browse more {serviceName.toLowerCase()} pros →
+                        </Link>
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 <div className="border rounded-2xl p-6 bg-white">
