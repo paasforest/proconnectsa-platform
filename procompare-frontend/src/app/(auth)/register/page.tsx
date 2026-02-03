@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { redirectToDashboard } from '@/lib/auth-utils';
 import ForgotPasswordModal from '@/components/auth/ForgotPasswordModal';
@@ -37,6 +37,9 @@ const majorCities = [
 
 export default function RegisterPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const redirectParam = searchParams?.get('redirect') || '';
+  const safeRedirect = redirectParam.startsWith('/') ? redirectParam : '';
   const [authMode, setAuthMode] = useState<'login' | 'signup'>('signup'); // Add auth mode state
   const [currentStep, setCurrentStep] = useState(1);
   const [formData, setFormData] = useState({
@@ -218,8 +221,8 @@ export default function RegisterPage() {
         // Get user type from response and redirect
         const userType = data.user?.user_type;
         
-        // Route to appropriate dashboard based on user type with a small delay to show the message
-        const dashboardPath = redirectToDashboard(userType);
+        // Redirect: prefer ?redirect=/somewhere (if present and safe), else route by user type.
+        const dashboardPath = safeRedirect || redirectToDashboard(userType);
         setTimeout(() => {
         window.location.replace(dashboardPath);
         }, 2000); // Show message for 2 seconds before redirect

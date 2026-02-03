@@ -10,6 +10,7 @@ import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { useAuth } from "@/components/AuthProvider";
 import Link from "next/link";
+import ProviderWriteReviewButton from "@/components/reviews/ProviderWriteReviewButton";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "https://api.proconnectsa.co.za";
 
@@ -373,21 +374,21 @@ export default function ProviderReviewsPage() {
                 </CardContent>
               </Card>
 
-              {/* Write Review CTA */}
+              {/* Write Review CTA (eligibility gated) */}
               <Card className="bg-gradient-to-br from-blue-50 to-indigo-100 border-blue-200">
                 <CardContent className="p-6">
                   <h3 className="font-semibold text-gray-900 mb-2">
                     Worked with {provider.business_name}?
                   </h3>
                   <p className="text-sm text-gray-600 mb-4">
-                    Share your experience to help others make informed decisions.
+                    Only clients who completed a job with this provider can leave a review. This prevents fake reviews.
                   </p>
-                  <Button asChild className="w-full bg-blue-600 hover:bg-blue-700">
-                    <Link href={`/providers/${params.id}/review`}>
-                      Write a Review
-                      <Star className="ml-2 h-4 w-4" />
-                    </Link>
-                  </Button>
+                  <ProviderWriteReviewButton
+                    providerProfileId={params.id}
+                    providerName={provider.business_name}
+                    variant="default"
+                    className="w-full bg-blue-600 hover:bg-blue-700"
+                  />
                 </CardContent>
               </Card>
 

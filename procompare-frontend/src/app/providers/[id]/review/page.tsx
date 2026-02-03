@@ -45,7 +45,7 @@ export default function ProviderReviewPage() {
     
     if (!user || !token) {
       toast.error("Please log in to write a review");
-      router.push(`/login?redirect=/providers/${params.id}/review`);
+      router.push(`/register?redirect=/providers/${params.id}/review`);
       return;
     }
 
@@ -69,38 +69,46 @@ export default function ProviderReviewPage() {
     fetchProvider();
   }, [params.id, user, token, authLoading, router]);
 
-  const [completedJobs, setCompletedJobs] = useState<any[]>([]);
-  const [loadingJobs, setLoadingJobs] = useState(true);
+  type EligibleAssignment = {
+    lead_assignment_id: string;
+    lead_id: string;
+    lead_title: string;
+  }
+  const [eligibleAssignments, setEligibleAssignments] = useState<EligibleAssignment[]>([]);
+  const [loadingEligible, setLoadingEligible] = useState(true);
+  const [selectedAssignmentId, setSelectedAssignmentId] = useState<string>("");
 
   useEffect(() => {
     if (!user || !token || !provider) return;
 
-    // Check for completed jobs with this provider
-    const fetchCompletedJobs = async () => {
+    const fetchEligible = async () => {
       try {
-        const res = await fetch(`${API_BASE}/api/reviews/`, {
+        setLoadingEligible(true);
+        const res = await fetch(`/api/backend-proxy/reviews/provider-by-profile/${params.id}/eligible`, {
+          method: 'GET',
           headers: {
             'Authorization': `Token ${token}`,
-            'Content-Type': 'application/json'
           }
         });
-        
-        if (res.ok) {
-          const reviews = await res.json();
-          // Filter for jobs with this provider that don't have reviews yet
-          const jobsWithProvider = reviews.filter((r: any) => 
-            r.provider?.id === parseInt(params.id) || r.provider?.id === params.id
-          );
-          setCompletedJobs(jobsWithProvider);
+
+        if (!res.ok) {
+          setEligibleAssignments([]);
+          return;
         }
+
+        const data = await res.json();
+        const items = Array.isArray(data?.eligible) ? data.eligible : [];
+        setEligibleAssignments(items);
+        setSelectedAssignmentId(items?.[0]?.lead_assignment_id || "");
       } catch (error) {
-        console.error("Error fetching completed jobs:", error);
+        console.error("Error fetching eligible assignments:", error);
+        setEligibleAssignments([]);
       } finally {
-        setLoadingJobs(false);
+        setLoadingEligible(false);
       }
     };
 
-    fetchCompletedJobs();
+    fetchEligible();
   }, [user, token, provider, params.id]);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -111,8 +119,8 @@ export default function ProviderReviewPage() {
       return;
     }
 
-    if (completedJobs.length === 0) {
-      toast.error("You need to complete a job with this provider before you can leave a review");
+    if (!selectedAssignmentId) {
+      toast.error("You can only review after a completed job with this provider");
       return;
     }
 
@@ -134,17 +142,8 @@ export default function ProviderReviewPage() {
     setSubmitting(true);
 
     try {
-      // Find the first completed job without a review
-      const jobToReview = completedJobs.find((job: any) => !job.review);
-      
-      if (!jobToReview) {
-        toast.error("You have already reviewed all your completed jobs with this provider");
-        setSubmitting(false);
-        return;
-      }
-
       const reviewData = {
-        lead_assignment: jobToReview.lead_assignment?.id || jobToReview.id,
+        lead_assignment_id: selectedAssignmentId,
         rating: rating,
         title: title.trim(),
         comment: comment.trim(),
@@ -156,7 +155,7 @@ export default function ProviderReviewPage() {
         job_completed: true
       };
 
-      const res = await fetch(`${API_BASE}/api/reviews/create/`, {
+      const res = await fetch(`/api/backend-proxy/reviews/create`, {
         method: 'POST',
         headers: {
           'Authorization': `Token ${token}`,
@@ -180,7 +179,7 @@ export default function ProviderReviewPage() {
     }
   };
 
-  if (authLoading || loading || loadingJobs) {
+  if (authLoading || loading || loadingEligible) {
     return (
       <div className="min-h-screen flex flex-col">
         <ClientHeader />
@@ -209,9 +208,7 @@ export default function ProviderReviewPage() {
     );
   }
 
-  // Check if user has completed jobs with this provider
-  const hasCompletedJobs = completedJobs.length > 0;
-  const hasUnreviewedJobs = completedJobs.some((job: any) => !job.review);
+  const hasEligible = eligibleAssignments.length > 0;
 
   const location = [provider.suburb, provider.city].filter(Boolean).join(", ") || "Location not specified";
 
@@ -234,7 +231,7 @@ export default function ProviderReviewPage() {
             <p className="text-sm text-gray-500 mt-1">{location}</p>
           </div>
 
-          {!hasCompletedJobs ? (
+          {!hasEligible ? (
             <Card>
               <CardHeader>
                 <CardTitle>Review Not Available</CardTitle>
@@ -274,28 +271,6 @@ export default function ProviderReviewPage() {
                 </div>
               </CardContent>
             </Card>
-          ) : !hasUnreviewedJobs ? (
-            <Card>
-              <CardHeader>
-                <CardTitle>All Jobs Reviewed</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-                  <div className="flex items-start gap-2">
-                    <AlertCircle className="h-5 w-5 text-green-600 mt-0.5" />
-                    <div className="text-sm text-green-800">
-                      <p className="font-semibold mb-1">Thank You!</p>
-                      <p>You have already reviewed all your completed jobs with {provider.business_name}.</p>
-                    </div>
-                  </div>
-                </div>
-                <Button asChild variant="outline" className="w-full">
-                  <Link href={`/providers/${params.id}`}>
-                    Back to Profile
-                  </Link>
-                </Button>
-              </CardContent>
-            </Card>
           ) : (
           <Card>
             <CardHeader>
@@ -306,6 +281,25 @@ export default function ProviderReviewPage() {
             </CardHeader>
             <CardContent>
               <form onSubmit={handleSubmit} className="space-y-6">
+                {/* Select Job */}
+                <div className="space-y-2">
+                  <Label className="text-lg font-semibold">Which job are you reviewing?</Label>
+                  <select
+                    value={selectedAssignmentId}
+                    onChange={(e) => setSelectedAssignmentId(e.target.value)}
+                    className="w-full px-3 py-2 border rounded-md bg-white"
+                  >
+                    {eligibleAssignments.map((a) => (
+                      <option key={a.lead_assignment_id} value={a.lead_assignment_id}>
+                        {a.lead_title}
+                      </option>
+                    ))}
+                  </select>
+                  <p className="text-xs text-gray-500">
+                    Only jobs you completed with this provider can be reviewed (prevents fake reviews).
+                  </p>
+                </div>
+
                 {/* Overall Rating */}
                 <div className="space-y-3">
                   <Label className="text-lg font-semibold">Overall Rating *</Label>
@@ -516,7 +510,7 @@ export default function ProviderReviewPage() {
                   </Button>
                   <Button
                     type="submit"
-                    disabled={submitting || rating === 0}
+                    disabled={submitting || rating === 0 || !selectedAssignmentId}
                     className="flex-1 bg-blue-600 hover:bg-blue-700"
                   >
                     <Send className="mr-2 h-4 w-4" />

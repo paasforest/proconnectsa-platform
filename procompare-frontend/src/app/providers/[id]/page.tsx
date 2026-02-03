@@ -16,6 +16,7 @@ import {
   Briefcase,
   Image as ImageIcon
 } from "lucide-react";
+import ProviderWriteReviewButton from "@/components/reviews/ProviderWriteReviewButton";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "https://api.proconnectsa.co.za";
 
@@ -307,6 +308,15 @@ export default async function ProviderDetailPage({ params }: { params: Promise<{
                       No Reviews Yet
                     </Button>
                   )}
+
+                  <div className="mt-3">
+                    <ProviderWriteReviewButton
+                      providerProfileId={provider.id}
+                      providerName={provider.business_name}
+                      variant="outline"
+                      className="w-full"
+                    />
+                  </div>
                 </div>
 
                 {/* Performance Metrics */}
