@@ -76,10 +76,11 @@ def public_providers_list(request):
     premium_active_q = Q(is_premium_listing=True) & (
         Q(premium_listing_expires_at__isnull=True) | Q(premium_listing_expires_at__gt=now)
     )
+    pending_with_docs_q = Q(verification_status='pending') & ~Q(verification_documents={})
     # Show verified/pending providers, plus any active-premium providers (grandfather/testing),
     # while always excluding rejected/suspended.
     qs = ProviderProfile.objects.exclude(verification_status__in=['rejected', 'suspended']).filter(
-        Q(verification_status__in=['verified', 'pending']) | premium_active_q
+        Q(verification_status='verified') | pending_with_docs_q | premium_active_q
     )
 
     if category_slug:
@@ -135,10 +136,11 @@ def public_provider_detail(request, provider_id):
         premium_active_q = Q(is_premium_listing=True) & (
             Q(premium_listing_expires_at__isnull=True) | Q(premium_listing_expires_at__gt=now)
         )
+        pending_with_docs_q = Q(verification_status='pending') & ~Q(verification_documents={})
         p = ProviderProfile.objects.select_related('user').exclude(
             verification_status__in=['rejected', 'suspended']
         ).get(
-            Q(id=provider_id) & (Q(verification_status__in=['verified', 'pending']) | premium_active_q)
+            Q(id=provider_id) & (Q(verification_status='verified') | pending_with_docs_q | premium_active_q)
         )
         return Response(_provider_public_dict(p))
     except ProviderProfile.DoesNotExist:
