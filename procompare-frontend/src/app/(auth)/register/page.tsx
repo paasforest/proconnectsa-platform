@@ -14,8 +14,18 @@ const serviceCategories = [
   'Appliance Repair', 'HVAC', 'Security', 'Landscaping', 'Pool Maintenance',
   'Construction', 'Renovations', 'Farm Fencing', 'Solar Installation',
   'PVC Installation', 'DSTV Installation', 'CCTV Installation', 'Access Control',
-  'Satellite Installation', 'Home Automation', 'Alarm Systems', 'Electric Fencing'
+  'Satellite Installation', 'Home Automation', 'Alarm Systems', 'Electric Fencing',
+  'Gate Motors'
 ];
+
+const SECURITY_SUBSERVICES = new Set([
+  'CCTV Installation',
+  'Access Control',
+  'Alarm Systems',
+  'Electric Fencing',
+  'Gate Motors',
+  'Farm Fencing',
+]);
 
 // Experience levels
 const experienceLevels = [
@@ -176,6 +186,14 @@ export default function RegisterPage() {
       }
       if (formData.service_categories.length === 0) {
         setError('Please select at least one service category');
+        return false;
+      }
+      // If Security is selected, require at least one sub-service to avoid "empty results" in client search.
+      if (
+        formData.service_categories.includes('Security') &&
+        !formData.service_categories.some((c) => SECURITY_SUBSERVICES.has(c))
+      ) {
+        setError('If you select Security, please also select at least one security sub-service (e.g. CCTV Installation, Alarm Systems, Access Control, Electric Fencing, Gate Motors).');
         return false;
       }
       if (formData.service_areas.length === 0) {
@@ -882,11 +900,22 @@ export default function RegisterPage() {
                   onChange={(e) => {
                     const value = e.target.value;
                     if (e.target.checked) {
+                      // Auto-add Security if a security sub-service is chosen.
+                      const next = new Set([...formData.service_categories, value]);
+                      if (SECURITY_SUBSERVICES.has(value)) next.add('Security');
                       setFormData({
                         ...formData,
-                        service_categories: [...formData.service_categories, value]
+                        service_categories: Array.from(next)
                       });
                     } else {
+                      // If Security is unchecked, also remove all its sub-services.
+                      if (value === 'Security') {
+                        setFormData({
+                          ...formData,
+                          service_categories: formData.service_categories.filter((c) => c !== 'Security' && !SECURITY_SUBSERVICES.has(c))
+                        });
+                        return;
+                      }
                       setFormData({
                         ...formData,
                         service_categories: formData.service_categories.filter(c => c !== value)

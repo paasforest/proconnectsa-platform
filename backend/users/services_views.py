@@ -323,6 +323,17 @@ def _sync_service_categories_json_field(provider_profile):
         for service in provider_profile.services.filter(is_active=True):
             if service.category.slug:
                 active_service_categories.add(service.category.slug)
+
+        # Add parent slugs for any selected child categories (e.g. cctv-installation -> security)
+        if active_service_categories:
+            parents = ServiceCategory.objects.filter(
+                slug__in=list(active_service_categories),
+                is_active=True,
+                parent__isnull=False,
+            ).select_related("parent").values_list("parent__slug", flat=True)
+            for p in parents:
+                if p:
+                    active_service_categories.add(p)
         
         # Update the JSON field to match Service objects
         provider_profile.service_categories = list(active_service_categories)

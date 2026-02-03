@@ -64,20 +64,38 @@ interface ProviderProfile {
 }
 
 const SERVICE_CATEGORIES = [
-  { value: 'appliance', label: 'Appliance Repair' },
+  { value: 'appliance-repair', label: 'Appliance Repair' },
   { value: 'automotive', label: 'Automotive' },
   { value: 'cleaning', label: 'Cleaning' },
+  { value: 'construction', label: 'Construction' },
   { value: 'electrical', label: 'Electrical' },
-  { value: 'general', label: 'General Maintenance' },
+  { value: 'handyman', label: 'Handyman' },
   { value: 'hvac', label: 'HVAC' },
   { value: 'landscaping', label: 'Landscaping' },
   { value: 'painting', label: 'Painting' },
-  { value: 'pool', label: 'Pool Maintenance' },
+  { value: 'pool-maintenance', label: 'Pool Maintenance' },
   { value: 'plumbing', label: 'Plumbing' },
-  { value: 'renovation', label: 'Renovation' },
+  { value: 'renovations', label: 'Renovations' },
   { value: 'roofing', label: 'Roofing' },
-  { value: 'security', label: 'Security' }
+  { value: 'security', label: 'Security' },
+  { value: 'solar-installation', label: 'Solar Installation' },
+  // Security sub-services (for reliable filtering)
+  { value: 'cctv-installation', label: 'CCTV Installation' },
+  { value: 'access-control', label: 'Access Control' },
+  { value: 'alarm-systems', label: 'Alarm Systems' },
+  { value: 'electric-fencing', label: 'Electric Fencing' },
+  { value: 'gate-motors', label: 'Gate Motors' },
+  { value: 'farm-fencing', label: 'Farm Fencing' },
 ];
+
+const SECURITY_SUBSERVICE_SLUGS = new Set([
+  'cctv-installation',
+  'access-control',
+  'alarm-systems',
+  'electric-fencing',
+  'gate-motors',
+  'farm-fencing',
+]);
 
 const CAPE_TOWN_AREAS = [
   'Cape Town CBD', 'Sea Point', 'Green Point', 'Camps Bay', 'Claremont', 'Newlands',
@@ -148,11 +166,20 @@ export default function ProfilePage() {
 
   const handleSaveProfile = async () => {
     if (!profile) return;
+
+    // Enforce Security rule on the client too (backend enforces as well).
+    if (
+      (profile.service_categories || []).includes('security') &&
+      !(profile.service_categories || []).some((s) => SECURITY_SUBSERVICE_SLUGS.has(s))
+    ) {
+      toast.error('If you select Security, please also select at least one security sub-service (e.g. CCTV Installation, Alarm Systems, Access Control, Electric Fencing, Gate Motors).');
+      return;
+    }
     
     setSaving(true);
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://api.proconnectsa.co.za'}/api/auth/profile/`, {
-        method: 'PATCH',
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://api.proconnectsa.co.za'}/api/auth/provider-profile/`, {
+        method: 'PUT',
         headers: {
           'Authorization': `Token ${token}`,
           'Content-Type': 'application/json'
@@ -244,9 +271,12 @@ export default function ProfilePage() {
     if (profile) {
       const currentCategories = profile.service_categories || [];
       if (!currentCategories.includes(category)) {
+        // Auto-add "security" if a security sub-service is chosen.
+        const next = new Set([...currentCategories, category]);
+        if (SECURITY_SUBSERVICE_SLUGS.has(category)) next.add('security');
         setProfile({
           ...profile,
-          service_categories: [...currentCategories, category]
+          service_categories: Array.from(next)
         });
       }
     }
@@ -255,6 +285,14 @@ export default function ProfilePage() {
   const removeServiceCategory = (category: string) => {
     if (profile) {
       const currentCategories = profile.service_categories || [];
+      // If removing "security", also remove any security sub-services.
+      if (category === 'security') {
+        setProfile({
+          ...profile,
+          service_categories: currentCategories.filter((c) => c !== 'security' && !SECURITY_SUBSERVICE_SLUGS.has(c))
+        });
+        return;
+      }
       setProfile({
         ...profile,
         service_categories: currentCategories.filter(c => c !== category)

@@ -50,11 +50,12 @@ urlpatterns = [
     path('2fa/initiate/', verification_views.initiate_two_factor_auth, name='initiate-2fa'),
     path('2fa/verify/', verification_views.verify_two_factor_auth, name='verify-2fa'),
     
-    # Service management endpoints
-    path('services/', views.manage_services, name='manage-services'),
-    path('services/areas/add/', views.add_service_area, name='add-service-area'),
-    path('services/areas/remove/<str:area>/', views.remove_service_area, name='remove-service-area'),
-    path('services/suggestions/', views.get_service_suggestions, name='service-suggestions'),
+    # Service preferences (writes ProviderProfile.service_categories directly)
+    # NOTE: keep this separate from "Services APIs" (Service objects CRUD) below.
+    path('service-preferences/', views.manage_services, name='manage-services'),
+    path('service-preferences/areas/add/', views.add_service_area, name='add-service-area'),
+    path('service-preferences/areas/remove/<str:area>/', views.remove_service_area, name='remove-service-area'),
+    path('service-preferences/suggestions/', views.get_service_suggestions, name='service-suggestions'),
     
     # Lead management endpoints
     path('leads/', views.LeadViewSet.as_view(), name='leads-list-create'),
@@ -90,7 +91,7 @@ urlpatterns = [
     path('my-leads/<str:lead_id>/notes/', my_leads_views.add_lead_note, name='add_lead_note'),
     path('my-leads/stats/', my_leads_views.lead_stats, name='lead_stats'),
     
-    # Services APIs
+    # Services APIs (CRUD for Service objects)
     path('services/', services_views.my_services, name='my_services'),
     path('services/add/', services_views.add_service, name='add_service'),
     path('services/<str:service_id>/', services_views.update_service, name='update_service'),

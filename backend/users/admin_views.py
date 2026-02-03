@@ -10,6 +10,7 @@ from django.db.models import Q
 import logging
 
 from .models import User, ProviderProfile
+from .service_category_utils import enforce_security_subservice_rule, normalize_service_category_slugs
 from .serializers import UserSerializer
 
 logger = logging.getLogger(__name__)
@@ -227,7 +228,15 @@ def support_user_provider_profile(request, user_id):
             }, status=status.HTTP_400_BAD_REQUEST)
         
         # Create or update provider profile
-        profile_data = request.data
+        profile_data = request.data.copy()
+
+        # Normalize service categories if provided (admins sometimes paste names/legacy slugs)
+        if 'service_categories' in profile_data:
+            normalized = normalize_service_category_slugs(profile_data.get('service_categories'), only_active=True, include_parents=True)
+            security_err = enforce_security_subservice_rule(normalized)
+            if security_err:
+                return Response({'error': security_err}, status=status.HTTP_400_BAD_REQUEST)
+            profile_data['service_categories'] = normalized
         profile, created = ProviderProfile.objects.get_or_create(
             user=user,
             defaults=profile_data

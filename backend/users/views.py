@@ -21,6 +21,11 @@ from django.contrib.auth import update_session_auth_hash
 from backend.notifications.email_service import send_welcome_email
 from .verification_service import VerificationService
 
+from .service_category_utils import (
+    enforce_security_subservice_rule,
+    normalize_service_category_slugs,
+)
+
 
 class UserRegistrationView(generics.CreateAPIView):
     """User registration endpoint"""
@@ -304,7 +309,7 @@ def manage_services(request):
         
         elif request.method == 'POST':
             # Update services
-            service_categories = request.data.get('service_categories', [])
+            raw_service_categories = request.data.get('service_categories', [])
             service_areas = request.data.get('service_areas', [])
             max_travel_distance = request.data.get('max_travel_distance', profile.max_travel_distance)
             
@@ -319,18 +324,19 @@ def manage_services(request):
                     'error': 'Minimum travel distance must be at least 5km'
                 }, status=status.HTTP_400_BAD_REQUEST)
             
-            # Validate service categories
-            from backend.leads.models import ServiceCategory
-            valid_categories = ServiceCategory.objects.filter(
-                slug__in=service_categories, 
-                is_active=True
-            ).values_list('slug', flat=True)
-            
-            if len(service_categories) != len(valid_categories):
-                invalid_categories = set(service_categories) - set(valid_categories)
-                return Response({
-                    'error': f'Invalid service categories: {list(invalid_categories)}'
-                }, status=status.HTTP_400_BAD_REQUEST)
+            # Normalize and validate service categories
+            service_categories = normalize_service_category_slugs(
+                raw_service_categories, only_active=True, include_parents=True
+            )
+            if not service_categories:
+                return Response(
+                    {'error': 'Please select at least one valid service category'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            security_err = enforce_security_subservice_rule(service_categories)
+            if security_err:
+                return Response({'error': security_err}, status=status.HTTP_400_BAD_REQUEST)
             
             # Update profile
             profile.service_categories = service_categories
@@ -798,7 +804,13 @@ class SettingsView(APIView):
                 if 'max_travel_distance' in preferences:
                     profile.max_travel_distance = preferences['max_travel_distance']
                 if 'preferred_lead_types' in preferences:
-                    profile.service_categories = preferences['preferred_lead_types']
+                    normalized = normalize_service_category_slugs(
+                        preferences['preferred_lead_types'], only_active=True, include_parents=True
+                    )
+                    security_err = enforce_security_subservice_rule(normalized)
+                    if security_err:
+                        return Response({'error': security_err}, status=status.HTTP_400_BAD_REQUEST)
+                    profile.service_categories = normalized
                 if 'working_hours' in preferences and hasattr(profile, 'working_hours'):
                     profile.working_hours = preferences['working_hours']
                 if 'timezone' in preferences and hasattr(profile, 'timezone'):

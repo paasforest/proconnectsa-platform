@@ -11,15 +11,8 @@ from django.db.models import Q
 from .models import ProviderProfile, User
 from backend.leads.models import ServiceCategory
 
+from .service_category_utils import CATEGORY_SLUG_ALIASES
 
-CATEGORY_SLUG_ALIASES = {
-    # legacy -> canonical
-    "cctv": "cctv-installation",
-    "electric-fence": "electric-fencing",
-    "gate": "gate-motors",
-    "gates": "gate-motors",
-    "solar": "solar-installation",
-}
 
 def _expand_category_slugs_for_filter(category_slug: str) -> list[str]:
     """

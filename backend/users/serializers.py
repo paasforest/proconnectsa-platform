@@ -295,6 +295,16 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
             from backend.leads.models import ServiceCategory
             valid_slugs = set(ServiceCategory.objects.filter(is_active=True).values_list('slug', flat=True))
             final_categories = [cat for cat in processed_categories if cat in valid_slugs]
+
+            # Normalize again using shared utils (adds parent categories like "security" when a sub-service is selected)
+            from .service_category_utils import (
+                enforce_security_subservice_rule,
+                normalize_service_category_slugs,
+            )
+            final_categories = normalize_service_category_slugs(final_categories, only_active=True, include_parents=True)
+            security_err = enforce_security_subservice_rule(final_categories)
+            if security_err:
+                raise serializers.ValidationError(security_err)
             
             # If still empty after validation, use handyman as fallback
             if not final_categories:
@@ -355,6 +365,11 @@ class ProviderProfileSerializer(serializers.ModelSerializer):
     """Serializer for ProviderProfile model"""
     user = UserSerializer(read_only=True)
     business_name = serializers.CharField(max_length=200)
+    service_categories = serializers.ListField(
+        child=serializers.CharField(),
+        required=False,
+        default=list
+    )
     
     class Meta:
         model = ProviderProfile
@@ -362,6 +377,7 @@ class ProviderProfileSerializer(serializers.ModelSerializer):
             'id', 'user', 'business_name', 'business_registration',
             'license_number', 'vat_number', 'business_phone', 'business_email',
             'business_address', 'service_areas', 'max_travel_distance',
+            'service_categories',
             'hourly_rate_min', 'hourly_rate_max', 'minimum_job_value',
             'subscription_tier', 'subscription_start_date', 'subscription_end_date',
             'credit_balance', 'monthly_lead_limit', 'leads_used_this_month',
@@ -394,6 +410,24 @@ class ProviderProfileSerializer(serializers.ModelSerializer):
             if method not in valid_methods:
                 raise serializers.ValidationError(f"Invalid notification method: {method}")
         return value
+
+    def validate_service_categories(self, value):
+        """
+        Normalize service categories to canonical slugs and enforce Security sub-service selection.
+        """
+        from .service_category_utils import (
+            enforce_security_subservice_rule,
+            normalize_service_category_slugs,
+        )
+
+        normalized = normalize_service_category_slugs(value, only_active=True, include_parents=True)
+        if not normalized:
+            return []
+
+        security_err = enforce_security_subservice_rule(normalized)
+        if security_err:
+            raise serializers.ValidationError(security_err)
+        return normalized
 
 
 class UserProfileSerializer(serializers.ModelSerializer):
