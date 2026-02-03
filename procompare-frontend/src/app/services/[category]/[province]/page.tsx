@@ -172,9 +172,14 @@ export default async function ServiceProvincePage({ params }: Props) {
 
               <div className="mt-6 flex flex-wrap gap-2">
                 {p.topCities.map((city) => (
-                  <span key={city} className="inline-flex items-center rounded-full bg-white border px-3 py-1 text-sm text-gray-700">
+                  <Link
+                    key={city}
+                    href={`/providers/browse?category=${encodeURIComponent(category)}&city=${encodeURIComponent(city)}`}
+                    className="inline-flex items-center rounded-full bg-white border px-3 py-1 text-sm text-gray-700 hover:border-emerald-300 hover:bg-emerald-50"
+                    title={`Browse ${serviceName.toLowerCase()} providers in ${city}`}
+                  >
                     {city}
-                  </span>
+                  </Link>
                 ))}
               </div>
             </div>
@@ -195,9 +200,14 @@ export default async function ServiceProvincePage({ params }: Props) {
                   </p>
                   <div className="flex flex-wrap gap-2">
                     {p.topCities.map((city) => (
-                      <span key={city} className="inline-flex items-center rounded-full border px-4 py-2 text-sm text-gray-700 bg-gray-50">
+                      <Link
+                        key={city}
+                        href={`/providers/browse?category=${encodeURIComponent(category)}&city=${encodeURIComponent(city)}`}
+                        className="inline-flex items-center rounded-full border px-4 py-2 text-sm text-gray-700 bg-gray-50 hover:border-emerald-300 hover:bg-emerald-50"
+                        title={`Browse ${serviceName.toLowerCase()} providers in ${city}`}
+                      >
                         {city}
-                      </span>
+                      </Link>
                     ))}
                   </div>
                 </div>
