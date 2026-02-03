@@ -124,12 +124,20 @@ export default async function ProvidersBrowsePage({
                       <span>{p.total_reviews} reviews</span>
                     </div>
                     <div className="mt-4">
-                      <Link
-                        href={`/providers/${p.id}`}
-                        className="inline-flex items-center text-blue-700 hover:text-blue-900 font-medium"
-                      >
-                        View profile →
-                      </Link>
+                      <div className="flex items-center gap-4">
+                        <Link
+                          href={`/providers/${p.id}`}
+                          className="inline-flex items-center text-blue-700 hover:text-blue-900 font-medium"
+                        >
+                          View profile →
+                        </Link>
+                        <Link
+                          href={`/providers/${p.id}/reviews`}
+                          className="inline-flex items-center text-gray-700 hover:text-gray-900 font-medium"
+                        >
+                          Reviews →
+                        </Link>
+                      </div>
                     </div>
                   </CardContent>
                 </Card>

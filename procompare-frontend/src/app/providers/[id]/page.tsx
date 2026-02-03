@@ -309,6 +309,18 @@ export default async function ProviderDetailPage({ params }: { params: Promise<{
                     </Button>
                   )}
 
+                  {/* Always show an entry point. Eligibility is enforced on the review page + backend. */}
+                  <div className="mt-3">
+                    <Link href={`/providers/${provider.id}/review`}>
+                      <Button variant="outline" className="w-full">
+                        Write a Review
+                      </Button>
+                    </Link>
+                    <p className="text-xs text-gray-500 mt-2">
+                      Only clients who completed a job with this provider can submit a review.
+                    </p>
+                  </div>
+
                   <div className="mt-3">
                     <ProviderWriteReviewButton
                       providerProfileId={provider.id}
