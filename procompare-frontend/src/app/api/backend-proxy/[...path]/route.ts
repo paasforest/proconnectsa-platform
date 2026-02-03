@@ -32,6 +32,21 @@ export async function DELETE(
   return handleRequest(request, resolvedParams.path, 'DELETE')
 }
 
+export async function OPTIONS(
+  request: NextRequest,
+  { params }: { params: Promise<{ path: string[] }> }
+) {
+  // Handle CORS preflight requests
+  return new NextResponse(null, {
+    status: 200,
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+    },
+  })
+}
+
 async function handleRequest(
   request: NextRequest,
   pathSegments: string[],

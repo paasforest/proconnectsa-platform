@@ -100,8 +100,25 @@ export default function PremiumListingUpgrade({
       });
 
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
-        throw new Error(errorData.error || `HTTP ${response.status}: ${response.statusText}`);
+        let errorData: any = { error: 'Unknown error' };
+        try {
+          const text = await response.text();
+          if (text) {
+            errorData = JSON.parse(text);
+          }
+        } catch (e) {
+          errorData = { error: `HTTP ${response.status}: ${response.statusText}` };
+        }
+        
+        // Log detailed error for debugging
+        console.error('Premium listing request failed:', {
+          status: response.status,
+          statusText: response.statusText,
+          errorData,
+          url: '/api/backend-proxy/auth/request-premium-listing/'
+        });
+        
+        throw new Error(errorData.error || errorData.message || `HTTP ${response.status}: ${response.statusText}`);
       }
 
       const responseData = await response.json();

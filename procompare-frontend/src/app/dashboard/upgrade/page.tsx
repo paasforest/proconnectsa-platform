@@ -29,6 +29,10 @@ function UpgradePageContent() {
         setCurrentTier(tier);
       } catch (error: any) {
         console.error('Error fetching profile:', error);
+        // Log the full error for debugging
+        if (error.response) {
+          console.error('API Error Response:', error.response.status, error.response.data);
+        }
         // If profile fetch fails, default to pay_as_you_go and continue
         // The PremiumListingUpgrade component will handle its own API calls
         setCurrentTier('pay_as_you_go');
