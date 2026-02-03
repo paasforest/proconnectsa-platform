@@ -55,7 +55,16 @@ async function handleRequest(
   try {
     const path = pathSegments.join('/')
     const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'https://api.proconnectsa.co.za'
-    const url = `${backendUrl}/api/${path}`
+    // Django is configured with trailing-slash URL patterns.
+    // If we forward to a no-slash URL, Django returns 301 and many clients (including fetch)
+    // will follow that redirect while changing POST -> GET, which then becomes a 405.
+    // So we normalize forwarded URLs to always include a trailing slash.
+    const forwardUrl = new URL(`${backendUrl}/api/${path}`)
+    if (!forwardUrl.pathname.endsWith('/')) {
+      forwardUrl.pathname = `${forwardUrl.pathname}/`
+    }
+    // Preserve querystring
+    forwardUrl.search = request.nextUrl.search
     
     // Get request body for POST/PUT requests
     let body: string | undefined
@@ -76,7 +85,7 @@ async function handleRequest(
       headers['Authorization'] = authHeader
     }
 
-    const response = await fetch(url, {
+    const response = await fetch(forwardUrl.toString(), {
       method,
       headers,
       body,
