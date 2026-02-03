@@ -21,6 +21,32 @@ CATEGORY_SLUG_ALIASES = {
     "solar": "solar-installation",
 }
 
+def _expand_category_slugs_for_filter(category_slug: str) -> list[str]:
+    """
+    ProviderProfile.service_categories historically stores broad parent slugs like "security".
+    To avoid empty results when filtering on a sub-service (e.g. "cctv-installation"),
+    we expand the filter to include parent/child slugs where applicable.
+    """
+    slug = slugify(str(category_slug).strip())
+    slug = CATEGORY_SLUG_ALIASES.get(slug, slug)
+    if not slug:
+        return []
+
+    slugs = {slug}
+    try:
+        cat = ServiceCategory.objects.select_related("parent").get(slug=slug, is_active=True)
+        # If filtering by a child, include its parent slug too (e.g. security).
+        if getattr(cat, "parent_id", None) and getattr(cat.parent, "slug", None):
+            slugs.add(cat.parent.slug)
+        # If filtering by a parent, include active children slugs too.
+        children = ServiceCategory.objects.filter(parent=cat, is_active=True).values_list("slug", flat=True)
+        for s in children:
+            if s:
+                slugs.add(s)
+    except ServiceCategory.DoesNotExist:
+        pass
+    return sorted(slugs)
+
 
 def _provider_public_dict(p: ProviderProfile):
     u = p.user
@@ -94,10 +120,12 @@ def public_providers_list(request):
     )
 
     if category_slug:
-        # Normalize incoming slug (be tolerant of legacy/short forms)
-        cat = slugify(str(category_slug).strip())
-        cat = CATEGORY_SLUG_ALIASES.get(cat, cat)
-        qs = qs.filter(service_categories__contains=[cat])
+        slugs = _expand_category_slugs_for_filter(category_slug)
+        if slugs:
+            cat_q = Q()
+            for s in slugs:
+                cat_q |= Q(service_categories__contains=[s])
+            qs = qs.filter(cat_q)
     if city:
         # Providers don't always store location consistently (some put the main city in `suburb`).
         # Match either field to make city filters on the frontend behave as users expect.
