@@ -213,5 +213,182 @@ export const SEO_SERVICE_PROVINCE_PAGES: Record<SeoServiceProvinceKey, SeoServic
       },
     ],
   },
+
+  "electrical/gauteng": {
+    seoTitle: "Electrical in Gauteng: Free Quotes from Verified Pros",
+    metaDescription:
+      "Need electrical work in Gauteng? Request free quotes from verified professionals on ProConnectSA. Fast matching, no obligation to hire.",
+    h1: "Electrical in Gauteng – Get Free Quotes from Verified Professionals",
+    intro:
+      "Electrical problems in Gauteng can’t be ignored—tripping breakers, burnt sockets, power outages in parts of the home, or urgent faults that affect safety. Gauteng homes and businesses also face everyday realities like load-shedding, generator changeovers, inverter installations, and compliance needs when buying, selling, or renovating. ProConnectSA helps you request free quotes from verified electrical professionals in Gauteng so you can compare availability, experience, and approach before you choose. Submit your job once, confirm it by SMS, and we’ll match you with providers who serve your area in Gauteng—without posting your contact details publicly and with no obligation to hire.",
+    sections: [
+      {
+        h2: "Common Electrical Jobs in Gauteng",
+        body:
+          "Because Gauteng has everything from older suburbs with legacy wiring to modern complexes with strict rules, electrical requests in Gauteng cover a wide range. Fault finding is one of the biggest needs in Gauteng—intermittent trips, partial power loss, damaged plugs, and loose connections. Many customers request DB board upgrades, circuit additions for high-load appliances, and safer distribution when expanding a home office or adding a cottage. Load-shedding solutions are also common in Gauteng: inverter and battery installations, generator changeover switches, and dedicated circuits for critical loads. In Gauteng apartments and estates, lighting replacements, stove repairs, and compliance work often needs careful scheduling and access coordination. Outdoor electrical work is frequent too—gate motors, electric fencing power, security lights, and wiring damaged by storms or wear. Whether it’s residential, commercial, or retail, Gauteng customers typically want a safe, compliant job and a clear explanation of what caused the issue.",
+      },
+      {
+        h2: "How ProConnectSA Connects You with Trusted Electrical Providers",
+        body:
+          "You describe the electrical job—fault finding, installation, repairs, load-shedding backup, or compliance—plus your suburb/city in Gauteng and your preferred timing. We verify the request via SMS so providers focus on genuine work. ProConnectSA then matches you with verified electrical professionals who serve your area and fit the job type. Your contact details are protected and not posted publicly; they’re shared only once a provider is matched and chooses to purchase the lead. You can compare quotes, ask questions about parts and compliance, and choose who to hire. Requesting quotes in Gauteng is free and there’s no obligation to proceed.",
+      },
+      {
+        h2: "Why Use ProConnectSA for Electrical in Gauteng",
+        body:
+          "In Gauteng, electrical work is both a safety and a reliability issue. ProConnectSA helps you move faster by collecting the job details once, then connecting you with verified professionals instead of random listings. Because matching is based on location and service fit, you’re more likely to reach electricians who actually work in your part of Gauteng and understand common needs like complex access, office park requirements, and backup power installations. You stay in control: compare responses, confirm what’s included, and hire only if the quote and timeline make sense.",
+      },
+      {
+        h2: "Pricing Expectations for Electrical in Gauteng",
+        body:
+          "Electrical pricing in Gauteng depends on the fault complexity, access, parts required, and how urgent the work is. Smaller jobs—like replacing a socket, light fitting, or isolator—often depend on call-out fees and labour time. Fault finding, DB work, and wiring repairs can vary based on how quickly the issue is identified and whether components need replacement. Larger projects in Gauteng, such as inverter systems, generator changeovers, rewiring, or new circuits, depend on equipment specifications, cable runs, compliance, and workmanship guarantees. The best way to compare value is to request multiple quotes, confirm exactly what’s included (parts, labour, VAT where applicable), and choose a provider who communicates clearly and prioritises safety.",
+      },
+      {
+        h2: "Get Free Quotes from Electrical Providers in Gauteng",
+        body:
+          "If you need electrical work in Gauteng, request free quotes on ProConnectSA in minutes. Describe the issue, confirm by SMS, and we’ll match you with verified professionals who can help. Compare options, ask the right questions, and hire only if it feels right for your budget and timeline. It’s free, there’s no obligation to hire, and your contact details stay protected throughout.",
+      },
+    ],
+    internalLinks: [
+      { href: "/services/electrical", text: "You can also start from our main electrical page at /services/electrical." },
+      {
+        href: "/services/electrical/western-cape",
+        text: "If you need help outside Gauteng, we also support electrical requests in the Western Cape.",
+      },
+      {
+        href: "/services/electrical/kwazulu-natal",
+        text: "For Durban and surrounding areas, see electrical in KwaZulu-Natal for region-specific demand.",
+      },
+      {
+        href: "/services/electrical/north-west",
+        text: "For Rustenburg and nearby towns, explore electrical in North West to match with local providers.",
+      },
+    ],
+  },
+
+  "electrical/western-cape": {
+    seoTitle: "Electrical in Western Cape: Free Quotes from Verified Pros",
+    metaDescription:
+      "Request electrical work in Western Cape and get free quotes from verified professionals on ProConnectSA. Fast matching, no obligation to hire.",
+    h1: "Electrical in Western Cape – Get Free Quotes from Verified Professionals",
+    intro:
+      "Electrical work in Western Cape often combines everyday needs with practical constraints—older properties with mixed wiring, apartment access rules, and coastal conditions that can affect fittings and outdoor equipment. From Cape Town apartments to Winelands homes and Garden Route holiday properties, Western Cape customers want electricians who communicate clearly, work safely, and handle compliance properly. ProConnectSA helps you request free quotes from verified electrical professionals in Western Cape. Submit your job once, confirm it via SMS, and we’ll match you with providers who serve your area in Western Cape—without sharing your contact details publicly and with no obligation to hire.",
+    sections: [
+      {
+        h2: "Common Electrical Jobs in Western Cape",
+        body:
+          "Western Cape electrical requests often include fault finding for trips, blown circuits, and inconsistent power—especially in older suburbs where additions and renovations have happened over time. Lighting upgrades are common in Western Cape homes and apartments, including energy-efficient replacements and safer outdoor lighting. DB board upgrades, compliance checks, and circuit additions are also frequent in Western Cape when adding appliances, home offices, or rental units. Load-shedding solutions have become everyday work in Western Cape too: inverter and battery installations, generator changeovers, and dedicated circuits for critical loads. Coastal areas in Western Cape often need attention on outdoor power points, gate motors, and security systems exposed to weather. Whether your job is small or complex, Western Cape customers typically want a neat finish, clear safety guidance, and dependable scheduling.",
+      },
+      {
+        h2: "How ProConnectSA Connects You with Trusted Electrical Providers",
+        body:
+          "You submit your electrical request with your area in Western Cape and the type of job required. We confirm the request via SMS to reduce spam and improve response quality. ProConnectSA matches you with verified electrical professionals who serve your suburb and fit your job type. Your contact details are kept private and are not posted publicly; they’re shared only when a provider is matched and chooses to purchase the lead. You can compare quotes and timelines, ask questions about parts and compliance, and decide who to hire. It’s free to request quotes in Western Cape and there’s no obligation to proceed.",
+      },
+      {
+        h2: "Why Use ProConnectSA for Electrical in Western Cape",
+        body:
+          "Western Cape customers often need fast answers—especially when power issues affect security, work-from-home setups, or appliances. ProConnectSA helps you compare verified professionals without wasting time on unresponsive listings. Because matching is based on location and job fit, you’re more likely to reach electricians who work in your part of Western Cape and understand the practicalities of apartment access, estate rules, and backup power requirements. You stay in control of the process: compare options and hire only when you’re satisfied.",
+      },
+      {
+        h2: "Pricing Expectations for Electrical in Western Cape",
+        body:
+          "Electrical pricing in Western Cape varies by job complexity, access, parts, and urgency. Smaller repairs often depend on call-out fees and labour time, while fault finding can vary based on how quickly the root cause is identified. DB work, rewiring, and new circuits depend on cable runs, compliance, and equipment. Backup power installations in Western Cape are priced based on system size, battery capacity, and installation requirements. Requesting multiple quotes helps you compare value—confirm what’s included (parts, labour, VAT where applicable) and ask about workmanship guarantees before deciding.",
+      },
+      {
+        h2: "Get Free Quotes from Electrical Providers in Western Cape",
+        body:
+          "If you need electrical work in Western Cape, request free quotes on ProConnectSA. Describe the job, confirm by SMS, and we’ll match you with verified professionals who can help. Compare quotes, confirm the details, and hire only if it fits your timeline and budget. It’s free, there’s no obligation to hire, and your contact details stay protected throughout the process.",
+      },
+    ],
+    internalLinks: [
+      { href: "/services/electrical", text: "Start from our main electrical page at /services/electrical." },
+      { href: "/services/electrical/gauteng", text: "For Johannesburg and Pretoria, you can also compare electrical in Gauteng." },
+      { href: "/services/electrical/kwazulu-natal", text: "For Durban and surrounding areas, explore electrical in KwaZulu-Natal." },
+      { href: "/services/electrical/north-west", text: "For Rustenburg and nearby towns, see electrical in North West." },
+    ],
+  },
+
+  "electrical/kwazulu-natal": {
+    seoTitle: "Electrical in KwaZulu-Natal: Free Quotes from Verified Pros",
+    metaDescription:
+      "Need electrical work in KwaZulu-Natal? Request free quotes from verified professionals on ProConnectSA. Fast matching and no obligation to hire.",
+    h1: "Electrical in KwaZulu-Natal – Get Free Quotes from Verified Professionals",
+    intro:
+      "Electrical issues in KwaZulu-Natal can quickly affect safety and daily routines—tripping breakers, power loss to key rooms, and faults that disrupt home security or business operations. KwaZulu-Natal also has coastal humidity and stormy periods that can impact outdoor electrical equipment, while load-shedding increases demand for backup power solutions. ProConnectSA helps you request free quotes from verified electrical professionals in KwaZulu-Natal. Submit your job once, confirm via SMS, and we’ll match you with providers who serve your area in KwaZulu-Natal—without posting your contact details publicly and with no obligation to hire.",
+    sections: [
+      {
+        h2: "Common Electrical Jobs in KwaZulu-Natal",
+        body:
+          "KwaZulu-Natal customers often request fault finding for trips and partial outages, especially where older wiring, moisture, or worn components create intermittent problems. Lighting repairs and upgrades are common in KwaZulu-Natal homes and complexes, including outdoor security lighting. DB board work and circuit additions are frequent too—stove lines, air-conditioning circuits, pool systems, and home office loads. Backup power requests have become everyday work in KwaZulu-Natal: inverter and battery installations, generator changeovers, and safer wiring for critical loads. Coastal areas in KwaZulu-Natal often need attention on outdoor points, gate motors, and security systems exposed to weather. Across the province, customers want a safe job, clear communication, and a reliable timeline.",
+      },
+      {
+        h2: "How ProConnectSA Connects You with Trusted Electrical Providers",
+        body:
+          "You submit your electrical job details and location in KwaZulu-Natal. We confirm the request via SMS to keep enquiries genuine and reduce spam. ProConnectSA matches you with verified electrical providers who serve your area and fit your job type. Your contact details remain private and are shared only when a provider is matched and chooses to purchase the lead. You can compare quotes, clarify what’s included, and choose who to hire. It’s free to request quotes in KwaZulu-Natal and there’s no obligation to proceed.",
+      },
+      {
+        h2: "Why Use ProConnectSA for Electrical in KwaZulu-Natal",
+        body:
+          "When electrical work is urgent in KwaZulu-Natal, you need a fast way to compare trustworthy options. ProConnectSA helps by connecting you with verified professionals through a clear process, so you don’t waste time chasing unresponsive listings. Because matching is based on service fit and location, you’re more likely to reach electricians who actually work in your part of KwaZulu-Natal and understand common needs like backup power and outdoor weather exposure. You stay in control: compare, confirm, then hire only when you’re satisfied.",
+      },
+      {
+        h2: "Pricing Expectations for Electrical in KwaZulu-Natal",
+        body:
+          "Electrical costs in KwaZulu-Natal vary by the job scope, access, and parts required. Small repairs often depend on a call-out fee and time onsite. Fault finding can vary based on the complexity of the issue and whether components must be replaced. DB upgrades, rewiring, and new circuits depend on cable runs, compliance, and equipment. Backup power installations are priced based on system size and components. The best way to compare value is to request multiple quotes, confirm what’s included, and ask about workmanship guarantees.",
+      },
+      {
+        h2: "Get Free Quotes from Electrical Providers in KwaZulu-Natal",
+        body:
+          "If you need electrical work in KwaZulu-Natal, request free quotes on ProConnectSA. Describe the job, confirm by SMS, and we’ll match you with verified professionals who can help. Compare options quickly and hire only if the quote and timeline work for you. It’s free, there’s no obligation to hire, and your contact details stay protected.",
+      },
+    ],
+    internalLinks: [
+      { href: "/services/electrical", text: "Start at /services/electrical to submit your request." },
+      { href: "/services/electrical/gauteng", text: "For inland metros, compare electrical in Gauteng." },
+      { href: "/services/electrical/western-cape", text: "For Cape Town and surrounding areas, explore electrical in Western Cape." },
+      { href: "/services/electrical/north-west", text: "For Rustenburg and nearby towns, see electrical in North West." },
+    ],
+  },
+
+  "electrical/north-west": {
+    seoTitle: "Electrical in North West: Free Quotes from Verified Pros",
+    metaDescription:
+      "Get electrical work in North West done safely—request free quotes from verified professionals on ProConnectSA. Fast matching, no obligation to hire.",
+    h1: "Electrical in North West – Get Free Quotes from Verified Professionals",
+    intro:
+      "Electrical work in North West often combines everyday repairs with practical realities like longer travel distances and a mix of town and out-of-town properties. Whether you need fault finding, safer DB distribution, outdoor electrical repairs, or backup power support, you want a reliable electrician who communicates clearly and works safely. ProConnectSA helps you request free quotes from verified electrical professionals in North West. Submit your job once, confirm it via SMS, and we’ll match you with providers who serve your area in North West—without posting your contact details publicly and with no obligation to hire.",
+    sections: [
+      {
+        h2: "Common Electrical Jobs in North West",
+        body:
+          "North West electrical requests often include fault finding for trips, power loss, and damaged sockets or fittings. Lighting repairs and upgrades are common, including outdoor lights for yards and entrances. DB board work and circuit additions come up frequently too—stove circuits, pumps, air-conditioning, workshops, and home office loads. In North West, outdoor electrical systems like gate motors, electric fencing supplies, and security lighting can need maintenance due to weather exposure and wear. Backup power setups are also increasingly common in North West, ranging from changeover solutions to inverter systems sized for critical loads. Because properties can be spread out, customers usually value clear scheduling, transparent pricing, and safe workmanship.",
+      },
+      {
+        h2: "How ProConnectSA Connects You with Trusted Electrical Providers",
+        body:
+          "You submit your electrical request with your location in North West and your preferred timing. We verify the request via SMS so providers focus on genuine jobs. ProConnectSA then matches you with verified electrical professionals who serve your area and fit the job type. Your contact details are kept private and are shared only when a provider is matched and chooses to purchase the lead. You can compare quotes and response times, ask for clarity, and decide who to hire. Requesting quotes in North West is free and there’s no obligation to proceed.",
+      },
+      {
+        h2: "Why Use ProConnectSA for Electrical in North West",
+        body:
+          "In North West, the challenge is often finding an electrician who covers your area and responds quickly. ProConnectSA helps by matching your request to verified professionals based on service fit and location, saving you time and reducing uncertainty. You can compare options, confirm what’s included, and choose a provider when you’re ready. This is especially useful in North West when an electrical fault affects safety, security systems, or essential appliances.",
+      },
+      {
+        h2: "Pricing Expectations for Electrical in North West",
+        body:
+          "Electrical pricing in North West depends on travel distance, access, and the job’s complexity. Small repairs typically include a call-out component plus labour and parts. Fault finding varies based on time required to diagnose and the cost of replacement components. Larger projects—DB upgrades, rewiring, new circuits, or backup power installations—depend on cable runs, equipment specs, and compliance requirements. Request multiple quotes so you can compare value, confirm what’s included, and ask about guarantees.",
+      },
+      {
+        h2: "Get Free Quotes from Electrical Providers in North West",
+        body:
+          "If you need electrical work in North West, request free quotes on ProConnectSA. Describe the job, confirm by SMS, and we’ll match you with verified professionals who can help. Compare quotes and timelines and hire only if it fits your needs. It’s free, there’s no obligation to hire, and your contact details stay protected throughout the process.",
+      },
+    ],
+    internalLinks: [
+      { href: "/services/electrical", text: "Start from our main electrical page at /services/electrical." },
+      { href: "/services/electrical/gauteng", text: "For Johannesburg and Pretoria, compare electrical in Gauteng." },
+      { href: "/services/electrical/western-cape", text: "For Cape Town and surrounding areas, see electrical in Western Cape." },
+      { href: "/services/electrical/kwazulu-natal", text: "For Durban and surrounding areas, explore electrical in KwaZulu-Natal." },
+    ],
+  },
 }
 
