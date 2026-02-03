@@ -390,5 +390,173 @@ export const SEO_SERVICE_PROVINCE_PAGES: Record<SeoServiceProvinceKey, SeoServic
       { href: "/services/electrical/kwazulu-natal", text: "For Durban and surrounding areas, explore electrical in KwaZulu-Natal." },
     ],
   },
+
+  "solar-installation/gauteng": {
+    seoTitle: "Solar Installation in Gauteng: Free Quotes",
+    metaDescription:
+      "Get solar installation in Gauteng with verified professionals. Request free quotes on ProConnectSA—compare systems, pricing, and timelines with no obligation.",
+    h1: "Solar Installation in Gauteng – Get Free Quotes from Verified Professionals",
+    intro:
+      "Solar installation in Gauteng has moved from “nice to have” to a day‑to‑day solution for load‑shedding, rising electricity costs, and business continuity. From Johannesburg suburbs and Pretoria estates to small offices and retail spaces, many Gauteng properties need a reliable solar setup that’s sized correctly and installed safely. ProConnectSA helps you request free quotes from verified solar installation professionals in Gauteng so you can compare system options, turnaround times, and workmanship before choosing a provider. Submit your request once, confirm it via SMS, and we’ll connect you with pros who serve your area in Gauteng—without posting your personal contact details publicly and with no obligation to hire.",
+    sections: [
+      {
+        h2: "Common Solar Installation Jobs in Gauteng",
+        body:
+          "Solar requests in Gauteng usually fall into a few practical categories. Many homes in Gauteng want hybrid inverter and battery systems to keep lights, Wi‑Fi, security, and fridges running through outages. Other Gauteng customers focus on reducing monthly bills by adding panels first, then expanding batteries later. Businesses in Gauteng often ask for systems sized for daytime loads—offices, tills, routers, small machinery—and require clean cable routing, labelled DB work, and minimal downtime. Because Gauteng properties vary, installers also deal with roof considerations (tile, metal, flat concrete), shade from trees or neighbouring buildings, and limited mounting space on complexes. It’s also common in Gauteng to integrate solar with existing generators, surge protection, and dedicated circuits for critical loads. Finally, customers frequently request inspections and upgrades of older solar installations in Gauteng—replacing batteries, correcting unsafe wiring, or improving monitoring and performance.",
+      },
+      {
+        h2: "How ProConnectSA Connects You with Trusted Solar Installation Providers",
+        body:
+          "You tell us what you need—backup power, bill reduction, a full hybrid system, or an upgrade—and where you are in Gauteng. We verify the request via SMS to reduce spam and ensure providers focus on genuine jobs. ProConnectSA then matches you with verified solar installation professionals who serve your suburb and fit the job type. Your contact details are protected and aren’t posted publicly; providers only receive access once they’re matched and choose to purchase the lead. You can compare quotes, ask about system sizing, warranties, monitoring, and installation timelines, and decide who to hire. Requesting quotes for solar installation in Gauteng is free and there’s no obligation to proceed.",
+      },
+      {
+        h2: "Why Use ProConnectSA for Solar Installation in Gauteng",
+        body:
+          "Solar installation is a major investment, and in Gauteng the wrong system sizing can lead to frustration—either not enough backup or money spent on capacity you don’t use. ProConnectSA helps you compare multiple verified providers so you can validate recommendations and pricing. Matching is based on location and service fit, which improves response quality in Gauteng and reduces wasted calls. You stay in control of the process: request free quotes, compare the details, and hire only when you’re confident the provider understands your needs and your property constraints.",
+      },
+      {
+        h2: "Pricing Expectations for Solar Installation in Gauteng",
+        body:
+          "Solar installation pricing in Gauteng varies depending on your goals and equipment. Costs are influenced by inverter type (hybrid vs off‑grid), battery capacity and chemistry, panel count, roof complexity, cable runs, DB upgrades, and whether you need surge protection or generator integration. In Gauteng, pricing can also change based on access rules in estates or complexes, inspection requirements, and the amount of civil work needed to route cabling neatly. A good quote should clearly list components, warranties, workmanship, timelines, and what’s included (installation, compliance checks, and monitoring). The best way to judge value is to compare a few quotes for solar installation in Gauteng and confirm the assumptions behind system sizing.",
+      },
+      {
+        h2: "Get Free Quotes from Solar Installation Providers in Gauteng",
+        body:
+          "Ready to install solar in Gauteng? Request free quotes on ProConnectSA. Describe your power needs, confirm by SMS, and we’ll connect you with verified professionals who can design and install a system that fits your home or business. Compare options quickly, ask the right questions, and move forward only if the proposal and timeline work for you. It’s free, with no obligation to hire, and your contact details stay protected throughout.",
+      },
+    ],
+    internalLinks: [
+      { href: "/services/solar-installation", text: "Start from the main solar installation page at /services/solar-installation." },
+      { href: "/services/solar-installation/western-cape", text: "For Cape Town and surrounding areas, see solar installation in Western Cape." },
+      { href: "/services/solar-installation/kwazulu-natal", text: "For coastal installs and storm conditions, explore solar installation in KwaZulu-Natal." },
+      { href: "/services/solar-installation/north-west", text: "For farms, plots, and smaller towns, compare solar installation in North West." },
+    ],
+  },
+
+  "solar-installation/western-cape": {
+    seoTitle: "Solar Installation in Western Cape: Free Quotes",
+    metaDescription:
+      "Request solar installation in Western Cape and get free quotes from verified professionals on ProConnectSA. Compare systems and pricing with no obligation.",
+    h1: "Solar Installation in Western Cape – Get Free Quotes from Verified Professionals",
+    intro:
+      "Solar installation in Western Cape is a practical way to reduce electricity bills and keep essentials running during load‑shedding—especially for homes that rely on stable power for security, work, and refrigeration. From Cape Town apartments and townhouses to Winelands homes and Garden Route holiday properties, Western Cape customers need solar solutions that are safe, well‑sized, and built for local conditions. ProConnectSA helps you request free quotes from verified solar installation professionals in Western Cape so you can compare system recommendations, timelines, and warranties. Submit one request, confirm it via SMS, and we’ll connect you with providers who serve your part of Western Cape—without posting your contact details publicly and with no obligation to hire.",
+    sections: [
+      {
+        h2: "Common Solar Installation Jobs in Western Cape",
+        body:
+          "Western Cape solar demand is often driven by two goals: backup power for outages and reducing monthly costs. Many Western Cape homes request hybrid inverter and battery systems that keep Wi‑Fi, lights, fridges, and security running. Others in Western Cape focus on panel-heavy systems to offset daytime usage and add batteries later. Coastal and windy areas in Western Cape may require careful mounting, corrosion‑resistant hardware, and tidy cable management for outdoor exposure. In dense areas, Western Cape properties also face space constraints—limited roof area, shade from neighbouring buildings, and complex access rules in sectional title units. Businesses in Western Cape commonly ask for solar to support tills, routers, office equipment, and small machinery, with minimal downtime during installation. Upgrades and repairs are also common in Western Cape: battery replacements, inverter troubleshooting, performance checks, and improving monitoring for better visibility of usage and savings.",
+      },
+      {
+        h2: "How ProConnectSA Connects You with Trusted Solar Installation Providers",
+        body:
+          "Describe your solar installation needs and your location in Western Cape. We confirm the request by SMS to keep enquiries genuine and improve response quality. ProConnectSA matches you with verified solar installation professionals who serve your suburb and fit your job type, whether it’s a new install or an upgrade. Your contact details are protected and not posted publicly; providers only receive access once matched and they choose to purchase the lead. You can compare quotes, ask about system sizing, warranties, compliance, and timelines, and choose a provider only if you’re satisfied. Requesting solar installation quotes in Western Cape is free and there’s no obligation to hire.",
+      },
+      {
+        h2: "Why Use ProConnectSA for Solar Installation in Western Cape",
+        body:
+          "Solar installation is technical, and Western Cape customers benefit from comparing multiple recommendations—especially when balancing battery capacity, panel count, and budget. ProConnectSA helps you compare verified providers so you can validate system sizing and pricing. Matching is based on location and service fit, which improves response relevance in Western Cape and reduces wasted calls. You stay in control of the process and can move fast when you need backup power or improved energy costs.",
+      },
+      {
+        h2: "Pricing Expectations for Solar Installation in Western Cape",
+        body:
+          "Solar installation pricing in Western Cape varies with inverter type, battery capacity, panel quantity, roof complexity, and electrical upgrades needed for safe distribution. Costs can also be influenced by access in complexes, cable run lengths, and whether you’re integrating a generator or adding surge protection. A quality quote for Western Cape solar installation should list all components, warranties, workmanship, monitoring, and what’s included in installation and compliance checks. Compare a few quotes in Western Cape so you can judge value and ensure system sizing is realistic for your daily usage.",
+      },
+      {
+        h2: "Get Free Quotes from Solar Installation Providers in Western Cape",
+        body:
+          "If you’re planning solar installation in Western Cape, request free quotes on ProConnectSA. Tell us what you want to power, confirm by SMS, and we’ll connect you with verified professionals who can design and install the right system. Compare options, ask questions, and proceed only if the proposal suits your timeline and budget. It’s free, with no obligation to hire, and your contact details stay protected.",
+      },
+    ],
+    internalLinks: [
+      { href: "/services/solar-installation", text: "Visit /services/solar-installation to start your request." },
+      { href: "/services/solar-installation/gauteng", text: "For Johannesburg and Pretoria, compare solar installation in Gauteng." },
+      { href: "/services/solar-installation/kwazulu-natal", text: "For coastal humidity and storm conditions, explore solar installation in KwaZulu-Natal." },
+      { href: "/services/solar-installation/north-west", text: "For farms and out-of-town installs, see solar installation in North West." },
+    ],
+  },
+
+  "solar-installation/kwazulu-natal": {
+    seoTitle: "Solar Installation in KwaZulu-Natal: Free Quotes",
+    metaDescription:
+      "Get solar installation in KwaZulu-Natal with verified professionals. Request free quotes on ProConnectSA and compare systems, pricing, and timelines.",
+    h1: "Solar Installation in KwaZulu-Natal – Get Free Quotes from Verified Professionals",
+    intro:
+      "Solar installation in KwaZulu-Natal is often motivated by reliability—keeping homes and businesses running through outages—alongside long-term savings. KwaZulu-Natal properties also face coastal humidity, storms, and lightning risk, so a safe, well‑protected installation matters. ProConnectSA helps you request free quotes from verified solar installation professionals in KwaZulu-Natal so you can compare system sizing, equipment quality, and timelines. Submit your request once, confirm it via SMS, and we’ll match you with providers who serve your area in KwaZulu-Natal—without posting your contact details publicly and with no obligation to hire.",
+    sections: [
+      {
+        h2: "Common Solar Installation Jobs in KwaZulu-Natal",
+        body:
+          "KwaZulu-Natal solar requests commonly include hybrid inverter and battery systems to keep essentials running—lights, Wi‑Fi, fridges, and security. Many customers in KwaZulu-Natal also want solar for air‑conditioning support or business continuity in shops and offices. Because KwaZulu-Natal has storm seasons and coastal exposure, installations often include surge protection, proper earthing, and neat, weather‑resistant routing for outdoor cabling. Space constraints in estates and complexes can affect panel placement, while shading from trees is a common consideration. Upgrades are frequent too: battery replacements, performance checks, adding panels, and improving monitoring. In some parts of KwaZulu-Natal, customers also request solar to support pumps, outdoor systems, and critical loads for larger properties.",
+      },
+      {
+        h2: "How ProConnectSA Connects You with Trusted Solar Installation Providers",
+        body:
+          "You submit your solar installation request and location in KwaZulu-Natal. We confirm by SMS to keep enquiries genuine and improve provider response quality. ProConnectSA matches you with verified solar installation professionals who serve your suburb and fit the job scope. Your contact details remain private and aren’t posted publicly; providers receive access only when matched and they choose to purchase the lead. You can compare quotes, ask about warranties and protection, and select a provider only if you’re comfortable. Requesting solar installation quotes in KwaZulu-Natal is free and there’s no obligation to hire.",
+      },
+      {
+        h2: "Why Use ProConnectSA for Solar Installation in KwaZulu-Natal",
+        body:
+          "Solar systems are complex, and KwaZulu-Natal customers benefit from comparing multiple proposals—especially for battery capacity, surge protection, and critical load planning. ProConnectSA helps you compare verified providers so you can validate system sizing and avoid overpaying for the wrong configuration. Matching is based on location and service fit, which improves response relevance in KwaZulu-Natal and helps you move faster when power reliability matters.",
+      },
+      {
+        h2: "Pricing Expectations for Solar Installation in KwaZulu-Natal",
+        body:
+          "Solar installation pricing in KwaZulu-Natal depends on inverter type, battery capacity, panel quantity, roof complexity, and electrical upgrades for safe distribution. Additional protection (surge, lightning considerations, earthing improvements) can influence cost in KwaZulu-Natal. Pricing also varies based on access in estates, cable run lengths, and whether you’re integrating a generator. Compare multiple quotes so you can confirm components, warranties, workmanship, monitoring, and what’s included in installation and compliance checks.",
+      },
+      {
+        h2: "Get Free Quotes from Solar Installation Providers in KwaZulu-Natal",
+        body:
+          "Need solar installation in KwaZulu-Natal? Request free quotes on ProConnectSA. Describe your power needs, confirm by SMS, and we’ll connect you with verified professionals who can design and install a system that suits your home or business. Compare options and proceed only if the proposal fits your budget and timeline. It’s free, with no obligation to hire, and your contact details stay protected.",
+      },
+    ],
+    internalLinks: [
+      { href: "/services/solar-installation", text: "Start at /services/solar-installation to submit your request." },
+      { href: "/services/solar-installation/gauteng", text: "For inland metros, see solar installation in Gauteng." },
+      { href: "/services/solar-installation/western-cape", text: "For Cape Town and the Winelands, explore solar installation in Western Cape." },
+      { href: "/services/solar-installation/north-west", text: "For farms and out-of-town installs, compare solar installation in North West." },
+    ],
+  },
+
+  "solar-installation/north-west": {
+    seoTitle: "Solar Installation in North West: Free Quotes",
+    metaDescription:
+      "Request solar installation in North West and get free quotes from verified professionals on ProConnectSA. Compare systems and pricing with no obligation.",
+    h1: "Solar Installation in North West – Get Free Quotes from Verified Professionals",
+    intro:
+      "Solar installation in North West is often about independence and reliability—especially for properties with long outages, higher daytime usage, or out‑of‑town locations. With strong sunlight and a mix of town and rural properties, North West customers often look for solar systems that can run critical loads, support pumps, and reduce monthly costs. ProConnectSA helps you request free quotes from verified solar installation professionals in North West so you can compare system sizing, equipment, and installation timelines. Submit one request, confirm by SMS, and we’ll match you with providers who serve your area in North West—without posting your contact details publicly and with no obligation to hire.",
+    sections: [
+      {
+        h2: "Common Solar Installation Jobs in North West",
+        body:
+          "North West solar requests often include hybrid systems sized for essential household loads—lights, Wi‑Fi, fridges, and security—plus the ability to expand. Many North West properties also ask for solar to support borehole or pressure pumps, workshops, and farm infrastructure where reliability matters. Because distances can be larger in North West, customers value clear planning: site assessments, roof suitability, and realistic performance expectations. Dust, heat, and outdoor exposure can affect hardware choices and mounting requirements. Upgrades are also common in North West, including battery replacements, inverter troubleshooting, and adding panels or monitoring. For some North West customers, solar installation is part of a broader plan that includes generator integration, surge protection, and dedicated circuits for critical loads.",
+      },
+      {
+        h2: "How ProConnectSA Connects You with Trusted Solar Installation Providers",
+        body:
+          "You submit your solar installation request and location in North West. We verify it by SMS to reduce spam and keep enquiries genuine. ProConnectSA matches you with verified professionals who serve your area and fit the job scope. Your contact details are protected and not posted publicly; providers only receive access once matched and they choose to purchase the lead. You can compare quotes, ask about system sizing, warranties, monitoring, and timelines, and hire only if it’s the right fit. Requesting solar installation quotes in North West is free and there’s no obligation to proceed.",
+      },
+      {
+        h2: "Why Use ProConnectSA for Solar Installation in North West",
+        body:
+          "Solar installation decisions can be expensive to reverse, and North West customers benefit from comparing multiple proposals to validate system sizing and value. ProConnectSA helps you reach verified providers who serve your location in North West so you can compare recommendations, timelines, and component quality. The process is structured and private, helping you move quickly when you need dependable power for home or farm operations.",
+      },
+      {
+        h2: "Pricing Expectations for Solar Installation in North West",
+        body:
+          "Pricing for solar installation in North West depends on inverter type, battery capacity, panel quantity, roof complexity, and electrical upgrades. In North West, travel distance and access can also affect overall cost, especially for out‑of‑town properties. If pumps or farm infrastructure are involved, system sizing and protection requirements can increase the scope. A good quote should list components, warranties, workmanship, monitoring, and what’s included in installation and compliance checks. Compare a few quotes in North West so you can judge value and confirm sizing assumptions.",
+      },
+      {
+        h2: "Get Free Quotes from Solar Installation Providers in North West",
+        body:
+          "Planning solar installation in North West? Request free quotes on ProConnectSA. Describe your needs, confirm by SMS, and we’ll connect you with verified professionals who can design and install a reliable system. Compare options and hire only if the proposal fits your goals and budget. It’s free, with no obligation to hire, and your contact details stay protected.",
+      },
+    ],
+    internalLinks: [
+      { href: "/services/solar-installation", text: "Start from /services/solar-installation to submit your request." },
+      { href: "/services/solar-installation/gauteng", text: "For Johannesburg and Pretoria, see solar installation in Gauteng." },
+      { href: "/services/solar-installation/western-cape", text: "For Cape Town and surrounding areas, explore solar installation in Western Cape." },
+      { href: "/services/solar-installation/kwazulu-natal", text: "For coastal installs and storm seasons, compare solar installation in KwaZulu-Natal." },
+    ],
+  },
 }
 
