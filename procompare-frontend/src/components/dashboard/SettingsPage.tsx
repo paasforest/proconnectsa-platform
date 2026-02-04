@@ -249,42 +249,101 @@ const SettingsPage = () => {
   const [showPremiumModal, setShowPremiumModal] = useState(false);
   const [selectedPremiumPlan, setSelectedPremiumPlan] = useState<'monthly' | 'lifetime' | null>(null);
 
-  const handleRequestPremium = async (planType?: 'monthly' | 'lifetime') => {
+  const handleRequestPremium = async (planType: 'monthly' | 'lifetime') => {
+    if (!token) {
+      setMessage({ type: 'error', text: 'Please log in to request premium listing' });
+      return;
+    }
+
+    if (!planType) {
+      setMessage({ type: 'error', text: 'Please select a plan type' });
+      return;
+    }
+
     try {
       setLoadingPremium(true);
-      // Use GET method as per backend endpoint
-      const res = await apiClient.get('/api/auth/premium-listing/request/');
-      if (res.success) {
-        setPremiumDetails(res);
-        // If planType is provided, show modal with that plan selected
-        if (planType) {
-          setSelectedPremiumPlan(planType);
-          setShowPremiumModal(true);
-        } else {
-          setMessage({ type: 'success', text: 'Premium listing request generated. Please make your EFT.' });
+
+      // Use the same backend-proxy approach as PremiumListingUpgrade component
+      const proxyUrl = '/api/backend-proxy/auth/request-premium-listing';
+      const response = await fetch(proxyUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Token ${token}`
+        },
+        body: JSON.stringify({
+          plan_type: planType
+        })
+      });
+
+      if (!response.ok) {
+        let errorData: any = { error: 'Unknown error' };
+        try {
+          const text = await response.text();
+          if (text) {
+            errorData = JSON.parse(text);
+          }
+        } catch (e) {
+          errorData = { error: `HTTP ${response.status}: ${response.statusText}` };
         }
+        
+        console.error('Premium listing request failed:', {
+          status: response.status,
+          statusText: response.statusText,
+          errorData,
+          url: proxyUrl
+        });
+        
+        throw new Error(errorData.error || errorData.message || `HTTP ${response.status}: ${response.statusText}`);
+      }
+
+      const responseData = await response.json();
+
+      // Handle different response structures
+      const data = responseData?.data || responseData;
+      
+      if (data.success || responseData.success) {
+        setPremiumDetails(data);
+        setSelectedPremiumPlan(planType);
+        setShowPremiumModal(true);
+        setMessage({ type: 'success', text: 'Premium request created! Please complete the EFT payment.' });
       } else {
-        setMessage({ type: 'error', text: res.message || 'Failed to generate premium request.' });
+        const errorMsg = data.error || responseData.error || 'Failed to create premium request';
+        setMessage({ type: 'error', text: errorMsg });
       }
     } catch (error: any) {
-      console.error('Failed to request premium:', error);
-      setMessage({ type: 'error', text: error.response?.data?.message || 'Error requesting premium. Please try again.' });
+      console.error('Premium request error:', error);
+      
+      let errorMessage = 'Failed to request premium listing';
+      if (error.message) {
+        errorMessage = error.message;
+      } else if (error.response?.data) {
+        errorMessage = error.response.data.error || 
+                      error.response.data.message || 
+                      error.response.data.detail ||
+                      errorMessage;
+      }
+      
+      setMessage({ type: 'error', text: errorMessage });
     } finally {
       setLoadingPremium(false);
     }
   };
 
   const handleCheckPremiumPayment = async () => {
-    if (!premiumDetails?.premium_details?.reference_number) {
+    if (!premiumDetails?.reference_number) {
       setMessage({ type: 'error', text: 'Please request premium listing first to get a reference number.' });
       return;
     }
     try {
       setLoadingPremium(true);
+      if (token) {
+        apiClient.setToken(token);
+      }
       const res = await apiClient.post('/api/payments/dashboard/check-deposit-by-customer-code/', {
-        customer_code: user?.customer_code,
-        amount: premiumDetails.premium_details.monthly_cost || 299.00,
-        reference_number: premiumDetails.premium_details.reference_number,
+        customer_code: premiumDetails.customer_code || user?.customer_code,
+        amount: premiumDetails.amount || 299.00,
+        reference_number: premiumDetails.reference_number,
       });
       if (res.success && res.new_status === 'premium_active') {
         setIsPremiumActive(true);
@@ -686,18 +745,36 @@ const SettingsPage = () => {
                     <button
                       onClick={() => handleRequestPremium('monthly')}
                       disabled={loadingPremium}
-                      className="px-4 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:opacity-50 text-center"
+                      className="px-4 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:opacity-50 text-center transition-colors"
                     >
-                      <div className="font-bold text-lg">R299</div>
-                      <div className="text-sm">Monthly</div>
+                      {loadingPremium ? (
+                        <div className="flex items-center justify-center">
+                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                          <span className="text-sm">Processing...</span>
+                        </div>
+                      ) : (
+                        <>
+                          <div className="font-bold text-lg">R299</div>
+                          <div className="text-sm">Monthly</div>
+                        </>
+                      )}
                     </button>
                     <button
                       onClick={() => handleRequestPremium('lifetime')}
                       disabled={loadingPremium}
-                      className="px-4 py-3 bg-gray-900 text-white rounded-lg hover:bg-gray-800 disabled:opacity-50 text-center"
+                      className="px-4 py-3 bg-gray-900 text-white rounded-lg hover:bg-gray-800 disabled:opacity-50 text-center transition-colors"
                     >
-                      <div className="font-bold text-lg">R2,990</div>
-                      <div className="text-sm">Lifetime</div>
+                      {loadingPremium ? (
+                        <div className="flex items-center justify-center">
+                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                          <span className="text-sm">Processing...</span>
+                        </div>
+                      ) : (
+                        <>
+                          <div className="font-bold text-lg">R2,990</div>
+                          <div className="text-sm">Lifetime</div>
+                        </>
+                      )}
                     </button>
                   </div>
                   {!premiumDetails ? (
@@ -712,10 +789,10 @@ const SettingsPage = () => {
                         Your premium listing will be activated automatically once payment is confirmed.
                       </p>
                       <div className="mt-3 space-y-1 text-sm text-blue-900">
-                        <p><strong>Bank:</strong> {premiumDetails.premium_details?.bank_name || 'Nedbank'}</p>
-                        <p><strong>Account Number:</strong> {premiumDetails.premium_details?.account_number || '1313872032'}</p>
-                        <p><strong>Branch Code:</strong> {premiumDetails.premium_details?.branch_code || '198765'}</p>
-                        <p><strong>Reference:</strong> <span className="font-mono text-lg bg-blue-100 px-2 py-1 rounded">{premiumDetails.premium_details?.reference_number || 'N/A'}</span></p>
+                        <p><strong>Bank:</strong> {premiumDetails.banking_details?.bank_name || premiumDetails.bank_name || 'Nedbank'}</p>
+                        <p><strong>Account Number:</strong> {premiumDetails.banking_details?.account_number || premiumDetails.account_number || '1313872032'}</p>
+                        <p><strong>Branch Code:</strong> {premiumDetails.banking_details?.branch_code || premiumDetails.branch_code || '198765'}</p>
+                        <p><strong>Reference:</strong> <span className="font-mono text-lg bg-blue-100 px-2 py-1 rounded">{premiumDetails.reference_number || 'N/A'}</span></p>
                         <p className="text-xs text-blue-600 mt-2">
                           (Copy this reference exactly for automatic activation)
                         </p>
@@ -775,14 +852,14 @@ const SettingsPage = () => {
                     <div className="space-y-2">
                       <div className="flex justify-between">
                         <span className="text-sm text-gray-600">Bank:</span>
-                        <span className="text-sm font-medium">{premiumDetails.eft_details?.bank_name || 'Nedbank'}</span>
+                        <span className="text-sm font-medium">{premiumDetails.banking_details?.bank_name || premiumDetails.bank_name || 'Nedbank'}</span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-sm text-gray-600">Account Number:</span>
                         <div className="flex items-center space-x-2">
-                          <span className="text-sm font-medium">{premiumDetails.eft_details?.account_number || '1313872032'}</span>
+                          <span className="text-sm font-medium">{premiumDetails.banking_details?.account_number || premiumDetails.account_number || '1313872032'}</span>
                           <button
-                            onClick={() => navigator.clipboard.writeText(premiumDetails.eft_details?.account_number || '1313872032')}
+                            onClick={() => navigator.clipboard.writeText(premiumDetails.banking_details?.account_number || premiumDetails.account_number || '1313872032')}
                             className="text-blue-600 hover:text-blue-700"
                             title="Copy account number"
                           >
@@ -792,11 +869,11 @@ const SettingsPage = () => {
                       </div>
                       <div className="flex justify-between">
                         <span className="text-sm text-gray-600">Branch Code:</span>
-                        <span className="text-sm font-medium">{premiumDetails.eft_details?.branch_code || '198765'}</span>
+                        <span className="text-sm font-medium">{premiumDetails.banking_details?.branch_code || premiumDetails.branch_code || '198765'}</span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-sm text-gray-600">Account Holder:</span>
-                        <span className="text-sm font-medium">{premiumDetails.eft_details?.account_holder || 'ProConnectSA (Pty) Ltd'}</span>
+                        <span className="text-sm font-medium">{premiumDetails.banking_details?.account_holder || premiumDetails.account_holder || 'ProConnectSA (Pty) Ltd'}</span>
                       </div>
                     </div>
                   </div>
@@ -806,10 +883,10 @@ const SettingsPage = () => {
                     <h4 className="font-semibold text-blue-900 mb-2">⚠️ Payment Reference (REQUIRED)</h4>
                     <div className="flex items-center justify-between bg-white border-2 border-blue-400 rounded-lg p-3 mb-2">
                       <span className="font-mono text-lg font-bold text-blue-600">
-                        {premiumDetails.eft_details?.reference || 'N/A'}
+                        {premiumDetails.reference_number || 'N/A'}
                       </span>
                       <button
-                        onClick={() => navigator.clipboard.writeText(premiumDetails.eft_details?.reference || '')}
+                        onClick={() => navigator.clipboard.writeText(premiumDetails.reference_number || '')}
                         className="text-blue-600 hover:text-blue-700 ml-2"
                         title="Copy reference number"
                       >
@@ -836,7 +913,7 @@ const SettingsPage = () => {
                     <h4 className="font-medium text-yellow-900 mb-2">Payment Instructions</h4>
                     <ul className="text-sm text-yellow-800 space-y-1 list-disc list-inside">
                       <li>Make an EFT payment of <strong>R{selectedPremiumPlan === 'monthly' ? '299' : '2,990'}</strong> to the account above</li>
-                      <li>Use the reference number: <strong className="font-mono">{premiumDetails.eft_details?.reference || 'N/A'}</strong></li>
+                      <li>Use the reference number: <strong className="font-mono">{premiumDetails.reference_number || 'N/A'}</strong></li>
                       <li>Premium listing activates automatically within 5 minutes of payment confirmation</li>
                       <li>You'll receive an email confirmation once activated</li>
                       <li>Contact support if premium doesn't activate within 30 minutes</li>
