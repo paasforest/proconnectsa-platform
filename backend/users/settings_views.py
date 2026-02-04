@@ -236,7 +236,7 @@ def delete_profile_image(request):
 def list_verification_documents(request):
     """List provider verification documents"""
     try:
-        if request.user.user_type != 'provider':
+        if not request.user.is_provider:
             return Response({'success': False, 'message': 'Only providers can list documents'}, status=status.HTTP_403_FORBIDDEN)
         
         profile = request.user.provider_profile
@@ -257,7 +257,7 @@ def upload_verification_document(request):
       - file: the uploaded file
     """
     try:
-        if request.user.user_type != 'provider':
+        if not request.user.is_provider:
             return Response({'success': False, 'message': 'Only providers can upload documents'}, status=status.HTTP_403_FORBIDDEN)
         
         if 'file' not in request.FILES:

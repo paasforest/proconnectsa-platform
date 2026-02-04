@@ -27,6 +27,25 @@ interface UserProfile {
 
 const SettingsPage = () => {
   const { user, token } = useAuth();
+  // More robust userType detection - check multiple possible field names
+  const userType = (user as any)?.user_type || (user as any)?.userType || '';
+  
+  // Determine if user is a provider - check multiple sources
+  const isProvider = user && (
+    (user as any).user_type === 'provider' || 
+    (user as any).user_type === 'service_provider' ||
+    userType === 'provider' || 
+    userType === 'service_provider' ||
+    // Fallback: if user has business_name or is on provider dashboard, assume provider
+    !!(user as any).business_name
+  );
+  
+  // Set token immediately when component mounts or token changes
+  useEffect(() => {
+    if (token) {
+      apiClient.setToken(token);
+    }
+  }, [token]);
   const [profile, setProfile] = useState<UserProfile>({
     id: user?.id?.toString() || '',
     email: user?.email || '',
@@ -52,7 +71,7 @@ const SettingsPage = () => {
     confirm_password: ''
   });
   const [showPassword, setShowPassword] = useState(false);
-  const [message, setMessage] = useState<{type: 'success' | 'error', text: string} | null>(null);
+  const [message, setMessage] = useState<{type: 'success' | 'error' | 'info', text: string} | null>(null);
   const [verificationStatus, setVerificationStatus] = useState<string>('');
   const [verificationDocs, setVerificationDocs] = useState<Record<string, Array<{url: string; path: string; uploaded_at: string}>>>({});
   const [docType, setDocType] = useState<string>('id_document');
@@ -64,6 +83,11 @@ const SettingsPage = () => {
     if (!user) {
       setLoading(false);
       return;
+    }
+
+    // Token is already set in the useEffect above, but ensure it's set here too
+    if (token) {
+      apiClient.setToken(token);
     }
 
     let isMounted = true;
@@ -111,7 +135,7 @@ const SettingsPage = () => {
       }
     };
 
-    if (user.userType === 'provider') {
+    if (isProvider) {
       fetchProfile();
       
       // Fetch verification documents
@@ -188,10 +212,11 @@ const SettingsPage = () => {
     if (!file) return;
 
     try {
-      const formData = new FormData();
-      formData.append('profile_image', file);
-      
-      const response = await apiClient.post('/api/settings/upload-image/', formData);
+      if (token) {
+        apiClient.setToken(token);
+      }
+
+      const response = await apiClient.uploadProfileImage(file);
       setProfile({ ...profile, profile_image: response.image_url });
       setMessage({ type: 'success', text: 'Profile image updated successfully!' });
     } catch (error) {
@@ -204,6 +229,9 @@ const SettingsPage = () => {
     const file = event.target.files?.[0];
     if (!file) return;
     try {
+      if (token) {
+        apiClient.setToken(token);
+      }
       const res = await apiClient.uploadVerificationDocument(docType, file);
       setMessage({ type: 'success', text: 'Verification document uploaded.' });
       setVerificationStatus(res.verification_status || verificationStatus);
@@ -627,7 +655,7 @@ const SettingsPage = () => {
           )}
 
           {/* Premium Listing - Provider Only */}
-          {user?.userType === 'provider' && (
+          {isProvider && (
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
               <h3 className="text-lg font-semibold text-gray-900 mb-4">Premium Listing</h3>
               
@@ -832,7 +860,7 @@ const SettingsPage = () => {
           )}
 
           {/* Verification Documents - Provider Only */}
-          {user?.userType === 'provider' && (
+          {isProvider && (
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
               <h3 className="text-lg font-semibold text-gray-900 mb-4">Verification Documents</h3>
               

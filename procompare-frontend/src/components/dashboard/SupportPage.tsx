@@ -188,24 +188,6 @@ const SupportPage = () => {
       <div className="mb-6">
         <h1 className="text-3xl font-bold text-gray-900">Support</h1>
         <p className="text-gray-600 mt-2">Get help and manage your support tickets</p>
-        
-        {/* Test Success Message Button */}
-        <button 
-          onClick={() => {
-            setSuccessMessage('Test success message!');
-            setSuccessDetails({
-              ticketId: 'TEST-12345',
-              timestamp: new Date().toISOString()
-            });
-            setTimeout(() => {
-              setSuccessMessage('');
-              setSuccessDetails(null);
-            }, 3000);
-          }}
-          className="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-        >
-          Test Success Message
-        </button>
       </div>
 
       {/* Success Message */}
@@ -215,8 +197,6 @@ const SupportPage = () => {
             <CheckCircle className="w-5 h-5 text-green-600 mr-3 mt-0.5" />
             <div className="flex-1">
               <p className="text-green-800 font-medium">{successMessage}</p>
-              {/* Debug info */}
-              <p className="text-xs text-green-600 mt-1">Debug: successMessage={successMessage}, successDetails={JSON.stringify(successDetails)}</p>
               {successDetails && (
                 <div className="mt-2 text-sm text-green-700">
                   <div className="flex flex-wrap gap-4">

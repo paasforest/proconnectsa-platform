@@ -405,6 +405,16 @@ export class SimpleApiClient {
     })
   }
 
+  async uploadProfileImage(file: File) {
+    const formData = new FormData()
+    // Backend expects request.FILES['image']
+    formData.append('image', file)
+    return this.request<any>('/api/auth/settings/upload-image/', {
+      method: 'POST',
+      body: formData,
+    })
+  }
+
   // Lead Visibility endpoints
   async getLeadVisibility(leadId: string) {
     return this.request(`/api/leads/${leadId}/visibility/`)

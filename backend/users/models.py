@@ -68,7 +68,8 @@ class User(AbstractUser):
     
     @property
     def is_provider(self):
-        return self.user_type == 'provider'
+        # Support legacy 'service_provider' user_type that exists in older data/flows
+        return self.user_type in ('provider', 'service_provider')
     
     @property
     def is_client(self):
