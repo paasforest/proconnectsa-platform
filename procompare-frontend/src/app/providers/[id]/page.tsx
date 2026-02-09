@@ -253,7 +253,7 @@ export default async function ProviderDetailPage({ params }: { params: Promise<{
                 </div>
 
                 {/* Google Reviews Section */}
-                {provider.google_reviews && provider.google_reviews.length > 0 && (
+                {(provider.google_reviews && provider.google_reviews.length > 0) ? (
                   <div className="bg-white border rounded-lg p-6">
                     <h2 className="text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
                       <CheckCircle className="w-5 h-5 text-green-600" />
