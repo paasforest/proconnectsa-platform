@@ -405,6 +405,51 @@ export class SimpleApiClient {
     })
   }
 
+  async submitGoogleReview(data: {
+    google_link: string;
+    review_text?: string;
+    review_rating: number;
+    review_screenshot?: File;
+    agreement_accepted: boolean;
+  }) {
+    const formData = new FormData()
+    formData.append('google_link', data.google_link)
+    if (data.review_text) {
+      formData.append('review_text', data.review_text)
+    }
+    formData.append('review_rating', data.review_rating.toString())
+    if (data.review_screenshot) {
+      formData.append('review_screenshot', data.review_screenshot)
+    }
+    formData.append('agreement_accepted', data.agreement_accepted ? 'true' : 'false')
+    
+    return this.request<any>('/api/reviews/google/submit/', {
+      method: 'POST',
+      body: formData,
+    })
+  }
+
+  async getMyGoogleReviews() {
+    return this.request<any>('/api/reviews/google/my-reviews/')
+  }
+
+  async moderateGoogleReview(reviewId: string, action: 'approve' | 'reject' | 'ban', adminNotes?: string) {
+    return this.request<any>(`/api/reviews/google/admin/${reviewId}/moderate/`, {
+      method: 'POST',
+      body: JSON.stringify({
+        action,
+        admin_notes: adminNotes || '',
+      }),
+    })
+  }
+
+  async getAdminGoogleReviews(status?: string) {
+    const url = status && status !== 'all'
+      ? `/api/reviews/google/admin/list/?status=${status}`
+      : '/api/reviews/google/admin/list/';
+    return this.request<any>(url)
+  }
+
   async uploadProfileImage(file: File) {
     const formData = new FormData()
     // Backend expects request.FILES['image']

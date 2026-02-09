@@ -53,6 +53,25 @@ def _provider_public_dict(p: ProviderProfile):
             except ServiceCategory.DoesNotExist:
                 service_category_names.append(slug.replace('-', ' ').title())
     
+    # Get approved Google reviews
+    from backend.reviews.models import GoogleReview
+    google_reviews = GoogleReview.objects.filter(
+        provider_profile=p,
+        review_status='approved'
+    ).order_by('-submission_date')[:10]  # Limit to 10 most recent
+    
+    google_reviews_data = [
+        {
+            'id': str(gr.id),
+            'review_text': gr.review_text,
+            'review_rating': gr.review_rating,
+            'review_screenshot': gr.review_screenshot,
+            'google_link': gr.google_link,
+            'submission_date': gr.submission_date.isoformat() if gr.submission_date else None,
+        }
+        for gr in google_reviews
+    ]
+    
     return {
         'id': str(p.id),
         'business_name': p.business_name,
@@ -82,6 +101,9 @@ def _provider_public_dict(p: ProviderProfile):
         'profile_image': p.profile_image or '',
         'portfolio_images': p.portfolio_images or [],
         'insurance_valid_until': p.insurance_valid_until.isoformat() if p.insurance_valid_until else None,
+        # Google Reviews (approved only)
+        'google_reviews': google_reviews_data,
+        'google_reviews_count': len(google_reviews_data),
         # No sensitive contact info exposed here
     }
 

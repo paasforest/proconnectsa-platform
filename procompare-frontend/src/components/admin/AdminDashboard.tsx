@@ -4,14 +4,15 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/components/AuthProvider';
 import {
   LayoutDashboard, MessageSquare, Users, DollarSign, Wrench, 
-  Settings, BarChart3, Bell, LogOut, Menu, X
+  Settings, BarChart3, Bell, LogOut, Menu, X, Star
 } from 'lucide-react';
 import AdminSupportDashboard from './AdminSupportDashboard';
 import StaffManagement from './StaffManagement';
 import FinanceDashboard from './FinanceDashboard';
 import TechnicalDashboard from './TechnicalDashboard';
+import GoogleReviewsModeration from './GoogleReviewsModeration';
 
-type DashboardView = 'overview' | 'support' | 'staff' | 'finance' | 'technical' | 'settings';
+type DashboardView = 'overview' | 'support' | 'staff' | 'finance' | 'technical' | 'settings' | 'google-reviews';
 
 const AdminDashboard = () => {
   const { user, logout } = useAuth();
@@ -21,6 +22,7 @@ const AdminDashboard = () => {
   const navigation = [
     { id: 'overview', name: 'Overview', icon: LayoutDashboard, current: currentView === 'overview' },
     { id: 'support', name: 'Support Tickets', icon: MessageSquare, current: currentView === 'support' },
+    { id: 'google-reviews', name: 'Google Reviews', icon: Star, current: currentView === 'google-reviews' },
     { id: 'staff', name: 'Staff Management', icon: Users, current: currentView === 'staff' },
     { id: 'finance', name: 'Finance', icon: DollarSign, current: currentView === 'finance' },
     { id: 'technical', name: 'Technical', icon: Wrench, current: currentView === 'technical' },
@@ -31,6 +33,8 @@ const AdminDashboard = () => {
     switch (currentView) {
       case 'support':
         return <AdminSupportDashboard />;
+      case 'google-reviews':
+        return <GoogleReviewsModeration />;
       case 'staff':
         return <StaffManagement />;
       case 'finance':

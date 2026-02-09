@@ -1,5 +1,5 @@
 from django.db import models
-from django.core.validators import MinValueValidator, MaxValueValidator
+from django.core.validators import MinValueValidator, MaxValueValidator, URLValidator
 import uuid
 from decimal import Decimal
 from django.utils import timezone
@@ -127,4 +127,124 @@ class Review(models.Model):
         self.is_verified = True
         self.save(update_fields=['is_verified'])
 
+
+class GoogleReview(models.Model):
+    """
+    Google Reviews submitted by providers for verification.
+    Providers submit their Google Business reviews with screenshots for admin verification.
+    """
+    REVIEW_STATUS = [
+        ('pending', 'Pending'),
+        ('approved', 'Approved'),
+        ('rejected', 'Rejected'),
+        ('banned', 'Banned'),
+    ]
+    
+    # Primary key
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    
+    # Provider relationship
+    provider_profile = models.ForeignKey(
+        'users.ProviderProfile',
+        on_delete=models.CASCADE,
+        related_name='google_reviews',
+        help_text="The provider who submitted this review"
+    )
+    
+    # Review information
+    google_link = models.URLField(
+        max_length=500,
+        validators=[URLValidator()],
+        help_text="Google Maps link to the review"
+    )
+    review_text = models.TextField(
+        blank=True,
+        help_text="The review text (optional, can be extracted from screenshot)"
+    )
+    review_rating = models.IntegerField(
+        validators=[MinValueValidator(1), MaxValueValidator(5)],
+        help_text="Star rating (1-5)"
+    )
+    review_screenshot = models.URLField(
+        blank=True,
+        help_text="URL to uploaded screenshot image"
+    )
+    
+    # Verification status
+    review_status = models.CharField(
+        max_length=20,
+        choices=REVIEW_STATUS,
+        default='pending',
+        help_text="Admin verification status"
+    )
+    
+    # Admin notes
+    admin_notes = models.TextField(
+        blank=True,
+        help_text="Admin notes for rejection/ban reasons"
+    )
+    
+    # Timestamps
+    submission_date = models.DateTimeField(auto_now_add=True)
+    reviewed_at = models.DateTimeField(null=True, blank=True)
+    reviewed_by = models.ForeignKey(
+        'users.User',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='google_reviews_reviewed',
+        help_text="Admin who reviewed this submission"
+    )
+    
+    # Optional: For future automation
+    google_place_id = models.CharField(
+        max_length=255,
+        blank=True,
+        help_text="Google Place ID for automated fetching (future feature)"
+    )
+    
+    class Meta:
+        ordering = ['-submission_date']
+        indexes = [
+            models.Index(fields=['provider_profile', 'review_status']),
+            models.Index(fields=['review_status', 'submission_date']),
+        ]
+        verbose_name = "Google Review"
+        verbose_name_plural = "Google Reviews"
+    
+    def __str__(self):
+        return f"Google Review for {self.provider_profile.business_name} - {self.review_rating}★ ({self.review_status})"
+    
+    def approve(self, admin_user=None):
+        """Approve the review"""
+        self.review_status = 'approved'
+        self.reviewed_at = timezone.now()
+        if admin_user:
+            self.reviewed_by = admin_user
+        self.save(update_fields=['review_status', 'reviewed_at', 'reviewed_by'])
+    
+    def reject(self, admin_user=None, notes=""):
+        """Reject the review"""
+        self.review_status = 'rejected'
+        self.reviewed_at = timezone.now()
+        if admin_user:
+            self.reviewed_by = admin_user
+        if notes:
+            self.admin_notes = notes
+        self.save(update_fields=['review_status', 'reviewed_at', 'reviewed_by', 'admin_notes'])
+    
+    def ban(self, admin_user=None, notes=""):
+        """Ban the review and optionally disable provider account"""
+        self.review_status = 'banned'
+        self.reviewed_at = timezone.now()
+        if admin_user:
+            self.reviewed_by = admin_user
+        if notes:
+            self.admin_notes = notes
+        self.save(update_fields=['review_status', 'reviewed_at', 'reviewed_by', 'admin_notes'])
+        
+        # Optionally suspend provider account for false reviews
+        if self.provider_profile.verification_status != 'suspended':
+            self.provider_profile.verification_status = 'suspended'
+            self.provider_profile.save(update_fields=['verification_status'])
 

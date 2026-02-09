@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Review
+from .models import Review, GoogleReview
 from backend.users.serializers import UserSerializer
 from backend.leads.serializers import LeadAssignmentSerializer
 
@@ -156,3 +156,96 @@ class ReviewSearchSerializer(serializers.Serializer):
     service_category = serializers.IntegerField(required=False)
 
 
+
+class GoogleReviewSerializer(serializers.ModelSerializer):
+    """Serializer for GoogleReview model"""
+    provider_profile = serializers.SerializerMethodField()
+    reviewed_by_name = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = GoogleReview
+        fields = [
+            'id', 'provider_profile', 'google_link', 'review_text',
+            'review_rating', 'review_screenshot', 'review_status',
+            'admin_notes', 'submission_date', 'reviewed_at', 'reviewed_by',
+            'reviewed_by_name', 'google_place_id'
+        ]
+        read_only_fields = [
+            'id', 'submission_date', 'reviewed_at', 'reviewed_by',
+            'review_status', 'admin_notes'
+        ]
+    
+    def get_provider_profile(self, obj):
+        return {
+            'id': str(obj.provider_profile.id),
+            'business_name': obj.provider_profile.business_name,
+        }
+    
+    def get_reviewed_by_name(self, obj):
+        if obj.reviewed_by:
+            return f"{obj.reviewed_by.first_name} {obj.reviewed_by.last_name}".strip()
+        return None
+
+
+class GoogleReviewSubmitSerializer(serializers.ModelSerializer):
+    """Serializer for providers to submit Google reviews"""
+    agreement_accepted = serializers.BooleanField(
+        required=True,
+        help_text="Must be True - confirms review is genuine"
+    )
+    
+    class Meta:
+        model = GoogleReview
+        fields = [
+            'google_link', 'review_text', 'review_rating',
+            'review_screenshot', 'google_place_id', 'agreement_accepted'
+        ]
+    
+    def validate_agreement_accepted(self, value):
+        """Ensure agreement checkbox is checked"""
+        if not value:
+            raise serializers.ValidationError(
+                "You must confirm that all reviews submitted are genuine and from your actual Google Business profile."
+            )
+        return value
+    
+    def validate_google_link(self, value):
+        """Validate Google Maps link"""
+        if not value.startswith(('https://www.google.com/maps', 'https://maps.google.com', 'https://goo.gl/maps')):
+            raise serializers.ValidationError("Please provide a valid Google Maps link")
+        return value
+    
+    def validate_review_rating(self, value):
+        """Validate rating is 1-5"""
+        if value < 1 or value > 5:
+            raise serializers.ValidationError("Rating must be between 1 and 5")
+        return value
+    
+    def create(self, validated_data):
+        """Create Google review submission"""
+        # Remove agreement_accepted from validated_data (not a model field)
+        validated_data.pop('agreement_accepted', None)
+        
+        # Get provider profile from request user
+        request = self.context.get('request')
+        if not request or not request.user or not request.user.is_provider:
+            raise serializers.ValidationError("Only providers can submit Google reviews")
+        
+        provider_profile = request.user.provider_profile
+        validated_data['provider_profile'] = provider_profile
+        validated_data['review_status'] = 'pending'  # Always start as pending
+        
+        return super().create(validated_data)
+
+
+class GoogleReviewModerationSerializer(serializers.Serializer):
+    """Serializer for admin to approve/reject/ban Google reviews"""
+    action = serializers.ChoiceField(
+        choices=['approve', 'reject', 'ban'],
+        required=True
+    )
+    admin_notes = serializers.CharField(
+        required=False,
+        allow_blank=True,
+        help_text="Optional notes for rejection/ban"
+    )

@@ -1,14 +1,23 @@
 from rest_framework import generics, status, permissions, filters
-from rest_framework.decorators import api_view, permission_classes
+from rest_framework.decorators import api_view, permission_classes, parser_classes
 from rest_framework.response import Response
+from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from django_filters.rest_framework import DjangoFilterBackend
-from .models import Review
+from django.core.files.storage import default_storage
+from django.core.files.base import ContentFile
+from django.utils import timezone
+import os
+import logging
+from .models import Review, GoogleReview
 from .serializers import (
     ReviewSerializer, ReviewCreateSerializer, ReviewModerationSerializer,
-    ReviewSearchSerializer
+    ReviewSearchSerializer, GoogleReviewSerializer, GoogleReviewSubmitSerializer,
+    GoogleReviewModerationSerializer
 )
 from backend.users.models import ProviderProfile
 from backend.leads.models import LeadAssignment
+
+logger = logging.getLogger(__name__)
 
 
 class ReviewListView(generics.ListAPIView):
@@ -221,4 +230,168 @@ def review_stats_view(request, provider_id):
         'rating_distribution': rating_distribution,
         'recommendation_rate': round(recommendation_rate, 2)
     })
+
+
+# ========== Google Reviews API Views ==========
+
+@api_view(['POST'])
+@permission_classes([permissions.IsAuthenticated])
+@parser_classes([MultiPartParser, FormParser, JSONParser])
+def submit_google_review(request):
+    """
+    Provider submits a Google review for verification.
+    Accepts FormData with:
+    - google_link (required): URL to Google Maps review
+    - review_text (optional): Review text
+    - review_rating (required): 1-5 star rating
+    - review_screenshot (optional): Image file (JPEG, PNG, max 10MB)
+    - agreement_accepted (required): Must be 'true' or True
+    - google_place_id (optional): For future automation
+    """
+    if not request.user.is_provider:
+        return Response(
+            {'error': 'Only providers can submit Google reviews'},
+            status=status.HTTP_403_FORBIDDEN
+        )
+    
+    # Handle file upload for screenshot
+    screenshot_url = None
+    if 'review_screenshot' in request.FILES:
+        screenshot_file = request.FILES['review_screenshot']
+        
+        # Validate file type
+        allowed_types = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif']
+        if screenshot_file.content_type not in allowed_types:
+            return Response(
+                {'error': 'Invalid file type. Only JPEG, PNG, and GIF files are allowed.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # Validate file size (max 10MB)
+        if screenshot_file.size > 10 * 1024 * 1024:
+            return Response(
+                {'error': 'File too large. Maximum size is 10MB.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # Save file
+        try:
+            file_extension = os.path.splitext(screenshot_file.name)[1]
+            filename = f"google_reviews/user_{request.user.id}/screenshot_{int(timezone.now().timestamp())}{file_extension}"
+            saved_path = default_storage.save(filename, ContentFile(screenshot_file.read()))
+            screenshot_url = default_storage.url(saved_path) if hasattr(default_storage, 'url') else f"/media/{saved_path}"
+        except Exception as e:
+            logger.error(f"Error saving screenshot: {str(e)}")
+            return Response(
+                {'error': 'Failed to save screenshot'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+    
+    # Prepare data for serializer
+    data = request.data.copy()
+    if screenshot_url:
+        data['review_screenshot'] = screenshot_url
+    
+    # Handle agreement_accepted from form data (might be string 'true'/'false')
+    if 'agreement_accepted' in data:
+        if isinstance(data['agreement_accepted'], str):
+            data['agreement_accepted'] = data['agreement_accepted'].lower() == 'true'
+    
+    serializer = GoogleReviewSubmitSerializer(data=data, context={'request': request})
+    if serializer.is_valid():
+        google_review = serializer.save()
+        return Response(
+            GoogleReviewSerializer(google_review).data,
+            status=status.HTTP_201_CREATED
+        )
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['GET'])
+@permission_classes([permissions.IsAuthenticated])
+def list_my_google_reviews(request):
+    """Provider lists their own Google review submissions"""
+    if not request.user.is_provider:
+        return Response(
+            {'error': 'Only providers can view their Google reviews'},
+            status=status.HTTP_403_FORBIDDEN
+        )
+    
+    provider_profile = request.user.provider_profile
+    reviews = GoogleReview.objects.filter(provider_profile=provider_profile).order_by('-submission_date')
+    serializer = GoogleReviewSerializer(reviews, many=True)
+    return Response(serializer.data)
+
+
+@api_view(['GET'])
+@permission_classes([permissions.AllowAny])
+def public_google_reviews_by_profile(request, profile_id):
+    """Get approved Google reviews for a provider (public endpoint)"""
+    try:
+        profile = ProviderProfile.objects.get(id=profile_id)
+    except ProviderProfile.DoesNotExist:
+        return Response({'error': 'Provider not found'}, status=status.HTTP_404_NOT_FOUND)
+    
+    reviews = GoogleReview.objects.filter(
+        provider_profile=profile,
+        review_status='approved'
+    ).order_by('-submission_date')
+    
+    serializer = GoogleReviewSerializer(reviews, many=True)
+    return Response(serializer.data)
+
+
+@api_view(['GET'])
+@permission_classes([permissions.IsAuthenticated])
+def admin_list_google_reviews(request):
+    """Admin lists all Google review submissions with filtering"""
+    if not request.user.is_admin:
+        return Response(
+            {'error': 'Only admins can view all Google reviews'},
+            status=status.HTTP_403_FORBIDDEN
+        )
+    
+    status_filter = request.GET.get('status', 'pending')
+    if status_filter not in ['pending', 'approved', 'rejected', 'banned', 'all']:
+        status_filter = 'pending'
+    
+    reviews = GoogleReview.objects.all()
+    if status_filter != 'all':
+        reviews = reviews.filter(review_status=status_filter)
+    
+    reviews = reviews.select_related('provider_profile', 'reviewed_by').order_by('-submission_date')
+    serializer = GoogleReviewSerializer(reviews, many=True)
+    return Response(serializer.data)
+
+
+@api_view(['POST'])
+@permission_classes([permissions.IsAuthenticated])
+def admin_moderate_google_review(request, review_id):
+    """Admin approves/rejects/bans a Google review"""
+    if not request.user.is_admin:
+        return Response(
+            {'error': 'Only admins can moderate Google reviews'},
+            status=status.HTTP_403_FORBIDDEN
+        )
+    
+    try:
+        google_review = GoogleReview.objects.get(id=review_id)
+    except GoogleReview.DoesNotExist:
+        return Response({'error': 'Google review not found'}, status=status.HTTP_404_NOT_FOUND)
+    
+    serializer = GoogleReviewModerationSerializer(data=request.data)
+    if not serializer.is_valid():
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    action = serializer.validated_data['action']
+    admin_notes = serializer.validated_data.get('admin_notes', '')
+    
+    if action == 'approve':
+        google_review.approve(admin_user=request.user)
+    elif action == 'reject':
+        google_review.reject(admin_user=request.user, notes=admin_notes)
+    elif action == 'ban':
+        google_review.ban(admin_user=request.user, notes=admin_notes)
+    
+    return Response(GoogleReviewSerializer(google_review).data)
 

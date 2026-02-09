@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import { apiClient } from '@/lib/api-simple';
 import { useAuth } from '@/components/AuthProvider';
+import GoogleReviewForm from './GoogleReviewForm';
 
 interface UserProfile {
   id: string;
@@ -78,6 +79,8 @@ const SettingsPage = () => {
   const [premiumDetails, setPremiumDetails] = useState<any>(null);
   const [isPremiumActive, setIsPremiumActive] = useState<boolean>(false);
   const [loadingPremium, setLoadingPremium] = useState(false);
+  const [showGoogleReviewForm, setShowGoogleReviewForm] = useState(false);
+  const [myGoogleReviews, setMyGoogleReviews] = useState<any[]>([]);
 
   useEffect(() => {
     if (!user) {
@@ -161,6 +164,17 @@ const SettingsPage = () => {
           })
           .catch(err => {
             console.warn('Failed to load premium status', err);
+          });
+        
+        // Fetch Google reviews
+        apiClient.getMyGoogleReviews()
+          .then((reviews: any) => {
+            if (isMounted) {
+              setMyGoogleReviews(Array.isArray(reviews) ? reviews : []);
+            }
+          })
+          .catch(err => {
+            console.warn('Failed to load Google reviews', err);
           });
       }
     } else {
@@ -933,6 +947,122 @@ const SettingsPage = () => {
                   </button>
                 </div>
               </div>
+            </div>
+          )}
+
+          {/* Google Reviews - Provider Only */}
+          {isProvider && (
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900">Google Reviews</h3>
+                  <p className="text-sm text-gray-600 mt-1">
+                    Submit your Google Business reviews for verification and display on your profile
+                  </p>
+                </div>
+                {!showGoogleReviewForm && (
+                  <button
+                    onClick={() => setShowGoogleReviewForm(true)}
+                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm font-medium"
+                  >
+                    Submit Review
+                  </button>
+                )}
+              </div>
+
+              {showGoogleReviewForm ? (
+                <div className="mt-4">
+                  <GoogleReviewForm
+                    onSuccess={() => {
+                      setShowGoogleReviewForm(false);
+                      // Refresh reviews list
+                      if (token) {
+                        apiClient.setToken(token);
+                        apiClient.getMyGoogleReviews()
+                          .then((reviews: any) => {
+                            setMyGoogleReviews(Array.isArray(reviews) ? reviews : []);
+                          })
+                          .catch(err => console.warn('Failed to refresh reviews', err));
+                      }
+                    }}
+                    onCancel={() => setShowGoogleReviewForm(false)}
+                  />
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {/* My Reviews List */}
+                  {myGoogleReviews.length > 0 ? (
+                    <div>
+                      <h4 className="text-sm font-medium text-gray-700 mb-3">Your Submissions</h4>
+                      <div className="space-y-3">
+                        {myGoogleReviews.map((review: any) => (
+                          <div
+                            key={review.id}
+                            className={`border rounded-lg p-4 ${
+                              review.review_status === 'approved'
+                                ? 'bg-green-50 border-green-200'
+                                : review.review_status === 'rejected'
+                                ? 'bg-red-50 border-red-200'
+                                : review.review_status === 'banned'
+                                ? 'bg-red-100 border-red-300'
+                                : 'bg-yellow-50 border-yellow-200'
+                            }`}
+                          >
+                            <div className="flex items-start justify-between">
+                              <div className="flex-1">
+                                <div className="flex items-center gap-2 mb-2">
+                                  <div className="flex">
+                                    {[1, 2, 3, 4, 5].map((star) => (
+                                      <Star
+                                        key={star}
+                                        className={`w-4 h-4 ${
+                                          star <= review.review_rating
+                                            ? 'fill-yellow-400 text-yellow-400'
+                                            : 'text-gray-300'
+                                        }`}
+                                      />
+                                    ))}
+                                  </div>
+                                  <span className={`text-xs font-medium px-2 py-1 rounded ${
+                                    review.review_status === 'approved'
+                                      ? 'bg-green-200 text-green-800'
+                                      : review.review_status === 'rejected'
+                                      ? 'bg-red-200 text-red-800'
+                                      : review.review_status === 'banned'
+                                      ? 'bg-red-300 text-red-900'
+                                      : 'bg-yellow-200 text-yellow-800'
+                                  }`}>
+                                    {review.review_status.charAt(0).toUpperCase() + review.review_status.slice(1)}
+                                  </span>
+                                </div>
+                                {review.review_text && (
+                                  <p className="text-sm text-gray-700 mb-2 line-clamp-2">
+                                    {review.review_text}
+                                  </p>
+                                )}
+                                <p className="text-xs text-gray-500">
+                                  Submitted: {new Date(review.submission_date).toLocaleDateString()}
+                                </p>
+                                {review.admin_notes && (
+                                  <p className="text-xs text-red-600 mt-1">
+                                    Note: {review.admin_notes}
+                                  </p>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="text-center py-8 text-gray-500">
+                      <Star className="w-12 h-12 mx-auto mb-3 text-gray-300" />
+                      <p>No Google reviews submitted yet</p>
+                      <p className="text-sm mt-1">Click "Submit Review" to add your first Google review</p>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           )}
 

@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Review
+from .models import Review, GoogleReview
 
 
 @admin.register(Review)
@@ -68,4 +68,72 @@ class ReviewAdmin(admin.ModelAdmin):
         updated = queryset.update(is_verified=True)
         self.message_user(request, f'{updated} reviews verified.')
     verify_reviews.short_description = 'Verify selected reviews'
+
+
+@admin.register(GoogleReview)
+class GoogleReviewAdmin(admin.ModelAdmin):
+    """Admin configuration for GoogleReview model"""
+    list_display = [
+        'provider_profile', 'review_rating', 'review_status',
+        'submission_date', 'reviewed_at', 'reviewed_by'
+    ]
+    list_filter = [
+        'review_status', 'review_rating', 'submission_date', 'reviewed_at'
+    ]
+    search_fields = [
+        'provider_profile__business_name', 'review_text', 'google_link',
+        'admin_notes'
+    ]
+    ordering = ['-submission_date']
+    readonly_fields = ['submission_date', 'reviewed_at']
+    
+    fieldsets = (
+        ('Provider Information', {
+            'fields': ('provider_profile',)
+        }),
+        ('Review Information', {
+            'fields': (
+                'google_link', 'review_text', 'review_rating',
+                'review_screenshot', 'google_place_id'
+            )
+        }),
+        ('Verification Status', {
+            'fields': (
+                'review_status', 'admin_notes', 'reviewed_by', 'reviewed_at'
+            )
+        }),
+        ('Timestamps', {
+            'fields': ('submission_date',),
+            'classes': ('collapse',)
+        }),
+    )
+    
+    actions = ['approve_google_reviews', 'reject_google_reviews', 'ban_google_reviews']
+    
+    def approve_google_reviews(self, request, queryset):
+        """Approve selected Google reviews"""
+        count = 0
+        for review in queryset:
+            review.approve(admin_user=request.user)
+            count += 1
+        self.message_user(request, f'{count} Google reviews approved.')
+    approve_google_reviews.short_description = 'Approve selected Google reviews'
+    
+    def reject_google_reviews(self, request, queryset):
+        """Reject selected Google reviews"""
+        count = 0
+        for review in queryset:
+            review.reject(admin_user=request.user, notes='Bulk rejection from admin')
+            count += 1
+        self.message_user(request, f'{count} Google reviews rejected.')
+    reject_google_reviews.short_description = 'Reject selected Google reviews'
+    
+    def ban_google_reviews(self, request, queryset):
+        """Ban selected Google reviews (and suspend provider accounts)"""
+        count = 0
+        for review in queryset:
+            review.ban(admin_user=request.user, notes='Bulk ban from admin - false reviews detected')
+            count += 1
+        self.message_user(request, f'{count} Google reviews banned and providers suspended.')
+    ban_google_reviews.short_description = 'Ban selected Google reviews (suspends providers)'
 

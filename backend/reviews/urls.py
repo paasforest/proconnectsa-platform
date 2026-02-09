@@ -16,5 +16,12 @@ urlpatterns = [
     path('provider-by-profile/<int:profile_id>/stats/', views.review_stats_by_profile_view, name='provider-review-stats-by-profile'),
     # Eligible review assignments (authenticated client only)
     path('provider-by-profile/<int:profile_id>/eligible/', views.eligible_review_assignments_by_profile_view, name='provider-review-eligible-by-profile'),
+    
+    # Google Reviews
+    path('google/submit/', views.submit_google_review, name='google-review-submit'),
+    path('google/my-reviews/', views.list_my_google_reviews, name='google-review-list-my'),
+    path('google/provider-by-profile/<int:profile_id>/', views.public_google_reviews_by_profile, name='google-review-by-profile'),
+    path('google/admin/list/', views.admin_list_google_reviews, name='google-review-admin-list'),
+    path('google/admin/<uuid:review_id>/moderate/', views.admin_moderate_google_review, name='google-review-admin-moderate'),
 ]
 
