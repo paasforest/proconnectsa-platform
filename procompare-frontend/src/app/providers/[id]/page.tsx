@@ -259,7 +259,7 @@ export default async function ProviderDetailPage({ params }: { params: Promise<{
                     Verified Google Reviews
                   </h2>
                   {provider.google_reviews && provider.google_reviews.length > 0 ? (
-                    <>
+                    <div>
                       <p className="text-sm text-gray-600 mb-4">
                         These reviews have been verified from the provider's Google Business profile.
                       </p>
@@ -320,7 +320,7 @@ export default async function ProviderDetailPage({ params }: { params: Promise<{
                           Showing {provider.google_reviews.length} of {provider.google_reviews_count} verified Google reviews
                         </p>
                       )}
-                    </>
+                    </div>
                   ) : (
                     <div className="text-center py-8 text-gray-500">
                       <Star className="w-12 h-12 mx-auto mb-3 text-gray-300" />
