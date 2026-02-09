@@ -253,74 +253,84 @@ export default async function ProviderDetailPage({ params }: { params: Promise<{
                 </div>
 
                 {/* Google Reviews Section */}
-                {(provider.google_reviews && provider.google_reviews.length > 0) ? (
-                  <div className="bg-white border rounded-lg p-6">
-                    <h2 className="text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                      <CheckCircle className="w-5 h-5 text-green-600" />
-                      Verified Google Reviews
-                    </h2>
-                    <p className="text-sm text-gray-600 mb-4">
-                      These reviews have been verified from the provider's Google Business profile.
-                    </p>
-                    <div className="space-y-4">
-                      {provider.google_reviews.map((review) => (
-                        <div key={review.id} className="border border-gray-200 rounded-lg p-4 hover:border-blue-300 transition-colors">
-                          <div className="flex items-start justify-between mb-2">
-                            <div className="flex items-center gap-2">
-                              <div className="flex">
-                                {[1, 2, 3, 4, 5].map((star) => (
-                                  <Star
-                                    key={star}
-                                    className={`w-4 h-4 ${
-                                      star <= review.review_rating
-                                        ? 'fill-yellow-400 text-yellow-400'
-                                        : 'text-gray-300'
-                                    }`}
-                                  />
-                                ))}
-                              </div>
-                              <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200 text-xs">
-                                <CheckCircle className="w-3 h-3 mr-1" />
-                                Verified Google Review
-                              </Badge>
-                            </div>
-                            {review.google_link && (
-                              <a
-                                href={review.google_link}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="text-blue-600 hover:text-blue-800 text-sm flex items-center gap-1"
-                              >
-                                View on Google
-                                <ExternalLink className="w-3 h-3" />
-                              </a>
-                            )}
-                          </div>
-                          {review.review_text && (
-                            <p className="text-gray-700 mb-3 leading-relaxed">{review.review_text}</p>
-                          )}
-                          {review.review_screenshot && (
-                            <div className="mt-3">
-                              <img
-                                src={review.review_screenshot}
-                                alt="Review screenshot"
-                                className="max-w-full h-auto rounded-lg border border-gray-200"
-                              />
-                            </div>
-                          )}
-                          <p className="text-xs text-gray-500 mt-2">
-                            Verified on {new Date(review.submission_date).toLocaleDateString()}
-                          </p>
-                        </div>
-                      ))}
-                    </div>
-                    {provider.google_reviews_count && provider.google_reviews_count > provider.google_reviews.length && (
-                      <p className="text-sm text-gray-600 mt-4 text-center">
-                        Showing {provider.google_reviews.length} of {provider.google_reviews_count} verified Google reviews
+                <div className="bg-white border rounded-lg p-6">
+                  <h2 className="text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                    <CheckCircle className="w-5 h-5 text-green-600" />
+                    Verified Google Reviews
+                  </h2>
+                  {provider.google_reviews && provider.google_reviews.length > 0 ? (
+                    <>
+                      <p className="text-sm text-gray-600 mb-4">
+                        These reviews have been verified from the provider's Google Business profile.
                       </p>
-                    )}
-                  </div>
-                )}
+                      <div className="space-y-4">
+                        {provider.google_reviews.map((review) => (
+                          <div key={review.id} className="border border-gray-200 rounded-lg p-4 hover:border-blue-300 transition-colors">
+                            <div className="flex items-start justify-between mb-2">
+                              <div className="flex items-center gap-2">
+                                <div className="flex">
+                                  {[1, 2, 3, 4, 5].map((star) => (
+                                    <Star
+                                      key={star}
+                                      className={`w-4 h-4 ${
+                                        star <= review.review_rating
+                                          ? 'fill-yellow-400 text-yellow-400'
+                                          : 'text-gray-300'
+                                      }`}
+                                    />
+                                  ))}
+                                </div>
+                                <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200 text-xs">
+                                  <CheckCircle className="w-3 h-3 mr-1" />
+                                  Verified Google Review
+                                </Badge>
+                              </div>
+                              {review.google_link && (
+                                <a
+                                  href={review.google_link}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="text-blue-600 hover:text-blue-800 text-sm flex items-center gap-1"
+                                >
+                                  View on Google
+                                  <ExternalLink className="w-3 h-3" />
+                                </a>
+                              )}
+                            </div>
+                            {review.review_text && (
+                              <p className="text-gray-700 mb-3 leading-relaxed">{review.review_text}</p>
+                            )}
+                            {review.review_screenshot && (
+                              <div className="mt-3">
+                                <img
+                                  src={review.review_screenshot}
+                                  alt="Review screenshot"
+                                  className="max-w-full h-auto rounded-lg border border-gray-200"
+                                />
+                              </div>
+                            )}
+                            <p className="text-xs text-gray-500 mt-2">
+                              Verified on {new Date(review.submission_date).toLocaleDateString()}
+                            </p>
+                          </div>
+                        ))}
+                      </div>
+                      {provider.google_reviews_count && provider.google_reviews_count > provider.google_reviews.length && (
+                        <p className="text-sm text-gray-600 mt-4 text-center">
+                          Showing {provider.google_reviews.length} of {provider.google_reviews_count} verified Google reviews
+                        </p>
+                      )}
+                    </>
+                  ) : (
+                    <div className="text-center py-8 text-gray-500">
+                      <Star className="w-12 h-12 mx-auto mb-3 text-gray-300" />
+                      <p className="text-gray-600">No verified Google reviews yet</p>
+                      <p className="text-sm text-gray-500 mt-2">
+                        This provider hasn't submitted any Google Business reviews for verification yet.
+                      </p>
+                    </div>
+                  )}
+                </div>
 
                 {/* Portfolio Images */}
                 {provider.portfolio_images && provider.portfolio_images.length > 0 && (
