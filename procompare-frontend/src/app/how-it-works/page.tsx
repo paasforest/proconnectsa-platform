@@ -27,8 +27,7 @@ export default function HowItWorksPage() {
               How ProConnectSA Works
             </h1>
             <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto">
-              Getting connected with verified service providers has never been easier. 
-              Follow our simple 3-step process to find the perfect professional for your needs.
+              Find trusted local service providers in your area. Follow our simple 3-step process to get free quotes and compare professionals.
             </p>
           </div>
         </section>

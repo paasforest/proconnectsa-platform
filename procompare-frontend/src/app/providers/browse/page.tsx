@@ -57,8 +57,8 @@ async function fetchProviders(searchParams: { category?: string; city?: string; 
 }
 
 export const metadata: Metadata = {
-  title: "Find Verified Providers | ProConnectSA",
-  description: "Browse public profiles of verified service providers by category and city.",
+  title: "Find Verified Local Service Providers | Browse by City & Service | ProConnectSA",
+  description: "Browse verified local service providers across South Africa. Filter by service category and city to find professionals near you.",
 };
 
 export default async function ProvidersBrowsePage({

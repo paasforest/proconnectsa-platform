@@ -62,9 +62,9 @@ export default async function ServiceCategoryPage({ params }: Props) {
               </div>
               <div className="space-y-6">
                 <div className="border rounded-2xl p-6 bg-white">
-                  <div className="text-lg font-semibold text-gray-900 mb-2">Choose your province</div>
+                  <div className="text-lg font-semibold text-gray-900 mb-2">Find {displayName} in Your Province</div>
                   <p className="text-gray-600 text-sm mb-4">
-                    For SEO and faster matching, start with your province page.
+                    Browse verified {displayName.toLowerCase()} professionals by province. Find local providers near you.
                   </p>
                   <div className="flex flex-wrap gap-2">
                     {PROVINCES.map((p) => (
@@ -80,11 +80,12 @@ export default async function ServiceCategoryPage({ params }: Props) {
                 </div>
 
                 <div className="border rounded-2xl p-6 bg-white">
-                  <div className="text-lg font-semibold text-gray-900 mb-2">Why ProConnectSA?</div>
+                  <div className="text-lg font-semibold text-gray-900 mb-2">Why Choose ProConnectSA?</div>
                   <ul className="text-sm text-gray-700 space-y-2">
-                    <li>• Verified professionals</li>
-                    <li>• Clear intent & timeline</li>
-                    <li>• Secure and private</li>
+                    <li>• <strong>Verified professionals:</strong> All providers are background checked</li>
+                    <li>• <strong>Compare quotes:</strong> Get multiple quotes to find the best price</li>
+                    <li>• <strong>Local & trusted:</strong> Connect with professionals in your area</li>
+                    <li>• <strong>No obligation:</strong> Free to request quotes, no commitment to hire</li>
                   </ul>
                 </div>
               </div>
