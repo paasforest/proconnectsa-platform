@@ -1,64 +1,13 @@
+"use client";
+
 import React, { useState, useEffect } from 'react';
 import { Search, User, MessageCircle, Clock, CheckCircle, AlertCircle, Filter } from 'lucide-react';
+import { useAuth } from '@/components/AuthProvider';
+import { apiClient } from '@/lib/api-simple';
 
 // Simple utility function to replace @/lib/utils
 const cn = (...classes: (string | undefined | null | boolean)[]) => {
   return classes.filter(Boolean).join(' ');
-};
-
-// Simple API client to replace @/lib/api-simple
-const apiClient = {
-  async get(endpoint: string) {
-    // Mock API response for demonstration
-    await new Promise(resolve => setTimeout(resolve, 500));
-    
-    if (endpoint === '/admin/support/tickets') {
-      return {
-        tickets: [
-          {
-            id: 1,
-            title: "Login Issues",
-            description: "User cannot access account after password reset",
-            status: "open",
-            priority: "high",
-            user: { name: "John Doe", email: "john@example.com" },
-            createdAt: "2024-01-15T10:30:00Z",
-            updatedAt: "2024-01-15T14:20:00Z",
-            assignee: "Sarah Admin"
-          },
-          {
-            id: 2,
-            title: "Billing Question",
-            description: "Inquiry about subscription charges",
-            status: "in-progress",
-            priority: "medium",
-            user: { name: "Jane Smith", email: "jane@example.com" },
-            createdAt: "2024-01-14T09:15:00Z",
-            updatedAt: "2024-01-15T11:30:00Z",
-            assignee: "Mike Support"
-          },
-          {
-            id: 3,
-            title: "Feature Request",
-            description: "Request for dark mode theme",
-            status: "resolved",
-            priority: "low",
-            user: { name: "Bob Wilson", email: "bob@example.com" },
-            createdAt: "2024-01-13T16:45:00Z",
-            updatedAt: "2024-01-14T10:20:00Z",
-            assignee: "Lisa Dev"
-          }
-        ]
-      };
-    }
-    
-    return { data: [] };
-  },
-
-  async post(endpoint: string, data?: any) {
-    await new Promise(resolve => setTimeout(resolve, 300));
-    return { success: true, data };
-  }
 };
 
 // Alert components
