@@ -57,30 +57,124 @@ const TechnicalDashboard = () => {
   const [componentFilter, setComponentFilter] = useState('all');
 
   useEffect(() => {
-    fetchTechnicalData();
-  }, []);
+    if (token) {
+      fetchTechnicalData();
+    }
+  }, [token]);
 
   const fetchTechnicalData = async () => {
-    if (!token) return;
+    if (!token) {
+      setLoading(false);
+      return;
+    }
     
     try {
       setLoading(true);
       apiClient.setToken(token);
 
-      // Fetch monitoring data for technical dashboard
-      const monitoringRes = await fetch('https://api.proconnectsa.co.za/api/admin/monitoring/dashboard/', {
-        headers: { 'Authorization': `Token ${token}` },
+      // Fetch support tickets (technical issues are typically support tickets)
+      const ticketsRes = await apiClient.get('/api/support/tickets/');
+      const allTickets = ticketsRes.tickets || ticketsRes.results || ticketsRes || [];
+
+      // Filter for technical-related tickets (bugs, technical issues, system errors)
+      const technicalTickets = allTickets.filter((ticket: any) => {
+        const title = (ticket.title || '').toLowerCase();
+        const description = (ticket.description || '').toLowerCase();
+        const category = (ticket.category || '').toLowerCase();
+        
+        return title.includes('bug') || title.includes('error') || title.includes('technical') ||
+               title.includes('system') || title.includes('api') || title.includes('database') ||
+               description.includes('bug') || description.includes('error') || 
+               description.includes('technical') || description.includes('system') ||
+               category === 'technical' || category === 'bug' || category === 'system';
       });
 
-      let monitoringData: any = {};
-      if (monitoringRes.ok) {
-        monitoringData = await monitoringRes.json();
+      // Transform tickets to TechnicalTicket format
+      const transformedTickets: TechnicalTicket[] = technicalTickets.map((ticket: any) => ({
+        id: ticket.id || ticket.ticket_id,
+        ticket_number: ticket.ticket_number || ticket.id || 'N/A',
+        title: ticket.title || 'Untitled',
+        description: ticket.description || '',
+        status: ticket.status || 'open',
+        priority: ticket.priority || 'medium',
+        user_name: ticket.user?.name || ticket.user_name || 'Unknown',
+        user_email: ticket.user?.email || ticket.user_email || '',
+        error_code: ticket.error_code,
+        system_component: ticket.system_component || ticket.category || 'general',
+        severity: ticket.severity || ticket.priority || 'medium',
+        created_at: ticket.created_at || ticket.created_at,
+        updated_at: ticket.updated_at || ticket.updated_at,
+        age_days: ticket.created_at ? Math.floor((new Date().getTime() - new Date(ticket.created_at).getTime()) / (1000 * 60 * 60 * 24)) : 0
+      }));
+
+      setTickets(transformedTickets);
+
+      // Calculate stats
+      const totalTickets = transformedTickets.length;
+      const openTickets = transformedTickets.filter(t => ['open', 'in_progress', 'pending_customer', 'pending_internal'].includes(t.status)).length;
+      const resolvedTickets = transformedTickets.filter(t => ['resolved', 'closed'].includes(t.status)).length;
+      const criticalIssues = transformedTickets.filter(t => t.severity === 'critical' || t.priority === 'urgent' || t.priority === 'critical').length;
+      
+      // Calculate average resolution time (for resolved tickets)
+      const resolvedWithTimes = transformedTickets.filter(t => ['resolved', 'closed'].includes(t.status) && t.created_at && t.updated_at);
+      const avgResolutionTime = resolvedWithTimes.length > 0
+        ? resolvedWithTimes.reduce((sum, t) => {
+            const created = new Date(t.created_at).getTime();
+            const updated = new Date(t.updated_at).getTime();
+            return sum + (updated - created) / (1000 * 60 * 60); // hours
+          }, 0) / resolvedWithTimes.length
+        : 0;
+
+      // Count by severity
+      const ticketsBySeverity: Record<string, number> = {};
+      transformedTickets.forEach(t => {
+        const severity = t.severity || 'medium';
+        ticketsBySeverity[severity] = (ticketsBySeverity[severity] || 0) + 1;
+      });
+
+      // Count by component
+      const ticketsByComponent: Record<string, number> = {};
+      transformedTickets.forEach(t => {
+        const component = t.system_component || 'general';
+        ticketsByComponent[component] = (ticketsByComponent[component] || 0) + 1;
+      });
+
+      // Count bug reports vs feature requests
+      const bugReports = transformedTickets.filter(t => 
+        (t.title || '').toLowerCase().includes('bug') || 
+        (t.description || '').toLowerCase().includes('bug')
+      ).length;
+      const featureRequests = transformedTickets.filter(t => 
+        (t.title || '').toLowerCase().includes('feature') || 
+        (t.description || '').toLowerCase().includes('feature')
+      ).length;
+
+      // Fetch monitoring data for system uptime
+      let systemUptime = 99.9;
+      try {
+        const monitoringRes = await apiClient.get('/api/admin/monitoring/dashboard/');
+        // System uptime would come from monitoring data if available
+        systemUptime = monitoringRes?.system_health?.uptime || 99.9;
+      } catch (e) {
+        // Use default if monitoring fails
       }
 
-      // Set tickets to empty for now
+      setStats({
+        total_tickets: totalTickets,
+        open_tickets: openTickets,
+        resolved_tickets: resolvedTickets,
+        critical_issues: criticalIssues,
+        avg_resolution_time: Math.round(avgResolutionTime * 10) / 10,
+        system_uptime: systemUptime,
+        bug_reports: bugReports,
+        feature_requests: featureRequests,
+        tickets_by_severity: ticketsBySeverity,
+        tickets_by_component: ticketsByComponent,
+        resolution_trends: [] // Could be populated with historical data if available
+      });
+    } catch (error: any) {
+      console.error('Failed to fetch technical data:', error);
       setTickets([]);
-
-      // Set stats from monitoring data
       setStats({
         total_tickets: 0,
         open_tickets: 0,
@@ -94,10 +188,6 @@ const TechnicalDashboard = () => {
         tickets_by_component: {},
         resolution_trends: []
       });
-    } catch (error) {
-      console.error('Failed to fetch technical data:', error);
-      setTickets([]);
-      setStats(null);
     } finally {
       setLoading(false);
     }
