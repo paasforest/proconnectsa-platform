@@ -97,19 +97,39 @@ def available_leads(request):
         profile = request.user.provider_profile
         
         # Convert provider categories (slugs/ids/names) -> category IDs
+        # IMPORTANT: Check BOTH Service objects AND service_categories JSON field
         from backend.leads.models import ServiceCategory
+        from backend.users.models import Service
+        
+        # Method 1: Get categories from Service objects (most reliable)
+        service_category_ids_from_objects = set()
+        service_category_slugs_from_objects = set()
+        for service in profile.services.filter(is_active=True):
+            if service.category:
+                service_category_ids_from_objects.add(service.category.id)
+                service_category_slugs_from_objects.add(service.category.slug)
+        
+        # Method 2: Get categories from JSON field (backward compatibility)
         raw_categories = profile.service_categories if profile.service_categories else []
         cat_ids, cat_slugs = _normalize_provider_category_inputs(raw_categories)
+        
+        # Combine both sources
+        all_category_ids = list(cat_ids) + list(service_category_ids_from_objects)
+        all_category_slugs = list(cat_slugs) + list(service_category_slugs_from_objects)
+        
+        # Get all matching category IDs
         category_ids = list(
             ServiceCategory.objects.filter(
-                Q(id__in=list(cat_ids)) | Q(slug__in=list(cat_slugs))
+                Q(id__in=all_category_ids) | Q(slug__in=all_category_slugs)
             ).values_list('id', flat=True)
         )
 
         if not category_ids:
-            logger.info(
-                "Provider %s has no resolvable service categories (raw=%s); returning 0 available leads",
+            logger.warning(
+                "Provider %s has no resolvable service categories. "
+                "Service objects: %s, JSON field: %s. Returning 0 available leads",
                 request.user.id,
+                list(service_category_slugs_from_objects),
                 raw_categories,
             )
             return Response({
@@ -119,8 +139,16 @@ def available_leads(request):
                     'balance': float(wallet.balance),
                     'customer_code': wallet.customer_code
                 },
-                'message': 'Please select your service categories in your profile to see matching leads.'
+                'message': 'Please add service categories in your profile to see matching leads. Go to Settings > Services to add your services.'
             })
+        
+        logger.info(
+            "Provider %s service categories resolved: %s category IDs from %s Service objects and %s JSON entries",
+            request.user.id,
+            len(category_ids),
+            len(service_category_ids_from_objects),
+            len(raw_categories)
+        )
         
         # Base query
         # Note: many leads move to `assigned` after distribution, but are still
@@ -169,12 +197,29 @@ def available_leads(request):
             provider_service_categories = request.user.provider_profile.service_categories or []
             provider_service_areas = request.user.provider_profile.service_areas or []
         
-        # Basic service category filtering (normalize the same way as main path)
+        # Basic service category filtering - check BOTH Service objects AND JSON field
         from backend.leads.models import ServiceCategory
+        from backend.users.models import Service
+        
+        # Get categories from Service objects
+        service_category_ids_from_objects = set()
+        service_category_slugs_from_objects = set()
+        if hasattr(request.user, 'provider_profile'):
+            for service in request.user.provider_profile.services.filter(is_active=True):
+                if service.category:
+                    service_category_ids_from_objects.add(service.category.id)
+                    service_category_slugs_from_objects.add(service.category.slug)
+        
+        # Get categories from JSON field
         cat_ids, cat_slugs = _normalize_provider_category_inputs(provider_service_categories)
+        
+        # Combine both sources
+        all_category_ids = list(cat_ids) + list(service_category_ids_from_objects)
+        all_category_slugs = list(cat_slugs) + list(service_category_slugs_from_objects)
+        
         category_ids = list(
             ServiceCategory.objects.filter(
-                Q(id__in=list(cat_ids)) | Q(slug__in=list(cat_slugs))
+                Q(id__in=all_category_ids) | Q(slug__in=all_category_slugs)
             ).values_list('id', flat=True)
         )
 
