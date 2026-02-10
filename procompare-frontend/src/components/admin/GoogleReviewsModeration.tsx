@@ -33,26 +33,36 @@ export default function GoogleReviewsModeration() {
 
   useEffect(() => {
     if (token) {
-      apiClient.setToken(token);
       fetchReviews();
+    } else {
+      setLoading(false);
+      setError('Authentication token not available. Please log in again.');
     }
   }, [token, statusFilter]);
 
   const fetchReviews = async () => {
+    if (!token) {
+      setError('Authentication token not available');
+      setLoading(false);
+      return;
+    }
+    
     try {
       setLoading(true);
       setError(null);
       
-      if (!token) {
-        throw new Error('Authentication token not available');
-      }
-      
+      // Ensure token is set before making request
       apiClient.setToken(token);
       const response = await apiClient.getAdminGoogleReviews(statusFilter);
       setReviews(Array.isArray(response) ? response : []);
     } catch (err: any) {
       console.error('Failed to fetch Google reviews:', err);
-      setError(err.response?.data?.error || err.message || 'Failed to load reviews');
+      const errorMessage = err.response?.data?.error || err.message || 'Failed to load reviews';
+      setError(errorMessage);
+      // If 401, suggest re-login
+      if (err.response?.status === 401) {
+        setError('Session expired. Please log out and log in again.');
+      }
     } finally {
       setLoading(false);
     }

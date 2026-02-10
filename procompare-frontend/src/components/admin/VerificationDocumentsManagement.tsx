@@ -38,26 +38,36 @@ export default function VerificationDocumentsManagement() {
 
   useEffect(() => {
     if (token) {
-      apiClient.setToken(token);
       fetchVerifications();
+    } else {
+      setLoading(false);
+      setError('Authentication token not available. Please log in again.');
     }
   }, [token, statusFilter]);
 
   const fetchVerifications = async () => {
+    if (!token) {
+      setError('Authentication token not available');
+      setLoading(false);
+      return;
+    }
+    
     try {
       setLoading(true);
       setError(null);
       
-      if (!token) {
-        throw new Error('Authentication token not available');
-      }
-      
+      // Ensure token is set before making request
       apiClient.setToken(token);
       const data = await apiClient.getVerifications(statusFilter);
       setVerifications(data.verifications || []);
     } catch (err: any) {
       console.error('Failed to fetch verifications:', err);
-      setError(err.response?.data?.error || err.message || 'Failed to load verification documents');
+      const errorMessage = err.response?.data?.error || err.message || 'Failed to load verification documents';
+      setError(errorMessage);
+      // If 401, suggest re-login
+      if (err.response?.status === 401) {
+        setError('Session expired. Please log out and log in again.');
+      }
     } finally {
       setLoading(false);
     }

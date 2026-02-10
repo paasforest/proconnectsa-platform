@@ -38,26 +38,36 @@ export default function PremiumRequestsManagement() {
 
   useEffect(() => {
     if (token) {
-      apiClient.setToken(token);
       fetchRequests();
+    } else {
+      setLoading(false);
+      setError('Authentication token not available. Please log in again.');
     }
   }, [token, statusFilter]);
 
   const fetchRequests = async () => {
+    if (!token) {
+      setError('Authentication token not available');
+      setLoading(false);
+      return;
+    }
+    
     try {
       setLoading(true);
       setError(null);
       
-      if (!token) {
-        throw new Error('Authentication token not available');
-      }
-      
+      // Ensure token is set before making request
       apiClient.setToken(token);
       const data = await apiClient.getPremiumRequests(statusFilter);
       setRequests(data.premium_requests || []);
     } catch (err: any) {
       console.error('Failed to fetch premium requests:', err);
-      setError(err.response?.data?.error || err.message || 'Failed to load premium requests');
+      const errorMessage = err.response?.data?.error || err.message || 'Failed to load premium requests';
+      setError(errorMessage);
+      // If 401, suggest re-login
+      if (err.response?.status === 401) {
+        setError('Session expired. Please log out and log in again.');
+      }
     } finally {
       setLoading(false);
     }

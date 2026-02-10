@@ -444,6 +444,9 @@ export class SimpleApiClient {
   }
 
   async getAdminGoogleReviews(status?: string) {
+    if (!this.token) {
+      throw new Error('Authentication token not set. Please log in.');
+    }
     const url = status && status !== 'all'
       ? `/api/reviews/google/admin/list/?status=${status}`
       : '/api/reviews/google/admin/list/';
@@ -462,6 +465,9 @@ export class SimpleApiClient {
 
   // Premium Requests Management
   async getPremiumRequests(status?: string) {
+    if (!this.token) {
+      throw new Error('Authentication token not set. Please log in.');
+    }
     const url = status && status !== 'all'
       ? `/api/admin/premium-requests/?status=${status}`
       : '/api/admin/premium-requests/';
@@ -469,6 +475,9 @@ export class SimpleApiClient {
   }
 
   async approvePremiumRequest(depositId: string, adminNotes?: string) {
+    if (!this.token) {
+      throw new Error('Authentication token not set. Please log in.');
+    }
     return this.request<any>(`/api/admin/premium-requests/${depositId}/approve/`, {
       method: 'POST',
       body: JSON.stringify({ admin_notes: adminNotes || '' }),
@@ -476,6 +485,9 @@ export class SimpleApiClient {
   }
 
   async rejectPremiumRequest(depositId: string, adminNotes?: string) {
+    if (!this.token) {
+      throw new Error('Authentication token not set. Please log in.');
+    }
     return this.request<any>(`/api/admin/premium-requests/${depositId}/reject/`, {
       method: 'POST',
       body: JSON.stringify({ admin_notes: adminNotes || '' }),
@@ -484,6 +496,9 @@ export class SimpleApiClient {
 
   // Verification Documents Management
   async getVerifications(status?: string) {
+    if (!this.token) {
+      throw new Error('Authentication token not set. Please log in.');
+    }
     const url = status && status !== 'all'
       ? `/api/admin/verifications/?status=${status}`
       : '/api/admin/verifications/';
@@ -491,16 +506,25 @@ export class SimpleApiClient {
   }
 
   async getVerificationDetail(providerId: string) {
+    if (!this.token) {
+      throw new Error('Authentication token not set. Please log in.');
+    }
     return this.request<any>(`/api/admin/verifications/${providerId}/`)
   }
 
   async approveVerification(providerId: string) {
+    if (!this.token) {
+      throw new Error('Authentication token not set. Please log in.');
+    }
     return this.request<any>(`/api/admin/verifications/${providerId}/approve/`, {
       method: 'POST',
     })
   }
 
   async rejectVerification(providerId: string, adminNotes: string) {
+    if (!this.token) {
+      throw new Error('Authentication token not set. Please log in.');
+    }
     return this.request<any>(`/api/admin/verifications/${providerId}/reject/`, {
       method: 'POST',
       body: JSON.stringify({ admin_notes: adminNotes }),
