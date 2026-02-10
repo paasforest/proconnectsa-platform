@@ -12,9 +12,9 @@ const inter = {
 };
 
 export const metadata: Metadata = {
-  title: "ProConnectSA Lead Marketplace - Find and Purchase Qualified Leads",
-  description: "ProConnectSA Lead Marketplace - Find and purchase qualified leads from South Africa's most trusted service marketplace. Access high-quality leads that are verified, qualified, and ready to convert.",
-  keywords: "lead marketplace, qualified leads, South Africa, service providers, lead generation, ProConnectSA, business leads",
+  title: "Local Service Providers in South Africa | Get Free Quotes | ProConnectSA",
+  description: "Find trusted local service providers in South Africa. Compare free quotes from verified professionals for plumbing, electrical, cleaning, and more. No obligation to hire.",
+  keywords: "local service providers South Africa, get quotes, trusted professionals, compare services, plumbers, electricians, service providers near me",
   authors: [{ name: "ProConnectSA Team" }],
   creator: "ProConnectSA",
   publisher: "ProConnectSA",
@@ -23,19 +23,19 @@ export const metadata: Metadata = {
     address: false,
     telephone: false,
   },
-  metadataBase: new URL("https://proconnectsa.co.za"),
+  metadataBase: new URL("https://www.proconnectsa.co.za"),
   openGraph: {
-    title: "ProConnectSA Lead Marketplace - Find and Purchase Qualified Leads",
-    description: "ProConnectSA Lead Marketplace - Find and purchase qualified leads from South Africa's most trusted service marketplace. Access high-quality leads that are verified, qualified, and ready to convert.",
-    url: "https://proconnectsa.co.za",
+    title: "Local Service Providers in South Africa | Get Free Quotes | ProConnectSA",
+    description: "Find trusted local service providers in South Africa. Compare free quotes from verified professionals. No obligation to hire.",
+    url: "https://www.proconnectsa.co.za",
     siteName: "ProConnectSA",
     locale: "en_ZA",
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "ProConnectSA - Connect with Verified Service Providers",
-    description: "Find and connect with verified service providers across South Africa. Get quotes, read reviews, and hire the best professionals.",
+    title: "Local Service Providers in South Africa | ProConnectSA",
+    description: "Find trusted local service providers. Compare free quotes from verified professionals across South Africa.",
   },
   robots: {
     index: true,
