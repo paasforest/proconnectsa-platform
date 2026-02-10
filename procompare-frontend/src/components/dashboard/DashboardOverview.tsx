@@ -208,10 +208,11 @@ const DashboardOverview = () => {
   const quickActions = [
     {
       title: 'Browse Leads',
-      description: 'Find new opportunities',
+      description: stats?.active_leads ? `${stats.active_leads} new leads available` : 'Find new opportunities',
       icon: Eye,
       href: '/dashboard/leads-dashboard',
-      color: 'blue'
+      color: 'blue',
+      badge: stats?.active_leads || 0
     },
     {
       title: 'My Leads',
@@ -387,13 +388,20 @@ const DashboardOverview = () => {
                   <a
                     key={index}
                     href={action.href}
-                    className="flex items-center p-4 rounded-lg hover:bg-gray-50 transition-colors"
+                    className="flex items-center p-4 rounded-lg hover:bg-gray-50 transition-colors relative"
                   >
                     <div className={`p-2 rounded-lg ${colorClasses[action.color]} mr-4`}>
                       <Icon className="w-5 h-5" />
                     </div>
-                    <div>
-                      <h3 className="font-medium text-gray-900">{action.title}</h3>
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2">
+                        <h3 className="font-medium text-gray-900">{action.title}</h3>
+                        {(action as any).badge > 0 && (
+                          <span className="px-2 py-0.5 bg-red-500 text-white text-xs font-bold rounded-full">
+                            {(action as any).badge}
+                          </span>
+                        )}
+                      </div>
                       <p className="text-sm text-gray-600">{action.description}</p>
                     </div>
                   </a>
