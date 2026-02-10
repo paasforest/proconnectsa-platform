@@ -775,44 +775,56 @@ class EnterpriseLeadFilteringService:
         filtered_query = base_query
         
         # Service category filter
-        if profile.service_categories:
-            # ProviderProfile.service_categories stores category slugs (legacy data may include IDs/names).
-            # Normalize to ServiceCategory IDs before filtering.
-            try:
-                from backend.leads.models import ServiceCategory
-                from django.utils.text import slugify
+        # IMPORTANT: Check BOTH Service objects AND service_categories JSON field
+        try:
+            from backend.leads.models import ServiceCategory
+            from backend.users.models import Service
+            from django.utils.text import slugify
 
-                raw = profile.service_categories or []
-                ids = set()
-                slugs = set()
-                for v in raw:
-                    if v is None:
-                        continue
-                    if isinstance(v, int):
-                        if v > 0:
-                            ids.add(v)
-                        continue
-                    s = str(v).strip()
-                    if not s:
-                        continue
-                    if s.isdigit():
-                        ids.add(int(s))
-                        continue
-                    slugs.add(slugify(s))
+            # Method 1: Get categories from Service objects (most reliable)
+            service_category_ids_from_objects = set()
+            service_category_slugs_from_objects = set()
+            for service in profile.services.filter(is_active=True):
+                if service.category:
+                    service_category_ids_from_objects.add(service.category.id)
+                    service_category_slugs_from_objects.add(service.category.slug)
+            
+            # Method 2: Get categories from JSON field (backward compatibility)
+            raw = profile.service_categories or []
+            ids = set()
+            slugs = set()
+            for v in raw:
+                if v is None:
+                    continue
+                if isinstance(v, int):
+                    if v > 0:
+                        ids.add(v)
+                    continue
+                s = str(v).strip()
+                if not s:
+                    continue
+                if s.isdigit():
+                    ids.add(int(s))
+                    continue
+                slugs.add(slugify(s))
 
-                category_ids = list(
-                    ServiceCategory.objects.filter(
-                        Q(id__in=list(ids)) | Q(slug__in=list(slugs))
-                    ).values_list('id', flat=True)
-                )
-                if category_ids:
-                    filtered_query = filtered_query.filter(service_category_id__in=category_ids)
-                else:
-                    # Fail closed: no categories => no leads
-                    filtered_query = filtered_query.none()
-            except Exception:
-                # Fail closed on unexpected schema/data problems
+            # Combine both sources
+            all_ids = list(ids) + list(service_category_ids_from_objects)
+            all_slugs = list(slugs) + list(service_category_slugs_from_objects)
+
+            category_ids = list(
+                ServiceCategory.objects.filter(
+                    Q(id__in=all_ids) | Q(slug__in=all_slugs)
+                ).values_list('id', flat=True)
+            )
+            if category_ids:
+                filtered_query = filtered_query.filter(service_category_id__in=category_ids)
+            else:
+                # Fail closed: no categories => no leads
                 filtered_query = filtered_query.none()
+        except Exception:
+            # Fail closed on unexpected schema/data problems
+            filtered_query = filtered_query.none()
         
         # Geographic filter
         if profile.service_areas:
