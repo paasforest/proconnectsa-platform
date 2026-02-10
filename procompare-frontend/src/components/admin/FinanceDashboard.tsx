@@ -110,41 +110,47 @@ const FinanceDashboard = () => {
       setLoading(true);
       apiClient.setToken(token);
 
-      // Fetch financial data from monitoring API
-      const monitoringRes = await fetch('https://api.proconnectsa.co.za/api/admin/monitoring/dashboard/', {
-        headers: { 'Authorization': `Token ${token}` },
-      });
-
-      let monitoringData: any = {};
-      if (monitoringRes.ok) {
-        monitoringData = await monitoringRes.json();
+      // Fetch comprehensive financial audit data
+      const auditRes = await apiClient.get('/api/payments/audit/');
+      
+      let auditData: any = {};
+      if (auditRes) {
+        auditData = auditRes;
+      } else {
+        // Fallback to monitoring API if audit API fails
+        const monitoringRes = await fetch('https://api.proconnectsa.co.za/api/admin/monitoring/dashboard/', {
+          headers: { 'Authorization': `Token ${token}` },
+        });
+        
+        if (monitoringRes.ok) {
+          const monitoringData = await monitoringRes.json();
+          auditData = {
+            revenue_metrics: {
+              total_revenue: monitoringData?.payments?.total_deposited || 0,
+              monthly_revenue: monitoringData?.payments?.total_deposited || 0,
+              net_revenue: monitoringData?.payments?.total_deposited || 0,
+              revenue_growth: 0,
+              refund_amount: 0
+            },
+            transaction_stats: {
+              total_transactions: monitoringData?.payments?.new_deposits || 0,
+              successful_transactions: monitoringData?.payments?.new_deposits || 0,
+              failed_transactions: 0,
+              average_transaction_value: monitoringData?.payments?.new_deposits > 0 
+                ? (monitoringData?.payments?.total_deposited / monitoringData?.payments?.new_deposits) 
+                : 0
+            },
+            platform_earnings: {},
+            financial_summary: {},
+            bank_reconciliation: {},
+            monthly_trends: []
+          };
+        }
       }
-
-      // Use monitoring data for finance stats
-      const auditData: any = {
-        revenue_metrics: {
-          total_revenue: monitoringData?.payments?.total_deposited || 0,
-          monthly_revenue: monitoringData?.payments?.total_deposited || 0,
-          net_revenue: monitoringData?.payments?.total_deposited || 0,
-          revenue_growth: 0,
-          refund_amount: 0
-        },
-        transaction_stats: {
-          total_transactions: monitoringData?.payments?.new_deposits || 0,
-          successful_transactions: monitoringData?.payments?.new_deposits || 0,
-          failed_transactions: 0,
-          average_transaction_value: monitoringData?.payments?.new_deposits > 0 
-            ? (monitoringData?.payments?.total_deposited / monitoringData?.payments?.new_deposits) 
-            : 0
-        },
-        platform_earnings: {},
-        financial_summary: {},
-        bank_reconciliation: {},
-        monthly_trends: []
-      };
 
       setTickets([]);
 
+      // Use comprehensive audit data
       setStats({
         total_tickets: 0,
         open_tickets: 0,
@@ -157,8 +163,8 @@ const FinanceDashboard = () => {
         successful_transactions: auditData.transaction_stats?.successful_transactions || 0,
         tickets_by_status: {},
         tickets_by_priority: {},
-        monthly_trends: [],
-        // Real financial metrics from audit data
+        monthly_trends: auditData.monthly_trends || [],
+        // Real financial metrics from comprehensive audit data
         total_revenue: auditData.revenue_metrics?.total_revenue || 0,
         monthly_revenue: auditData.revenue_metrics?.monthly_revenue || 0,
         transaction_volume: auditData.transaction_stats?.total_transactions || 0,
