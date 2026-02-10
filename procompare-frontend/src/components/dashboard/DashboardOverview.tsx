@@ -293,6 +293,31 @@ const DashboardOverview = () => {
         )}
       </div>
 
+      {/* New Leads Alert Banner */}
+      {stats?.active_leads && stats.active_leads > 0 && (
+        <div className="mb-6 bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg shadow-lg p-6 text-white">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div className="bg-white bg-opacity-20 p-3 rounded-lg">
+                <Zap className="w-6 h-6" />
+              </div>
+              <div>
+                <h3 className="text-lg font-bold">🎯 New Leads Available!</h3>
+                <p className="text-blue-100">
+                  You have <strong className="text-white">{stats.active_leads}</strong> new lead{stats.active_leads !== 1 ? 's' : ''} matching your services
+                </p>
+              </div>
+            </div>
+            <a
+              href="/dashboard/leads-dashboard"
+              className="px-6 py-2 bg-white text-blue-600 font-semibold rounded-lg hover:bg-blue-50 transition-colors"
+            >
+              View Leads →
+            </a>
+          </div>
+        </div>
+      )}
+
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         {statCards.map((card, index) => {
