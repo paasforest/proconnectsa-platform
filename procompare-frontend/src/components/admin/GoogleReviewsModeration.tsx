@@ -43,6 +43,11 @@ export default function GoogleReviewsModeration() {
       setLoading(true);
       setError(null);
       
+      if (!token) {
+        throw new Error('Authentication token not available');
+      }
+      
+      apiClient.setToken(token);
       const response = await apiClient.getAdminGoogleReviews(statusFilter);
       setReviews(Array.isArray(response) ? response : []);
     } catch (err: any) {
@@ -58,6 +63,11 @@ export default function GoogleReviewsModeration() {
       setModeratingId(reviewId);
       const notes = adminNotes[reviewId] || '';
       
+      if (!token) {
+        throw new Error('Authentication token not available');
+      }
+      
+      apiClient.setToken(token);
       await apiClient.moderateGoogleReview(reviewId, action, notes);
 
       // Refresh the list

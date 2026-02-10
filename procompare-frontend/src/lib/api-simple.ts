@@ -450,6 +450,63 @@ export class SimpleApiClient {
     return this.request<any>(url)
   }
 
+  async moderateGoogleReview(reviewId: string, action: 'approve' | 'reject' | 'ban', adminNotes?: string) {
+    return this.request<any>(`/api/reviews/google/admin/${reviewId}/moderate/`, {
+      method: 'POST',
+      body: JSON.stringify({
+        action,
+        admin_notes: adminNotes || '',
+      }),
+    })
+  }
+
+  // Premium Requests Management
+  async getPremiumRequests(status?: string) {
+    const url = status && status !== 'all'
+      ? `/api/admin/premium-requests/?status=${status}`
+      : '/api/admin/premium-requests/';
+    return this.request<any>(url)
+  }
+
+  async approvePremiumRequest(depositId: string, adminNotes?: string) {
+    return this.request<any>(`/api/admin/premium-requests/${depositId}/approve/`, {
+      method: 'POST',
+      body: JSON.stringify({ admin_notes: adminNotes || '' }),
+    })
+  }
+
+  async rejectPremiumRequest(depositId: string, adminNotes?: string) {
+    return this.request<any>(`/api/admin/premium-requests/${depositId}/reject/`, {
+      method: 'POST',
+      body: JSON.stringify({ admin_notes: adminNotes || '' }),
+    })
+  }
+
+  // Verification Documents Management
+  async getVerifications(status?: string) {
+    const url = status && status !== 'all'
+      ? `/api/admin/verifications/?status=${status}`
+      : '/api/admin/verifications/';
+    return this.request<any>(url)
+  }
+
+  async getVerificationDetail(providerId: string) {
+    return this.request<any>(`/api/admin/verifications/${providerId}/`)
+  }
+
+  async approveVerification(providerId: string) {
+    return this.request<any>(`/api/admin/verifications/${providerId}/approve/`, {
+      method: 'POST',
+    })
+  }
+
+  async rejectVerification(providerId: string, adminNotes: string) {
+    return this.request<any>(`/api/admin/verifications/${providerId}/reject/`, {
+      method: 'POST',
+      body: JSON.stringify({ admin_notes: adminNotes }),
+    })
+  }
+
   async uploadProfileImage(file: File) {
     const formData = new FormData()
     // Backend expects request.FILES['image']

@@ -48,19 +48,16 @@ export default function PremiumRequestsManagement() {
       setLoading(true);
       setError(null);
       
-      const response = await fetch(`https://api.proconnectsa.co.za/api/admin/premium-requests/?status=${statusFilter}`, {
-        headers: { 'Authorization': `Token ${token}` },
-      });
-      
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      if (!token) {
+        throw new Error('Authentication token not available');
       }
       
-      const data = await response.json();
+      apiClient.setToken(token);
+      const data = await apiClient.getPremiumRequests(statusFilter);
       setRequests(data.premium_requests || []);
     } catch (err: any) {
       console.error('Failed to fetch premium requests:', err);
-      setError(err.message || 'Failed to load premium requests');
+      setError(err.response?.data?.error || err.message || 'Failed to load premium requests');
     } finally {
       setLoading(false);
     }
@@ -71,19 +68,12 @@ export default function PremiumRequestsManagement() {
       setProcessingId(requestId);
       const notes = adminNotes[requestId] || '';
       
-      const response = await fetch(`https://api.proconnectsa.co.za/api/admin/premium-requests/${requestId}/approve/`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Token ${token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ admin_notes: notes }),
-      });
-      
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to approve premium request');
+      if (!token) {
+        throw new Error('Authentication token not available');
       }
+      
+      apiClient.setToken(token);
+      await apiClient.approvePremiumRequest(requestId, notes);
       
       await fetchRequests();
       setAdminNotes({ ...adminNotes, [requestId]: '' });
@@ -91,7 +81,7 @@ export default function PremiumRequestsManagement() {
       alert('Premium listing approved and activated!');
     } catch (err: any) {
       console.error('Failed to approve premium request:', err);
-      alert(err.message || 'Failed to approve premium request');
+      alert(err.response?.data?.error || err.message || 'Failed to approve premium request');
     } finally {
       setProcessingId(null);
     }
@@ -107,19 +97,12 @@ export default function PremiumRequestsManagement() {
         return;
       }
       
-      const response = await fetch(`https://api.proconnectsa.co.za/api/admin/premium-requests/${requestId}/reject/`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Token ${token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ admin_notes: notes }),
-      });
-      
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to reject premium request');
+      if (!token) {
+        throw new Error('Authentication token not available');
       }
+      
+      apiClient.setToken(token);
+      await apiClient.rejectPremiumRequest(requestId, notes);
       
       await fetchRequests();
       setAdminNotes({ ...adminNotes, [requestId]: '' });
@@ -127,7 +110,7 @@ export default function PremiumRequestsManagement() {
       alert('Premium request rejected');
     } catch (err: any) {
       console.error('Failed to reject premium request:', err);
-      alert(err.message || 'Failed to reject premium request');
+      alert(err.response?.data?.error || err.message || 'Failed to reject premium request');
     } finally {
       setProcessingId(null);
     }

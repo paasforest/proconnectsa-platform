@@ -48,19 +48,16 @@ export default function VerificationDocumentsManagement() {
       setLoading(true);
       setError(null);
       
-      const response = await fetch(`https://api.proconnectsa.co.za/api/admin/verifications/?status=${statusFilter}`, {
-        headers: { 'Authorization': `Token ${token}` },
-      });
-      
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      if (!token) {
+        throw new Error('Authentication token not available');
       }
       
-      const data = await response.json();
+      apiClient.setToken(token);
+      const data = await apiClient.getVerifications(statusFilter);
       setVerifications(data.verifications || []);
     } catch (err: any) {
       console.error('Failed to fetch verifications:', err);
-      setError(err.message || 'Failed to load verification documents');
+      setError(err.response?.data?.error || err.message || 'Failed to load verification documents');
     } finally {
       setLoading(false);
     }
@@ -70,25 +67,19 @@ export default function VerificationDocumentsManagement() {
     try {
       setProcessingId(providerId);
       
-      const response = await fetch(`https://api.proconnectsa.co.za/api/admin/verifications/${providerId}/approve/`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Token ${token}`,
-          'Content-Type': 'application/json',
-        },
-      });
-      
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to approve verification');
+      if (!token) {
+        throw new Error('Authentication token not available');
       }
+      
+      apiClient.setToken(token);
+      await apiClient.approveVerification(providerId);
       
       await fetchVerifications();
       setSelectedVerification(null);
       alert('Provider verification approved!');
     } catch (err: any) {
       console.error('Failed to approve verification:', err);
-      alert(err.message || 'Failed to approve verification');
+      alert(err.response?.data?.error || err.message || 'Failed to approve verification');
     } finally {
       setProcessingId(null);
     }
@@ -110,19 +101,12 @@ export default function VerificationDocumentsManagement() {
         return;
       }
       
-      const response = await fetch(`https://api.proconnectsa.co.za/api/admin/verifications/${providerId}/reject/`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Token ${token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ admin_notes: notes }),
-      });
-      
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to reject verification');
+      if (!token) {
+        throw new Error('Authentication token not available');
       }
+      
+      apiClient.setToken(token);
+      await apiClient.rejectVerification(providerId, notes);
       
       await fetchVerifications();
       setAdminNotes({ ...adminNotes, [providerId]: '' });
@@ -130,7 +114,7 @@ export default function VerificationDocumentsManagement() {
       alert('Verification rejected');
     } catch (err: any) {
       console.error('Failed to reject verification:', err);
-      alert(err.message || 'Failed to reject verification');
+      alert(err.response?.data?.error || err.message || 'Failed to reject verification');
     } finally {
       setProcessingId(null);
     }
