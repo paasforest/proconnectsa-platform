@@ -35,7 +35,7 @@ export default async function ServicesPage() {
           <div className="container mx-auto px-4">
             <div className="max-w-6xl mx-auto">
               <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-6">Popular provinces</h2>
-              <div className="flex flex-wrap gap-3 mb-10">
+              <div className="flex flex-wrap gap-3 mb-6">
                 {PROVINCES.slice(0, 3).map((p) => (
                   <Link
                     key={p.slug}
@@ -46,6 +46,35 @@ export default async function ServicesPage() {
                   </Link>
                 ))}
               </div>
+              {PROVINCES.find((p) => p.slug === "gauteng") && (
+                <div className="mb-10 p-4 bg-emerald-50 border border-emerald-200 rounded-lg">
+                  <p className="text-sm text-gray-700 mb-2">
+                    <strong>Looking for services in Gauteng?</strong> Explore our dedicated Gauteng pages:
+                  </p>
+                  <div className="flex flex-wrap gap-2">
+                    <Link
+                      href="/gauteng/local-services"
+                      className="text-sm text-emerald-700 font-semibold hover:text-emerald-800 hover:underline"
+                    >
+                      Local Services
+                    </Link>
+                    <span className="text-gray-400">•</span>
+                    <Link
+                      href="/gauteng/get-quotes"
+                      className="text-sm text-emerald-700 font-semibold hover:text-emerald-800 hover:underline"
+                    >
+                      Get Quotes
+                    </Link>
+                    <span className="text-gray-400">•</span>
+                    <Link
+                      href="/gauteng/find-service-providers"
+                      className="text-sm text-emerald-700 font-semibold hover:text-emerald-800 hover:underline"
+                    >
+                      Find Providers
+                    </Link>
+                  </div>
+                </div>
+              )}
 
               <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-6">Service categories</h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">

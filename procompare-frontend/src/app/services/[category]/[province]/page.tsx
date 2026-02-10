@@ -294,6 +294,26 @@ export default async function ServiceProvincePage({ params }: Props) {
                     Learn how it works →
                   </Link>
                 </div>
+
+                {province === "gauteng" && (
+                  <div className="border rounded-2xl p-6 bg-emerald-50 border-emerald-200">
+                    <div className="text-lg font-semibold text-gray-900 mb-2">Explore {p.name} Services</div>
+                    <p className="text-gray-600 text-sm mb-4">
+                      Discover more ways to find and connect with service providers in {p.name}.
+                    </p>
+                    <div className="space-y-2">
+                      <Link href="/gauteng/local-services" className="block text-emerald-700 font-semibold hover:text-emerald-800 text-sm">
+                        Local Services in {p.name} →
+                      </Link>
+                      <Link href="/gauteng/get-quotes" className="block text-emerald-700 font-semibold hover:text-emerald-800 text-sm">
+                        Get Free Quotes in {p.name} →
+                      </Link>
+                      <Link href="/gauteng/find-service-providers" className="block text-emerald-700 font-semibold hover:text-emerald-800 text-sm">
+                        Find Service Providers in {p.name} →
+                      </Link>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           </div>
