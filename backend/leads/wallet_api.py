@@ -622,5 +622,3 @@ def get_intent_display(hiring_intent):
         'researching': 'Researching',
     }
     return intent_map.get(hiring_intent or '', 'Unknown')
-
-
