@@ -171,16 +171,19 @@ export default async function ServiceProvincePage({ params }: Props) {
               </p>
 
               <div className="mt-6 flex flex-wrap gap-2">
-                {p.topCities.map((city) => (
-                  <Link
-                    key={city}
-                    href={`/providers/browse?category=${encodeURIComponent(category)}&city=${encodeURIComponent(city)}`}
-                    className="inline-flex items-center rounded-full bg-white border px-3 py-1 text-sm text-gray-700 hover:border-emerald-300 hover:bg-emerald-50"
-                    title={`Browse ${serviceName.toLowerCase()} providers in ${city}`}
-                  >
-                    {city}
-                  </Link>
-                ))}
+                {p.topCities.map((city) => {
+                  const citySlug = city.toLowerCase().replace(/\s+/g, "-")
+                  return (
+                    <Link
+                      key={city}
+                      href={`/${citySlug}/${category}`}
+                      className="inline-flex items-center rounded-full bg-white border px-3 py-1 text-sm text-gray-700 hover:border-emerald-300 hover:bg-emerald-50"
+                      title={`Find ${serviceName.toLowerCase()} in ${city}`}
+                    >
+                      {city}
+                    </Link>
+                  )
+                })}
               </div>
             </div>
           </div>

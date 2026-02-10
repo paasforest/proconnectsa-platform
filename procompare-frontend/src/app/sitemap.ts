@@ -1,6 +1,7 @@
 import type { MetadataRoute } from "next"
 import { fetchServiceCategories } from "@/lib/service-categories"
 import { PROVINCES } from "@/lib/seo-locations"
+import { MAJOR_CITIES } from "@/lib/seo-cities"
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = "https://www.proconnectsa.co.za"
@@ -25,6 +26,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { id: 0, slug: "cleaning", name: "Cleaning" },
     { id: 0, slug: "painting", name: "Painting" },
     { id: 0, slug: "handyman", name: "Handyman" },
+    { id: 0, slug: "hvac", name: "HVAC" },
+    { id: 0, slug: "landscaping", name: "Landscaping" },
+    { id: 0, slug: "solar-installation", name: "Solar Installation" },
   ])
 
   const categoryUrls: MetadataRoute.Sitemap = cats.map((c) => ({
@@ -42,5 +46,17 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     }
   }
 
-  return [...core, ...categoryUrls, ...provinceUrls]
+  // City + Service pages - prioritize top services and major cities
+  const topServices = ["plumbing", "electrical", "cleaning", "painting", "handyman", "hvac", "landscaping", "solar-installation"]
+  const cityServiceUrls: MetadataRoute.Sitemap = []
+  for (const city of MAJOR_CITIES) {
+    for (const service of topServices) {
+      cityServiceUrls.push({
+        url: `${baseUrl}/${city.slug}/${service}`,
+        lastModified: new Date(),
+      })
+    }
+  }
+
+  return [...core, ...categoryUrls, ...provinceUrls, ...cityServiceUrls]
 }
