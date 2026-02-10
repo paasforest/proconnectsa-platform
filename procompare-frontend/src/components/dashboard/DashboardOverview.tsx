@@ -89,9 +89,20 @@ const DashboardOverview = () => {
           });
         } else {
           // Use API data for existing users
+          // Also fetch available leads count for active_leads
+          let availableLeadsCount = 0;
+          try {
+            const leadsResponse = await apiClient.get('/api/leads/wallet/available/');
+            const leads = leadsResponse.data?.leads || leadsResponse.leads || [];
+            availableLeadsCount = Array.isArray(leads) ? leads.length : 0;
+          } catch (e) {
+            // If leads fetch fails, use stats data
+            availableLeadsCount = statsResponse.data?.active_leads || 0;
+          }
+          
           setStats({
             total_leads: statsResponse.data.total_leads || 0,
-            active_leads: statsResponse.data.active_leads || 0,
+            active_leads: availableLeadsCount || statsResponse.data.active_leads || 0,
             completed_jobs: statsResponse.data.completed_leads || 0,
             total_revenue: statsResponse.data.total_earnings || 0,
             average_rating: 0,
