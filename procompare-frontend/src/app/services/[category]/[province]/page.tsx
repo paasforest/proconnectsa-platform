@@ -197,22 +197,36 @@ export default async function ServiceProvincePage({ params }: Props) {
               </div>
               <div className="space-y-6">
                 <div className="border rounded-2xl p-6 bg-white">
-                  <div className="text-lg font-semibold text-gray-900 mb-2">Popular cities in {p.name}</div>
+                  <div className="text-lg font-semibold text-gray-900 mb-2">Find {serviceName} in Cities Near You</div>
                   <p className="text-gray-600 text-sm mb-4">
-                    We’ll match based on your suburb/city — these are common areas in {p.name}.
+                    Browse verified {serviceName.toLowerCase()} professionals in major cities across {p.name}.
                   </p>
                   <div className="flex flex-wrap gap-2">
-                    {p.topCities.map((city) => (
-                      <Link
-                        key={city}
-                        href={`/providers/browse?category=${encodeURIComponent(category)}&city=${encodeURIComponent(city)}`}
-                        className="inline-flex items-center rounded-full border px-4 py-2 text-sm text-gray-700 bg-gray-50 hover:border-emerald-300 hover:bg-emerald-50"
-                        title={`Browse ${serviceName.toLowerCase()} providers in ${city}`}
-                      >
-                        {city}
-                      </Link>
-                    ))}
+                    {p.topCities.map((city) => {
+                      const citySlug = city.toLowerCase().replace(/\s+/g, "-")
+                      return (
+                        <Link
+                          key={city}
+                          href={`/${citySlug}/${category}`}
+                          className="inline-flex items-center rounded-full border px-4 py-2 text-sm text-gray-700 bg-gray-50 hover:border-emerald-300 hover:bg-emerald-50"
+                          title={`Find ${serviceName.toLowerCase()} in ${city}`}
+                        >
+                          {city}
+                        </Link>
+                      )
+                    })}
                   </div>
+                </div>
+
+                <div className="border rounded-2xl p-6 bg-emerald-50 border-emerald-200">
+                  <div className="text-lg font-semibold text-gray-900 mb-2">Why Choose ProConnectSA in {p.name}?</div>
+                  <ul className="text-sm text-gray-700 space-y-2">
+                    <li>• <strong>Verified professionals:</strong> All providers are background checked and verified</li>
+                    <li>• <strong>Local expertise:</strong> Providers understand {p.name} properties and local regulations</li>
+                    <li>• <strong>Compare quotes:</strong> Get multiple quotes to find the best price</li>
+                    <li>• <strong>No obligation:</strong> Free to request quotes, no commitment to hire</li>
+                    <li>• <strong>Fast matching:</strong> Connect with professionals who can help quickly</li>
+                  </ul>
                 </div>
 
                 <div className="border rounded-2xl p-6 bg-white">
