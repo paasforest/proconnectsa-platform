@@ -78,7 +78,7 @@ export function Footer() {
               </li>
               <li>
                 <Link href="/providers/browse" className="text-muted-foreground hover:text-foreground transition-colors">
-                  Browse Pros
+                  Browse Providers
                 </Link>
               </li>
               <li>
@@ -89,6 +89,33 @@ export function Footer() {
               <li>
                 <Link href="/pricing" className="text-muted-foreground hover:text-foreground transition-colors">
                   Pricing
+                </Link>
+              </li>
+            </ul>
+          </div>
+
+          {/* Locations */}
+          <div className="space-y-4">
+            <h3 className="font-semibold">Find Services By Province</h3>
+            <ul className="space-y-2 text-sm">
+              <li>
+                <Link href="/gauteng/local-services" className="text-muted-foreground hover:text-foreground transition-colors">
+                  Gauteng
+                </Link>
+              </li>
+              <li>
+                <Link href="/services/plumbing/western-cape" className="text-muted-foreground hover:text-foreground transition-colors">
+                  Western Cape
+                </Link>
+              </li>
+              <li>
+                <Link href="/services/plumbing/kwazulu-natal" className="text-muted-foreground hover:text-foreground transition-colors">
+                  KwaZulu-Natal
+                </Link>
+              </li>
+              <li>
+                <Link href="/services" className="text-muted-foreground hover:text-foreground transition-colors">
+                  All Provinces
                 </Link>
               </li>
             </ul>

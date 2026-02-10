@@ -102,22 +102,45 @@ export default async function Homepage() {
                 </div>
 
                 <div className="border rounded-2xl bg-white p-6">
-                  <div className="text-lg font-semibold text-gray-900 mb-3">Top provinces</div>
-                  <div className="flex flex-wrap gap-2">
+                  <div className="text-lg font-semibold text-gray-900 mb-3">Find Services by Province</div>
+                  <p className="text-sm text-gray-600 mb-4">
+                    Browse verified professionals in your province
+                  </p>
+                  <div className="flex flex-wrap gap-2 mb-4">
                     {PROVINCES.slice(0, 3).map((p) => (
                       <Link
                         key={p.slug}
-                        href={`/services/plumbing/${p.slug}`}
+                        href={`/${p.slug}/local-services`}
                         className="inline-flex items-center rounded-full border px-4 py-2 text-sm text-gray-700 hover:border-emerald-300 hover:bg-emerald-50"
                       >
                         {p.name}
                       </Link>
                     ))}
                   </div>
+                  <div className="pt-4 border-t">
+                    <div className="text-sm font-semibold text-gray-900 mb-2">Popular Cities</div>
+                    <div className="flex flex-wrap gap-2">
+                      <Link href="/johannesburg/plumbing" className="text-xs text-emerald-700 hover:text-emerald-800 hover:underline">
+                        Johannesburg
+                      </Link>
+                      <span className="text-gray-300">•</span>
+                      <Link href="/cape-town/plumbing" className="text-xs text-emerald-700 hover:text-emerald-800 hover:underline">
+                        Cape Town
+                      </Link>
+                      <span className="text-gray-300">•</span>
+                      <Link href="/durban/plumbing" className="text-xs text-emerald-700 hover:text-emerald-800 hover:underline">
+                        Durban
+                      </Link>
+                      <span className="text-gray-300">•</span>
+                      <Link href="/pretoria/plumbing" className="text-xs text-emerald-700 hover:text-emerald-800 hover:underline">
+                        Pretoria
+                      </Link>
+                    </div>
+                  </div>
                   <div className="mt-4 text-sm text-gray-600">
-                    Want leads as a professional?{" "}
+                    Are you a professional?{" "}
                     <Link href="/for-pros" className="font-semibold text-emerald-700 hover:text-emerald-800">
-                      Learn how it works →
+                      Join as a provider →
                     </Link>
                   </div>
                 </div>
@@ -133,19 +156,41 @@ export default async function Homepage() {
                 </div>
 
                 <div className="border rounded-2xl bg-emerald-50 border-emerald-200 p-6">
-                  <div className="text-lg font-semibold text-gray-900 mb-2">Find Services in Gauteng</div>
+                  <div className="text-lg font-semibold text-gray-900 mb-2">Trust & Safety</div>
+                  <div className="space-y-2 text-sm text-gray-700">
+                    <div className="flex items-center gap-2">
+                      <span className="text-emerald-600 font-bold">✓</span>
+                      <span><strong>Verified professionals:</strong> All providers are background checked</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-emerald-600 font-bold">✓</span>
+                      <span><strong>No obligation:</strong> Free to request quotes, no commitment to hire</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-emerald-600 font-bold">✓</span>
+                      <span><strong>Compare quotes:</strong> Get multiple quotes to find the best price</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-emerald-600 font-bold">✓</span>
+                      <span><strong>Local & trusted:</strong> Connect with professionals in your area</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="border rounded-2xl bg-blue-50 border-blue-200 p-6">
+                  <div className="text-lg font-semibold text-gray-900 mb-2">Explore by Province</div>
                   <p className="text-gray-600 text-sm mb-4">
-                    Explore our dedicated pages for Gauteng service providers
+                    Find services in major provinces across South Africa
                   </p>
                   <div className="space-y-2">
-                    <Link href="/gauteng/local-services" className="block text-emerald-700 font-semibold hover:text-emerald-800 text-sm">
-                      Local Services in Gauteng →
+                    <Link href="/gauteng/local-services" className="block text-blue-700 font-semibold hover:text-blue-800 text-sm">
+                      Gauteng Services →
                     </Link>
-                    <Link href="/gauteng/get-quotes" className="block text-emerald-700 font-semibold hover:text-emerald-800 text-sm">
-                      Get Free Quotes in Gauteng →
+                    <Link href="/services/plumbing/western-cape" className="block text-blue-700 font-semibold hover:text-blue-800 text-sm">
+                      Western Cape Services →
                     </Link>
-                    <Link href="/gauteng/find-service-providers" className="block text-emerald-700 font-semibold hover:text-emerald-800 text-sm">
-                      Find Service Providers in Gauteng →
+                    <Link href="/services/plumbing/kwazulu-natal" className="block text-blue-700 font-semibold hover:text-blue-800 text-sm">
+                      KwaZulu-Natal Services →
                     </Link>
                   </div>
                 </div>

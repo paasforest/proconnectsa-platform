@@ -98,6 +98,22 @@ export default async function GautengLocalServicesPage() {
           <div className="container mx-auto px-4">
             <div className="max-w-5xl mx-auto">
               <div className="bg-white border rounded-2xl p-6 mb-8">
+                <div className="flex items-center gap-2 mb-4">
+                  <div className="flex items-center gap-2 text-sm text-emerald-700">
+                    <span className="font-bold">✓</span>
+                    <span className="font-semibold">Verified Professionals</span>
+                  </div>
+                  <span className="text-gray-300">•</span>
+                  <div className="flex items-center gap-2 text-sm text-emerald-700">
+                    <span className="font-bold">✓</span>
+                    <span className="font-semibold">No Obligation</span>
+                  </div>
+                  <span className="text-gray-300">•</span>
+                  <div className="flex items-center gap-2 text-sm text-emerald-700">
+                    <span className="font-bold">✓</span>
+                    <span className="font-semibold">Compare Quotes</span>
+                  </div>
+                </div>
                 <h2 className="text-2xl font-semibold text-gray-900 mb-4">Request Free Quotes</h2>
                 <p className="text-gray-600 mb-6">
                   Tell us what service you need and your location in {provinceName}, and we'll connect you with verified local professionals.
