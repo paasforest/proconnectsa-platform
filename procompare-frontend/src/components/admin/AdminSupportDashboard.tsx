@@ -90,6 +90,7 @@ const AlertDescription = ({ children, className }) => (
 
 // Main Dashboard Component
 export default function AdminSupportDashboard() {
+  const { token } = useAuth();
   const [tickets, setTickets] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -97,16 +98,20 @@ export default function AdminSupportDashboard() {
   const [priorityFilter, setPriorityFilter] = useState('all');
 
   useEffect(() => {
-    loadTickets();
-  }, []);
+    if (token) {
+      apiClient.setToken(token);
+      loadTickets();
+    }
+  }, [token]);
 
   const loadTickets = async () => {
     try {
       setLoading(true);
-      const response = await apiClient.get('/admin/support/tickets');
-      setTickets(response.tickets || []);
+      const response = await apiClient.get('/api/support/tickets/');
+      setTickets(response.tickets || response.results || response || []);
     } catch (error) {
       console.error('Failed to load tickets:', error);
+      setTickets([]); // Set empty array on error
     } finally {
       setLoading(false);
     }
