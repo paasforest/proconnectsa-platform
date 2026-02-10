@@ -12,6 +12,8 @@ from . import settings_views
 from . import support_views
 from . import admin_monitoring
 from . import admin_views
+from . import admin_premium_views
+from . import admin_verification_views
 
 urlpatterns = [
     # Authentication
@@ -130,6 +132,17 @@ urlpatterns = [
     path('admin/monitoring/dashboard/', admin_monitoring.admin_monitoring_dashboard, name='admin-monitoring-dashboard'),
     path('admin/monitoring/activity/', admin_monitoring.recent_activity_feed, name='admin-activity-feed'),
     path('admin/monitoring/problems/', admin_monitoring.problem_detection, name='admin-problem-detection'),
+    
+    # Admin Premium Listing Management
+    path('admin/premium-requests/', admin_premium_views.admin_premium_requests, name='admin-premium-requests'),
+    path('admin/premium-requests/<uuid:deposit_id>/approve/', admin_premium_views.admin_approve_premium, name='admin-approve-premium'),
+    path('admin/premium-requests/<uuid:deposit_id>/reject/', admin_premium_views.admin_reject_premium, name='admin-reject-premium'),
+    
+    # Admin Verification Management
+    path('admin/verifications/', admin_verification_views.admin_pending_verifications, name='admin-pending-verifications'),
+    path('admin/verifications/<str:provider_id>/', admin_verification_views.admin_provider_verification_detail, name='admin-verification-detail'),
+    path('admin/verifications/<str:provider_id>/approve/', admin_verification_views.admin_approve_verification, name='admin-approve-verification'),
+    path('admin/verifications/<str:provider_id>/reject/', admin_verification_views.admin_reject_verification, name='admin-reject-verification'),
     
     # Public provider directory (SEO)
     path('public/providers/', public_views.public_providers_list, name='public-providers-list'),
