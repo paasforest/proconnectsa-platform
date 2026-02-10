@@ -358,19 +358,40 @@ def admin_list_google_reviews(request):
         if status_filter not in ['pending', 'approved', 'rejected', 'banned', 'all']:
             status_filter = 'pending'
         
-        reviews = GoogleReview.objects.all()
+        # Get reviews with safe select_related to avoid DoesNotExist errors
+        reviews = GoogleReview.objects.select_related('provider_profile', 'reviewed_by').order_by('-submission_date')
+        
         if status_filter != 'all':
             reviews = reviews.filter(review_status=status_filter)
         
-        reviews = reviews.select_related('provider_profile', 'reviewed_by').order_by('-submission_date')
-        serializer = GoogleReviewSerializer(reviews, many=True)
-        return Response(serializer.data)
+        # Serialize reviews with error handling for each item
+        reviews_list = []
+        for review in reviews:
+            try:
+                serializer = GoogleReviewSerializer(review)
+                reviews_list.append(serializer.data)
+            except Exception as e:
+                logger.error(f"Error serializing GoogleReview {review.id}: {str(e)}")
+                # Include basic info even if serialization fails
+                reviews_list.append({
+                    'id': str(review.id),
+                    'error': 'Failed to serialize review data',
+                    'review_status': review.review_status,
+                    'submission_date': review.submission_date.isoformat() if review.submission_date else None,
+                })
+        
+        return Response(reviews_list)
     except Exception as e:
         logger.error(f"Error in admin_list_google_reviews: {str(e)}")
         import traceback
-        logger.error(traceback.format_exc())
+        error_trace = traceback.format_exc()
+        logger.error(error_trace)
         return Response(
-            {'error': f'Failed to fetch Google reviews: {str(e)}'},
+            {
+                'error': 'Failed to fetch Google reviews',
+                'message': str(e),
+                'details': error_trace.split('\n')[-5:] if error_trace else []
+            },
             status=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
 

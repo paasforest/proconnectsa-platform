@@ -156,7 +156,6 @@ class ReviewSearchSerializer(serializers.Serializer):
     service_category = serializers.IntegerField(required=False)
 
 
-
 class GoogleReviewSerializer(serializers.ModelSerializer):
     """Serializer for GoogleReview model"""
     provider_profile = serializers.SerializerMethodField()
@@ -176,14 +175,26 @@ class GoogleReviewSerializer(serializers.ModelSerializer):
         ]
     
     def get_provider_profile(self, obj):
+        try:
+            if obj.provider_profile:
+                return {
+                    'id': str(obj.provider_profile.id),
+                    'business_name': obj.provider_profile.business_name or 'Unknown Business',
+                }
+        except Exception:
+            pass
         return {
-            'id': str(obj.provider_profile.id),
-            'business_name': obj.provider_profile.business_name,
+            'id': None,
+            'business_name': 'Unknown Business',
         }
     
     def get_reviewed_by_name(self, obj):
-        if obj.reviewed_by:
-            return f"{obj.reviewed_by.first_name} {obj.reviewed_by.last_name}".strip()
+        try:
+            if obj.reviewed_by:
+                name = f"{obj.reviewed_by.first_name or ''} {obj.reviewed_by.last_name or ''}".strip()
+                return name if name else obj.reviewed_by.email
+        except Exception:
+            pass
         return None
 
 
@@ -249,3 +260,4 @@ class GoogleReviewModerationSerializer(serializers.Serializer):
         allow_blank=True,
         help_text="Optional notes for rejection/ban"
     )
+
