@@ -342,29 +342,37 @@ def public_google_reviews_by_profile(request, profile_id):
 
 
 @api_view(['GET'])
-@permission_classes([permissions.IsAuthenticated])
 @api_view(['GET'])
 @permission_classes([permissions.IsAuthenticated])
 def admin_list_google_reviews(request):
     """Admin lists all Google review submissions with filtering"""
-    # Check if user is admin or staff
-    if not (request.user.is_staff or request.user.user_type in ['admin', 'support']):
+    try:
+        # Check if user is admin or staff
+        if not (request.user.is_staff or request.user.user_type in ['admin', 'support']):
+            return Response(
+                {'error': 'Only admins can view all Google reviews'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        
+        status_filter = request.GET.get('status', 'pending')
+        if status_filter not in ['pending', 'approved', 'rejected', 'banned', 'all']:
+            status_filter = 'pending'
+        
+        reviews = GoogleReview.objects.all()
+        if status_filter != 'all':
+            reviews = reviews.filter(review_status=status_filter)
+        
+        reviews = reviews.select_related('provider_profile', 'reviewed_by').order_by('-submission_date')
+        serializer = GoogleReviewSerializer(reviews, many=True)
+        return Response(serializer.data)
+    except Exception as e:
+        logger.error(f"Error in admin_list_google_reviews: {str(e)}")
+        import traceback
+        logger.error(traceback.format_exc())
         return Response(
-            {'error': 'Only admins can view all Google reviews'},
-            status=status.HTTP_403_FORBIDDEN
+            {'error': f'Failed to fetch Google reviews: {str(e)}'},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
-    
-    status_filter = request.GET.get('status', 'pending')
-    if status_filter not in ['pending', 'approved', 'rejected', 'banned', 'all']:
-        status_filter = 'pending'
-    
-    reviews = GoogleReview.objects.all()
-    if status_filter != 'all':
-        reviews = reviews.filter(review_status=status_filter)
-    
-    reviews = reviews.select_related('provider_profile', 'reviewed_by').order_by('-submission_date')
-    serializer = GoogleReviewSerializer(reviews, many=True)
-    return Response(serializer.data)
 
 
 @api_view(['POST'])
