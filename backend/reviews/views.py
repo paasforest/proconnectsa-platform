@@ -343,9 +343,12 @@ def public_google_reviews_by_profile(request, profile_id):
 
 @api_view(['GET'])
 @permission_classes([permissions.IsAuthenticated])
+@api_view(['GET'])
+@permission_classes([permissions.IsAuthenticated])
 def admin_list_google_reviews(request):
     """Admin lists all Google review submissions with filtering"""
-    if not request.user.is_admin:
+    # Check if user is admin or staff
+    if not (request.user.is_staff or request.user.user_type in ['admin', 'support']):
         return Response(
             {'error': 'Only admins can view all Google reviews'},
             status=status.HTTP_403_FORBIDDEN
@@ -368,7 +371,8 @@ def admin_list_google_reviews(request):
 @permission_classes([permissions.IsAuthenticated])
 def admin_moderate_google_review(request, review_id):
     """Admin approves/rejects/bans a Google review"""
-    if not request.user.is_admin:
+    # Check if user is admin or staff
+    if not (request.user.is_staff or request.user.user_type in ['admin', 'support']):
         return Response(
             {'error': 'Only admins can moderate Google reviews'},
             status=status.HTTP_403_FORBIDDEN
