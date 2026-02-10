@@ -37,11 +37,15 @@ export default async function ServiceCategoryPage({ params }: Props) {
         <section className="bg-gradient-to-br from-emerald-50 to-blue-50 py-12">
           <div className="container mx-auto px-4">
             <div className="max-w-5xl mx-auto">
-              <nav className="text-sm text-gray-600 mb-4">
+              <nav className="text-sm text-gray-600 mb-4 flex items-center flex-wrap gap-1">
+                <Link href="/" className="hover:text-gray-900">
+                  Home
+                </Link>
+                <span className="mx-1">/</span>
                 <Link href="/services" className="hover:text-gray-900">
                   Services
                 </Link>{" "}
-                <span className="mx-2">/</span>
+                <span className="mx-1">/</span>
                 <span className="text-gray-900 font-medium">{displayName}</span>
               </nav>
               <h1 className="text-3xl md:text-5xl font-bold text-gray-900 mb-3">
@@ -58,6 +62,13 @@ export default async function ServiceCategoryPage({ params }: Props) {
           <div className="container mx-auto px-4">
             <div className="max-w-5xl mx-auto grid lg:grid-cols-2 gap-8 items-start">
               <div className="bg-white border rounded-2xl p-6">
+                <div className="flex items-center gap-2 mb-4 text-sm flex-wrap">
+                  <span className="text-emerald-700 font-semibold">✓ Verified</span>
+                  <span className="text-gray-300">•</span>
+                  <span className="text-emerald-700 font-semibold">✓ No Obligation</span>
+                  <span className="text-gray-300">•</span>
+                  <span className="text-emerald-700 font-semibold">✓ Compare Quotes</span>
+                </div>
                 <BarkLeadForm preselectedCategory={category} />
               </div>
               <div className="space-y-6">

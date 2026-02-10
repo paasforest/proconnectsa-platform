@@ -122,6 +122,13 @@ export default async function GautengGetQuotesPage() {
           <div className="container mx-auto px-4">
             <div className="max-w-5xl mx-auto grid lg:grid-cols-2 gap-8 items-start">
               <div className="bg-white border rounded-2xl p-6">
+                <div className="flex items-center gap-2 mb-4 text-sm flex-wrap">
+                  <span className="text-emerald-700 font-semibold">✓ Verified</span>
+                  <span className="text-gray-300">•</span>
+                  <span className="text-emerald-700 font-semibold">✓ No Obligation</span>
+                  <span className="text-gray-300">•</span>
+                  <span className="text-emerald-700 font-semibold">✓ Compare Quotes</span>
+                </div>
                 <h2 className="text-xl font-semibold text-gray-900 mb-4">Request Your Free Quote</h2>
                 <p className="text-gray-600 text-sm mb-6">
                   Tell us what service you need and where you're located in {provinceName}, and we'll connect you with verified professionals.
