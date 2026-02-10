@@ -342,7 +342,6 @@ def public_google_reviews_by_profile(request, profile_id):
 
 
 @api_view(['GET'])
-@api_view(['GET'])
 @permission_classes([permissions.IsAuthenticated])
 def admin_list_google_reviews(request):
     """Admin lists all Google review submissions with filtering"""
