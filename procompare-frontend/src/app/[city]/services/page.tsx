@@ -109,7 +109,7 @@ export default async function CityServicesPage({ params }: Props) {
               <p className="text-gray-600 text-lg max-w-3xl">
                 Find trusted service providers in {cityData.name}, {cityData.provinceName}. 
                 Compare free quotes from verified professionals for all your home and business needs. 
-                Fast matching with no obligation to hire.
+                Whether you need <Link href={`/${city}/plumbing`} className="text-emerald-700 hover:text-emerald-800 hover:underline font-medium">plumbing</Link>, <Link href={`/${city}/electrical`} className="text-emerald-700 hover:text-emerald-800 hover:underline font-medium">electrical work</Link>, <Link href={`/${city}/cleaning`} className="text-emerald-700 hover:text-emerald-800 hover:underline font-medium">cleaning services</Link>, <Link href={`/${city}/painting`} className="text-emerald-700 hover:text-emerald-800 hover:underline font-medium">painting</Link>, or <Link href={`/${city}/handyman`} className="text-emerald-700 hover:text-emerald-800 hover:underline font-medium">handyman services</Link> in {cityData.name}, we'll match you with local professionals. Fast matching with no obligation to hire.
               </p>
             </div>
           </div>

@@ -69,7 +69,7 @@ export default async function Homepage() {
                   Find Trusted Local Service Providers in South Africa
                 </h1>
                 <p className="text-lg text-gray-600 mb-6">
-                  Compare quotes from verified professionals near you — fast & free. No obligation to hire.
+                  Compare quotes from verified professionals near you — fast & free. Whether you're in <Link href="/johannesburg/services" className="text-emerald-700 hover:text-emerald-800 hover:underline font-medium">Johannesburg</Link>, <Link href="/cape-town/services" className="text-emerald-700 hover:text-emerald-800 hover:underline font-medium">Cape Town</Link>, <Link href="/durban/services" className="text-emerald-700 hover:text-emerald-800 hover:underline font-medium">Durban</Link>, or <Link href="/pretoria/services" className="text-emerald-700 hover:text-emerald-800 hover:underline font-medium">Pretoria</Link>, find trusted <Link href="/services/plumbing" className="text-emerald-700 hover:text-emerald-800 hover:underline font-medium">plumbers</Link>, <Link href="/services/electrical" className="text-emerald-700 hover:text-emerald-800 hover:underline font-medium">electricians</Link>, <Link href="/services/cleaning" className="text-emerald-700 hover:text-emerald-800 hover:underline font-medium">cleaning services</Link>, and more. No obligation to hire.
                 </p>
                 <div className="flex flex-wrap gap-3 text-sm text-gray-700 mb-8">
                   <span className="inline-flex items-center rounded-full bg-white border px-3 py-1">✓ Verified professionals</span>

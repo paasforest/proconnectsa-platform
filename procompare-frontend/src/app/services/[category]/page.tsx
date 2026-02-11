@@ -52,7 +52,7 @@ export default async function ServiceCategoryPage({ params }: Props) {
                 Get free quotes for {displayName}
               </h1>
               <p className="text-gray-600 text-lg max-w-3xl">
-                Tell us what you need and we’ll connect you with verified professionals in your area. No obligation.
+                Tell us what you need and we'll connect you with verified professionals in your area. Find {displayName.toLowerCase()} in <Link href={`/johannesburg/${category}`} className="text-emerald-700 hover:text-emerald-800 hover:underline font-medium">Johannesburg</Link>, <Link href={`/cape-town/${category}`} className="text-emerald-700 hover:text-emerald-800 hover:underline font-medium">Cape Town</Link>, <Link href={`/durban/${category}`} className="text-emerald-700 hover:text-emerald-800 hover:underline font-medium">Durban</Link>, <Link href={`/pretoria/${category}`} className="text-emerald-700 hover:text-emerald-800 hover:underline font-medium">Pretoria</Link>, or browse by province: <Link href={`/services/${category}/gauteng`} className="text-emerald-700 hover:text-emerald-800 hover:underline font-medium">Gauteng</Link>, <Link href={`/services/${category}/western-cape`} className="text-emerald-700 hover:text-emerald-800 hover:underline font-medium">Western Cape</Link>, <Link href={`/services/${category}/kwazulu-natal`} className="text-emerald-700 hover:text-emerald-800 hover:underline font-medium">KwaZulu-Natal</Link>. No obligation.
               </p>
             </div>
           </div>

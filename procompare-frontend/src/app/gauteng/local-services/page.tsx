@@ -150,19 +150,20 @@ export default async function GautengLocalServicesPage() {
                 <h2 className="text-xl font-semibold text-gray-900 mb-4">Why Choose Local Providers in {provinceName}?</h2>
                 <div className="space-y-4 text-gray-700">
                   <p>
-                    Whether you're in bustling Johannesburg, the administrative hub of Pretoria, the business district of Sandton, 
-                    or the growing suburbs of Midrand, finding reliable local service providers matters. Local professionals understand 
+                    Whether you're in bustling <Link href="/johannesburg/services" className="text-emerald-700 hover:text-emerald-800 hover:underline font-medium">Johannesburg</Link>, the administrative hub of <Link href="/pretoria/services" className="text-emerald-700 hover:text-emerald-800 hover:underline font-medium">Pretoria</Link>, the business district of <Link href="/sandton/services" className="text-emerald-700 hover:text-emerald-800 hover:underline font-medium">Sandton</Link>, 
+                    or the growing suburbs of <Link href="/midrand/services" className="text-emerald-700 hover:text-emerald-800 hover:underline font-medium">Midrand</Link>, finding reliable local service providers matters. Local professionals understand 
                     the unique needs of {provinceName} properties—from high-rise apartments to suburban homes, from commercial spaces 
                     to residential complexes.
                   </p>
                   <p>
                     Our platform connects you with verified service providers who serve your specific area in {provinceName}. 
                     This means faster response times, better understanding of local regulations, and professionals who know the 
-                    common issues faced by properties in Johannesburg, Pretoria, Sandton, Midrand, and surrounding areas.
+                    common issues faced by properties in <Link href="/johannesburg/services" className="text-emerald-700 hover:text-emerald-800 hover:underline font-medium">Johannesburg</Link>, <Link href="/pretoria/services" className="text-emerald-700 hover:text-emerald-800 hover:underline font-medium">Pretoria</Link>, <Link href="/sandton/services" className="text-emerald-700 hover:text-emerald-800 hover:underline font-medium">Sandton</Link>, <Link href="/midrand/services" className="text-emerald-700 hover:text-emerald-800 hover:underline font-medium">Midrand</Link>, and surrounding areas.
                   </p>
                   <p>
                     Request free quotes from multiple providers, compare pricing and availability, and choose the professional 
-                    that best fits your needs—all without sharing your contact details publicly and with no obligation to hire.
+                    that best fits your needs—all without sharing your contact details publicly and with no obligation to hire. 
+                    Whether you need <Link href="/services/plumbing/gauteng" className="text-emerald-700 hover:text-emerald-800 hover:underline font-medium">plumbing services</Link>, <Link href="/services/electrical/gauteng" className="text-emerald-700 hover:text-emerald-800 hover:underline font-medium">electrical work</Link>, <Link href="/services/cleaning/gauteng" className="text-emerald-700 hover:text-emerald-800 hover:underline font-medium">cleaning services</Link>, or <Link href="/services/painting/gauteng" className="text-emerald-700 hover:text-emerald-800 hover:underline font-medium">painting</Link>, we'll match you with verified professionals in your area.
                   </p>
                 </div>
               </div>

@@ -181,7 +181,7 @@ export default async function ServiceProvincePage({ params }: Props) {
                 Get free quotes for {serviceName} in {p.name}
               </h1>
               <p className="text-gray-600 text-lg max-w-3xl">
-                Compare quotes from verified professionals across {p.name}. Tell us what you need and get matched fast.
+                Compare quotes from verified professionals across {p.name}. Whether you're looking for {serviceName.toLowerCase()} in <Link href={`/johannesburg/${category}`} className="text-emerald-700 hover:text-emerald-800 hover:underline font-medium">Johannesburg</Link>, <Link href={`/pretoria/${category}`} className="text-emerald-700 hover:text-emerald-800 hover:underline font-medium">Pretoria</Link>, <Link href={`/cape-town/${category}`} className="text-emerald-700 hover:text-emerald-800 hover:underline font-medium">Cape Town</Link>, or <Link href={`/durban/${category}`} className="text-emerald-700 hover:text-emerald-800 hover:underline font-medium">Durban</Link>, we'll match you with local professionals. Tell us what you need and get matched fast.
               </p>
 
               <div className="mt-6 flex flex-wrap gap-2">
@@ -241,13 +241,20 @@ export default async function ServiceProvincePage({ params }: Props) {
 
                 <div className="border rounded-2xl p-6 bg-emerald-50 border-emerald-200">
                   <div className="text-lg font-semibold text-gray-900 mb-2">Why Choose ProConnectSA in {p.name}?</div>
-                  <ul className="text-sm text-gray-700 space-y-2">
-                    <li>• <strong>Verified professionals:</strong> All providers are background checked and verified</li>
-                    <li>• <strong>Local expertise:</strong> Providers understand {p.name} properties and local regulations</li>
-                    <li>• <strong>Compare quotes:</strong> Get multiple quotes to find the best price</li>
-                    <li>• <strong>No obligation:</strong> Free to request quotes, no commitment to hire</li>
-                    <li>• <strong>Fast matching:</strong> Connect with professionals who can help quickly</li>
-                  </ul>
+                  <div className="text-sm text-gray-700 space-y-3">
+                    <p>
+                      <strong>Verified professionals:</strong> All providers are background checked and verified. Whether you need {serviceName.toLowerCase()} in <Link href={`/johannesburg/${category}`} className="text-emerald-700 hover:text-emerald-800 hover:underline font-medium">Johannesburg</Link> or <Link href={`/cape-town/${category}`} className="text-emerald-700 hover:text-emerald-800 hover:underline font-medium">Cape Town</Link>, we ensure quality.
+                    </p>
+                    <p>
+                      <strong>Local expertise:</strong> Providers understand {p.name} properties and local regulations. From <Link href={`/services/plumbing/${p.slug}`} className="text-emerald-700 hover:text-emerald-800 hover:underline font-medium">plumbing</Link> to <Link href={`/services/electrical/${p.slug}`} className="text-emerald-700 hover:text-emerald-800 hover:underline font-medium">electrical work</Link>, our professionals know the local market.
+                    </p>
+                    <p>
+                      <strong>Compare quotes:</strong> Get multiple quotes to find the best price. No obligation to hire—request quotes from <Link href={`/${p.topCities[0]?.toLowerCase().replace(/\s+/g, "-")}/${category}`} className="text-emerald-700 hover:text-emerald-800 hover:underline font-medium">{p.topCities[0]}</Link> to <Link href={`/${p.topCities[1]?.toLowerCase().replace(/\s+/g, "-")}/${category}`} className="text-emerald-700 hover:text-emerald-800 hover:underline font-medium">{p.topCities[1]}</Link> and compare.
+                    </p>
+                    <p>
+                      <strong>Fast matching:</strong> Connect with professionals who can help quickly. Our platform matches you with verified {serviceName.toLowerCase()} providers across all major cities in {p.name}.
+                    </p>
+                  </div>
                 </div>
 
                 <div className="border rounded-2xl p-6 bg-white">
