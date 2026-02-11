@@ -201,13 +201,20 @@ export default async function CityServicesPage({ params }: Props) {
                 <h2 className="text-xl font-semibold text-gray-900 mb-4">
                   Why Choose ProConnectSA in {cityData.name}?
                 </h2>
-                <ul className="text-sm text-gray-700 space-y-2">
-                  <li>• <strong>Local professionals:</strong> All providers serve {cityData.name} and surrounding areas</li>
-                  <li>• <strong>Verified & reviewed:</strong> Check credentials and read customer reviews</li>
-                  <li>• <strong>Compare quotes:</strong> Get multiple quotes to find the best price</li>
-                  <li>• <strong>No obligation:</strong> Free to request quotes, no commitment to hire</li>
-                  <li>• <strong>Fast matching:</strong> Connect with professionals who can help quickly</li>
-                </ul>
+                <div className="text-sm text-gray-700 space-y-3">
+                  <p>
+                    <strong>Local professionals:</strong> All providers serve {cityData.name} and surrounding areas. From <Link href={`/${city}/plumbing`} className="text-emerald-700 hover:text-emerald-800 hover:underline font-medium">plumbers</Link> to <Link href={`/${city}/electrical`} className="text-emerald-700 hover:text-emerald-800 hover:underline font-medium">electricians</Link>, our network covers all major services in {cityData.name}.
+                  </p>
+                  <p>
+                    <strong>Verified & reviewed:</strong> Check credentials and read customer reviews. Every provider on our platform serving {cityData.name} is verified. Looking for services in other areas? Check out <Link href={`/${otherCitiesInProvince[0]?.slug}/services`} className="text-emerald-700 hover:text-emerald-800 hover:underline font-medium">{otherCitiesInProvince[0]?.name}</Link> or <Link href={`/${otherCitiesInProvince[1]?.slug}/services`} className="text-emerald-700 hover:text-emerald-800 hover:underline font-medium">{otherCitiesInProvince[1]?.name}</Link>.
+                  </p>
+                  <p>
+                    <strong>Compare quotes:</strong> Get multiple quotes to find the best price. Request quotes from different providers for <Link href={`/${city}/plumbing`} className="text-emerald-700 hover:text-emerald-800 hover:underline font-medium">plumbing</Link>, <Link href={`/${city}/electrical`} className="text-emerald-700 hover:text-emerald-800 hover:underline font-medium">electrical</Link>, <Link href={`/${city}/cleaning`} className="text-emerald-700 hover:text-emerald-800 hover:underline font-medium">cleaning</Link>, and more in {cityData.name}.
+                  </p>
+                  <p>
+                    <strong>No obligation:</strong> Free to request quotes, no commitment to hire. Explore all services available in {cityData.name} or browse <Link href={`/${cityData.provinceSlug}/local-services`} className="text-emerald-700 hover:text-emerald-800 hover:underline font-medium">all services across {cityData.provinceName}</Link>.
+                  </p>
+                </div>
               </div>
 
               {/* Back to Province */}
