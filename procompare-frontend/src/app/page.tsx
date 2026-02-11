@@ -153,23 +153,19 @@ export default async function Homepage() {
 
                 <div className="border rounded-2xl bg-emerald-50 border-emerald-200 p-6">
                   <div className="text-lg font-semibold text-gray-900 mb-2">Trust & Safety</div>
-                  <div className="space-y-2 text-sm text-gray-700">
-                    <div className="flex items-center gap-2">
-                      <span className="text-emerald-600 font-bold">✓</span>
-                      <span><strong>Verified professionals:</strong> All providers are background checked</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-emerald-600 font-bold">✓</span>
-                      <span><strong>No obligation:</strong> Free to request quotes, no commitment to hire</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-emerald-600 font-bold">✓</span>
-                      <span><strong>Compare quotes:</strong> Get multiple quotes to find the best price</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-emerald-600 font-bold">✓</span>
-                      <span><strong>Local & trusted:</strong> Connect with professionals in your area</span>
-                    </div>
+                  <div className="space-y-3 text-sm text-gray-700">
+                    <p>
+                      <span className="text-emerald-600 font-bold">✓</span> <strong>Verified professionals:</strong> All providers are background checked. Whether you're in <Link href="/johannesburg/services" className="text-emerald-700 hover:text-emerald-800 hover:underline font-medium">Johannesburg</Link> or <Link href="/cape-town/services" className="text-emerald-700 hover:text-emerald-800 hover:underline font-medium">Cape Town</Link>, every professional is verified.
+                    </p>
+                    <p>
+                      <span className="text-emerald-600 font-bold">✓</span> <strong>No obligation:</strong> Free to request quotes, no commitment to hire. Compare <Link href="/services/plumbing" className="text-emerald-700 hover:text-emerald-800 hover:underline font-medium">plumbing</Link>, <Link href="/services/electrical" className="text-emerald-700 hover:text-emerald-800 hover:underline font-medium">electrical</Link>, and <Link href="/services/cleaning" className="text-emerald-700 hover:text-emerald-800 hover:underline font-medium">cleaning</Link> quotes with zero pressure.
+                    </p>
+                    <p>
+                      <span className="text-emerald-600 font-bold">✓</span> <strong>Compare quotes:</strong> Get multiple quotes to find the best price. Request quotes from providers in <Link href="/gauteng/local-services" className="text-emerald-700 hover:text-emerald-800 hover:underline font-medium">Gauteng</Link>, <Link href="/services/plumbing/western-cape" className="text-emerald-700 hover:text-emerald-800 hover:underline font-medium">Western Cape</Link>, and all provinces.
+                    </p>
+                    <p>
+                      <span className="text-emerald-600 font-bold">✓</span> <strong>Local & trusted:</strong> Connect with professionals in your area. Serving 50+ cities nationwide including <Link href="/durban/services" className="text-emerald-700 hover:text-emerald-800 hover:underline font-medium">Durban</Link>, <Link href="/pretoria/services" className="text-emerald-700 hover:text-emerald-800 hover:underline font-medium">Pretoria</Link>, and <Link href="/sandton/services" className="text-emerald-700 hover:text-emerald-800 hover:underline font-medium">Sandton</Link>.
+                    </p>
                   </div>
                 </div>
 
