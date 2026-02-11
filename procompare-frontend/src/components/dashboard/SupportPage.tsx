@@ -69,8 +69,11 @@ const SupportPage = () => {
         setLoading(true);
         apiClient.setToken(token);
         const response = await apiClient.get('/api/support/tickets/');
-        setTickets(response.results || []);
-      } catch (error) {
+        // Handle paginated response (results) or direct array
+        const ticketsList = response.results || (Array.isArray(response) ? response : []);
+        setTickets(ticketsList);
+      } catch (error: any) {
+        console.error('Error fetching tickets:', error);
         setTickets([]);
       } finally {
         setLoading(false);
