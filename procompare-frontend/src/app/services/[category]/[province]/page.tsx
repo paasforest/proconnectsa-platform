@@ -110,6 +110,11 @@ export default async function ServiceProvincePage({ params }: Props) {
     provinceTopCities: p.topCities || [],
     limit: 6,
   })
+  
+  // Get related services (other services in same province)
+  const relatedServices = categories
+    .filter(cat => cat.slug !== category)
+    .slice(0, 6)
 
   const faq = [
     {

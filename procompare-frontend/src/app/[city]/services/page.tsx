@@ -5,7 +5,7 @@ import { ClientHeader } from "@/components/layout/ClientHeader"
 import { Footer } from "@/components/layout/Footer"
 import { fetchServiceCategories } from "@/lib/service-categories"
 import { getCityBySlug, getCitiesByProvince } from "@/lib/seo-cities"
-import { getProvinceBySlug } from "@/lib/seo-locations"
+import { getProvinceBySlug, PROVINCES } from "@/lib/seo-locations"
 import BarkLeadForm from "@/components/leads/BarkLeadForm"
 
 export const dynamic = "force-dynamic"

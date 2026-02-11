@@ -86,6 +86,11 @@ export default async function CityServicePage({ params }: Props) {
 
   // Fetch providers for this city and service
   const providers = await fetchProvidersForCityService(cityName, categorySlug, 6)
+  
+  // Get related services (other services in same city)
+  const relatedServices = categories
+    .filter(c => c.slug !== categorySlug)
+    .slice(0, 6)
 
   // Structured data for SEO
   const localBusinessSchema = {
@@ -110,7 +115,8 @@ export default async function CityServicePage({ params }: Props) {
     itemListElement: [
       { "@type": "ListItem", position: 1, name: "Home", item: "https://www.proconnectsa.co.za" },
       { "@type": "ListItem", position: 2, name: provinceName, item: `https://www.proconnectsa.co.za/${cityData.provinceSlug}/local-services` },
-      { "@type": "ListItem", position: 3, name: cityName, item: `https://www.proconnectsa.co.za/${city}/${service}` },
+      { "@type": "ListItem", position: 3, name: `${cityName} Services`, item: `https://www.proconnectsa.co.za/${city}/services` },
+      { "@type": "ListItem", position: 4, name: `${serviceName} in ${cityName}`, item: `https://www.proconnectsa.co.za/${city}/${service}` },
     ],
   }
 
@@ -255,19 +261,34 @@ export default async function CityServicePage({ params }: Props) {
                   </div>
                 )}
 
-                {/* City Services Hub Link */}
-                <div className="border rounded-2xl p-6 bg-white">
-                  <div className="text-lg font-semibold text-gray-900 mb-2">All Services in {cityName}</div>
-                  <p className="text-gray-600 text-sm mb-4">
-                    Looking for other services in {cityName}? Browse all available services:
-                  </p>
-                  <Link
-                    href={`/${city}/services`}
-                    className="inline-flex items-center px-6 py-3 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 font-medium"
-                  >
-                    View All Services in {cityName} →
-                  </Link>
-                </div>
+                {/* Related Services Section */}
+                {relatedServices.length > 0 && (
+                  <div className="border rounded-2xl p-6 bg-white">
+                    <div className="text-lg font-semibold text-gray-900 mb-2">Other Services in {cityName}</div>
+                    <p className="text-gray-600 text-sm mb-4">
+                      Looking for other services in {cityName}? Browse related services:
+                    </p>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                      {relatedServices.map((relatedService) => (
+                        <Link
+                          key={relatedService.slug}
+                          href={`/${city}/${relatedService.slug}`}
+                          className="text-sm text-emerald-700 hover:text-emerald-800 hover:underline font-medium"
+                        >
+                          {relatedService.name} in {cityName}
+                        </Link>
+                      ))}
+                    </div>
+                    <div className="mt-4 pt-4 border-t">
+                      <Link
+                        href={`/${city}/services`}
+                        className="text-sm text-emerald-700 font-semibold hover:text-emerald-800"
+                      >
+                        View All Services in {cityName} →
+                      </Link>
+                    </div>
+                  </div>
+                )}
 
                 {province && (
                   <div className="border rounded-2xl p-6 bg-white">

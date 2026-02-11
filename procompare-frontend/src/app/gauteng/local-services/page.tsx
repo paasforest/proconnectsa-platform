@@ -201,6 +201,28 @@ export default async function GautengLocalServicesPage() {
               </div>
 
               {/* Popular Areas Section */}
+              {/* Other Provinces Section */}
+              <div className="bg-white border rounded-2xl p-6 mb-8">
+                <h2 className="text-xl font-semibold text-gray-900 mb-4">Other Provinces</h2>
+                <p className="text-gray-600 text-sm mb-4">
+                  Find service providers in other provinces across South Africa:
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  {PROVINCES.filter(p => p.slug !== "gauteng").map((otherProvince) => (
+                    <Link
+                      key={otherProvince.slug}
+                      href={otherProvince.slug === "gauteng" 
+                        ? `/gauteng/local-services` 
+                        : `/services/plumbing/${otherProvince.slug}`
+                      }
+                      className="inline-flex items-center rounded-full border px-4 py-2 text-sm text-gray-700 hover:border-emerald-300 hover:bg-emerald-50 font-medium"
+                    >
+                      {otherProvince.name}
+                    </Link>
+                  ))}
+                </div>
+              </div>
+
               <div className="bg-white border rounded-2xl p-6">
                 <h2 className="text-xl font-semibold text-gray-900 mb-4">Popular Areas We Serve</h2>
                 <p className="text-gray-600 text-sm mb-4">
