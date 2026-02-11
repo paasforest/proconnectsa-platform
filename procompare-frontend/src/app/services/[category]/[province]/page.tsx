@@ -192,9 +192,14 @@ export default async function ServiceProvincePage({ params }: Props) {
               <h1 className="text-3xl md:text-5xl font-bold text-gray-900 mb-3">
                 Get free quotes for {serviceName} in {p.name}
               </h1>
-              <p className="text-gray-600 text-lg max-w-3xl">
+              <p className="text-gray-600 text-lg max-w-3xl mb-4">
                 Compare quotes from verified professionals across {p.name}. Whether you're looking for {serviceName.toLowerCase()} in <Link href={`/johannesburg/${category}`} className="text-emerald-700 hover:text-emerald-800 hover:underline font-medium">Johannesburg</Link>, <Link href={`/pretoria/${category}`} className="text-emerald-700 hover:text-emerald-800 hover:underline font-medium">Pretoria</Link>, <Link href={`/cape-town/${category}`} className="text-emerald-700 hover:text-emerald-800 hover:underline font-medium">Cape Town</Link>, or <Link href={`/durban/${category}`} className="text-emerald-700 hover:text-emerald-800 hover:underline font-medium">Durban</Link>, we'll match you with local professionals. Tell us what you need and get matched fast.
               </p>
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 max-w-3xl">
+                <p className="text-sm text-gray-700">
+                  <strong>Looking for {serviceName.toLowerCase()} in {p.name}?</strong> Our platform connects you with verified professionals across all major cities in {p.name}, including {p.topCities.slice(0, 3).join(", ")}, and surrounding areas. Every provider is background checked, insured, and has proven track records. Request free quotes with no obligation to hire.
+                </p>
+              </div>
 
               <div className="mt-6 flex flex-wrap gap-2">
                 {p.topCities.map((city) => {
