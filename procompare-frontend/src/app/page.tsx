@@ -104,14 +104,14 @@ export default async function Homepage() {
                 <div className="border rounded-2xl bg-white p-6">
                   <div className="text-lg font-semibold text-gray-900 mb-3">Find Services by Province</div>
                   <p className="text-sm text-gray-600 mb-4">
-                    Browse verified professionals in your province
+                    Browse verified professionals in your province. Get quotes from local service providers near you.
                   </p>
                   <div className="flex flex-wrap gap-2 mb-4">
-                    {PROVINCES.slice(0, 3).map((p) => (
+                    {PROVINCES.map((p) => (
                       <Link
                         key={p.slug}
-                        href={`/${p.slug}/local-services`}
-                        className="inline-flex items-center rounded-full border px-4 py-2 text-sm text-gray-700 hover:border-emerald-300 hover:bg-emerald-50"
+                        href={p.slug === "gauteng" ? `/${p.slug}/local-services` : `/services/plumbing/${p.slug}`}
+                        className="inline-flex items-center rounded-full border px-4 py-2 text-sm text-gray-700 hover:border-emerald-300 hover:bg-emerald-50 font-medium"
                       >
                         {p.name}
                       </Link>
@@ -119,22 +119,18 @@ export default async function Homepage() {
                   </div>
                   <div className="pt-4 border-t">
                     <div className="text-sm font-semibold text-gray-900 mb-2">Popular Cities</div>
+                    <p className="text-xs text-gray-600 mb-3">
+                      Find services in major cities: <Link href="/johannesburg/services" className="text-emerald-700 hover:text-emerald-800 hover:underline font-medium">Johannesburg</Link>, <Link href="/cape-town/services" className="text-emerald-700 hover:text-emerald-800 hover:underline font-medium">Cape Town</Link>, <Link href="/durban/services" className="text-emerald-700 hover:text-emerald-800 hover:underline font-medium">Durban</Link>, <Link href="/pretoria/services" className="text-emerald-700 hover:text-emerald-800 hover:underline font-medium">Pretoria</Link>, <Link href="/sandton/services" className="text-emerald-700 hover:text-emerald-800 hover:underline font-medium">Sandton</Link>, and more.
+                    </p>
                     <div className="flex flex-wrap gap-2">
-                      <Link href="/johannesburg/plumbing" className="text-xs text-emerald-700 hover:text-emerald-800 hover:underline">
-                        Johannesburg
-                      </Link>
-                      <span className="text-gray-300">•</span>
-                      <Link href="/cape-town/plumbing" className="text-xs text-emerald-700 hover:text-emerald-800 hover:underline">
-                        Cape Town
-                      </Link>
-                      <span className="text-gray-300">•</span>
-                      <Link href="/durban/plumbing" className="text-xs text-emerald-700 hover:text-emerald-800 hover:underline">
-                        Durban
-                      </Link>
-                      <span className="text-gray-300">•</span>
-                      <Link href="/pretoria/plumbing" className="text-xs text-emerald-700 hover:text-emerald-800 hover:underline">
-                        Pretoria
-                      </Link>
+                      {["Johannesburg", "Cape Town", "Durban", "Pretoria", "Sandton", "Centurion", "Midrand", "Stellenbosch"].map((city) => {
+                        const citySlug = city.toLowerCase().replace(/\s+/g, "-")
+                        return (
+                          <Link key={city} href={`/${citySlug}/services`} className="text-xs text-emerald-700 hover:text-emerald-800 hover:underline font-medium">
+                            {city}
+                          </Link>
+                        )
+                      })}
                     </div>
                   </div>
                   <div className="mt-4 text-sm text-gray-600">
@@ -178,21 +174,31 @@ export default async function Homepage() {
                 </div>
 
                 <div className="border rounded-2xl bg-blue-50 border-blue-200 p-6">
-                  <div className="text-lg font-semibold text-gray-900 mb-2">Explore by Province</div>
+                  <div className="text-lg font-semibold text-gray-900 mb-2">Get Quotes by Province</div>
                   <p className="text-gray-600 text-sm mb-4">
-                    Find services in major provinces across South Africa
+                    Find trusted service providers in major provinces across South Africa. Compare quotes from verified professionals near you.
                   </p>
-                  <div className="space-y-2">
-                    <Link href="/gauteng/local-services" className="block text-blue-700 font-semibold hover:text-blue-800 text-sm">
-                      Gauteng Services →
+                  <div className="grid grid-cols-2 gap-3 mb-4">
+                    <Link href="/gauteng/local-services" className="block px-4 py-3 bg-white border rounded-lg hover:border-emerald-300 hover:bg-emerald-50 transition">
+                      <div className="font-semibold text-gray-900 text-sm">Gauteng</div>
+                      <div className="text-xs text-gray-600 mt-1">Johannesburg, Pretoria, Sandton</div>
                     </Link>
-                    <Link href="/services/plumbing/western-cape" className="block text-blue-700 font-semibold hover:text-blue-800 text-sm">
-                      Western Cape Services →
+                    <Link href="/services/plumbing/western-cape" className="block px-4 py-3 bg-white border rounded-lg hover:border-emerald-300 hover:bg-emerald-50 transition">
+                      <div className="font-semibold text-gray-900 text-sm">Western Cape</div>
+                      <div className="text-xs text-gray-600 mt-1">Cape Town, Stellenbosch, Bellville</div>
                     </Link>
-                    <Link href="/services/plumbing/kwazulu-natal" className="block text-blue-700 font-semibold hover:text-blue-800 text-sm">
-                      KwaZulu-Natal Services →
+                    <Link href="/services/plumbing/kwazulu-natal" className="block px-4 py-3 bg-white border rounded-lg hover:border-emerald-300 hover:bg-emerald-50 transition">
+                      <div className="font-semibold text-gray-900 text-sm">KwaZulu-Natal</div>
+                      <div className="text-xs text-gray-600 mt-1">Durban, Umhlanga, Pietermaritzburg</div>
+                    </Link>
+                    <Link href="/services/plumbing/eastern-cape" className="block px-4 py-3 bg-white border rounded-lg hover:border-emerald-300 hover:bg-emerald-50 transition">
+                      <div className="font-semibold text-gray-900 text-sm">Eastern Cape</div>
+                      <div className="text-xs text-gray-600 mt-1">Gqeberha, East London</div>
                     </Link>
                   </div>
+                  <p className="text-xs text-gray-600">
+                    Serving all 9 provinces: <Link href="/gauteng/local-services" className="text-emerald-700 hover:text-emerald-800 hover:underline">Gauteng</Link>, <Link href="/services/plumbing/western-cape" className="text-emerald-700 hover:text-emerald-800 hover:underline">Western Cape</Link>, <Link href="/services/plumbing/kwazulu-natal" className="text-emerald-700 hover:text-emerald-800 hover:underline">KwaZulu-Natal</Link>, and more.
+                  </p>
                 </div>
               </div>
             </div>

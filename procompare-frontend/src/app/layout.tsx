@@ -13,7 +13,7 @@ const inter = {
 
 export const metadata: Metadata = {
   title: "Local Service Providers in South Africa | Get Free Quotes | ProConnectSA",
-  description: "Find trusted local service providers in South Africa. Compare free quotes from verified professionals for plumbing, electrical, cleaning, and more. No obligation to hire.",
+  description: "Find trusted local service providers in Johannesburg, Cape Town, Durban, Pretoria, and across South Africa. Compare free quotes from verified plumbers, electricians, cleaners, and more. No obligation to hire.",
   keywords: "local service providers South Africa, get quotes, trusted professionals, compare services, plumbers, electricians, service providers near me",
   authors: [{ name: "ProConnectSA Team" }],
   creator: "ProConnectSA",
