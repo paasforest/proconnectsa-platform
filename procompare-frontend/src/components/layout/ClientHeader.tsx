@@ -53,6 +53,12 @@ export function ClientHeader() {
             How it Works
           </Link>
           <Link 
+            href="/resources"
+            className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+          >
+            Resources
+          </Link>
+          <Link 
             href="/for-pros"
             className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors font-semibold"
           >

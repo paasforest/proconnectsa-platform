@@ -96,6 +96,16 @@ export function Footer() {
                   Pricing
                 </Link>
               </li>
+              <li>
+                <Link href="/resources" className="text-muted-foreground hover:text-foreground transition-colors">
+                  Resources & Guides
+                </Link>
+              </li>
+              <li>
+                <Link href="/press" className="text-muted-foreground hover:text-foreground transition-colors">
+                  Press & Media
+                </Link>
+              </li>
             </ul>
           </div>
 

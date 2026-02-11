@@ -14,6 +14,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${baseUrl}/providers/browse`, lastModified: new Date() },
     { url: `${baseUrl}/for-pros`, lastModified: new Date() },
     { url: `${baseUrl}/pricing`, lastModified: new Date() },
+    { url: `${baseUrl}/resources`, lastModified: new Date() },
+    { url: `${baseUrl}/press`, lastModified: new Date() },
     // Gauteng province pages
     { url: `${baseUrl}/gauteng/local-services`, lastModified: new Date() },
     { url: `${baseUrl}/gauteng/get-quotes`, lastModified: new Date() },
