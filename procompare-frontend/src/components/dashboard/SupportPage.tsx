@@ -135,29 +135,66 @@ const SupportPage = () => {
         setSuccessDetails(null);
       }, 5000);
     } catch (error: any) {
-      console.error('Failed to create ticket:', error);
+      console.error('Failed to create ticket - Full error:', error);
+      console.error('Error type:', typeof error);
+      console.error('Error keys:', Object.keys(error));
       
-      // Better error handling
+      // Better error handling - check all possible error structures
       let errorMessage = 'Failed to create ticket. Please try again.';
       
+      // Check if error has response property (from apiClient)
       if (error.response) {
+        console.error('Error response:', error.response);
         const errorData = error.response.data || error.response;
+        console.error('Error data:', errorData);
+        
+        if (errorData.detail) {
+          errorMessage = errorData.detail;
+        } else if (errorData.error) {
+          errorMessage = typeof errorData.error === 'string' ? errorData.error : JSON.stringify(errorData.error);
+        } else if (errorData.message) {
+          errorMessage = errorData.message;
+        } else if (typeof errorData === 'object' && !Array.isArray(errorData)) {
+          // Handle validation errors - flatten nested objects
+          const validationErrors: string[] = [];
+          for (const [key, value] of Object.entries(errorData)) {
+            if (Array.isArray(value)) {
+              validationErrors.push(`${key}: ${value.join(', ')}`);
+            } else if (typeof value === 'string') {
+              validationErrors.push(`${key}: ${value}`);
+            } else {
+              validationErrors.push(`${key}: ${JSON.stringify(value)}`);
+            }
+          }
+          if (validationErrors.length > 0) {
+            errorMessage = validationErrors.join(' | ');
+          }
+        } else if (typeof errorData === 'string') {
+          errorMessage = errorData;
+        }
+      } 
+      // Check if error is a string
+      else if (typeof error === 'string') {
+        errorMessage = error;
+      }
+      // Check if error has message property
+      else if (error.message) {
+        errorMessage = error.message;
+      }
+      // Check if error has data property directly
+      else if (error.data) {
+        const errorData = error.data;
         if (errorData.detail) {
           errorMessage = errorData.detail;
         } else if (errorData.error) {
           errorMessage = errorData.error;
         } else if (errorData.message) {
           errorMessage = errorData.message;
-        } else if (typeof errorData === 'object') {
-          // Handle validation errors
-          const validationErrors = Object.values(errorData).flat();
-          errorMessage = validationErrors.join(', ') || errorMessage;
         }
-      } else if (error.message) {
-        errorMessage = error.message;
       }
       
-      alert(errorMessage);
+      console.error('Final error message to display:', errorMessage);
+      alert(`Error: ${errorMessage}\n\nPlease check the browser console for more details.`);
     }
   };
 
