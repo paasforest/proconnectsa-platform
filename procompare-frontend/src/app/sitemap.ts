@@ -46,6 +46,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     }
   }
 
+  // City hub pages - all services in each city
+  const cityHubUrls: MetadataRoute.Sitemap = MAJOR_CITIES.map((city) => ({
+    url: `${baseUrl}/${city.slug}/services`,
+    lastModified: new Date(),
+  }))
+
   // City + Service pages - prioritize top services and major cities
   const topServices = ["plumbing", "electrical", "cleaning", "painting", "handyman", "hvac", "landscaping", "solar-installation"]
   const cityServiceUrls: MetadataRoute.Sitemap = []
@@ -58,5 +64,5 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     }
   }
 
-  return [...core, ...categoryUrls, ...provinceUrls, ...cityServiceUrls]
+  return [...core, ...categoryUrls, ...provinceUrls, ...cityHubUrls, ...cityServiceUrls]
 }

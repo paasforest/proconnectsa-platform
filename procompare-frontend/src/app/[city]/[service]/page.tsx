@@ -255,6 +255,20 @@ export default async function CityServicePage({ params }: Props) {
                   </div>
                 )}
 
+                {/* City Services Hub Link */}
+                <div className="border rounded-2xl p-6 bg-white">
+                  <div className="text-lg font-semibold text-gray-900 mb-2">All Services in {cityName}</div>
+                  <p className="text-gray-600 text-sm mb-4">
+                    Looking for other services in {cityName}? Browse all available services:
+                  </p>
+                  <Link
+                    href={`/${city}/services`}
+                    className="inline-flex items-center px-6 py-3 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 font-medium"
+                  >
+                    View All Services in {cityName} →
+                  </Link>
+                </div>
+
                 {province && (
                   <div className="border rounded-2xl p-6 bg-white">
                     <div className="text-lg font-semibold text-gray-900 mb-2">Other cities in {provinceName}</div>
@@ -265,15 +279,18 @@ export default async function CityServicePage({ params }: Props) {
                       {province.topCities
                         .filter(c => c !== cityName)
                         .slice(0, 5)
-                        .map((otherCity) => (
-                          <Link
-                            key={otherCity}
-                            href={`/${otherCity.toLowerCase().replace(/\s+/g, "-")}/${service}`}
-                            className="inline-flex items-center rounded-full border px-4 py-2 text-sm text-gray-700 hover:border-emerald-300 hover:bg-emerald-50"
-                          >
-                            {otherCity}
-                          </Link>
-                        ))}
+                        .map((otherCity) => {
+                          const otherCitySlug = otherCity.toLowerCase().replace(/\s+/g, "-")
+                          return (
+                            <Link
+                              key={otherCity}
+                              href={`/${otherCitySlug}/${service}`}
+                              className="inline-flex items-center rounded-full border px-4 py-2 text-sm text-gray-700 hover:border-emerald-300 hover:bg-emerald-50"
+                            >
+                              {otherCity}
+                            </Link>
+                          )
+                        })}
                     </div>
                   </div>
                 )}

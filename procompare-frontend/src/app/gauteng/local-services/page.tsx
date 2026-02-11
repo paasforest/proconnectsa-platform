@@ -203,19 +203,19 @@ export default async function GautengLocalServicesPage() {
               {/* Popular Areas Section */}
               <div className="bg-white border rounded-2xl p-6">
                 <h2 className="text-xl font-semibold text-gray-900 mb-4">Popular Areas We Serve</h2>
+                <p className="text-gray-600 text-sm mb-4">
+                  Click any city to browse all services available in that area:
+                </p>
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-                  {topCities.map((city) => {
-                    const citySlug = city.toLowerCase().replace(/\s+/g, "-")
-                    return (
-                      <Link
-                        key={city}
-                        href={`/${citySlug}/plumbing`}
-                        className="text-sm text-emerald-700 hover:text-emerald-800 hover:underline font-medium"
-                      >
-                        {city}
-                      </Link>
-                    )
-                  })}
+                  {allCities.map((city) => (
+                    <Link
+                      key={city.slug}
+                      href={`/${city.slug}/services`}
+                      className="text-sm text-emerald-700 hover:text-emerald-800 hover:underline font-medium"
+                    >
+                      All Services in {city.name}
+                    </Link>
+                  ))}
                 </div>
               </div>
             </div>
