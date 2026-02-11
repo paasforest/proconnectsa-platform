@@ -165,6 +165,13 @@ export function ClientHeader() {
                 How it Works
               </Link>
               <Link 
+                href="/resources" 
+                className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors py-3 px-2 -mx-2 rounded-md hover:bg-muted"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                Resources
+              </Link>
+              <Link 
                 href="/for-pros" 
                 className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors py-3 px-2 -mx-2 rounded-md hover:bg-muted font-semibold"
                 onClick={() => setIsMobileMenuOpen(false)}
