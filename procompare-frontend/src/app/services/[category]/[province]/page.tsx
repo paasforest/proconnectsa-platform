@@ -309,9 +309,9 @@ export default async function ServiceProvincePage({ params }: Props) {
                 {/* All Cities in Province Section */}
                 {citiesInProvince.length > 0 && (
                   <div className="border rounded-2xl p-6 bg-white">
-                    <div className="text-lg font-semibold text-gray-900 mb-2">Find {serviceName} in Cities Across {provinceName}</div>
+                    <div className="text-lg font-semibold text-gray-900 mb-2">Find {serviceName} in Cities Across {p.name}</div>
                     <p className="text-gray-600 text-sm mb-4">
-                      Browse {serviceName.toLowerCase()} professionals in all major cities across {provinceName}. Click any city to see providers and get quotes.
+                      Browse {serviceName.toLowerCase()} professionals in all major cities across {p.name}. Click any city to see providers and get quotes.
                     </p>
                     <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                       {citiesInProvince.map((city) => (
