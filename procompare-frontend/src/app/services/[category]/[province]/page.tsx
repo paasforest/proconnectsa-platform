@@ -6,6 +6,7 @@ import { ClientHeader } from "@/components/layout/ClientHeader"
 import { Footer } from "@/components/layout/Footer"
 import { fetchServiceCategories } from "@/lib/service-categories"
 import { getProvinceBySlug } from "@/lib/seo-locations"
+import { getCitiesByProvince } from "@/lib/seo-cities"
 import { SEO_SERVICE_PROVINCE_PAGES } from "@/lib/seo-service-pages"
 
 export const dynamic = "force-dynamic"
@@ -103,6 +104,7 @@ export default async function ServiceProvincePage({ params }: Props) {
   const serviceName = c?.name || category
   const key = `${category}/${province}`
   const custom = SEO_SERVICE_PROVINCE_PAGES[key]
+  const citiesInProvince = getCitiesByProvince(province)
   const topProviders = await fetchTopVerifiedProvidersForProvinceService({
     categorySlug: category,
     provinceTopCities: p.topCities || [],
