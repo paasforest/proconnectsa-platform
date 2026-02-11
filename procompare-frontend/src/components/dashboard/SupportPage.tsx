@@ -83,28 +83,78 @@ const SupportPage = () => {
   }, [user, token]);
 
   const handleCreateTicket = async () => {
-    if (!token) return;
+    if (!token) {
+      alert('Please log in to create a support ticket.');
+      return;
+    }
+    
+    // Validate form
+    if (!newTicket.title || !newTicket.title.trim()) {
+      alert('Please enter a ticket title.');
+      return;
+    }
+    
+    if (!newTicket.description || !newTicket.description.trim()) {
+      alert('Please enter a ticket description.');
+      return;
+    }
     
     try {
       apiClient.setToken(token);
-      const response = await apiClient.post('/api/support/tickets/', newTicket);
+      console.log('Creating ticket with data:', newTicket);
       
-      setTickets([response, ...tickets]);
+      const response = await apiClient.post('/api/support/tickets/', {
+        title: newTicket.title.trim(),
+        description: newTicket.description.trim(),
+        category: newTicket.category,
+        priority: newTicket.priority
+      });
+      
+      console.log('Ticket created successfully:', response);
+      
+      // Refresh tickets list
+      const ticketsResponse = await apiClient.get('/api/support/tickets/');
+      setTickets(ticketsResponse.results || ticketsResponse || []);
+      
+      // Reset form
       setNewTicket({ title: '', description: '', category: 'general', priority: 'medium' });
       setShowNewTicketModal(false);
       
+      // Show success message
       setSuccessMessage('Ticket created successfully!');
       setSuccessDetails({
-        ticketId: response.id || response.ticket_id || `TICKET-${Date.now()}`,
-        timestamp: new Date().toISOString()
+        ticketId: response.id || response.ticket_id || response.ticket_number || `TICKET-${Date.now()}`,
+        timestamp: response.created_at || new Date().toISOString()
       });
       
       setTimeout(() => {
         setSuccessMessage('');
         setSuccessDetails(null);
       }, 5000);
-    } catch (error) {
-      alert('Failed to create ticket. Please try again.');
+    } catch (error: any) {
+      console.error('Failed to create ticket:', error);
+      
+      // Better error handling
+      let errorMessage = 'Failed to create ticket. Please try again.';
+      
+      if (error.response) {
+        const errorData = error.response.data || error.response;
+        if (errorData.detail) {
+          errorMessage = errorData.detail;
+        } else if (errorData.error) {
+          errorMessage = errorData.error;
+        } else if (errorData.message) {
+          errorMessage = errorData.message;
+        } else if (typeof errorData === 'object') {
+          // Handle validation errors
+          const validationErrors = Object.values(errorData).flat();
+          errorMessage = validationErrors.join(', ') || errorMessage;
+        }
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+      
+      alert(errorMessage);
     }
   };
 
@@ -460,7 +510,7 @@ const SupportPage = () => {
               </button>
               <button
                 onClick={handleCreateTicket}
-                disabled={!newTicket.title || !newTicket.description}
+                disabled={!newTicket.title?.trim() || !newTicket.description?.trim()}
                 className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Create Ticket
