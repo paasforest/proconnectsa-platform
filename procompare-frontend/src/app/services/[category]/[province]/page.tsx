@@ -118,16 +118,28 @@ export default async function ServiceProvincePage({ params }: Props) {
 
   const faq = [
     {
-      q: `How many ${serviceName.toLowerCase()} quotes will I get?`,
-      a: "We’ll match you with up to 3 verified professionals based on your location and request.",
+      q: `How many ${serviceName.toLowerCase()} quotes will I get in ${p.name}?`,
+      a: `We'll match you with up to 3 verified ${serviceName.toLowerCase()} professionals based on your location in ${p.name} and your specific request. This allows you to compare pricing, availability, and reviews from multiple providers before making a decision.`,
     },
     {
-      q: "Is it free to request quotes?",
-      a: "Yes — requesting quotes is free and there’s no obligation to hire.",
+      q: `Is it free to request ${serviceName.toLowerCase()} quotes in ${p.name}?`,
+      a: `Yes — requesting quotes is completely free and there's no obligation to hire. You only pay if you decide to proceed with a ${serviceName.toLowerCase()} provider. This service is available across all major cities in ${p.name}, including ${p.topCities.slice(0, 3).join(", ")}.`,
     },
     {
-      q: "How fast do professionals respond?",
-      a: "Many professionals respond within 24 hours, depending on demand in your area.",
+      q: `How fast do ${serviceName.toLowerCase()} professionals respond in ${p.name}?`,
+      a: `Most ${serviceName.toLowerCase()} professionals in ${p.name} respond within 24-48 hours of your request. Response times may vary based on demand in your specific area, but our platform prioritizes active providers who respond quickly to customer requests.`,
+    },
+    {
+      q: `Are ${serviceName.toLowerCase()} in ${p.name} verified?`,
+      a: `Yes, all professionals listed on ProConnectSA are verified. We check credentials, business registration, reviews, and insurance to ensure you're connecting with trusted providers across ${p.name}. Every ${serviceName.toLowerCase()} you'll be matched with has been background checked before being listed.`,
+    },
+    {
+      q: `What areas in ${p.name} do you cover?`,
+      a: `Our network covers all major cities and towns across ${p.name}, including ${p.topCities.slice(0, 5).join(", ")}, and surrounding areas. Whether you're in a major city or smaller town, we'll match you with ${serviceName.toLowerCase()} professionals who serve your specific area.`,
+    },
+    {
+      q: `How much do ${serviceName.toLowerCase()} cost in ${p.name}?`,
+      a: `Pricing varies based on the specific job, materials needed, provider experience, and location within ${p.name}. Request free quotes from multiple professionals to compare pricing. Rates may differ between major cities like ${p.topCities[0]} and smaller towns, so getting multiple quotes helps ensure fair pricing.`,
     },
   ]
 
@@ -380,6 +392,53 @@ export default async function ServiceProvincePage({ params }: Props) {
                     </div>
                   </div>
                 )}
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* FAQ Section */}
+        <section className="py-10 bg-gray-50">
+          <div className="container mx-auto px-4">
+            <div className="max-w-4xl mx-auto">
+              <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-6 text-center">
+                Frequently Asked Questions About {serviceName} in {p.name}
+              </h2>
+              <div className="space-y-4">
+                {faq.map((item, index) => (
+                  <div key={index} className="bg-white border rounded-xl p-6">
+                    <h3 className="text-lg font-semibold text-gray-900 mb-2">{item.q}</h3>
+                    <p className="text-gray-700">{item.a}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Trust Signals Section */}
+        <section className="py-10">
+          <div className="container mx-auto px-4">
+            <div className="max-w-4xl mx-auto">
+              <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-6 text-center">
+                Why Choose ProConnectSA for {serviceName} in {p.name}?
+              </h2>
+              <div className="grid md:grid-cols-3 gap-6">
+                <div className="bg-white border rounded-xl p-6 text-center">
+                  <div className="text-3xl font-bold text-emerald-600 mb-2">100%</div>
+                  <div className="text-sm font-semibold text-gray-900 mb-1">Verified Providers</div>
+                  <p className="text-xs text-gray-600">All {serviceName.toLowerCase()} are background checked and verified across {p.name}</p>
+                </div>
+                <div className="bg-white border rounded-xl p-6 text-center">
+                  <div className="text-3xl font-bold text-emerald-600 mb-2">Free</div>
+                  <div className="text-sm font-semibold text-gray-900 mb-1">Quote Requests</div>
+                  <p className="text-xs text-gray-600">No cost, no obligation to hire in {p.name}</p>
+                </div>
+                <div className="bg-white border rounded-xl p-6 text-center">
+                  <div className="text-3xl font-bold text-emerald-600 mb-2">24hr</div>
+                  <div className="text-sm font-semibold text-gray-900 mb-1">Average Response</div>
+                  <p className="text-xs text-gray-600">Fast matching with local professionals in {p.name}</p>
+                </div>
               </div>
             </div>
           </div>

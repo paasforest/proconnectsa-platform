@@ -330,6 +330,100 @@ export default async function CityServicePage({ params }: Props) {
             </div>
           </div>
         </section>
+
+        {/* FAQ Section */}
+        <section className="py-10 bg-gray-50">
+          <div className="container mx-auto px-4">
+            <div className="max-w-4xl mx-auto">
+              <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-6 text-center">
+                Frequently Asked Questions About {serviceName} in {cityName}
+              </h2>
+              <div className="space-y-4">
+                <div className="bg-white border rounded-xl p-6">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                    How do I find {serviceName.toLowerCase()} in {cityName}?
+                  </h3>
+                  <p className="text-gray-700">
+                    Submit your service request through our form above and we'll connect you with up to 3 verified {serviceName.toLowerCase()} professionals in {cityName}. Compare their quotes, read reviews, and choose the best fit—all free with no obligation to hire. Our platform matches you with local providers who serve {cityName} and surrounding areas in {provinceName}.
+                  </p>
+                </div>
+
+                <div className="bg-white border rounded-xl p-6">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                    Are {serviceName.toLowerCase()} in {cityName} verified?
+                  </h3>
+                  <p className="text-gray-700">
+                    Yes, all professionals listed on ProConnectSA are verified. We check credentials, business registration, reviews, and insurance to ensure you're connecting with trusted local providers in {cityName}. Every {serviceName.toLowerCase()} you'll be matched with has been background checked and verified before being listed on our platform.
+                  </p>
+                </div>
+
+                <div className="bg-white border rounded-xl p-6">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                    How much do {serviceName.toLowerCase()} cost in {cityName}?
+                  </h3>
+                  <p className="text-gray-700">
+                    Pricing varies based on the specific job, materials needed, provider experience, and location within {cityName}. Request free quotes from multiple {serviceName.toLowerCase()} professionals to compare pricing and find the best value for your needs. Most providers in {cityName} offer competitive rates, and getting multiple quotes helps ensure you're getting fair pricing for your project.
+                  </p>
+                </div>
+
+                <div className="bg-white border rounded-xl p-6">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                    How quickly can I get quotes in {cityName}?
+                  </h3>
+                  <p className="text-gray-700">
+                    Most {serviceName.toLowerCase()} professionals in {cityName} respond within 24-48 hours of your request. During peak seasons or for urgent jobs, response times may vary. Our platform prioritizes active providers who respond quickly to customer requests, ensuring you get timely quotes for your project in {cityName}.
+                  </p>
+                </div>
+
+                <div className="bg-white border rounded-xl p-6">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                    What areas in {cityName} do you cover?
+                  </h3>
+                  <p className="text-gray-700">
+                    Our network of verified {serviceName.toLowerCase()} covers all areas of {cityName}, including {cityName === "Johannesburg" ? "Sandton, Rosebank, Melville, Randburg, Fourways, Midrand, Rivonia" : cityName === "Cape Town" ? "City Bowl, Sea Point, Camps Bay, Constantia, Newlands, Rondebosch" : cityName === "Durban" ? "Umhlanga, Berea, Morningside, Glenwood, Westville" : "all major suburbs and surrounding areas"}. Whether you're in the city center or surrounding suburbs, we'll match you with providers who serve your specific area.
+                  </p>
+                </div>
+
+                <div className="bg-white border rounded-xl p-6">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                    Is it really free to get quotes?
+                  </h3>
+                  <p className="text-gray-700">
+                    Yes, requesting quotes is completely free. There's no cost to you, and no obligation to hire any of the professionals who respond. You only pay if you decide to proceed with a {serviceName.toLowerCase()} provider. This allows you to compare pricing, availability, and reviews from multiple professionals in {cityName} before making a decision.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Trust Signals Section */}
+        <section className="py-10">
+          <div className="container mx-auto px-4">
+            <div className="max-w-4xl mx-auto">
+              <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-6 text-center">
+                Why Trust ProConnectSA for {serviceName} in {cityName}?
+              </h2>
+              <div className="grid md:grid-cols-3 gap-6">
+                <div className="bg-white border rounded-xl p-6 text-center">
+                  <div className="text-3xl font-bold text-emerald-600 mb-2">100%</div>
+                  <div className="text-sm font-semibold text-gray-900 mb-1">Verified Providers</div>
+                  <p className="text-xs text-gray-600">All {serviceName.toLowerCase()} are background checked and verified</p>
+                </div>
+                <div className="bg-white border rounded-xl p-6 text-center">
+                  <div className="text-3xl font-bold text-emerald-600 mb-2">Free</div>
+                  <div className="text-sm font-semibold text-gray-900 mb-1">Quote Requests</div>
+                  <p className="text-xs text-gray-600">No cost, no obligation to hire</p>
+                </div>
+                <div className="bg-white border rounded-xl p-6 text-center">
+                  <div className="text-3xl font-bold text-emerald-600 mb-2">24hr</div>
+                  <div className="text-sm font-semibold text-gray-900 mb-1">Average Response</div>
+                  <p className="text-xs text-gray-600">Fast matching with local professionals</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
       </main>
       <Footer />
     </div>
