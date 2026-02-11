@@ -84,7 +84,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title: `${name} in ${provinceName} | Get Free Quotes | ProConnectSA`,
     description: `Compare free quotes from verified ${name.toLowerCase()} professionals in ${provinceName}. Fast matching and no obligation.`,
-    robots: { index: false, follow: true },
+    robots: {
+      index: true,
+      follow: true,
+    },
   }
 }
 

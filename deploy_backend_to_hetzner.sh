@@ -27,6 +27,8 @@ echo "🔄 Step 3: Restarting services on Hetzner..."
 ssh root@${HETZNER_IP} "cd ${HETZNER_DIR} && \
   killall gunicorn celery 2>/dev/null || true && \
   sleep 3 && \
+  find backend -type d -name __pycache__ -exec rm -r {} + 2>/dev/null || true && \
+  find backend -name '*.pyc' -delete 2>/dev/null || true && \
   source venv/bin/activate && \
   pip install -r requirements.txt && \
   python manage.py migrate --noinput && \
