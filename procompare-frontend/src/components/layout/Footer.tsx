@@ -2,6 +2,21 @@
 
 import Link from "next/link"
 import { Facebook, Twitter, Instagram, Linkedin, Mail, Phone, MapPin } from "lucide-react"
+import { PROVINCES } from "@/lib/seo-locations"
+import { MAJOR_CITIES } from "@/lib/seo-cities"
+
+const TOP_SERVICES = [
+  { slug: "plumbing", name: "Plumbing" },
+  { slug: "electrical", name: "Electrical" },
+  { slug: "cleaning", name: "Cleaning" },
+  { slug: "painting", name: "Painting" },
+  { slug: "handyman", name: "Handyman" },
+  { slug: "hvac", name: "HVAC" },
+  { slug: "landscaping", name: "Landscaping" },
+  { slug: "solar-installation", name: "Solar Installation" },
+]
+
+const TOP_CITIES = MAJOR_CITIES.slice(0, 20)
 
 export function Footer() {
   return (
@@ -39,29 +54,19 @@ export function Footer() {
           <div className="space-y-4">
             <h3 className="font-semibold">Services</h3>
             <ul className="space-y-2 text-sm">
+              {TOP_SERVICES.map((service) => (
+                <li key={service.slug}>
+                  <Link 
+                    href={`/services/${service.slug}`} 
+                    className="text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    {service.name}
+                  </Link>
+                </li>
+              ))}
               <li>
-                <Link href="/services/plumbing/gauteng" className="text-muted-foreground hover:text-foreground transition-colors">
-                  Plumbing
-                </Link>
-              </li>
-              <li>
-                <Link href="/services/electrical/gauteng" className="text-muted-foreground hover:text-foreground transition-colors">
-                  Electrical
-                </Link>
-              </li>
-              <li>
-                <Link href="/services/painting/gauteng" className="text-muted-foreground hover:text-foreground transition-colors">
-                  Painting
-                </Link>
-              </li>
-              <li>
-                <Link href="/services/cleaning/gauteng" className="text-muted-foreground hover:text-foreground transition-colors">
-                  Cleaning
-                </Link>
-              </li>
-              <li>
-                <Link href="/services" className="text-muted-foreground hover:text-foreground transition-colors">
-                  All services
+                <Link href="/services" className="text-muted-foreground hover:text-foreground transition-colors font-medium">
+                  All services →
                 </Link>
               </li>
             </ul>
@@ -98,27 +103,34 @@ export function Footer() {
           <div className="space-y-4">
             <h3 className="font-semibold">Find Services By Province</h3>
             <ul className="space-y-2 text-sm">
-              <li>
-                <Link href="/gauteng/local-services" className="text-muted-foreground hover:text-foreground transition-colors">
-                  Gauteng
-                </Link>
-              </li>
-              <li>
-                <Link href="/services/plumbing/western-cape" className="text-muted-foreground hover:text-foreground transition-colors">
-                  Western Cape
-                </Link>
-              </li>
-              <li>
-                <Link href="/services/plumbing/kwazulu-natal" className="text-muted-foreground hover:text-foreground transition-colors">
-                  KwaZulu-Natal
-                </Link>
-              </li>
-              <li>
-                <Link href="/services" className="text-muted-foreground hover:text-foreground transition-colors">
-                  All Provinces
-                </Link>
-              </li>
+              {PROVINCES.map((province) => (
+                <li key={province.slug}>
+                  <Link 
+                    href={province.slug === "gauteng" 
+                      ? `/gauteng/local-services` 
+                      : `/services/plumbing/${province.slug}`
+                    } 
+                    className="text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    {province.name}
+                  </Link>
+                </li>
+              ))}
             </ul>
+            <div className="pt-3 border-t">
+              <h4 className="font-semibold text-xs mb-2">Popular Cities</h4>
+              <div className="flex flex-wrap gap-x-3 gap-y-1 text-xs">
+                {TOP_CITIES.map((city) => (
+                  <Link
+                    key={city.slug}
+                    href={`/${city.slug}/plumbing`}
+                    className="text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    {city.name}
+                  </Link>
+                ))}
+              </div>
+            </div>
           </div>
 
           {/* Contact */}

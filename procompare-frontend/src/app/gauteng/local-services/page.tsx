@@ -4,6 +4,7 @@ import { ClientHeader } from "@/components/layout/ClientHeader"
 import { Footer } from "@/components/layout/Footer"
 import { fetchServiceCategories } from "@/lib/service-categories"
 import { PROVINCES } from "@/lib/seo-locations"
+import { getCitiesByProvince } from "@/lib/seo-cities"
 import BarkLeadForm from "@/components/leads/BarkLeadForm"
 
 export const dynamic = "force-dynamic"
@@ -11,6 +12,7 @@ export const dynamic = "force-dynamic"
 const province = PROVINCES.find((p) => p.slug === "gauteng")!
 const provinceName = province.name
 const topCities = province.topCities
+const allCities = getCitiesByProvince("gauteng")
 
 export const metadata: Metadata = {
   title: "Find Local Service Providers in Gauteng | ProConnectSA",
@@ -165,18 +167,55 @@ export default async function GautengLocalServicesPage() {
                 </div>
               </div>
 
+              {/* All Cities in Province Section */}
+              <div className="bg-white border rounded-2xl p-6 mb-8">
+                <h2 className="text-xl font-semibold text-gray-900 mb-4">All Cities in {provinceName}</h2>
+                <p className="text-gray-600 text-sm mb-4">
+                  Find service providers in all major cities across {provinceName}. Click any city to browse services.
+                </p>
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+                  {allCities.map((city) => (
+                    <Link
+                      key={city.slug}
+                      href={`/${city.slug}/plumbing`}
+                      className="text-sm text-emerald-700 hover:text-emerald-800 hover:underline font-medium"
+                    >
+                      {city.name}
+                    </Link>
+                  ))}
+                </div>
+                <div className="mt-4 pt-4 border-t">
+                  <p className="text-xs text-gray-500 mb-2">Popular services in {provinceName} cities:</p>
+                  <div className="flex flex-wrap gap-2">
+                    {categories.slice(0, 6).map((c) => (
+                      <Link
+                        key={c.slug}
+                        href={`/services/${c.slug}/${province.slug}`}
+                        className="text-xs text-gray-600 hover:text-emerald-700 hover:underline"
+                      >
+                        {c.name} in {provinceName}
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* Popular Areas Section */}
               <div className="bg-white border rounded-2xl p-6">
                 <h2 className="text-xl font-semibold text-gray-900 mb-4">Popular Areas We Serve</h2>
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-                  {topCities.map((city) => (
-                    <Link
-                      key={city}
-                      href={`/providers/browse?city=${encodeURIComponent(city)}`}
-                      className="text-sm text-emerald-700 hover:text-emerald-800 hover:underline"
-                    >
-                      {city}
-                    </Link>
-                  ))}
+                  {topCities.map((city) => {
+                    const citySlug = city.toLowerCase().replace(/\s+/g, "-")
+                    return (
+                      <Link
+                        key={city}
+                        href={`/${citySlug}/plumbing`}
+                        className="text-sm text-emerald-700 hover:text-emerald-800 hover:underline font-medium"
+                      >
+                        {city}
+                      </Link>
+                    )
+                  })}
                 </div>
               </div>
             </div>

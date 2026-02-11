@@ -77,16 +77,36 @@ export default async function ServiceCategoryPage({ params }: Props) {
                   <p className="text-gray-600 text-sm mb-4">
                     Browse verified {displayName.toLowerCase()} professionals by province. Find local providers near you.
                   </p>
-                  <div className="flex flex-wrap gap-2">
+                  <div className="flex flex-wrap gap-2 mb-4">
                     {PROVINCES.map((p) => (
                       <Link
                         key={p.slug}
                         href={`/services/${category}/${p.slug}`}
-                        className="inline-flex items-center rounded-full border px-4 py-2 text-sm text-gray-700 hover:border-emerald-300 hover:bg-emerald-50"
+                        className="inline-flex items-center rounded-full border px-4 py-2 text-sm text-gray-700 hover:border-emerald-300 hover:bg-emerald-50 font-medium"
                       >
                         {p.name}
                       </Link>
                     ))}
+                  </div>
+                  <div className="pt-4 border-t">
+                    <p className="text-sm font-semibold text-gray-900 mb-2">Popular Cities for {displayName}</p>
+                    <p className="text-gray-600 text-xs mb-3">
+                      Find {displayName.toLowerCase()} in major cities across South Africa:
+                    </p>
+                    <div className="flex flex-wrap gap-2">
+                      {["Johannesburg", "Cape Town", "Durban", "Pretoria", "Sandton", "Centurion", "Midrand", "Stellenbosch", "Umhlanga", "Bellville"].map((city) => {
+                        const citySlug = city.toLowerCase().replace(/\s+/g, "-")
+                        return (
+                          <Link
+                            key={city}
+                            href={`/${citySlug}/${category}`}
+                            className="text-xs text-emerald-700 hover:text-emerald-800 hover:underline"
+                          >
+                            {city}
+                          </Link>
+                        )
+                      })}
+                    </div>
                   </div>
                 </div>
 

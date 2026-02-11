@@ -304,6 +304,27 @@ export default async function ServiceProvincePage({ params }: Props) {
                   )}
                 </div>
 
+                {/* All Cities in Province Section */}
+                {citiesInProvince.length > 0 && (
+                  <div className="border rounded-2xl p-6 bg-white">
+                    <div className="text-lg font-semibold text-gray-900 mb-2">Find {serviceName} in Cities Across {provinceName}</div>
+                    <p className="text-gray-600 text-sm mb-4">
+                      Browse {serviceName.toLowerCase()} professionals in all major cities across {provinceName}. Click any city to see providers and get quotes.
+                    </p>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                      {citiesInProvince.map((city) => (
+                        <Link
+                          key={city.slug}
+                          href={`/${city.slug}/${category}`}
+                          className="text-sm text-emerald-700 hover:text-emerald-800 hover:underline font-medium"
+                        >
+                          {serviceName} in {city.name}
+                        </Link>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
                 <div className="border rounded-2xl p-6 bg-white">
                   <div className="text-lg font-semibold text-gray-900 mb-3">FAQs</div>
                   <div className="space-y-3 text-sm">

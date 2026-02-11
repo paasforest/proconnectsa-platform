@@ -2,10 +2,6 @@
 
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import type { Metadata } from 'next';
-
-// Note: This is a client component, so metadata must be set via Head or layout
-// For client components, we'll handle this in the layout or use next/head
 
 export default function LoginRedirect() {
   const router = useRouter();
