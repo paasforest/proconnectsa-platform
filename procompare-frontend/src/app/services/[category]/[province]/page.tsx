@@ -82,9 +82,31 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     }
   }
 
+  // Optimized emotional titles for better CTR
+  const getOptimizedTitle = (service: string, province: string) => {
+    const serviceLower = service.toLowerCase()
+    if (serviceLower.includes("plumber")) {
+      return `Compare 3 Verified Plumbers in ${province} (Free Quotes in 60 Seconds) | ProConnectSA`
+    }
+    if (serviceLower.includes("electrician")) {
+      return `Compare 3 Verified Electricians in ${province} (Free Quotes in 60 Seconds) | ProConnectSA`
+    }
+    if (serviceLower.includes("solar")) {
+      return `Compare 3 Verified Solar Installers in ${province} (Free Quotes in 60 Seconds) | ProConnectSA`
+    }
+    if (serviceLower.includes("clean")) {
+      return `Compare 3 Verified Cleaning Services in ${province} (Free Quotes in 60 Seconds) | ProConnectSA`
+    }
+    if (serviceLower.includes("paint")) {
+      return `Compare 3 Verified Painters in ${province} (Free Quotes in 60 Seconds) | ProConnectSA`
+    }
+    // Default optimized title
+    return `Compare 3 Verified ${name} in ${province} (Free Quotes in 60 Seconds) | ProConnectSA`
+  }
+
   return {
-    title: `${name} in ${provinceName} | Get Free Quotes | ProConnectSA`,
-    description: `Compare free quotes from verified ${name.toLowerCase()} professionals in ${provinceName}. Fast matching and no obligation.`,
+    title: getOptimizedTitle(name, provinceName),
+    description: `Get free quotes from 3 verified ${name.toLowerCase()} professionals in ${provinceName}. Compare pricing, reviews, and availability. No obligation to hire. Fast matching in 60 seconds.`,
     robots: {
       index: true,
       follow: true,
@@ -189,11 +211,14 @@ export default async function ServiceProvincePage({ params }: Props) {
                 <span className="text-gray-900 font-medium">{p.name}</span>
               </nav>
 
-              <h1 className="text-3xl md:text-5xl font-bold text-gray-900 mb-3">
-                Get free quotes for {serviceName} in {p.name}
+              <h1 className="text-3xl md:text-5xl font-bold text-gray-900 mb-4">
+                Compare 3 Verified {serviceName} in {p.name}
               </h1>
-              <p className="text-gray-600 text-lg max-w-3xl mb-4">
-                Compare quotes from verified professionals across {p.name}. Whether you're looking for {serviceName.toLowerCase()} in <Link href={`/johannesburg/${category}`} className="text-emerald-700 hover:text-emerald-800 hover:underline font-medium">Johannesburg</Link>, <Link href={`/pretoria/${category}`} className="text-emerald-700 hover:text-emerald-800 hover:underline font-medium">Pretoria</Link>, <Link href={`/cape-town/${category}`} className="text-emerald-700 hover:text-emerald-800 hover:underline font-medium">Cape Town</Link>, or <Link href={`/durban/${category}`} className="text-emerald-700 hover:text-emerald-800 hover:underline font-medium">Durban</Link>, we'll match you with local professionals. Tell us what you need and get matched fast.
+              <p className="text-gray-700 text-lg md:text-xl max-w-3xl mb-6 font-medium">
+                Get free quotes in 60 seconds. Compare pricing, reviews, and availability from verified local professionals across {p.name}. No obligation to hire.
+              </p>
+              <p className="text-gray-600 text-base max-w-3xl mb-4">
+                Whether you're looking for {serviceName.toLowerCase()} in <Link href={`/johannesburg/${category}`} className="text-emerald-700 hover:text-emerald-800 hover:underline font-medium">Johannesburg</Link>, <Link href={`/pretoria/${category}`} className="text-emerald-700 hover:text-emerald-800 hover:underline font-medium">Pretoria</Link>, <Link href={`/cape-town/${category}`} className="text-emerald-700 hover:text-emerald-800 hover:underline font-medium">Cape Town</Link>, or <Link href={`/durban/${category}`} className="text-emerald-700 hover:text-emerald-800 hover:underline font-medium">Durban</Link>, we'll match you with local professionals.
               </p>
               <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 max-w-3xl">
                 <p className="text-sm text-gray-700">

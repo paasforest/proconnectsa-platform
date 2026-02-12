@@ -54,12 +54,34 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const cityName = cityData.name
   const provinceName = cityData.provinceName
 
+  // Optimized emotional titles for better CTR
+  const getOptimizedTitle = (service: string, city: string) => {
+    const serviceLower = service.toLowerCase()
+    if (serviceLower.includes("plumber")) {
+      return `Compare 3 Verified Plumbers in ${city} (Free Quotes in 60 Seconds) | ProConnectSA`
+    }
+    if (serviceLower.includes("electrician")) {
+      return `Compare 3 Verified Electricians in ${city} (Free Quotes in 60 Seconds) | ProConnectSA`
+    }
+    if (serviceLower.includes("solar")) {
+      return `Compare 3 Verified Solar Installers in ${city} (Free Quotes in 60 Seconds) | ProConnectSA`
+    }
+    if (serviceLower.includes("clean")) {
+      return `Compare 3 Verified Cleaning Services in ${city} (Free Quotes in 60 Seconds) | ProConnectSA`
+    }
+    if (serviceLower.includes("paint")) {
+      return `Compare 3 Verified Painters in ${city} (Free Quotes in 60 Seconds) | ProConnectSA`
+    }
+    // Default optimized title
+    return `Compare 3 Verified ${service} in ${city} (Free Quotes in 60 Seconds) | ProConnectSA`
+  }
+
   return {
-    title: `${serviceName} in ${cityName} – Get Free Quotes | ProConnectSA`,
-    description: `Find trusted ${serviceName.toLowerCase()} in ${cityName}, ${provinceName}. Compare free quotes from verified local professionals. No obligation to hire.`,
+    title: getOptimizedTitle(serviceName, cityName),
+    description: `Get free quotes from 3 verified ${serviceName.toLowerCase()} in ${cityName}, ${provinceName}. Compare pricing, reviews, and availability. No obligation to hire. Fast matching in 60 seconds.`,
     openGraph: {
-      title: `${serviceName} in ${cityName} | ProConnectSA`,
-      description: `Find trusted ${serviceName.toLowerCase()} in ${cityName}. Compare free quotes from verified professionals.`,
+      title: getOptimizedTitle(serviceName, cityName),
+      description: `Get free quotes from 3 verified ${serviceName.toLowerCase()} in ${cityName}. Compare pricing and reviews. No obligation.`,
       type: "website",
     },
     robots: {
@@ -176,16 +198,52 @@ export default async function CityServicePage({ params }: Props) {
                 </Link>
                 <span className="mx-1">/</span>
                 <span className="text-gray-900 font-medium">{serviceName}</span>
-                <span className="mx-2">/</span>
-                <span className="text-gray-900 font-medium">{serviceName}</span>
               </nav>
 
-              <h1 className="text-3xl md:text-5xl font-bold text-gray-900 mb-3">
-                {serviceName} in {cityName}
+              <h1 className="text-3xl md:text-5xl font-bold text-gray-900 mb-4">
+                Compare 3 Verified {serviceName} in {cityName}
               </h1>
-              <p className="text-gray-600 text-lg max-w-3xl">
-                Find trusted {serviceName.toLowerCase()} near you in {cityName}, {provinceName}. Compare free quotes from verified local professionals. No obligation to hire.
+              <p className="text-gray-700 text-lg md:text-xl max-w-3xl mb-6 font-medium">
+                Get free quotes in 60 seconds. Compare pricing, reviews, and availability from verified local professionals. No obligation to hire.
               </p>
+            </div>
+          </div>
+        </section>
+
+        {/* Dedicated Quote Section Above The Fold */}
+        <section className="py-8 bg-white border-b">
+          <div className="container mx-auto px-4">
+            <div className="max-w-5xl mx-auto">
+              <div className="bg-gradient-to-br from-emerald-50 to-blue-50 border-2 border-emerald-200 rounded-2xl p-6 md:p-8">
+                <div className="text-center mb-6">
+                  <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">
+                    Get 3 Free Quotes from Verified {serviceName} in {cityName}
+                  </h2>
+                  <p className="text-gray-700 text-sm md:text-base">
+                    Tell us what you need and we'll match you with up to 3 verified professionals. Compare quotes and choose the best fit—all free with no obligation.
+                  </p>
+                </div>
+                <div className="flex items-center justify-center gap-4 mb-6 text-sm flex-wrap">
+                  <span className="flex items-center gap-1.5 text-emerald-700 font-semibold">
+                    <span className="text-lg">✓</span> Verified Professionals
+                  </span>
+                  <span className="text-gray-300">•</span>
+                  <span className="flex items-center gap-1.5 text-emerald-700 font-semibold">
+                    <span className="text-lg">✓</span> Free Quotes
+                  </span>
+                  <span className="text-gray-300">•</span>
+                  <span className="flex items-center gap-1.5 text-emerald-700 font-semibold">
+                    <span className="text-lg">✓</span> No Obligation
+                  </span>
+                  <span className="text-gray-300">•</span>
+                  <span className="flex items-center gap-1.5 text-emerald-700 font-semibold">
+                    <span className="text-lg">✓</span> 60 Second Matching
+                  </span>
+                </div>
+                <div className="max-w-2xl mx-auto">
+                  <BarkLeadForm preselectedCategory={categorySlug} />
+                </div>
+              </div>
             </div>
           </div>
         </section>

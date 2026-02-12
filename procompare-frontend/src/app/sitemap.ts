@@ -66,5 +66,40 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     }
   }
 
-  return [...core, ...categoryUrls, ...provinceUrls, ...cityHubUrls, ...cityServiceUrls]
+  // Resource guides and cost guides (30 total)
+  const resourceUrls: MetadataRoute.Sitemap = [
+    { url: `${baseUrl}/resources/how-to-choose-a-plumber`, lastModified: new Date() },
+    { url: `${baseUrl}/resources/plumber-cost-cape-town`, lastModified: new Date() },
+    { url: `${baseUrl}/resources/plumber-cost-johannesburg`, lastModified: new Date() },
+    { url: `${baseUrl}/resources/electrician-cost-johannesburg`, lastModified: new Date() },
+    { url: `${baseUrl}/resources/electrician-cost-cape-town`, lastModified: new Date() },
+    { url: `${baseUrl}/resources/solar-installation-cost-south-africa`, lastModified: new Date() },
+    { url: `${baseUrl}/resources/cleaning-service-costs`, lastModified: new Date() },
+    { url: `${baseUrl}/resources/painting-costs`, lastModified: new Date() },
+    { url: `${baseUrl}/resources/handyman-costs`, lastModified: new Date() },
+    { url: `${baseUrl}/resources/painting-cost-durban`, lastModified: new Date() },
+    { url: `${baseUrl}/resources/painting-cost-cape-town`, lastModified: new Date() },
+    { url: `${baseUrl}/resources/painting-cost-pretoria`, lastModified: new Date() },
+    { url: `${baseUrl}/resources/renovation-cost-johannesburg`, lastModified: new Date() },
+    { url: `${baseUrl}/resources/renovation-cost-cape-town`, lastModified: new Date() },
+    { url: `${baseUrl}/resources/renovation-cost-durban`, lastModified: new Date() },
+    { url: `${baseUrl}/resources/cleaning-cost-cape-town`, lastModified: new Date() },
+    { url: `${baseUrl}/resources/cleaning-cost-johannesburg`, lastModified: new Date() },
+    { url: `${baseUrl}/resources/handyman-cost-cape-town`, lastModified: new Date() },
+    { url: `${baseUrl}/resources/handyman-cost-johannesburg`, lastModified: new Date() },
+    { url: `${baseUrl}/resources/hvac-cost-south-africa`, lastModified: new Date() },
+    { url: `${baseUrl}/resources/hvac-cost-cape-town`, lastModified: new Date() },
+    { url: `${baseUrl}/resources/hvac-cost-johannesburg`, lastModified: new Date() },
+    { url: `${baseUrl}/resources/landscaping-cost-south-africa`, lastModified: new Date() },
+    { url: `${baseUrl}/resources/landscaping-cost-cape-town`, lastModified: new Date() },
+    { url: `${baseUrl}/resources/landscaping-cost-johannesburg`, lastModified: new Date() },
+    { url: `${baseUrl}/resources/roofing-cost-south-africa`, lastModified: new Date() },
+    { url: `${baseUrl}/resources/roofing-cost-cape-town`, lastModified: new Date() },
+    { url: `${baseUrl}/resources/roofing-cost-johannesburg`, lastModified: new Date() },
+    { url: `${baseUrl}/resources/flooring-cost-south-africa`, lastModified: new Date() },
+    { url: `${baseUrl}/resources/flooring-cost-cape-town`, lastModified: new Date() },
+    { url: `${baseUrl}/resources/flooring-cost-johannesburg`, lastModified: new Date() },
+  ]
+
+  return [...core, ...categoryUrls, ...provinceUrls, ...cityHubUrls, ...cityServiceUrls, ...resourceUrls]
 }
