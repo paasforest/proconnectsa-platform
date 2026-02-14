@@ -263,6 +263,15 @@ def available_leads(request):
                 is_active=True
             ).exists()
             
+            # Get actual count of providers who have purchased this lead (for transparency)
+            current_responses = LeadAccess.objects.filter(
+                lead=lead,
+                is_active=True
+            ).count()
+            
+            # Get max_providers from lead model (default to 5 if not set)
+            max_providers = getattr(lead, 'max_providers', 5)
+            
             # Use LeadAssignmentService for proper data formatting (with error handling)
             try:
                 from .services import LeadAssignmentService
@@ -317,7 +326,10 @@ def available_leads(request):
                 'details': lead.description,
                 'masked_details': mask_text_content(lead.description) if not is_unlocked else lead.description,
                 'views_count': getattr(lead, 'views_count', 0),
-                'responses_count': getattr(lead, 'responses_count', 0)
+                'responses_count': getattr(lead, 'responses_count', 0),
+                'max_providers': max_providers,
+                'current_responses': current_responses,
+                'assigned_providers_count': current_responses  # Alias for compatibility
             }
             leads_data.append(lead_data)
             
@@ -373,7 +385,10 @@ def available_leads(request):
                     'details': lead.description,
                     'masked_details': mask_text_content(lead.description) if not False else lead.description,
                     'views_count': getattr(lead, 'views_count', 0),
-                    'responses_count': getattr(lead, 'responses_count', 0)
+                    'responses_count': getattr(lead, 'responses_count', 0),
+                    'max_providers': getattr(lead, 'max_providers', 5),
+                    'current_responses': LeadAccess.objects.filter(lead=lead, is_active=True).count(),
+                    'assigned_providers_count': LeadAccess.objects.filter(lead=lead, is_active=True).count()
                 }
                 leads_data.append(lead_data)
             except Exception as fallback_error:

@@ -218,8 +218,8 @@ const WalletLeadDashboard = () => {
           timeAgo: lead.timeAgo || lead.lastActivity || 'Recently posted',
           client_name: lead.masked_name || 'Client Name',
           credit_cost: lead.credits || lead.credit_cost || 1,
-          max_providers: 5,
-          current_responses: lead.responses_count || 0,
+          max_providers: lead.max_providers || 5,  // Use API value, fallback to 5
+          current_responses: lead.current_responses !== undefined ? lead.current_responses : (lead.assigned_providers_count !== undefined ? lead.assigned_providers_count : (lead.responses_count || 0)),  // Use actual purchase count
           lead_status: lead.status || 'active',
           client_rating: lead.rating || 4.5,
           client_jobs_posted: 0,
@@ -232,7 +232,8 @@ const WalletLeadDashboard = () => {
             phone: lead.phone || 'Phone available',
             email: lead.email || 'Email available',
             exact_address: lead.location || lead.masked_location || 'Address available'
-          }
+          },
+          isUnlocked: lead.isUnlocked || false
         }));
         
         setLeads(transformedLeads);
@@ -345,18 +346,77 @@ const WalletLeadDashboard = () => {
           setUserCredits(prev => prev - lead.credit_cost);
         }
         
-        // Update lead status
-        setLeads(prev => prev.map(l => 
-          l.id === leadId 
-            ? { 
-                ...l, 
-                status: 'unlocked', 
-                isUnlocked: true,
-                current_responses: l.current_responses + 1,
-                contact_info: response.unlocked_data || l.contact_info
+        // Refresh leads data to get updated counts from API (for accurate display)
+        // Fetch fresh data and update both leads list and selected lead
+        try {
+          apiClient.setToken(token);
+          const refreshResponse = await apiClient.get('/api/leads/wallet/available/');
+          const refreshedLeadsData = refreshResponse.leads || refreshResponse.data?.leads || [];
+          
+          if (refreshedLeadsData.length > 0) {
+            // Transform and update leads list
+            const transformedLeads = refreshedLeadsData.map((lead: any, index: number) => ({
+              id: lead.id,
+              title: lead.service || lead.title || `Service Request ${index + 1}`,
+              description: lead.details || lead.masked_details || lead.description || 'Service details available after purchase',
+              service_category: { 
+                name: lead.service?.split(' • ')[0] || 'General Services', 
+                id: lead.id 
+              },
+              location_city: lead.masked_location?.split(', ')[1] || lead.location_city || 'Location hidden',
+              location_suburb: lead.masked_location?.split(', ')[0] || lead.location_suburb || 'Location hidden',
+              budget_range: lead.budget || lead.budget_range || 'Budget available',
+              urgency: lead.urgency || 'medium',
+              timeline: lead.timeline || 'Flexible',
+              created_at: lead.created_at || new Date().toISOString(),
+              timeAgo: lead.timeAgo || lead.lastActivity || 'Recently posted',
+              client_name: lead.masked_name || 'Client Name',
+              credit_cost: lead.credits || lead.credit_cost || 1,
+              max_providers: lead.max_providers || 5,
+              current_responses: lead.current_responses !== undefined ? lead.current_responses : (lead.assigned_providers_count !== undefined ? lead.assigned_providers_count : (lead.responses_count || 0)),
+              lead_status: lead.status || 'active',
+              client_rating: lead.rating || 4.5,
+              client_jobs_posted: 0,
+              project_details: {
+                property_type: lead.jobSize || 'Standard',
+                special_requirements: lead.category || 'General'
+              },
+              hidden_details: {
+                full_name: lead.name || 'Client Name',
+                phone: lead.phone || 'Phone available',
+                email: lead.email || 'Email available',
+                exact_address: lead.location || lead.masked_location || 'Address available'
+              },
+              isUnlocked: lead.isUnlocked || false
+            }));
+            
+            setLeads(transformedLeads);
+            
+            // Update selected lead if it's the one purchased
+            if (selectedLead?.id === leadId) {
+              const updatedLead = transformedLeads.find((l: any) => l.id === leadId);
+              if (updatedLead) {
+                setSelectedLead({
+                  ...updatedLead,
+                  isUnlocked: true
+                });
               }
-            : l
-        ));
+            }
+          }
+        } catch (refreshError) {
+          console.error('Error refreshing leads after purchase:', refreshError);
+          // Fallback: just update the local state
+          setLeads(prev => prev.map(l => 
+            l.id === leadId 
+              ? { 
+                  ...l, 
+                  status: 'unlocked', 
+                  isUnlocked: true,
+                  current_responses: (l.current_responses || 0) + 1
+                }
+              : l
+          ));
+        }
         
         console.log('✅ Lead purchased successfully:', response);
         showNotification(`Lead purchased successfully! ${response.credits_deducted || lead.credit_cost} credits deducted.`, 'success');
