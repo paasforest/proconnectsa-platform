@@ -55,7 +55,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   }))
 
   // City + Service pages - prioritize top services and major cities
-  const topServices = ["plumbing", "electrical", "cleaning", "painting", "handyman", "hvac", "landscaping", "solar-installation"]
+  const topServices = ["plumbing", "electrical", "cleaning", "painting", "handyman", "hvac", "landscaping", "solar-installation", "security", "alarm-systems", "carpentry"]
   const cityServiceUrls: MetadataRoute.Sitemap = []
   for (const city of MAJOR_CITIES) {
     for (const service of topServices) {

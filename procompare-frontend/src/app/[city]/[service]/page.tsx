@@ -54,34 +54,116 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const cityName = cityData.name
   const provinceName = cityData.provinceName
 
-  // Optimized emotional titles for better CTR
-  const getOptimizedTitle = (service: string, city: string) => {
+  // Optimized emotional titles for better CTR with keyword variations
+  const getOptimizedTitle = (service: string, city: string, serviceSlug: string) => {
     const serviceLower = service.toLowerCase()
-    if (serviceLower.includes("plumber")) {
-      return `Compare 3 Verified Plumbers in ${city} (Free Quotes in 60 Seconds) | ProConnectSA`
+    const slugLower = serviceSlug.toLowerCase()
+    
+    // Electrical variations - target "electricians", "electrical contractors", "electrical installation"
+    if (serviceLower.includes("electrician") || slugLower === "electrical") {
+      // Rotate between variations for better coverage
+      const variations = [
+        `Electricians & Electrical Contractors in ${city} (Free Quotes in 60 Seconds) | ProConnectSA`,
+        `Electrician Near Me in ${city} - Compare 3 Verified Pros | ProConnectSA`,
+        `Electrical Installation Services in ${city} (Free Quotes) | ProConnectSA`,
+        `Compare 3 Verified Electricians in ${city} (Free Quotes in 60 Seconds) | ProConnectSA`
+      ]
+      // Use city hash for consistent variation per city
+      const hash = cityName.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0)
+      return variations[hash % variations.length]
     }
-    if (serviceLower.includes("electrician")) {
-      return `Compare 3 Verified Electricians in ${city} (Free Quotes in 60 Seconds) | ProConnectSA`
+    
+    // Plumbing variations
+    if (serviceLower.includes("plumber") || slugLower === "plumbing") {
+      const variations = [
+        `Plumbers & Plumbing Contractors in ${city} (Free Quotes in 60 Seconds) | ProConnectSA`,
+        `Plumber Near Me in ${city} - Compare 3 Verified Pros | ProConnectSA`,
+        `Compare 3 Verified Plumbers in ${city} (Free Quotes in 60 Seconds) | ProConnectSA`
+      ]
+      const hash = cityName.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0)
+      return variations[hash % variations.length]
     }
+    
+    // Security/Alarm variations
+    if (serviceLower.includes("security") || slugLower.includes("alarm") || slugLower.includes("security")) {
+      const variations = [
+        `Alarm Systems & Security Installation in ${city} (Free Quotes) | ProConnectSA`,
+        `Security Systems Near Me in ${city} - Compare 3 Verified Pros | ProConnectSA`,
+        `Alarm Systems in ${city} - Get Free Quotes from Verified Installers | ProConnectSA`
+      ]
+      const hash = cityName.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0)
+      return variations[hash % variations.length]
+    }
+    
+    // Carpentry variations
+    if (serviceLower.includes("carpenter") || slugLower === "carpentry") {
+      const variations = [
+        `Carpenters & Carpentry Services in ${city} (Free Quotes) | ProConnectSA`,
+        `Carpenter Near Me in ${city} - Compare 3 Verified Pros | ProConnectSA`,
+        `Carpentry Services in ${city} - Get Free Quotes | ProConnectSA`
+      ]
+      const hash = cityName.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0)
+      return variations[hash % variations.length]
+    }
+    
+    // Solar variations
     if (serviceLower.includes("solar")) {
-      return `Compare 3 Verified Solar Installers in ${city} (Free Quotes in 60 Seconds) | ProConnectSA`
+      return `Solar Installation Services in ${city} (Free Quotes in 60 Seconds) | ProConnectSA`
     }
+    
+    // Cleaning variations
     if (serviceLower.includes("clean")) {
-      return `Compare 3 Verified Cleaning Services in ${city} (Free Quotes in 60 Seconds) | ProConnectSA`
+      return `Cleaning Services Near Me in ${city} (Free Quotes) | ProConnectSA`
     }
+    
+    // Painting variations
     if (serviceLower.includes("paint")) {
-      return `Compare 3 Verified Painters in ${city} (Free Quotes in 60 Seconds) | ProConnectSA`
+      return `Painters & Painting Services in ${city} (Free Quotes) | ProConnectSA`
     }
-    // Default optimized title
+    
+    // Default optimized title with "near me" variation
+    const hash = cityName.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0)
+    if (hash % 2 === 0) {
+      return `${service} Near Me in ${city} - Compare 3 Verified Pros | ProConnectSA`
+    }
     return `Compare 3 Verified ${service} in ${city} (Free Quotes in 60 Seconds) | ProConnectSA`
   }
 
+  // Enhanced meta descriptions with urgency and social proof
+  const getOptimizedDescription = (service: string, city: string, province: string, serviceSlug: string) => {
+    const serviceLower = service.toLowerCase()
+    const slugLower = serviceSlug.toLowerCase()
+    
+    // Electrical descriptions
+    if (serviceLower.includes("electrician") || slugLower === "electrical") {
+      return `Find trusted electricians and electrical contractors in ${city}, ${province}. Compare free quotes from 3 verified professionals. Get quotes today - no obligation. Trusted by 1000+ customers. Fast matching in 60 seconds.`
+    }
+    
+    // Plumbing descriptions
+    if (serviceLower.includes("plumber") || slugLower === "plumbing") {
+      return `Find trusted plumbers and plumbing contractors in ${city}, ${province}. Compare free quotes from 3 verified professionals. Get quotes today - no obligation. Trusted by 1000+ customers.`
+    }
+    
+    // Security/Alarm descriptions
+    if (serviceLower.includes("security") || slugLower.includes("alarm") || slugLower.includes("security")) {
+      return `Find trusted alarm systems and security installation professionals in ${city}, ${province}. Compare free quotes from 3 verified installers. Get quotes today - no obligation. Trusted by 1000+ customers.`
+    }
+    
+    // Carpentry descriptions
+    if (serviceLower.includes("carpenter") || slugLower === "carpentry") {
+      return `Find trusted carpenters and carpentry services in ${city}, ${province}. Compare free quotes from 3 verified professionals. Get quotes today - no obligation. Trusted by 1000+ customers.`
+    }
+    
+    // Default enhanced description
+    return `Find trusted ${service.toLowerCase()} professionals in ${city}, ${province}. Compare free quotes from 3 verified experts. Get quotes today - no obligation. Trusted by 1000+ customers. Fast matching in 60 seconds.`
+  }
+
   return {
-    title: getOptimizedTitle(serviceName, cityName),
-    description: `Get free quotes from 3 verified ${serviceName.toLowerCase()} in ${cityName}, ${provinceName}. Compare pricing, reviews, and availability. No obligation to hire. Fast matching in 60 seconds.`,
+    title: getOptimizedTitle(serviceName, cityName, service),
+    description: getOptimizedDescription(serviceName, cityName, provinceName, service),
     openGraph: {
-      title: getOptimizedTitle(serviceName, cityName),
-      description: `Get free quotes from 3 verified ${serviceName.toLowerCase()} in ${cityName}. Compare pricing and reviews. No obligation.`,
+      title: getOptimizedTitle(serviceName, cityName, service),
+      description: getOptimizedDescription(serviceName, cityName, provinceName, service),
       type: "website",
     },
     robots: {
@@ -204,7 +286,7 @@ export default async function CityServicePage({ params }: Props) {
                 Compare 3 Verified {serviceName} in {cityName}
               </h1>
               <p className="text-gray-700 text-lg md:text-xl max-w-3xl mb-6 font-medium">
-                Get free quotes in 60 seconds. Compare pricing, reviews, and availability from verified local professionals. No obligation to hire.
+                Find trusted {serviceName.toLowerCase()} {categorySlug === "electrical" ? "and electrical contractors" : categorySlug === "plumbing" ? "and plumbing contractors" : categorySlug === "carpentry" ? "and carpentry services" : ""} near you in {cityName}, {provinceName}. Get free quotes in 60 seconds. Compare pricing, reviews, and availability from verified local professionals. No obligation to hire.
               </p>
             </div>
           </div>
@@ -271,13 +353,13 @@ export default async function CityServicePage({ params }: Props) {
                   <div className="text-lg font-semibold text-gray-900 mb-2">Why Choose ProConnectSA in {cityName}?</div>
                   <div className="text-sm text-gray-700 space-y-3">
                     <p>
-                      <strong>Local professionals:</strong> All providers serve {cityName} and surrounding areas. Whether you need <Link href={`/${city}/plumbing`} className="text-emerald-700 hover:text-emerald-800 hover:underline font-medium">plumbing services</Link>, <Link href={`/${city}/electrical`} className="text-emerald-700 hover:text-emerald-800 hover:underline font-medium">electrical work</Link>, or <Link href={`/${city}/cleaning`} className="text-emerald-700 hover:text-emerald-800 hover:underline font-medium">cleaning services</Link>, we connect you with verified professionals in {cityName}.
+                      <strong>Local professionals near you:</strong> All providers serve {cityName} and surrounding areas. Whether you need {categorySlug === "electrical" ? "electrical contractors and installation services" : categorySlug === "plumbing" ? "plumbing contractors and installation services" : categorySlug === "carpentry" ? "carpentry services and custom woodwork" : categorySlug === "security" || categorySlug === "alarm-systems" ? "alarm systems and security installation" : `${serviceName.toLowerCase()}`} in {cityName}, we connect you with verified professionals near you. Looking for other services? Browse <Link href={`/${city}/plumbing`} className="text-emerald-700 hover:text-emerald-800 hover:underline font-medium">plumbing</Link>, <Link href={`/${city}/electrical`} className="text-emerald-700 hover:text-emerald-800 hover:underline font-medium">electrical contractors</Link>, or <Link href={`/${city}/cleaning`} className="text-emerald-700 hover:text-emerald-800 hover:underline font-medium">cleaning services</Link>.
                     </p>
                     <p>
-                      <strong>Verified & reviewed:</strong> Check credentials and read customer reviews. Our {serviceName.toLowerCase()} providers in {cityName} are verified and have proven track records. Looking for other services? Browse <Link href={`/${city}/services`} className="text-emerald-700 hover:text-emerald-800 hover:underline font-medium">all services in {cityName}</Link>.
+                      <strong>Verified & reviewed:</strong> Check credentials and read customer reviews. Our {serviceName.toLowerCase()} {categorySlug === "electrical" ? "and electrical contractors" : categorySlug === "plumbing" ? "and plumbing contractors" : ""} in {cityName} are verified and have proven track records. Trusted by 1000+ customers across South Africa. Looking for other services? Browse <Link href={`/${city}/services`} className="text-emerald-700 hover:text-emerald-800 hover:underline font-medium">all services in {cityName}</Link>.
                     </p>
                     <p>
-                      <strong>Compare quotes:</strong> Get multiple quotes to find the best price. Request quotes from different {serviceName.toLowerCase()} providers in {cityName} and compare pricing, availability, and reviews before making a decision.
+                      <strong>Compare quotes:</strong> Get multiple quotes to find the best price. Request quotes from different {serviceName.toLowerCase()} {categorySlug === "electrical" ? "contractors" : categorySlug === "plumbing" ? "contractors" : "providers"} in {cityName} and compare pricing, availability, and reviews before making a decision. Get quotes today - no obligation to hire.
                     </p>
                     <p>
                       <strong>No obligation:</strong> Free to request quotes, no commitment to hire. Explore <Link href={`/services/${categorySlug}/${cityData.provinceSlug}`} className="text-emerald-700 hover:text-emerald-800 hover:underline font-medium">{serviceName.toLowerCase()} across {provinceName}</Link> or find providers in nearby cities like <Link href={`/${province?.topCities.find(c => c !== cityName)?.toLowerCase().replace(/\s+/g, "-")}/${service}`} className="text-emerald-700 hover:text-emerald-800 hover:underline font-medium">{province?.topCities.find(c => c !== cityName)}</Link>.

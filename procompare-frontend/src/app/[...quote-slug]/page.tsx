@@ -25,6 +25,11 @@ const SERVICE_NAME_TO_SLUG: Record<string, string> = {
   "roofing": "roofing",
   "carpenter": "carpentry",
   "carpentry": "carpentry",
+  "alarm": "alarm-systems",
+  "alarms": "alarm-systems",
+  "alarm-systems": "alarm-systems",
+  "security": "security",
+  "security-systems": "security",
 }
 
 // City name variations to slug mappings
