@@ -447,7 +447,7 @@ export default async function CityServicePage({ params }: Props) {
                     <p className="text-gray-600 text-sm mb-4">
                       Looking for {serviceName.toLowerCase()} in other areas? Explore nearby cities:
                     </p>
-                    <div className="flex flex-wrap gap-2">
+                    <div className="flex flex-wrap gap-2 mb-4">
                       {province.topCities
                         .filter(c => c !== cityName)
                         .slice(0, 5)
@@ -463,6 +463,14 @@ export default async function CityServicePage({ params }: Props) {
                             </Link>
                           )
                         })}
+                    </div>
+                    <div className="pt-4 border-t">
+                      <Link
+                        href={`/services/${service}/${province.slug}`}
+                        className="text-sm text-emerald-700 font-semibold hover:text-emerald-800 hover:underline"
+                      >
+                        View all {serviceName.toLowerCase()} in {provinceName} →
+                      </Link>
                     </div>
                   </div>
                 )}

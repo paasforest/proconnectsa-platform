@@ -225,6 +225,36 @@ export default async function ServiceProvincePage({ params }: Props) {
                   <strong>Looking for {serviceName.toLowerCase()} in {p.name}?</strong> Our platform connects you with verified professionals across all major cities in {p.name}, including {p.topCities.slice(0, 3).join(", ")}, and surrounding areas. Every provider is background checked, insured, and has proven track records. Request free quotes with no obligation to hire.
                 </p>
               </div>
+              
+              {/* Province-specific content for better indexing */}
+              <div className="mt-6 max-w-3xl">
+                <div className="bg-white border rounded-lg p-6">
+                  <h2 className="text-xl font-semibold text-gray-900 mb-3">
+                    {serviceName} Services Across {p.name}
+                  </h2>
+                  <p className="text-gray-700 mb-4">
+                    {p.name} is {p.name === "Gauteng" ? "South Africa's economic hub, home to major cities like Johannesburg, Pretoria, and Sandton" : p.name === "Western Cape" ? "known for its diverse economy and major cities like Cape Town, Stellenbosch, and Bellville" : p.name === "KwaZulu-Natal" ? "a coastal province with major cities like Durban, Umhlanga, and Pietermaritzburg" : p.name === "Eastern Cape" ? "a province with growing urban centers like Gqeberha and East London" : p.name === "Northern Cape" ? "South Africa's largest province by area, with unique service needs" : p.name === "North West" ? "a province with growing service industries" : p.name === "Mpumalanga" ? "a province known for its natural beauty and growing economy" : p.name === "Limpopo" ? "a province with diverse service needs" : "a province with unique service requirements"}. 
+                    Finding reliable {serviceName.toLowerCase()} professionals in {p.name} requires understanding local regulations, climate considerations, and regional pricing.
+                  </p>
+                  <p className="text-gray-700 mb-4">
+                    Our network of verified {serviceName.toLowerCase()} professionals serves all major cities and towns across {p.name}. Whether you're in {p.topCities[0]}, {p.topCities[1]}, or smaller towns, we'll match you with qualified professionals who understand {p.name === "Gauteng" ? "urban infrastructure and high-density living" : p.name === "Western Cape" ? "coastal conditions and heritage building requirements" : p.name === "KwaZulu-Natal" ? "tropical climate considerations and coastal regulations" : "local market conditions and regional requirements"}.
+                  </p>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                    <div>
+                      <h3 className="font-semibold text-gray-900 mb-2">Coverage Areas</h3>
+                      <p className="text-sm text-gray-600">
+                        We serve all major cities in {p.name}, including {p.topCities.slice(0, 4).join(", ")}, and surrounding areas.
+                      </p>
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-gray-900 mb-2">Local Expertise</h3>
+                      <p className="text-sm text-gray-600">
+                        All providers understand {p.name} regulations, local pricing, and regional service requirements.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
 
               <div className="mt-6 flex flex-wrap gap-2">
                 {p.topCities.map((city) => {
@@ -375,6 +405,27 @@ export default async function ServiceProvincePage({ params }: Props) {
                           className="text-sm text-emerald-700 hover:text-emerald-800 hover:underline font-medium"
                         >
                           {serviceName} in {city.name}
+                        </Link>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Related Services in Same Province */}
+                {relatedServices.length > 0 && (
+                  <div className="border rounded-2xl p-6 bg-white">
+                    <div className="text-lg font-semibold text-gray-900 mb-2">Other Services in {p.name}</div>
+                    <p className="text-gray-600 text-sm mb-4">
+                      Looking for other services in {p.name}? Browse related services by province:
+                    </p>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                      {relatedServices.map((relatedService) => (
+                        <Link
+                          key={relatedService.slug}
+                          href={`/services/${relatedService.slug}/${province}`}
+                          className="text-sm text-emerald-700 hover:text-emerald-800 hover:underline font-medium"
+                        >
+                          {relatedService.name} in {p.name}
                         </Link>
                       ))}
                     </div>

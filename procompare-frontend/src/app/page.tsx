@@ -183,17 +183,17 @@ export default async function Homepage() {
                       <div className="font-semibold text-gray-900 text-sm">Western Cape</div>
                       <div className="text-xs text-gray-600 mt-1">Cape Town, Stellenbosch, Bellville</div>
                     </Link>
-                    <Link href="/services/plumbing/kwazulu-natal" className="block px-4 py-3 bg-white border rounded-lg hover:border-emerald-300 hover:bg-emerald-50 transition">
+                    <Link href="/services/electrical/kwazulu-natal" className="block px-4 py-3 bg-white border rounded-lg hover:border-emerald-300 hover:bg-emerald-50 transition">
                       <div className="font-semibold text-gray-900 text-sm">KwaZulu-Natal</div>
                       <div className="text-xs text-gray-600 mt-1">Durban, Umhlanga, Pietermaritzburg</div>
                     </Link>
-                    <Link href="/services/plumbing/eastern-cape" className="block px-4 py-3 bg-white border rounded-lg hover:border-emerald-300 hover:bg-emerald-50 transition">
+                    <Link href="/services/handyman/eastern-cape" className="block px-4 py-3 bg-white border rounded-lg hover:border-emerald-300 hover:bg-emerald-50 transition">
                       <div className="font-semibold text-gray-900 text-sm">Eastern Cape</div>
                       <div className="text-xs text-gray-600 mt-1">Gqeberha, East London</div>
                     </Link>
                   </div>
                   <p className="text-xs text-gray-600">
-                    Serving all 9 provinces: <Link href="/gauteng/local-services" className="text-emerald-700 hover:text-emerald-800 hover:underline">Gauteng</Link>, <Link href="/services/plumbing/western-cape" className="text-emerald-700 hover:text-emerald-800 hover:underline">Western Cape</Link>, <Link href="/services/plumbing/kwazulu-natal" className="text-emerald-700 hover:text-emerald-800 hover:underline">KwaZulu-Natal</Link>, and more.
+                    Serving all 9 provinces: <Link href="/gauteng/local-services" className="text-emerald-700 hover:text-emerald-800 hover:underline">Gauteng</Link>, <Link href="/services/plumbing/western-cape" className="text-emerald-700 hover:text-emerald-800 hover:underline">Western Cape</Link>, <Link href="/services/electrical/kwazulu-natal" className="text-emerald-700 hover:text-emerald-800 hover:underline">KwaZulu-Natal</Link>, <Link href="/services/handyman/eastern-cape" className="text-emerald-700 hover:text-emerald-800 hover:underline">Eastern Cape</Link>, and more.
                   </p>
                 </div>
               </div>

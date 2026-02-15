@@ -127,6 +127,18 @@ export function Footer() {
                 </li>
               ))}
             </ul>
+            <div className="pt-2 border-t">
+              <p className="text-xs text-muted-foreground mb-2">Popular Services by Province:</p>
+              <div className="flex flex-wrap gap-x-2 gap-y-1 text-xs">
+                <Link href="/services/electrical/gauteng" className="text-muted-foreground hover:text-foreground transition-colors">Electrical (Gauteng)</Link>
+                <span className="text-muted-foreground">•</span>
+                <Link href="/services/electrical/kwazulu-natal" className="text-muted-foreground hover:text-foreground transition-colors">Electrical (KZN)</Link>
+                <span className="text-muted-foreground">•</span>
+                <Link href="/services/handyman/western-cape" className="text-muted-foreground hover:text-foreground transition-colors">Handyman (WC)</Link>
+                <span className="text-muted-foreground">•</span>
+                <Link href="/services/painting/northern-cape" className="text-muted-foreground hover:text-foreground transition-colors">Painting (NC)</Link>
+              </div>
+            </div>
             <div className="pt-3 border-t">
               <h4 className="font-semibold text-xs mb-2">Popular Cities</h4>
               <div className="flex flex-wrap gap-x-3 gap-y-1 text-xs">
