@@ -79,6 +79,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     return {
       title: custom.seoTitle,
       description: custom.metaDescription,
+      robots: {
+        index: true,
+        follow: true,
+      },
     }
   }
 
