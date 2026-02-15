@@ -471,6 +471,81 @@ export default async function CityServicePage({ params }: Props) {
           </div>
         </section>
 
+        {/* Comprehensive Service Information Section */}
+        <section className="py-10 bg-white">
+          <div className="container mx-auto px-4">
+            <div className="max-w-4xl mx-auto">
+              <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-6">
+                Finding the Right {serviceName} in {cityName}, {provinceName}
+              </h2>
+              
+              <div className="prose prose-lg max-w-none space-y-6 text-gray-700">
+                <p className="text-lg leading-relaxed">
+                  When you need {serviceName.toLowerCase()} in {cityName}, it's essential to work with verified professionals who understand the local market and can deliver quality results. {cityName} is {cityName === "Johannesburg" ? "South Africa's largest city and economic hub" : cityName === "Cape Town" ? "a major port city and tourist destination" : cityName === "Durban" ? "a major port city and tourist destination" : cityName === "Sandton" ? "a major business district and financial center" : cityName === "Midrand" ? "a fast-growing area between Johannesburg and Pretoria" : "a vibrant city"} with unique requirements for {serviceName.toLowerCase()}.
+                </p>
+
+                <div>
+                  <h3 className="text-xl font-semibold text-gray-900 mb-3 mt-6">
+                    Why Choose Verified {serviceName} in {cityName}?
+                  </h3>
+                  <p className="mb-4">
+                    Working with verified {serviceName.toLowerCase()} {categorySlug === "electrical" ? "and electrical contractors" : categorySlug === "plumbing" ? "and plumbing contractors" : ""} in {cityName} ensures you're getting professionals who have been background checked, verified for credentials, and have proven track records. All providers on ProConnectSA are verified before being listed, giving you peace of mind when hiring for your project.
+                  </p>
+                  <p className="mb-4">
+                    Whether you're looking for {categorySlug === "electrical" ? "electrical installation services, wiring repairs, or electrical contractors" : categorySlug === "plumbing" ? "plumbing repairs, installations, or plumbing contractors" : categorySlug === "cleaning" ? "house cleaning, office cleaning, or deep cleaning services" : categorySlug === "handyman" ? "general repairs, installations, or maintenance work" : `${serviceName.toLowerCase()}`} in {cityName}, our platform connects you with up to 3 verified professionals who serve your area. This allows you to compare quotes, read reviews, and choose the best fit for your needs and budget.
+                  </p>
+                </div>
+
+                <div>
+                  <h3 className="text-xl font-semibold text-gray-900 mb-3 mt-6">
+                    What to Look for in {serviceName} in {cityName}
+                  </h3>
+                  <ul className="list-disc pl-6 space-y-2 mb-4">
+                    <li><strong>Local experience:</strong> Choose {serviceName.toLowerCase()} who have experience working in {cityName} and understand local building codes, regulations, and common issues in the area.</li>
+                    <li><strong>Verified credentials:</strong> Ensure the professional is licensed, insured, and verified. All providers on ProConnectSA are verified before being listed.</li>
+                    <li><strong>Positive reviews:</strong> Check customer reviews and ratings. Our platform shows verified reviews from previous customers in {cityName}.</li>
+                    <li><strong>Transparent pricing:</strong> Get multiple quotes to compare pricing. Most {serviceName.toLowerCase()} in {cityName} offer competitive rates, and comparing quotes helps ensure fair pricing.</li>
+                    <li><strong>Availability:</strong> Consider the provider's availability and response time. Many {serviceName.toLowerCase()} in {cityName} offer same-day or next-day service for urgent jobs.</li>
+                  </ul>
+                </div>
+
+                <div>
+                  <h3 className="text-xl font-semibold text-gray-900 mb-3 mt-6">
+                    Common {serviceName} Services in {cityName}
+                  </h3>
+                  <p className="mb-4">
+                    {categorySlug === "electrical" ? `Electrical contractors in ${cityName} commonly handle wiring installations, electrical panel upgrades, outlet installations, lighting fixtures, generator installations, and smart home setups. Whether you need residential electrical work or commercial electrical services, verified electricians in ${cityName} can help with your project.` : categorySlug === "plumbing" ? `Plumbing contractors in ${cityName} commonly handle pipe repairs, drain cleaning, toilet repairs, water heater installations, leak detection, and bathroom installations. Whether you need emergency plumbing services or planned installations, verified plumbers in ${cityName} can help.` : categorySlug === "cleaning" ? `Cleaning services in ${cityName} commonly include house cleaning, office cleaning, deep cleaning, carpet cleaning, window cleaning, and move-in/move-out cleaning. Whether you need regular maintenance cleaning or one-time deep cleaning, verified cleaning professionals in ${cityName} can help.` : categorySlug === "handyman" ? `Handyman services in ${cityName} commonly include general repairs, furniture assembly, mounting and hanging, minor renovations, and maintenance work. Whether you need a quick fix or a larger project, verified handyman professionals in ${cityName} can help.` : `Professional ${serviceName.toLowerCase()} in ${cityName} offer a wide range of services to meet your needs. Whether you need routine maintenance, repairs, or new installations, verified professionals in ${cityName} can help with your project.`}
+                  </p>
+                </div>
+
+                <div>
+                  <h3 className="text-xl font-semibold text-gray-900 mb-3 mt-6">
+                    Getting Quotes from {serviceName} in {cityName}
+                  </h3>
+                  <p className="mb-4">
+                    The best way to find the right {serviceName.toLowerCase()} for your project in {cityName} is to get multiple quotes. Our platform makes this easy - simply submit your service request through the form above, and we'll connect you with up to 3 verified {serviceName.toLowerCase()} professionals in {cityName}. Compare their quotes, read reviews, check availability, and choose the best fit for your needs.
+                  </p>
+                  <p className="mb-4">
+                    All quote requests are completely free, and there's no obligation to hire. This allows you to compare pricing, services, and reviews from multiple {serviceName.toLowerCase()} in {cityName} before making a decision. Most providers respond within 24-48 hours, and many offer same-day or next-day service for urgent jobs.
+                  </p>
+                </div>
+
+                <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-6 mt-6">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                    Ready to Find {serviceName} in {cityName}?
+                  </h3>
+                  <p className="text-gray-700 mb-4">
+                    Get started today by requesting free quotes from verified {serviceName.toLowerCase()} professionals in {cityName}. Our platform matches you with up to 3 verified providers who serve your area. Compare quotes, read reviews, and choose the best fit—all free with no obligation to hire.
+                  </p>
+                  <p className="text-sm text-gray-600">
+                    Looking for {serviceName.toLowerCase()} in other areas? Explore <Link href={`/services/${categorySlug}/${cityData.provinceSlug}`} className="text-emerald-700 hover:text-emerald-800 hover:underline font-medium">{serviceName.toLowerCase()} across {provinceName}</Link> or browse <Link href={`/${city}/services`} className="text-emerald-700 hover:text-emerald-800 hover:underline font-medium">all services in {cityName}</Link>.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
         {/* FAQ Section */}
         <section className="py-10 bg-gray-50">
           <div className="container mx-auto px-4">
