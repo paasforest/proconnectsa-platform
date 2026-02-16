@@ -195,17 +195,27 @@ const OverviewDashboard = () => {
       // Fetch monitoring dashboard data
       try {
         const monitoringData = await apiClient.get('/api/users/admin/monitoring/dashboard/');
-        setMonitoringData(monitoringData);
-      } catch (error) {
+        // Handle both direct response and nested data
+        if (monitoringData && typeof monitoringData === 'object') {
+          setMonitoringData(monitoringData.data || monitoringData);
+        }
+      } catch (error: any) {
         console.error('Failed to fetch monitoring dashboard:', error);
+        // Set empty data on error so UI doesn't show loading forever
+        setMonitoringData({ registrations: { total: 0 }, payments: { total_deposited: 0 }, leads: { new_leads: 0 } });
       }
       
       // Fetch problems data
       try {
         const problemsData = await apiClient.get('/api/users/admin/monitoring/problems/');
-        setProblems(problemsData);
-      } catch (error) {
+        // Handle both direct response and nested data
+        if (problemsData && typeof problemsData === 'object') {
+          setProblems(problemsData.data || problemsData);
+        }
+      } catch (error: any) {
         console.error('Failed to fetch problems:', error);
+        // Set empty data on error so UI doesn't show loading forever
+        setProblems({ problems_detected: 0, warnings: [] });
       }
     } catch (error) {
       console.error('Failed to fetch monitoring data:', error);
