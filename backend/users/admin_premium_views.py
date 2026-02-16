@@ -60,7 +60,10 @@ def admin_premium_requests(request):
                 plan_type = 'monthly'
             
             # Check payment verification status
-            payment_verified = bool(deposit.bank_reference) or deposit.is_auto_verified
+            # IMPORTANT: If bank_reference equals reference_number, it was incorrectly set during creation
+            # Real bank_reference should be different from reference_number (it comes from bank transaction)
+            has_real_bank_reference = bool(deposit.bank_reference) and deposit.bank_reference != deposit.reference_number
+            payment_verified = has_real_bank_reference or deposit.is_auto_verified
             payment_status = 'verified' if payment_verified else 'pending'
             
             premium_requests.append({
@@ -124,7 +127,10 @@ def admin_approve_premium(request, deposit_id):
             )
         
         # PAYMENT VERIFICATION CHECK - Only approve if payment was received
-        payment_verified = bool(deposit.bank_reference) or deposit.is_auto_verified
+        # IMPORTANT: If bank_reference equals reference_number, it was incorrectly set during creation
+        # Real bank_reference should be different from reference_number (it comes from bank transaction)
+        has_real_bank_reference = bool(deposit.bank_reference) and deposit.bank_reference != deposit.reference_number
+        payment_verified = has_real_bank_reference or deposit.is_auto_verified
         
         if not payment_verified:
             return Response(
