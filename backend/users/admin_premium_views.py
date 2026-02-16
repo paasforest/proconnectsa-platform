@@ -59,6 +59,10 @@ def admin_premium_requests(request):
             elif 'monthly' in verification_notes.lower():
                 plan_type = 'monthly'
             
+            # Check payment verification status
+            payment_verified = bool(deposit.bank_reference) or deposit.is_auto_verified
+            payment_status = 'verified' if payment_verified else 'pending'
+            
             premium_requests.append({
                 'id': str(deposit.id),
                 'deposit_id': str(deposit.id),
@@ -71,6 +75,9 @@ def admin_premium_requests(request):
                 'status': deposit.status,
                 'reference_number': deposit.reference_number,
                 'bank_reference': deposit.bank_reference,
+                'is_auto_verified': deposit.is_auto_verified,
+                'payment_verified': payment_verified,
+                'payment_status': payment_status,
                 'verification_notes': verification_notes,
                 'admin_notes': deposit.admin_notes,
                 'created_at': deposit.created_at.isoformat(),
@@ -113,6 +120,24 @@ def admin_approve_premium(request, deposit_id):
         if deposit.status != TransactionStatus.PENDING:
             return Response(
                 {'error': f'Deposit is already {deposit.status}'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # PAYMENT VERIFICATION CHECK - Only approve if payment was received
+        payment_verified = bool(deposit.bank_reference) or deposit.is_auto_verified
+        
+        if not payment_verified:
+            return Response(
+                {
+                    'error': 'Payment not verified',
+                    'message': 'Cannot approve premium request. Payment has not been detected. Please verify payment was received before approving.',
+                    'payment_status': {
+                        'has_bank_reference': bool(deposit.bank_reference),
+                        'is_auto_verified': deposit.is_auto_verified,
+                        'reference_number': deposit.reference_number,
+                        'payment_verified': False
+                    }
+                },
                 status=status.HTTP_400_BAD_REQUEST
             )
         

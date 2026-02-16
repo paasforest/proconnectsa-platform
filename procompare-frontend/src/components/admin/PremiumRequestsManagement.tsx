@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/components/AuthProvider';
-import { Crown, CheckCircle, XCircle, RefreshCw, Filter, Eye, Clock } from 'lucide-react';
+import { Crown, CheckCircle, XCircle, RefreshCw, Filter, Eye, Clock, AlertCircle, ShieldCheck } from 'lucide-react';
 import { apiClient } from '@/lib/api-simple';
 
 interface PremiumRequest {
@@ -17,6 +17,9 @@ interface PremiumRequest {
   status: string;
   reference_number: string;
   bank_reference: string;
+  is_auto_verified?: boolean;
+  payment_verified?: boolean;
+  payment_status?: 'verified' | 'pending';
   verification_notes: string;
   admin_notes: string;
   created_at: string;
@@ -258,9 +261,18 @@ export default function PremiumRequestsManagement() {
                     </div>
                     <div>
                       <span className="text-gray-600">Reference:</span>
-                      <p className="font-medium text-gray-900">{request.reference_number}</p>
+                      <p className="font-medium text-gray-900 font-mono text-xs">{request.reference_number}</p>
                       {request.bank_reference && (
-                        <p className="text-gray-500 text-xs">Bank: {request.bank_reference}</p>
+                        <p className="text-green-600 text-xs font-medium flex items-center gap-1 mt-1">
+                          <ShieldCheck className="w-3 h-3" />
+                          Bank: {request.bank_reference}
+                        </p>
+                      )}
+                      {request.is_auto_verified && (
+                        <p className="text-green-600 text-xs font-medium flex items-center gap-1 mt-1">
+                          <CheckCircle className="w-3 h-3" />
+                          Auto-verified
+                        </p>
                       )}
                     </div>
                     <div>
@@ -286,6 +298,42 @@ export default function PremiumRequestsManagement() {
                     </div>
                   )}
 
+                  {/* Payment Verification Status */}
+                  {request.status === 'pending' && (
+                    <div className={`mt-3 p-3 rounded-lg border ${
+                      request.payment_verified 
+                        ? 'bg-green-50 border-green-200' 
+                        : 'bg-yellow-50 border-yellow-200'
+                    }`}>
+                      <div className="flex items-start gap-2">
+                        {request.payment_verified ? (
+                          <ShieldCheck className="w-5 h-5 text-green-600 mt-0.5" />
+                        ) : (
+                          <AlertCircle className="w-5 h-5 text-yellow-600 mt-0.5" />
+                        )}
+                        <div className="flex-1">
+                          <p className={`text-sm font-medium ${
+                            request.payment_verified ? 'text-green-800' : 'text-yellow-800'
+                          }`}>
+                            Payment Status: {request.payment_verified ? 'Verified' : 'Not Verified'}
+                          </p>
+                          {request.payment_verified ? (
+                            <p className="text-xs text-green-700 mt-1">
+                              Payment has been detected. Safe to approve.
+                              {request.bank_reference && ` Bank Reference: ${request.bank_reference}`}
+                              {request.is_auto_verified && ' (Auto-verified by system)'}
+                            </p>
+                          ) : (
+                            <p className="text-xs text-yellow-700 mt-1">
+                              Payment has not been detected yet. Please verify payment was received before approving.
+                              The system will auto-detect payments within 5 minutes, or you can verify manually.
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
                   {request.status === 'pending' && (
                     <div className="mt-4 p-4 bg-white rounded border border-gray-200">
                       <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -307,8 +355,13 @@ export default function PremiumRequestsManagement() {
                 <div className="mt-4 flex items-center gap-3">
                   <button
                     onClick={() => handleApprove(request.id)}
-                    disabled={processingId === request.id}
-                    className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                    disabled={processingId === request.id || !request.payment_verified}
+                    className={`flex items-center gap-2 px-4 py-2 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed ${
+                      request.payment_verified
+                        ? 'bg-green-600 text-white hover:bg-green-700'
+                        : 'bg-gray-400 text-white cursor-not-allowed'
+                    }`}
+                    title={!request.payment_verified ? 'Payment must be verified before approval' : ''}
                   >
                     {processingId === request.id ? (
                       <RefreshCw className="w-4 h-4 animate-spin" />
