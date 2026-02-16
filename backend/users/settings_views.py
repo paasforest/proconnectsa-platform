@@ -497,12 +497,13 @@ def request_premium_listing(request):
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         
         # Create deposit request with PREMIUM reference
+        # NOTE: bank_reference should be None initially - it's only set when payment is detected
         try:
             deposit_request = DepositRequest.objects.create(
                 account=account,
                 amount=amount,
-                bank_reference=reference_number,
-                reference_number=reference_number,
+                bank_reference=None,  # Only set when payment is actually detected from bank
+                reference_number=reference_number,  # This is what provider uses when making payment
                 customer_code=customer_code,
                 credits_to_activate=0,  # Premium doesn't give credits, it gives free leads
                 status='pending',
