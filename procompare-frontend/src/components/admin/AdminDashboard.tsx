@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/components/AuthProvider';
+import { apiClient } from '@/lib/api-simple';
 import {
   LayoutDashboard, MessageSquare, Users, DollarSign, Wrench, 
   Settings, BarChart3, Bell, LogOut, Menu, X, Star, FileText
@@ -189,30 +190,22 @@ const OverviewDashboard = () => {
 
     try {
       setLoading(true);
+      apiClient.setToken(token);
       
       // Fetch monitoring dashboard data
-      const monitoringRes = await fetch('https://api.proconnectsa.co.za/api/users/admin/monitoring/dashboard/', {
-        headers: { 
-          'Authorization': `Token ${token}`,
-          'Content-Type': 'application/json'
-        },
-      });
-      
-      const problemsRes = await fetch('https://api.proconnectsa.co.za/api/users/admin/monitoring/problems/', {
-        headers: { 
-          'Authorization': `Token ${token}`,
-          'Content-Type': 'application/json'
-        },
-      });
-      
-      if (monitoringRes.ok) {
-        const data = await monitoringRes.json();
-        setMonitoringData(data);
+      try {
+        const monitoringData = await apiClient.get('/api/users/admin/monitoring/dashboard/');
+        setMonitoringData(monitoringData);
+      } catch (error) {
+        console.error('Failed to fetch monitoring dashboard:', error);
       }
       
-      if (problemsRes.ok) {
-        const data = await problemsRes.json();
-        setProblems(data);
+      // Fetch problems data
+      try {
+        const problemsData = await apiClient.get('/api/users/admin/monitoring/problems/');
+        setProblems(problemsData);
+      } catch (error) {
+        console.error('Failed to fetch problems:', error);
       }
     } catch (error) {
       console.error('Failed to fetch monitoring data:', error);
