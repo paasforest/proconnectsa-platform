@@ -106,19 +106,64 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       return variations[hash % variations.length]
     }
     
-    // Solar variations
+    // Solar variations - more emotional and benefit-focused
     if (serviceLower.includes("solar")) {
-      return `Solar Installation Services in ${city} (Free Quotes in 60 Seconds) | ProConnectSA`
+      const variations = [
+        `Solar Panel Installation in ${city} - Get Free Quotes Today | ProConnectSA`,
+        `Solar Installers Near Me in ${city} - Compare 3 Verified Pros | ProConnectSA`,
+        `Solar Power Installation in ${city} (Free Quotes in 60 Seconds) | ProConnectSA`,
+        `Best Solar Installers in ${city} - Free Quotes & Compare Prices | ProConnectSA`
+      ]
+      const hash = cityName.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0)
+      return variations[hash % variations.length]
     }
     
-    // Cleaning variations
+    // Cleaning variations - more compelling
     if (serviceLower.includes("clean")) {
-      return `Cleaning Services Near Me in ${city} (Free Quotes) | ProConnectSA`
+      const variations = [
+        `Cleaning Services Near Me in ${city} - Get Free Quotes Today | ProConnectSA`,
+        `Professional Cleaners in ${city} - Compare 3 Verified Services | ProConnectSA`,
+        `House Cleaning Services in ${city} (Free Quotes in 60 Seconds) | ProConnectSA`,
+        `Best Cleaning Services in ${city} - Free Quotes & Compare Prices | ProConnectSA`
+      ]
+      const hash = cityName.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0)
+      return variations[hash % variations.length]
     }
     
-    // Painting variations
+    // Painting variations - more emotional
     if (serviceLower.includes("paint")) {
-      return `Painters & Painting Services in ${city} (Free Quotes) | ProConnectSA`
+      const variations = [
+        `Painters & Painting Services in ${city} - Get Free Quotes Today | ProConnectSA`,
+        `Painter Near Me in ${city} - Compare 3 Verified Professionals | ProConnectSA`,
+        `House Painting Services in ${city} (Free Quotes in 60 Seconds) | ProConnectSA`,
+        `Best Painters in ${city} - Free Quotes & Compare Prices | ProConnectSA`
+      ]
+      const hash = cityName.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0)
+      return variations[hash % variations.length]
+    }
+    
+    // Roofing variations - NEW
+    if (serviceLower.includes("roof") || slugLower === "roofing") {
+      const variations = [
+        `Roofing Contractors in ${city} - Get Free Quotes Today | ProConnectSA`,
+        `Roofer Near Me in ${city} - Compare 3 Verified Professionals | ProConnectSA`,
+        `Roof Repair & Installation in ${city} (Free Quotes) | ProConnectSA`,
+        `Best Roofing Services in ${city} - Free Quotes & Compare Prices | ProConnectSA`
+      ]
+      const hash = cityName.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0)
+      return variations[hash % variations.length]
+    }
+    
+    // Handyman variations - NEW
+    if (serviceLower.includes("handyman") || slugLower === "handyman") {
+      const variations = [
+        `Handyman Services Near Me in ${city} - Get Free Quotes Today | ProConnectSA`,
+        `Handyman in ${city} - Compare 3 Verified Professionals | ProConnectSA`,
+        `Local Handyman Services in ${city} (Free Quotes in 60 Seconds) | ProConnectSA`,
+        `Best Handyman in ${city} - Free Quotes & Compare Prices | ProConnectSA`
+      ]
+      const hash = cityName.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0)
+      return variations[hash % variations.length]
     }
     
     // Default optimized title with "near me" variation
@@ -152,6 +197,31 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     // Carpentry descriptions
     if (serviceLower.includes("carpenter") || slugLower === "carpentry") {
       return `Find trusted carpenters and carpentry services in ${city}, ${province}. Compare free quotes from 3 verified professionals. Get quotes today - no obligation. Trusted by 1000+ customers.`
+    }
+    
+    // Solar descriptions - NEW
+    if (serviceLower.includes("solar")) {
+      return `Get free quotes from verified solar installers in ${city}, ${province}. Compare pricing, reviews, and availability. Get quotes today - no obligation. Trusted by 1000+ customers. Fast matching in 60 seconds.`
+    }
+    
+    // Cleaning descriptions - NEW
+    if (serviceLower.includes("clean")) {
+      return `Find trusted cleaning services and professional cleaners in ${city}, ${province}. Compare free quotes from 3 verified professionals. Get quotes today - no obligation. Trusted by 1000+ customers. Fast matching in 60 seconds.`
+    }
+    
+    // Painting descriptions - NEW
+    if (serviceLower.includes("paint")) {
+      return `Find trusted painters and painting services in ${city}, ${province}. Compare free quotes from 3 verified professionals. Get quotes today - no obligation. Trusted by 1000+ customers. Fast matching in 60 seconds.`
+    }
+    
+    // Roofing descriptions - NEW
+    if (serviceLower.includes("roof") || slugLower === "roofing") {
+      return `Find trusted roofing contractors and roofers in ${city}, ${province}. Compare free quotes from 3 verified professionals. Get quotes today - no obligation. Trusted by 1000+ customers. Fast matching in 60 seconds.`
+    }
+    
+    // Handyman descriptions - NEW
+    if (serviceLower.includes("handyman") || slugLower === "handyman") {
+      return `Find trusted handyman services in ${city}, ${province}. Compare free quotes from 3 verified professionals. Get quotes today - no obligation. Trusted by 1000+ customers. Fast matching in 60 seconds.`
     }
     
     // Default enhanced description
