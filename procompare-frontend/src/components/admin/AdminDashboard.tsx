@@ -179,16 +179,27 @@ const OverviewDashboard = () => {
 
   useEffect(() => {
     const fetchDashboardData = async () => {
+      if (!token) {
+        setLoading(false);
+        return;
+      }
+
       try {
         setLoading(true);
         
         // Fetch monitoring dashboard data
         const monitoringRes = await fetch('https://api.proconnectsa.co.za/api/admin/monitoring/dashboard/', {
-          headers: { 'Authorization': `Token ${token}` },
+          headers: { 
+            'Authorization': `Token ${token}`,
+            'Content-Type': 'application/json'
+          },
         });
         
         const problemsRes = await fetch('https://api.proconnectsa.co.za/api/admin/monitoring/problems/', {
-          headers: { 'Authorization': `Token ${token}` },
+          headers: { 
+            'Authorization': `Token ${token}`,
+            'Content-Type': 'application/json'
+          },
         });
         
         if (monitoringRes.ok) {
@@ -207,12 +218,10 @@ const OverviewDashboard = () => {
       }
     };
 
-    if (token) {
-      fetchDashboardData();
-      // Refresh every 30 seconds
-      const interval = setInterval(fetchDashboardData, 30000);
-      return () => clearInterval(interval);
-    }
+    fetchDashboardData();
+    // Refresh every 30 seconds
+    const interval = setInterval(fetchDashboardData, 30000);
+    return () => clearInterval(interval);
   }, [token]);
 
   return (
