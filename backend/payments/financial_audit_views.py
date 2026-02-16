@@ -55,10 +55,14 @@ def financial_audit_data(request):
         )
 
         # Calculate revenue metrics from EFT manual deposits
-        total_revenue = transactions.filter(
+        # Include both regular deposits and premium deposits in total revenue
+        regular_deposit_revenue = transactions.filter(
             status='completed',
             transaction_type='deposit'
         ).aggregate(total=Sum('amount'))['total'] or 0
+        
+        # Total revenue includes both regular deposits and premium features
+        total_revenue = regular_deposit_revenue + premium_features_revenue
 
         monthly_revenue = transactions.filter(
             status='completed',
@@ -74,6 +78,14 @@ def financial_audit_data(request):
 
         net_revenue = total_revenue - refund_amount
 
+        # Calculate premium features revenue from premium deposits
+        # Premium deposits are deposits with "premium listing request" in verification_notes
+        premium_deposits = DepositRequest.objects.filter(
+            verification_notes__icontains='premium listing request',
+            status='completed'
+        )
+        premium_features_revenue = premium_deposits.aggregate(total=Sum('amount'))['total'] or 0
+        
         # Platform earnings breakdown from EFT deposits and lead purchases
         platform_earnings = {
             'lead_sales': transactions.filter(
@@ -85,7 +97,7 @@ def financial_audit_data(request):
                 status='completed'
             ).aggregate(total=Sum('amount'))['total'] or 0,
             'transaction_fees': 0,  # No transaction fees with EFT deposits
-            'premium_features': 0,  # No premium features yet
+            'premium_features': premium_features_revenue,
             'other_income': transactions.filter(
                 ~Q(transaction_type__in=['lead_purchase', 'subscription', 'deposit', 'refund']),
                 status='completed'
