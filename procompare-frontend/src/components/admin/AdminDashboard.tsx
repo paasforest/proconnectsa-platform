@@ -303,6 +303,46 @@ const OverviewDashboard = () => {
                   <div className="flex-1">
                     <p className="font-medium text-gray-900">{problem.message}</p>
                     <p className="text-sm text-gray-600 mt-1">{problem.action}</p>
+                    
+                    {/* Show user emails if available */}
+                    {problem.users && problem.users.length > 0 && (
+                      <div className="mt-3">
+                        <p className="text-xs font-semibold text-gray-700 mb-1">Affected Users ({problem.users.length}):</p>
+                        <div className="max-h-32 overflow-y-auto">
+                          <div className="flex flex-wrap gap-1">
+                            {problem.users.slice(0, 10).map((email: string, idx: number) => (
+                              <span key={idx} className="text-xs bg-gray-100 px-2 py-1 rounded text-gray-700">
+                                {email}
+                              </span>
+                            ))}
+                            {problem.users.length > 10 && (
+                              <span className="text-xs text-gray-500 px-2 py-1">
+                                +{problem.users.length - 10} more
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                    
+                    {/* Show deposit details if available */}
+                    {problem.details && problem.details.length > 0 && (
+                      <div className="mt-3">
+                        <p className="text-xs font-semibold text-gray-700 mb-1">Deposit Details ({problem.details.length}):</p>
+                        <div className="max-h-32 overflow-y-auto space-y-1">
+                          {problem.details.slice(0, 5).map((detail: any, idx: number) => (
+                            <div key={idx} className="text-xs bg-gray-50 px-2 py-1 rounded">
+                              <span className="font-medium">{detail.user}</span>: R{detail.amount} ({detail.age_hours?.toFixed(1)}h ago)
+                            </div>
+                          ))}
+                          {problem.details.length > 5 && (
+                            <span className="text-xs text-gray-500 px-2 py-1">
+                              +{problem.details.length - 5} more deposits
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    )}
                   </div>
                   <span className={`px-2 py-1 text-xs font-medium rounded-full ${
                     problem.severity === 'high' ? 'bg-red-100 text-red-800' :
