@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import {
   Users, ShoppingCart, Wallet, MessageSquare, TrendingUp, 
   Clock, Target, DollarSign, Activity, BarChart3, Zap,
-  ArrowUpRight, ArrowDownRight, Eye, Star, CheckCircle, Wrench, Crown
+  ArrowUpRight, ArrowDownRight, Eye, Star, CheckCircle, Wrench, Crown, AlertCircle, RefreshCw
 } from 'lucide-react';
 import { apiClient } from '@/lib/api-simple';
 import { useAuth } from '@/components/AuthProvider';
@@ -292,6 +292,71 @@ const DashboardOverview = () => {
           </div>
         )}
       </div>
+
+      {/* Premium Request Status Banner */}
+      {premiumStatus?.has_premium_request && premiumStatus.premium_status === 'pending' && (
+        <div className={`mb-6 rounded-lg shadow-lg p-4 border-2 ${
+          premiumStatus.deposit?.payment_verified 
+            ? 'bg-blue-50 border-blue-300' 
+            : 'bg-yellow-50 border-yellow-300'
+        }`}>
+          <div className="flex items-start gap-3">
+            {premiumStatus.deposit?.payment_verified ? (
+              <CheckCircle className="w-6 h-6 text-blue-600 flex-shrink-0 mt-0.5" />
+            ) : (
+              <AlertCircle className="w-6 h-6 text-yellow-600 flex-shrink-0 mt-0.5" />
+            )}
+            <div className="flex-1">
+              <h3 className={`font-semibold mb-1 ${
+                premiumStatus.deposit?.payment_verified ? 'text-blue-900' : 'text-yellow-900'
+              }`}>
+                Premium Request Status
+              </h3>
+              <p className={`text-sm mb-2 ${
+                premiumStatus.deposit?.payment_verified ? 'text-blue-700' : 'text-yellow-700'
+              }`}>
+                {premiumStatus.deposit?.payment_verified 
+                  ? '✅ Payment verified! Your premium request is pending admin approval.'
+                  : `⏳ Payment verification pending. Reference: ${premiumStatus.deposit?.reference_number || 'N/A'}`}
+              </p>
+              <div className="flex items-center gap-3 mt-2">
+                <button
+                  onClick={() => router.push('/dashboard/settings')}
+                  className={`text-sm font-medium px-3 py-1 rounded ${
+                    premiumStatus.deposit?.payment_verified 
+                      ? 'bg-blue-600 text-white hover:bg-blue-700' 
+                      : 'bg-yellow-600 text-white hover:bg-yellow-700'
+                  }`}
+                >
+                  View Details
+                </button>
+                <button
+                  onClick={async () => {
+                    try {
+                      const response = await fetch('/api/backend-proxy/auth/premium-status/', {
+                        headers: {
+                          'Authorization': `Token ${token}`,
+                          'Content-Type': 'application/json'
+                        }
+                      });
+                      if (response.ok) {
+                        const data = await response.json();
+                        setPremiumStatus(data.data || data);
+                      }
+                    } catch (error) {
+                      console.error('Failed to refresh:', error);
+                    }
+                  }}
+                  className="text-sm text-gray-600 hover:text-gray-900 flex items-center gap-1"
+                >
+                  <RefreshCw className="w-4 h-4" />
+                  Refresh
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* New Leads Alert Banner */}
       {stats?.active_leads && stats.active_leads > 0 && (

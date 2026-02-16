@@ -308,6 +308,91 @@ def upload_verification_document(request):
         return Response({'success': False, 'message': 'Failed to upload document'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def premium_status(request):
+    """
+    Get premium listing status and payment verification status for the current provider
+    """
+    try:
+        if request.user.user_type != 'provider':
+            return Response({
+                'success': False,
+                'error': 'Only providers can check premium status'
+            }, status=status.HTTP_403_FORBIDDEN)
+        
+        provider = request.user.provider_profile
+        
+        # Check for pending premium requests
+        from backend.payments.models import DepositRequest, TransactionStatus
+        pending_premium_deposits = DepositRequest.objects.filter(
+            account__user=request.user,
+            verification_notes__icontains='premium listing request',
+            status=TransactionStatus.PENDING
+        ).order_by('-created_at')
+        
+        # Get the most recent pending request
+        latest_request = pending_premium_deposits.first() if pending_premium_deposits.exists() else None
+        
+        # Check premium listing status
+        is_premium_active = provider.is_premium_listing_active if hasattr(provider, 'is_premium_listing_active') else False
+        
+        # Build response
+        response_data = {
+            'success': True,
+            'has_premium_request': latest_request is not None,
+            'premium_status': 'active' if is_premium_active else ('pending' if latest_request else 'none'),
+            'premium_listing': {
+                'is_active': is_premium_active,
+                'expires_at': provider.premium_listing_expires_at.isoformat() if provider.premium_listing_expires_at else None,
+                'started_at': provider.premium_listing_started_at.isoformat() if provider.premium_listing_started_at else None,
+                'payment_reference': provider.premium_listing_payment_reference or None
+            }
+        }
+        
+        # Add deposit/payment information if there's a pending request
+        if latest_request:
+            payment_verified = bool(latest_request.bank_reference) or latest_request.is_auto_verified
+            
+            # Extract plan type
+            verification_notes = latest_request.verification_notes or ''
+            plan_type = 'monthly'
+            if 'lifetime' in verification_notes.lower():
+                plan_type = 'lifetime'
+            elif 'monthly' in verification_notes.lower():
+                plan_type = 'monthly'
+            
+            response_data['deposit'] = {
+                'id': str(latest_request.id),
+                'amount': float(latest_request.amount),
+                'plan_type': plan_type,
+                'reference_number': latest_request.reference_number,
+                'bank_reference': latest_request.bank_reference,
+                'status': latest_request.status,
+                'payment_verified': payment_verified,
+                'payment_status': 'verified' if payment_verified else 'pending',
+                'is_auto_verified': latest_request.is_auto_verified,
+                'created_at': latest_request.created_at.isoformat(),
+                'age_hours': round((timezone.now() - latest_request.created_at).total_seconds() / 3600, 1)
+            }
+        else:
+            response_data['deposit'] = None
+        
+        return Response(response_data, status=status.HTTP_200_OK)
+        
+    except ProviderProfile.DoesNotExist:
+        return Response({
+            'success': False,
+            'error': 'Provider profile not found'
+        }, status=status.HTTP_404_NOT_FOUND)
+    except Exception as e:
+        logger.error(f"Error getting premium status: {str(e)}")
+        return Response({
+            'success': False,
+            'error': 'Failed to get premium status'
+        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def request_premium_listing(request):

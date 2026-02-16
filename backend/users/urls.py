@@ -110,6 +110,7 @@ urlpatterns = [
     path('provider-profile/documents/upload/', settings_views.upload_verification_document, name='upload_verification_document'),
     
     # Premium Listing
+    path('premium-status/', settings_views.premium_status, name='premium_status'),
     path('request-premium-listing/', settings_views.request_premium_listing, name='request_premium_listing'),
     
     # Support APIs

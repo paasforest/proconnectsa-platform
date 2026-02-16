@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import {
   User, Mail, Phone, MapPin, Save, Eye, EyeOff, 
-  Camera, Upload, CheckCircle, AlertCircle, Star, XCircle, Copy
+  Camera, Upload, CheckCircle, AlertCircle, Star, XCircle, Copy, RefreshCw
 } from 'lucide-react';
 import { apiClient } from '@/lib/api-simple';
 import { useAuth } from '@/components/AuthProvider';
@@ -79,6 +79,7 @@ const SettingsPage = () => {
   const [premiumDetails, setPremiumDetails] = useState<any>(null);
   const [isPremiumActive, setIsPremiumActive] = useState<boolean>(false);
   const [loadingPremium, setLoadingPremium] = useState(false);
+  const [premiumStatus, setPremiumStatus] = useState<any>(null);
   const [showGoogleReviewForm, setShowGoogleReviewForm] = useState(false);
   const [myGoogleReviews, setMyGoogleReviews] = useState<any[]>([]);
 
@@ -154,8 +155,11 @@ const SettingsPage = () => {
           console.warn('Failed to load verification documents', err);
         });
       
-      // Fetch premium listing status from provider profile
+      // Fetch premium listing status and payment status
       if (token) {
+        fetchPremiumStatus();
+        
+        // Also fetch provider profile for backward compatibility
         apiClient.get('/api/auth/provider-profile/')
           .then((res: any) => {
             if (isMounted) {
@@ -344,31 +348,54 @@ const SettingsPage = () => {
     }
   };
 
-  const handleCheckPremiumPayment = async () => {
-    if (!premiumDetails?.reference_number) {
-      setMessage({ type: 'error', text: 'Please request premium listing first to get a reference number.' });
-      return;
-    }
+  const fetchPremiumStatus = async () => {
+    if (!token) return;
+    
     try {
-      setLoadingPremium(true);
-      if (token) {
-        apiClient.setToken(token);
-      }
-      const res = await apiClient.post('/api/payments/dashboard/check-deposit-by-customer-code/', {
-        customer_code: premiumDetails.customer_code || user?.customer_code,
-        amount: premiumDetails.amount || 299.00,
-        reference_number: premiumDetails.reference_number,
+      apiClient.setToken(token);
+      const response = await fetch('/api/backend-proxy/auth/premium-status/', {
+        headers: {
+          'Authorization': `Token ${token}`,
+          'Content-Type': 'application/json'
+        }
       });
-      if (res.success && res.new_status === 'premium_active') {
-        setIsPremiumActive(true);
+      
+      if (response.ok) {
+        const data = await response.json();
+        const statusData = data.data || data;
+        setPremiumStatus(statusData);
+        setIsPremiumActive(statusData.premium_listing?.is_active || false);
+        
+        // Update premiumDetails if there's a pending request
+        if (statusData.deposit) {
+          setPremiumDetails({
+            reference_number: statusData.deposit.reference_number,
+            amount: statusData.deposit.amount,
+            plan_type: statusData.deposit.plan_type,
+            customer_code: user?.customer_code
+          });
+        }
+      }
+    } catch (error) {
+      console.error('Failed to fetch premium status:', error);
+    }
+  };
+
+  const handleCheckPremiumPayment = async () => {
+    setLoadingPremium(true);
+    try {
+      await fetchPremiumStatus();
+      if (premiumStatus?.premium_status === 'active') {
         setMessage({ type: 'success', text: '✅ Premium listing activated successfully!' });
         setPremiumDetails(null);
+      } else if (premiumStatus?.deposit?.payment_verified) {
+        setMessage({ type: 'info', text: 'Payment verified! Premium activation is pending admin approval.' });
       } else {
-        setMessage({ type: 'info', text: res.message || 'Payment not yet detected. Please allow a few minutes for processing.' });
+        setMessage({ type: 'info', text: 'Payment is still pending verification. Please check again later or contact support if payment was made more than 24 hours ago.' });
       }
     } catch (error: any) {
       console.error('Failed to check premium payment:', error);
-      setMessage({ type: 'error', text: error.response?.data?.message || 'Error checking payment. Please try again.' });
+      setMessage({ type: 'error', text: error.message || 'Failed to check payment status. Please try again.' });
     } finally {
       setLoadingPremium(false);
     }
@@ -855,9 +882,101 @@ const SettingsPage = () => {
                     <CheckCircle className="w-5 h-5 text-green-600 mr-2" />
                     <span className="font-semibold text-green-800">Premium Active</span>
                   </div>
-                  <p className="text-sm text-green-700">
+                  <p className="text-sm text-green-700 mb-2">
                     Your premium listing is active. You receive unlimited FREE leads and enhanced visibility.
                   </p>
+                  {premiumStatus?.premium_listing?.expires_at && (
+                    <p className="text-xs text-green-600">
+                      Expires: {new Date(premiumStatus.premium_listing.expires_at).toLocaleDateString()}
+                    </p>
+                  )}
+                </div>
+              ) : premiumStatus?.has_premium_request ? (
+                <div className="mb-4 space-y-4">
+                  {/* Pending Request Status */}
+                  <div className={`p-4 rounded-lg border ${
+                    premiumStatus.deposit?.payment_verified 
+                      ? 'bg-blue-50 border-blue-200' 
+                      : 'bg-yellow-50 border-yellow-200'
+                  }`}>
+                    <div className="flex items-start gap-2 mb-2">
+                      {premiumStatus.deposit?.payment_verified ? (
+                        <CheckCircle className="w-5 h-5 text-blue-600 mt-0.5" />
+                      ) : (
+                        <AlertCircle className="w-5 h-5 text-yellow-600 mt-0.5" />
+                      )}
+                      <div className="flex-1">
+                        <h4 className="font-semibold text-gray-900 mb-1">
+                          Premium Request Pending
+                        </h4>
+                        <p className={`text-sm mb-2 ${
+                          premiumStatus.deposit?.payment_verified 
+                            ? 'text-blue-700' 
+                            : 'text-yellow-700'
+                        }`}>
+                          {premiumStatus.deposit?.payment_verified 
+                            ? 'Payment verified! Premium activation is pending admin approval.'
+                            : 'Payment verification pending. Please make the EFT payment using the reference below.'}
+                        </p>
+                        <div className="mt-3 space-y-2 text-sm">
+                          <div className="flex justify-between">
+                            <span className="text-gray-600">Reference Number:</span>
+                            <span className="font-mono font-semibold">{premiumStatus.deposit?.reference_number}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-gray-600">Amount:</span>
+                            <span className="font-semibold">R{premiumStatus.deposit?.amount?.toFixed(2)}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-gray-600">Plan:</span>
+                            <span className="capitalize">{premiumStatus.deposit?.plan_type}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-gray-600">Payment Status:</span>
+                            <span className={`font-semibold ${
+                              premiumStatus.deposit?.payment_verified ? 'text-green-600' : 'text-yellow-600'
+                            }`}>
+                              {premiumStatus.deposit?.payment_verified ? 'Verified' : 'Pending'}
+                            </span>
+                          </div>
+                          {premiumStatus.deposit?.bank_reference && (
+                            <div className="flex justify-between">
+                              <span className="text-gray-600">Bank Reference:</span>
+                              <span className="font-mono text-xs">{premiumStatus.deposit.bank_reference}</span>
+                            </div>
+                          )}
+                          <div className="flex justify-between text-xs text-gray-500">
+                            <span>Requested:</span>
+                            <span>{new Date(premiumStatus.deposit?.created_at).toLocaleString()}</span>
+                          </div>
+                        </div>
+                        <button
+                          onClick={handleCheckPremiumPayment}
+                          disabled={loadingPremium}
+                          className="mt-3 w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 flex items-center justify-center gap-2"
+                        >
+                          <RefreshCw className={`w-4 h-4 ${loadingPremium ? 'animate-spin' : ''}`} />
+                          {loadingPremium ? 'Checking...' : 'Check Payment Status'}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {/* Show banking details if not yet paid */}
+                  {!premiumStatus.deposit?.payment_verified && premiumDetails && (
+                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                      <h4 className="font-semibold text-blue-800 mb-2">EFT Payment Details</h4>
+                      <div className="space-y-1 text-sm text-blue-900">
+                        <p><strong>Bank:</strong> Nedbank</p>
+                        <p><strong>Account Number:</strong> 1313872032</p>
+                        <p><strong>Branch Code:</strong> 198765</p>
+                        <p><strong>Reference:</strong> <span className="font-mono text-lg bg-blue-100 px-2 py-1 rounded">{premiumDetails.reference_number}</span></p>
+                        <p className="text-xs text-blue-600 mt-2">
+                          ⚠️ Use this EXACT reference when making the EFT payment
+                        </p>
+                      </div>
+                    </div>
+                  )}
                 </div>
               ) : (
                 <>
