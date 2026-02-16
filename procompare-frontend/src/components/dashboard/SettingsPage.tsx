@@ -159,6 +159,13 @@ const SettingsPage = () => {
       if (token) {
         fetchPremiumStatus();
         
+        // Auto-refresh premium status every 30 seconds
+        const premiumInterval = setInterval(() => {
+          if (isMounted) {
+            fetchPremiumStatus();
+          }
+        }, 30000); // Every 30 seconds
+        
         // Also fetch provider profile for backward compatibility
         apiClient.get('/api/auth/provider-profile/')
           .then((res: any) => {
