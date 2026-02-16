@@ -132,6 +132,9 @@ urlpatterns = [
     path('admin/monitoring/dashboard/', admin_monitoring.admin_monitoring_dashboard, name='admin-monitoring-dashboard'),
     path('admin/monitoring/activity/', admin_monitoring.recent_activity_feed, name='admin-activity-feed'),
     path('admin/monitoring/problems/', admin_monitoring.problem_detection, name='admin-problem-detection'),
+    path('admin/users/<str:email>/', admin_monitoring.user_detail_by_email, name='admin-user-detail'),
+    path('admin/deposits/<uuid:deposit_id>/', admin_monitoring.deposit_detail, name='admin-deposit-detail'),
+    path('admin/deposits/<uuid:deposit_id>/action/', admin_monitoring.deposit_action, name='admin-deposit-action'),
     
     # Admin Premium Listing Management
     path('admin/premium-requests/', admin_premium_views.admin_premium_requests, name='admin-premium-requests'),

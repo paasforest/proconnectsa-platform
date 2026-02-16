@@ -13,6 +13,8 @@ import TechnicalDashboard from './TechnicalDashboard';
 import GoogleReviewsModeration from './GoogleReviewsModeration';
 import PremiumRequestsManagement from './PremiumRequestsManagement';
 import VerificationDocumentsManagement from './VerificationDocumentsManagement';
+import UserDetailModal from './UserDetailModal';
+import DepositDetailModal from './DepositDetailModal';
 
 type DashboardView = 'overview' | 'support' | 'staff' | 'finance' | 'technical' | 'settings' | 'google-reviews' | 'premium-requests' | 'verifications';
 
@@ -176,48 +178,50 @@ const OverviewDashboard = () => {
   const [monitoringData, setMonitoringData] = useState<any>(null);
   const [problems, setProblems] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [selectedUserEmail, setSelectedUserEmail] = useState<string | null>(null);
+  const [selectedDepositId, setSelectedDepositId] = useState<string | null>(null);
+
+  const fetchDashboardData = async () => {
+    if (!token) {
+      setLoading(false);
+      return;
+    }
+
+    try {
+      setLoading(true);
+      
+      // Fetch monitoring dashboard data
+      const monitoringRes = await fetch('https://api.proconnectsa.co.za/api/users/admin/monitoring/dashboard/', {
+        headers: { 
+          'Authorization': `Token ${token}`,
+          'Content-Type': 'application/json'
+        },
+      });
+      
+      const problemsRes = await fetch('https://api.proconnectsa.co.za/api/users/admin/monitoring/problems/', {
+        headers: { 
+          'Authorization': `Token ${token}`,
+          'Content-Type': 'application/json'
+        },
+      });
+      
+      if (monitoringRes.ok) {
+        const data = await monitoringRes.json();
+        setMonitoringData(data);
+      }
+      
+      if (problemsRes.ok) {
+        const data = await problemsRes.json();
+        setProblems(data);
+      }
+    } catch (error) {
+      console.error('Failed to fetch monitoring data:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchDashboardData = async () => {
-      if (!token) {
-        setLoading(false);
-        return;
-      }
-
-      try {
-        setLoading(true);
-        
-        // Fetch monitoring dashboard data
-        const monitoringRes = await fetch('https://api.proconnectsa.co.za/api/admin/monitoring/dashboard/', {
-          headers: { 
-            'Authorization': `Token ${token}`,
-            'Content-Type': 'application/json'
-          },
-        });
-        
-        const problemsRes = await fetch('https://api.proconnectsa.co.za/api/admin/monitoring/problems/', {
-          headers: { 
-            'Authorization': `Token ${token}`,
-            'Content-Type': 'application/json'
-          },
-        });
-        
-        if (monitoringRes.ok) {
-          const data = await monitoringRes.json();
-          setMonitoringData(data);
-        }
-        
-        if (problemsRes.ok) {
-          const data = await problemsRes.json();
-          setProblems(data);
-        }
-      } catch (error) {
-        console.error('Failed to fetch monitoring data:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchDashboardData();
     // Refresh every 30 seconds
     const interval = setInterval(fetchDashboardData, 30000);
@@ -319,11 +323,21 @@ const OverviewDashboard = () => {
                         <p className="text-xs font-semibold text-gray-700 mb-1">Affected Users ({problem.users.length}):</p>
                         <div className="max-h-32 overflow-y-auto">
                           <div className="flex flex-wrap gap-1">
-                            {problem.users.slice(0, 10).map((email: string, idx: number) => (
-                              <span key={idx} className="text-xs bg-gray-100 px-2 py-1 rounded text-gray-700">
-                                {email}
-                              </span>
-                            ))}
+                            {problem.users.slice(0, 10).map((user: any, idx: number) => {
+                              const email = typeof user === 'string' ? user : user.email;
+                              const businessName = typeof user === 'object' ? user.business_name : null;
+                              return (
+                                <button
+                                  key={idx}
+                                  onClick={() => setSelectedUserEmail(email)}
+                                  className="text-xs bg-gray-100 hover:bg-gray-200 px-2 py-1 rounded text-gray-700 cursor-pointer transition-colors"
+                                  title={businessName ? `Click to view details - ${businessName}` : 'Click to view details'}
+                                >
+                                  {email}
+                                  {businessName && <span className="ml-1 text-gray-500">({businessName})</span>}
+                                </button>
+                              );
+                            })}
                             {problem.users.length > 10 && (
                               <span className="text-xs text-gray-500 px-2 py-1">
                                 +{problem.users.length - 10} more
@@ -340,9 +354,17 @@ const OverviewDashboard = () => {
                         <p className="text-xs font-semibold text-gray-700 mb-1">Deposit Details ({problem.details.length}):</p>
                         <div className="max-h-32 overflow-y-auto space-y-1">
                           {problem.details.slice(0, 5).map((detail: any, idx: number) => (
-                            <div key={idx} className="text-xs bg-gray-50 px-2 py-1 rounded">
-                              <span className="font-medium">{detail.user}</span>: R{detail.amount} ({detail.age_hours?.toFixed(1)}h ago)
-                            </div>
+                            <button
+                              key={idx}
+                              onClick={() => setSelectedDepositId(detail.deposit_id)}
+                              className="text-xs bg-gray-50 hover:bg-gray-100 px-2 py-1 rounded w-full text-left transition-colors"
+                              title="Click to view deposit details"
+                            >
+                              <span className="font-medium">{detail.business_name || detail.user}</span>: R{detail.amount} ({detail.age_hours?.toFixed(1)}h ago)
+                              {detail.reference_number && (
+                                <span className="text-gray-500 ml-1">- {detail.reference_number}</span>
+                              )}
+                            </button>
                           ))}
                           {problem.details.length > 5 && (
                             <span className="text-xs text-gray-500 px-2 py-1">
@@ -441,6 +463,27 @@ const OverviewDashboard = () => {
           </div>
         </div>
       </div>
+
+      {/* Modals */}
+      {selectedUserEmail && (
+        <UserDetailModal
+          email={selectedUserEmail}
+          onClose={() => {
+            setSelectedUserEmail(null);
+            fetchDashboardData(); // Refresh data after closing
+          }}
+        />
+      )}
+      {selectedDepositId && (
+        <DepositDetailModal
+          depositId={selectedDepositId}
+          onClose={() => {
+            setSelectedDepositId(null);
+            fetchDashboardData(); // Refresh data after closing
+          }}
+          onAction={fetchDashboardData} // Refresh data after action
+        />
+      )}
     </div>
   );
 };
