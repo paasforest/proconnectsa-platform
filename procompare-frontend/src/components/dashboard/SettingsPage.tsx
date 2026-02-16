@@ -96,6 +96,7 @@ const SettingsPage = () => {
 
     let isMounted = true;
     let timeoutId: NodeJS.Timeout | null = null;
+    let premiumInterval: NodeJS.Timeout | null = null;
 
     const fetchProfile = async () => {
       try {
@@ -160,7 +161,7 @@ const SettingsPage = () => {
         fetchPremiumStatus();
         
         // Auto-refresh premium status every 30 seconds
-        const premiumInterval = setInterval(() => {
+        premiumInterval = setInterval(() => {
           if (isMounted) {
             fetchPremiumStatus();
           }
@@ -196,6 +197,7 @@ const SettingsPage = () => {
     return () => {
       isMounted = false;
       if (timeoutId) clearTimeout(timeoutId);
+      if (premiumInterval) clearInterval(premiumInterval);
     };
   }, [user, token]);
 
