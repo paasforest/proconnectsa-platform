@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { Search, User, MessageCircle, Clock, CheckCircle, AlertCircle, Filter } from 'lucide-react';
+import { Search, User, MessageCircle, Clock, CheckCircle, AlertCircle, Filter, RefreshCw } from 'lucide-react';
 import { useAuth } from '@/components/AuthProvider';
 import { apiClient } from '@/lib/api-simple';
 
@@ -46,18 +46,27 @@ export default function AdminSupportDashboard() {
   const [statusFilter, setStatusFilter] = useState('all');
   const [priorityFilter, setPriorityFilter] = useState('all');
 
-  useEffect(() => {
-    if (token) {
-      apiClient.setToken(token);
-      loadTickets();
-    }
-  }, [token]);
-
   const loadTickets = async () => {
     try {
       setLoading(true);
       const response = await apiClient.get('/api/support/tickets/');
-      setTickets(response.tickets || response.results || response || []);
+      
+      // Handle different response formats:
+      // - Paginated: { results: [...], count: N }
+      // - List: { tickets: [...] }
+      // - Direct array: [...]
+      let ticketsList = [];
+      if (Array.isArray(response)) {
+        ticketsList = response;
+      } else if (response.results && Array.isArray(response.results)) {
+        ticketsList = response.results;
+      } else if (response.tickets && Array.isArray(response.tickets)) {
+        ticketsList = response.tickets;
+      } else if (response.data && Array.isArray(response.data)) {
+        ticketsList = response.data;
+      }
+      
+      setTickets(ticketsList);
     } catch (error) {
       console.error('Failed to load tickets:', error);
       setTickets([]); // Set empty array on error
@@ -65,13 +74,32 @@ export default function AdminSupportDashboard() {
       setLoading(false);
     }
   };
+  
+  useEffect(() => {
+    if (token) {
+      apiClient.setToken(token);
+      loadTickets();
+      
+      // Auto-refresh tickets every 30 seconds
+      const interval = setInterval(() => {
+        loadTickets();
+      }, 30000); // Refresh every 30 seconds
+      
+      return () => clearInterval(interval);
+    }
+  }, [token]);
 
   const filteredTickets = tickets.filter(ticket => {
-    const matchesSearch = ticket.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         ticket.user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         ticket.user.email.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus = statusFilter === 'all' || ticket.status === statusFilter;
-    const matchesPriority = priorityFilter === 'all' || ticket.priority === priorityFilter;
+    const title = (ticket.title || '').toLowerCase();
+    const user_name = (ticket.user_name || ticket.user?.name || '').toLowerCase();
+    const user_email = (ticket.user_email || ticket.user?.email || '').toLowerCase();
+    const searchLower = searchTerm.toLowerCase();
+    
+    const matchesSearch = title.includes(searchLower) ||
+                         user_name.includes(searchLower) ||
+                         user_email.includes(searchLower);
+    const matchesStatus = statusFilter === 'all' || (ticket.status || '').toLowerCase() === statusFilter.toLowerCase();
+    const matchesPriority = priorityFilter === 'all' || (ticket.priority || '').toLowerCase() === priorityFilter.toLowerCase();
     
     return matchesSearch && matchesStatus && matchesPriority;
   });
@@ -221,10 +249,18 @@ export default function AdminSupportDashboard() {
 
       {/* Tickets List */}
       <div className="bg-white rounded-lg shadow border overflow-hidden">
-        <div className="px-6 py-4 border-b">
+        <div className="px-6 py-4 border-b flex items-center justify-between">
           <h2 className="text-lg font-semibold text-gray-900">
             Support Tickets ({filteredTickets.length})
           </h2>
+          <button
+            onClick={loadTickets}
+            disabled={loading}
+            className="flex items-center px-3 py-2 text-sm text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 disabled:opacity-50"
+          >
+            <RefreshCw className={`w-4 h-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
+            Refresh
+          </button>
         </div>
         
         <div className="divide-y divide-gray-200">
@@ -250,11 +286,18 @@ export default function AdminSupportDashboard() {
                   <div className="mt-3 flex items-center space-x-4 text-sm text-gray-500">
                     <div className="flex items-center">
                       <User className="w-4 h-4 mr-1" />
-                      {ticket.user.name} ({ticket.user.email})
+                      {ticket.user_name || ticket.user?.name || 'Unknown User'} 
+                      {ticket.user_email || ticket.user?.email ? ` (${ticket.user_email || ticket.user?.email})` : ''}
                     </div>
-                    <div>Assigned to: {ticket.assignee}</div>
-                    <div>Created: {formatDate(ticket.createdAt)}</div>
-                    <div>Updated: {formatDate(ticket.updatedAt)}</div>
+                    {ticket.assigned_to_name && (
+                      <div>Assigned to: {ticket.assigned_to_name}</div>
+                    )}
+                    {ticket.created_at && (
+                      <div>Created: {formatDate(ticket.created_at)}</div>
+                    )}
+                    {ticket.updated_at && (
+                      <div>Updated: {formatDate(ticket.updated_at)}</div>
+                    )}
                   </div>
                 </div>
                 
