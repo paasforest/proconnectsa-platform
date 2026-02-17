@@ -68,7 +68,7 @@ const SupportPage = () => {
       try {
         setLoading(true);
         apiClient.setToken(token);
-        const response = await apiClient.get('/api/support/tickets/');
+        const response = await apiClient.get('/api/users/support/');
         // Handle paginated response (results) or direct array
         const ticketsList = response.results || (Array.isArray(response) ? response : []);
         setTickets(ticketsList);
@@ -106,8 +106,8 @@ const SupportPage = () => {
       apiClient.setToken(token);
       console.log('Creating ticket with data:', newTicket);
       
-      const response = await apiClient.post('/api/support/tickets/', {
-        title: newTicket.title.trim(),
+      const response = await apiClient.post('/api/users/support/create/', {
+        subject: newTicket.title.trim(),  // Backend expects 'subject' not 'title'
         description: newTicket.description.trim(),
         category: newTicket.category,
         priority: newTicket.priority
@@ -116,8 +116,8 @@ const SupportPage = () => {
       console.log('Ticket created successfully:', response);
       
       // Refresh tickets list
-      const ticketsResponse = await apiClient.get('/api/support/tickets/');
-      setTickets(ticketsResponse.results || ticketsResponse || []);
+      const ticketsResponse = await apiClient.get('/api/users/support/');
+      setTickets(ticketsResponse.tickets || ticketsResponse.results || ticketsResponse || []);
       
       // Reset form
       setNewTicket({ title: '', description: '', category: 'general', priority: 'medium' });
@@ -205,7 +205,7 @@ const SupportPage = () => {
       if (token) {
         apiClient.setToken(token);
       }
-      const response = await apiClient.post(`/api/support/tickets/${ticketId}/responses/`, {
+      const response = await apiClient.post(`/api/users/support/${ticketId}/respond/`, {
         message: newResponse
       });
       
