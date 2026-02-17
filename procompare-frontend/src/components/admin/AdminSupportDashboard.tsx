@@ -49,13 +49,17 @@ export default function AdminSupportDashboard() {
   const loadTickets = async () => {
     try {
       setLoading(true);
-      console.log('[Admin Support] Fetching tickets from /api/support/tickets/');
+      console.log('[Admin Support] ====== FETCHING TICKETS ======');
       console.log('[Admin Support] Token exists:', !!token);
+      console.log('[Admin Support] Token value:', token ? `${token.substring(0, 20)}...` : 'null');
       
-      const response = await apiClient.get('/api/support/tickets/');
-      console.log('[Admin Support] Raw response type:', typeof response);
-      console.log('[Admin Support] Raw response:', JSON.stringify(response, null, 2));
+      // Try fetching with explicit page parameter to avoid pagination issues
+      const response = await apiClient.get('/api/support/tickets/?page=1&page_size=100');
+      console.log('[Admin Support] ====== RAW RESPONSE ======');
+      console.log('[Admin Support] Response type:', typeof response);
+      console.log('[Admin Support] Response:', response);
       console.log('[Admin Support] Response keys:', Object.keys(response || {}));
+      console.log('[Admin Support] Is array?', Array.isArray(response));
       
       // Handle different response formats:
       // - Paginated: { results: [...], count: N, next: url, previous: url }
@@ -64,31 +68,46 @@ export default function AdminSupportDashboard() {
       let ticketsList = [];
       if (Array.isArray(response)) {
         ticketsList = response;
-        console.log('[Admin Support] Response is direct array');
+        console.log('[Admin Support] ✅ Response is direct array, count:', ticketsList.length);
       } else if (response && response.results && Array.isArray(response.results)) {
         ticketsList = response.results;
-        console.log('[Admin Support] Response is paginated, count:', response.count);
+        console.log('[Admin Support] ✅ Response is paginated');
+        console.log('[Admin Support] Total count:', response.count);
+        console.log('[Admin Support] Results count:', ticketsList.length);
+        console.log('[Admin Support] Next page:', response.next);
+        console.log('[Admin Support] Previous page:', response.previous);
       } else if (response && response.tickets && Array.isArray(response.tickets)) {
         ticketsList = response.tickets;
-        console.log('[Admin Support] Response has tickets key');
+        console.log('[Admin Support] ✅ Response has tickets key, count:', ticketsList.length);
       } else if (response && response.data && Array.isArray(response.data)) {
         ticketsList = response.data;
-        console.log('[Admin Support] Response has data key');
+        console.log('[Admin Support] ✅ Response has data key, count:', ticketsList.length);
       } else {
-        console.warn('[Admin Support] Unknown response format:', response);
+        console.warn('[Admin Support] ⚠️ Unknown response format:', response);
+        console.warn('[Admin Support] Response structure:', JSON.stringify(response, null, 2));
       }
       
-      console.log('[Admin Support] Parsed tickets list:', ticketsList.length, 'tickets');
+      console.log('[Admin Support] ====== PARSED RESULT ======');
+      console.log('[Admin Support] Final tickets list length:', ticketsList.length);
       if (ticketsList.length > 0) {
         console.log('[Admin Support] First ticket:', ticketsList[0]);
+        console.log('[Admin Support] First ticket keys:', Object.keys(ticketsList[0]));
+      } else {
+        console.warn('[Admin Support] ⚠️ NO TICKETS FOUND IN RESPONSE');
+        console.warn('[Admin Support] This might mean:');
+        console.warn('[Admin Support] 1. Admin user doesn\'t have correct permissions');
+        console.warn('[Admin Support] 2. No tickets exist in database');
+        console.warn('[Admin Support] 3. API is filtering tickets incorrectly');
       }
       setTickets(ticketsList);
     } catch (error: any) {
+      console.error('[Admin Support] ====== ERROR ======');
       console.error('[Admin Support] Failed to load tickets:', error);
       console.error('[Admin Support] Error type:', typeof error);
       console.error('[Admin Support] Error keys:', Object.keys(error || {}));
       if (error.response) {
         console.error('[Admin Support] Error response status:', error.response.status);
+        console.error('[Admin Support] Error response statusText:', error.response.statusText);
         console.error('[Admin Support] Error response data:', error.response.data);
       }
       if (error.message) {
