@@ -181,14 +181,19 @@ class TicketResponseSerializer(serializers.ModelSerializer):
     
     author_name = serializers.CharField(source='author.get_full_name', read_only=True)
     author_email = serializers.CharField(source='author.email', read_only=True)
+    is_staff = serializers.SerializerMethodField()  # Map response_type to is_staff for frontend compatibility
     
     class Meta:
         model = TicketResponse
         fields = [
             'id', 'ticket', 'author', 'author_name', 'author_email', 'message',
-            'response_type', 'is_internal', 'created_at'
+            'response_type', 'is_staff', 'is_internal', 'created_at'
         ]
         read_only_fields = ['id', 'created_at']
+    
+    def get_is_staff(self, obj):
+        """Map response_type to is_staff for frontend compatibility"""
+        return obj.response_type == 'staff'
 
 
 class TicketResponseCreateSerializer(serializers.ModelSerializer):
@@ -237,14 +242,15 @@ class SupportTicketListSerializer(serializers.ModelSerializer):
     """Simplified serializer for ticket lists"""
     
     user_name = serializers.CharField(source='user.get_full_name', read_only=True)
+    user_email = serializers.CharField(source='user.email', read_only=True)
     assigned_to_name = serializers.CharField(source='assigned_to.get_full_name', read_only=True)
     age_days = serializers.IntegerField(read_only=True)
     
     class Meta:
         model = SupportTicket
         fields = [
-            'id', 'ticket_number', 'title', 'category', 'priority', 'status',
-            'user_name', 'assigned_to_name', 'created_at', 'age_days'
+            'id', 'ticket_number', 'title', 'description', 'category', 'priority', 'status',
+            'user_name', 'user_email', 'assigned_to_name', 'created_at', 'updated_at', 'age_days'
         ]
 
 

@@ -154,7 +154,8 @@ def ticket_detail(request, ticket_id):
             responses_data.append({
                 'id': str(response.id),
                 'message': response.message,
-                'is_staff': response.is_staff,
+                'is_staff': response.response_type == 'staff',  # Map response_type to is_staff for frontend compatibility
+                'response_type': response.response_type,
                 'created_at': response.created_at.isoformat()
             })
         
@@ -198,12 +199,13 @@ def add_ticket_response(request, ticket_id):
                 status=status.HTTP_400_BAD_REQUEST
             )
         
-        # Create response
+        # Create response - TicketResponse model uses 'author' and 'response_type', not 'user' and 'is_staff'
         response = TicketResponse.objects.create(
             ticket=ticket,
+            author=user,
             message=message,
-            is_staff=False,
-            user=user
+            response_type='customer',
+            is_internal=False
         )
         
         # Update ticket status if it was closed
@@ -216,7 +218,8 @@ def add_ticket_response(request, ticket_id):
             'response': {
                 'id': str(response.id),
                 'message': response.message,
-                'is_staff': response.is_staff,
+                'is_staff': response.response_type == 'staff',  # Map response_type to is_staff for frontend compatibility
+                'response_type': response.response_type,
                 'created_at': response.created_at.isoformat()
             }
         })
