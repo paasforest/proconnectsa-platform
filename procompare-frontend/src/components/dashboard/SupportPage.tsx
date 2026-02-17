@@ -125,9 +125,10 @@ const SupportPage = () => {
       
       // Show success message
       setSuccessMessage('Ticket created successfully!');
+      const ticketData = response.ticket || response;
       setSuccessDetails({
-        ticketId: response.id || response.ticket_id || response.ticket_number || `TICKET-${Date.now()}`,
-        timestamp: response.created_at || new Date().toISOString()
+        ticketId: ticketData.id || response.id || response.ticket_id || response.ticket_number || `TICKET-${Date.now()}`,
+        timestamp: ticketData.created_at || response.created_at || new Date().toISOString()
       });
       
       setTimeout(() => {
