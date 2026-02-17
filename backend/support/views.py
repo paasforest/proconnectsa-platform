@@ -83,18 +83,32 @@ class SupportTicketListCreateView(generics.ListCreateAPIView):
         # Debug logging
         import logging
         logger = logging.getLogger(__name__)
-        logger.info(f"SupportTicketListCreateView.get_queryset: user={user.email}, is_staff={user.is_staff}, user_type={getattr(user, 'user_type', None)}")
+        logger.info(f"SupportTicketListCreateView.get_queryset: user={user.email if hasattr(user, 'email') else 'Anonymous'}, is_staff={user.is_staff if hasattr(user, 'is_staff') else False}, user_type={getattr(user, 'user_type', None)}, is_authenticated={user.is_authenticated if hasattr(user, 'is_authenticated') else False}")
+        
+        # Check if user is authenticated
+        if not user.is_authenticated:
+            logger.warning("User is not authenticated - returning empty queryset")
+            return SupportTicket.objects.none()
         
         # Admin and staff users can see all tickets
-        if user.is_staff or getattr(user, 'user_type', None) in ['admin', 'support']:
+        user_type = getattr(user, 'user_type', None)
+        is_admin_or_staff = user.is_staff or user_type in ['admin', 'support']
+        
+        logger.info(f"User type check: is_staff={user.is_staff}, user_type={user_type}, is_admin_or_staff={is_admin_or_staff}")
+        
+        if is_admin_or_staff:
             # Staff/admin can see all tickets
             queryset = SupportTicket.objects.all().order_by('-created_at')
-            logger.info(f"Admin/staff user - returning all tickets: {queryset.count()} tickets")
+            count = queryset.count()
+            logger.info(f"✅ Admin/staff user - returning all tickets: {count} tickets")
+            if count > 0:
+                logger.info(f"   First ticket: {queryset.first().title} by {queryset.first().user.email if queryset.first().user else 'No user'}")
             return queryset
         else:
             # Users can only see their own tickets
             queryset = SupportTicket.objects.filter(user=user).order_by('-created_at')
-            logger.info(f"Regular user - returning own tickets: {queryset.count()} tickets")
+            count = queryset.count()
+            logger.info(f"Regular user - returning own tickets: {count} tickets")
             return queryset
 
 

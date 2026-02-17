@@ -47,11 +47,21 @@ export default function AdminSupportDashboard() {
   const [priorityFilter, setPriorityFilter] = useState('all');
 
   const loadTickets = async () => {
+    if (!token) {
+      console.error('[Admin Support] ❌ No token available');
+      setLoading(false);
+      return;
+    }
+
     try {
       setLoading(true);
       console.log('[Admin Support] ====== FETCHING TICKETS ======');
       console.log('[Admin Support] Token exists:', !!token);
       console.log('[Admin Support] Token value:', token ? `${token.substring(0, 20)}...` : 'null');
+      
+      // CRITICAL: Set token before making request
+      apiClient.setToken(token);
+      console.log('[Admin Support] Token set in apiClient');
       
       // Try fetching with explicit page parameter to avoid pagination issues
       const response = await apiClient.get('/api/support/tickets/?page=1&page_size=100');
