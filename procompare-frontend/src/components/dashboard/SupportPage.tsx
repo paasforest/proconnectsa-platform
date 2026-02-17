@@ -107,9 +107,9 @@ const SupportPage = () => {
       apiClient.setToken(token);
       console.log('Creating ticket with data:', newTicket);
       
-      // Use the support app endpoint which is at /api/support/tickets/
-      const response = await apiClient.post('/api/support/tickets/', {
-        title: newTicket.title.trim(),  // Support app expects 'title'
+      // Use the users support endpoint at /api/auth/support/create/ (works correctly)
+      const response = await apiClient.post('/api/auth/support/create/', {
+        title: newTicket.title.trim(),  // Backend accepts 'title' and maps to model
         description: newTicket.description.trim(),
         category: newTicket.category,
         priority: newTicket.priority

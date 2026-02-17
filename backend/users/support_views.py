@@ -76,14 +76,15 @@ def create_ticket(request):
     try:
         user = request.user
         
-        subject = request.data.get('subject')
+        # Accept both 'title' and 'subject' for compatibility
+        subject = request.data.get('subject') or request.data.get('title')
         description = request.data.get('description')
         category = request.data.get('category', 'general')
         priority = request.data.get('priority', 'medium')
         
         if not subject or not description:
             return Response(
-                {'error': 'Subject and description are required'}, 
+                {'error': 'Title/subject and description are required'}, 
                 status=status.HTTP_400_BAD_REQUEST
             )
         
