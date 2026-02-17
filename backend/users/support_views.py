@@ -160,7 +160,8 @@ def ticket_detail(request, ticket_id):
         return Response({
             'ticket': {
                 'id': str(ticket.id),
-                'subject': ticket.subject,
+                'subject': ticket.title,  # Map 'title' to 'subject' for frontend
+                'title': ticket.title,  # Also include 'title'
                 'description': ticket.description,
                 'status': ticket.status,
                 'priority': ticket.priority,
