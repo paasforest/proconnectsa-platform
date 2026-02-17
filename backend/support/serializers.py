@@ -241,9 +241,9 @@ class SupportMetricsSerializer(serializers.ModelSerializer):
 class SupportTicketListSerializer(serializers.ModelSerializer):
     """Simplified serializer for ticket lists"""
     
-    user_name = serializers.CharField(source='user.get_full_name', read_only=True)
-    user_email = serializers.CharField(source='user.email', read_only=True)
-    assigned_to_name = serializers.CharField(source='assigned_to.get_full_name', read_only=True)
+    user_name = serializers.SerializerMethodField()
+    user_email = serializers.SerializerMethodField()
+    assigned_to_name = serializers.SerializerMethodField()
     age_days = serializers.IntegerField(read_only=True)
     
     class Meta:
@@ -252,6 +252,22 @@ class SupportTicketListSerializer(serializers.ModelSerializer):
             'id', 'ticket_number', 'title', 'description', 'category', 'priority', 'status',
             'user_name', 'user_email', 'assigned_to_name', 'created_at', 'updated_at', 'age_days'
         ]
+    
+    def get_user_name(self, obj):
+        """Safely get user full name"""
+        if obj.user:
+            return obj.user.get_full_name() or f"{obj.user.first_name} {obj.user.last_name}".strip() or obj.user.email
+        return None
+    
+    def get_user_email(self, obj):
+        """Safely get user email"""
+        return obj.user.email if obj.user else None
+    
+    def get_assigned_to_name(self, obj):
+        """Safely get assigned to name"""
+        if obj.assigned_to:
+            return obj.assigned_to.get_full_name() or f"{obj.assigned_to.first_name} {obj.assigned_to.last_name}".strip() or obj.assigned_to.email
+        return None
 
 
 class SupportTicketStatsSerializer(serializers.Serializer):
