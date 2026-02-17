@@ -80,13 +80,22 @@ class SupportTicketListCreateView(generics.ListCreateAPIView):
         """Filter tickets based on user permissions"""
         user = self.request.user
         
+        # Debug logging
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.info(f"SupportTicketListCreateView.get_queryset: user={user.email}, is_staff={user.is_staff}, user_type={getattr(user, 'user_type', None)}")
+        
         # Admin and staff users can see all tickets
         if user.is_staff or getattr(user, 'user_type', None) in ['admin', 'support']:
             # Staff/admin can see all tickets
-            return SupportTicket.objects.all().order_by('-created_at')
+            queryset = SupportTicket.objects.all().order_by('-created_at')
+            logger.info(f"Admin/staff user - returning all tickets: {queryset.count()} tickets")
+            return queryset
         else:
             # Users can only see their own tickets
-            return SupportTicket.objects.filter(user=user).order_by('-created_at')
+            queryset = SupportTicket.objects.filter(user=user).order_by('-created_at')
+            logger.info(f"Regular user - returning own tickets: {queryset.count()} tickets")
+            return queryset
 
 
 class SupportTicketDetailView(generics.RetrieveUpdateDestroyAPIView):
