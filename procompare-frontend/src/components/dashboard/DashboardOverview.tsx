@@ -54,6 +54,7 @@ const DashboardOverview = () => {
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
+  const [premiumStatus, setPremiumStatus] = useState<any>(null);
   const { user, token } = useAuth();
   const router = useRouter();
 
@@ -124,6 +125,24 @@ const DashboardOverview = () => {
           province: user?.province || '',
           subscription_tier: 'basic'
         });
+        
+        // Fetch premium status if provider
+        if (user?.user_type === 'provider' && token) {
+          try {
+            const premiumResponse = await fetch('/api/backend-proxy/auth/premium-status/', {
+              headers: {
+                'Authorization': `Token ${token}`,
+                'Content-Type': 'application/json'
+              }
+            });
+            if (premiumResponse.ok) {
+              const premiumData = await premiumResponse.json();
+              setPremiumStatus(premiumData.data || premiumData);
+            }
+          } catch (error) {
+            console.error('Failed to fetch premium status:', error);
+          }
+        }
       } catch (error) {
         console.error('Error fetching dashboard data:', error);
         // Show clean data for new users on error
