@@ -323,8 +323,45 @@ const SupportPage = () => {
         </div>
       )}
 
-      {/* Quick Help */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+      {/* WhatsApp Support - Prominent */}
+      <div className="mb-8 bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg border-2 border-green-200 p-6">
+        <div className="flex items-start">
+          <div className="flex-shrink-0">
+            <div className="p-3 bg-green-500 rounded-full">
+              <MessageSquare className="w-8 h-8 text-white" />
+            </div>
+          </div>
+          <div className="ml-4 flex-1">
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">
+              Quick Support via WhatsApp
+            </h2>
+            <p className="text-gray-700 mb-4">
+              For quick questions and immediate assistance, message us on WhatsApp. We typically respond within a few minutes during business hours.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-3">
+              <a
+                href="https://wa.me/27679518124"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center justify-center px-6 py-3 bg-green-500 hover:bg-green-600 text-white font-semibold rounded-lg transition-colors shadow-md hover:shadow-lg"
+              >
+                <MessageSquare className="w-5 h-5 mr-2" />
+                Chat on WhatsApp
+              </a>
+              <div className="flex items-center text-sm text-gray-600">
+                <Phone className="w-4 h-4 mr-2" />
+                <span>+27 67 951 8124</span>
+                <span className="mx-2">•</span>
+                <Clock className="w-4 h-4 mr-2" />
+                <span>Mon-Fri: 8am-6pm</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Other Support Options */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
           <div className="flex items-center mb-4">
             <div className="p-2 bg-blue-100 rounded-lg">
@@ -340,29 +377,18 @@ const SupportPage = () => {
 
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
           <div className="flex items-center mb-4">
-            <div className="p-2 bg-green-100 rounded-lg">
-              <Phone className="w-6 h-6 text-green-600" />
+            <div className="p-2 bg-gray-100 rounded-lg">
+              <Mail className="w-6 h-6 text-gray-600" />
             </div>
-            <h3 className="text-lg font-semibold text-gray-900 ml-3">Contact Us</h3>
+            <h3 className="text-lg font-semibold text-gray-900 ml-3">Email Support</h3>
           </div>
-          <p className="text-gray-600 mb-4">Get in touch with our support team</p>
-          <div className="space-y-2 text-sm text-gray-600">
-            <p>📞 +27 67 951 8124</p>
-            <p>✉️ support@proconnectsa.co.za</p>
-          </div>
-        </div>
-
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-          <div className="flex items-center mb-4">
-            <div className="p-2 bg-purple-100 rounded-lg">
-              <MessageSquare className="w-6 h-6 text-purple-600" />
-            </div>
-            <h3 className="text-lg font-semibold text-gray-900 ml-3">Live Chat</h3>
-          </div>
-          <p className="text-gray-600 mb-4">Chat with support in real-time</p>
-          <button className="text-purple-600 hover:text-purple-700 font-medium">
-            Start Chat
-          </button>
+          <p className="text-gray-600 mb-4">Send us an email for detailed inquiries</p>
+          <a 
+            href="mailto:support@proconnectsa.co.za"
+            className="text-gray-700 hover:text-gray-900 font-medium"
+          >
+            support@proconnectsa.co.za
+          </a>
         </div>
       </div>
 
