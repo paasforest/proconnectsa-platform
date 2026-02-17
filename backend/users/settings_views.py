@@ -482,7 +482,7 @@ def request_premium_listing(request):
             # Use defaults already set above
         
         # Create deposit request for premium payment
-        from backend.payments.models import DepositRequest
+        from backend.payments.models import DepositRequest, TransactionStatus
         from backend.payments.payment_service import PaymentService
         
         try:
@@ -499,22 +499,40 @@ def request_premium_listing(request):
         # Create deposit request with PREMIUM reference
         # NOTE: bank_reference should be None initially - it's only set when payment is detected
         try:
+            from decimal import Decimal
+            
+            # Ensure amount is Decimal
+            amount_decimal = Decimal(str(amount))
+            
+            # Ensure account exists and is valid
+            if not account:
+                raise ValueError("Payment account is None")
+            
+            # Create deposit request
             deposit_request = DepositRequest.objects.create(
                 account=account,
-                amount=amount,
-                bank_reference=None,  # Only set when payment is actually detected from bank
+                amount=amount_decimal,
+                bank_reference='',  # Empty string instead of None (CharField doesn't accept None)
                 reference_number=reference_number,  # This is what provider uses when making payment
-                customer_code=customer_code,
+                customer_code=customer_code or '',  # Ensure not None
                 credits_to_activate=0,  # Premium doesn't give credits, it gives free leads
-                status='pending',
+                status=TransactionStatus.PENDING,  # Use enum value
                 verification_notes=f'Premium listing request - {plan_type} plan'
             )
+            
+            logger.info(f"Successfully created deposit request {deposit_request.id} for premium listing")
+            
         except Exception as e:
+            import traceback
+            error_trace = traceback.format_exc()
             logger.error(f"Error creating deposit request: {str(e)}")
+            logger.error(f"Traceback: {error_trace}")
+            logger.error(f"Account: {account}, Amount: {amount}, Type: {type(amount)}")
             return Response({
                 'success': False,
                 'error': 'Failed to create deposit request',
-                'message': str(e)
+                'message': str(e),
+                'details': f'Account: {account.id if account else "None"}, Amount: {amount}'
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         
         # Instructions for user
