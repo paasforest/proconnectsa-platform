@@ -176,6 +176,28 @@ const DashboardOverview = () => {
     if (user) {
       fetchDashboardData();
     }
+    
+    // Auto-refresh premium status every 30 seconds if provider
+    if (user?.user_type === 'provider' && token) {
+      const premiumInterval = setInterval(async () => {
+        try {
+          const premiumResponse = await fetch('/api/backend-proxy/auth/premium-status/', {
+            headers: {
+              'Authorization': `Token ${token}`,
+              'Content-Type': 'application/json'
+            }
+          });
+          if (premiumResponse.ok) {
+            const premiumData = await premiumResponse.json();
+            setPremiumStatus(premiumData.data || premiumData);
+          }
+        } catch (error) {
+          console.error('Failed to refresh premium status:', error);
+        }
+      }, 30000); // Every 30 seconds
+      
+      return () => clearInterval(premiumInterval);
+    }
   }, [user, token]);
 
   if (loading) {
