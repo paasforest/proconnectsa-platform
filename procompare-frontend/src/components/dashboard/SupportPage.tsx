@@ -68,10 +68,10 @@ const SupportPage = () => {
       try {
         setLoading(true);
         apiClient.setToken(token);
-        // Use the support app endpoint which is at /api/support/tickets/
-        const response = await apiClient.get('/api/support/tickets/');
-        // Handle paginated response (results) or direct array
-        const ticketsList = response.results || (Array.isArray(response) ? response : []);
+        // Use the users support endpoint at /api/auth/support/ (works and is simpler)
+        const response = await apiClient.get('/api/auth/support/');
+        // Handle response structure: {tickets: [...], total: N}
+        const ticketsList = response.tickets || response.results || (Array.isArray(response) ? response : []);
         setTickets(ticketsList);
       } catch (error: any) {
         console.error('Error fetching tickets:', error);
@@ -118,7 +118,7 @@ const SupportPage = () => {
       console.log('Ticket created successfully:', response);
       
       // Refresh tickets list
-      const ticketsResponse = await apiClient.get('/api/support/tickets/');
+      const ticketsResponse = await apiClient.get('/api/auth/support/');
       setTickets(ticketsResponse.tickets || ticketsResponse.results || ticketsResponse || []);
       
       // Reset form
@@ -208,8 +208,8 @@ const SupportPage = () => {
       if (token) {
         apiClient.setToken(token);
       }
-      // Use the support app endpoint for responses
-      const response = await apiClient.post(`/api/support/tickets/${ticketId}/responses/`, {
+      // Use the users support endpoint for responses
+      const response = await apiClient.post(`/api/auth/support/${ticketId}/respond/`, {
         message: newResponse
       });
       

@@ -44,7 +44,8 @@ def support_tickets(request):
             
             tickets_data.append({
                 'id': str(ticket.id),
-                'subject': ticket.subject,
+                'subject': ticket.title,  # Map 'title' from model to 'subject' for frontend compatibility
+                'title': ticket.title,  # Also include 'title' for consistency
                 'description': ticket.description,
                 'status': ticket.status,
                 'priority': ticket.priority,
@@ -102,21 +103,23 @@ def create_ticket(request):
                 status=status.HTTP_400_BAD_REQUEST
             )
         
-        # Create ticket
+        # Create ticket - SupportTicket model uses 'title' not 'subject'
         ticket = SupportTicket.objects.create(
             user=user,
-            subject=subject,
+            title=subject,  # Map 'subject' from request to 'title' field in model
             description=description,
             category=category,
             priority=priority,
-            status='open'
+            status='open',
+            user_type='provider' if hasattr(user, 'provider_profile') else 'client'
         )
         
         return Response({
             'success': True,
             'ticket': {
                 'id': str(ticket.id),
-                'subject': ticket.subject,
+                'subject': ticket.title,  # Map 'title' to 'subject' for frontend
+                'title': ticket.title,  # Also include 'title'
                 'description': ticket.description,
                 'status': ticket.status,
                 'priority': ticket.priority,
