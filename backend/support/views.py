@@ -80,12 +80,13 @@ class SupportTicketListCreateView(generics.ListCreateAPIView):
         """Filter tickets based on user permissions"""
         user = self.request.user
         
-        if user.is_staff:
-            # Staff can see all tickets
-            return SupportTicket.objects.all()
+        # Admin and staff users can see all tickets
+        if user.is_staff or getattr(user, 'user_type', None) in ['admin', 'support']:
+            # Staff/admin can see all tickets
+            return SupportTicket.objects.all().order_by('-created_at')
         else:
             # Users can only see their own tickets
-            return SupportTicket.objects.filter(user=user)
+            return SupportTicket.objects.filter(user=user).order_by('-created_at')
 
 
 class SupportTicketDetailView(generics.RetrieveUpdateDestroyAPIView):
@@ -102,7 +103,8 @@ class SupportTicketDetailView(generics.RetrieveUpdateDestroyAPIView):
         """Filter tickets based on user permissions"""
         user = self.request.user
         
-        if user.is_staff:
+        # Admin and staff users can see all tickets
+        if user.is_staff or getattr(user, 'user_type', None) in ['admin', 'support']:
             return SupportTicket.objects.all()
         else:
             return SupportTicket.objects.filter(user=user)
