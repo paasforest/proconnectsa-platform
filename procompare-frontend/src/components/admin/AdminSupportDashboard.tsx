@@ -49,7 +49,9 @@ export default function AdminSupportDashboard() {
   const loadTickets = async () => {
     try {
       setLoading(true);
+      console.log('[Admin Support] Fetching tickets from /api/support/tickets/');
       const response = await apiClient.get('/api/support/tickets/');
+      console.log('[Admin Support] Raw response:', response);
       
       // Handle different response formats:
       // - Paginated: { results: [...], count: N }
@@ -66,9 +68,11 @@ export default function AdminSupportDashboard() {
         ticketsList = response.data;
       }
       
+      console.log('[Admin Support] Parsed tickets list:', ticketsList.length, 'tickets');
       setTickets(ticketsList);
-    } catch (error) {
-      console.error('Failed to load tickets:', error);
+    } catch (error: any) {
+      console.error('[Admin Support] Failed to load tickets:', error);
+      console.error('[Admin Support] Error details:', error.response?.data || error.message);
       setTickets([]); // Set empty array on error
     } finally {
       setLoading(false);
@@ -264,7 +268,30 @@ export default function AdminSupportDashboard() {
         </div>
         
         <div className="divide-y divide-gray-200">
-          {filteredTickets.map((ticket) => (
+          {loading ? (
+            <div className="p-6 text-center">
+              <div className="animate-pulse space-y-4">
+                <div className="h-4 bg-gray-200 rounded w-3/4 mx-auto"></div>
+                <div className="h-4 bg-gray-200 rounded w-1/2 mx-auto"></div>
+              </div>
+              <p className="mt-4 text-gray-500">Loading tickets...</p>
+            </div>
+          ) : filteredTickets.length === 0 ? (
+            <div className="p-6 text-center">
+              <MessageCircle className="w-12 h-12 text-gray-300 mx-auto mb-4" />
+              <p className="text-gray-500 mb-2">
+                {tickets.length === 0 
+                  ? 'No support tickets found. Tickets created by providers will appear here.'
+                  : 'No tickets match your filters.'}
+              </p>
+              {tickets.length === 0 && (
+                <p className="text-sm text-gray-400 mt-2">
+                  Make sure you're logged in as an admin user with staff permissions.
+                </p>
+              )}
+            </div>
+          ) : (
+            filteredTickets.map((ticket) => (
             <div key={ticket.id} className="p-6 hover:bg-gray-50">
               <div className="flex items-start justify-between">
                 <div className="flex-1">
@@ -311,18 +338,7 @@ export default function AdminSupportDashboard() {
                 </div>
               </div>
             </div>
-          ))}
-          
-          {filteredTickets.length === 0 && (
-            <div className="p-12 text-center">
-              <MessageCircle className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 mb-2">No tickets found</h3>
-              <p className="text-gray-500">
-                {searchTerm || statusFilter !== 'all' || priorityFilter !== 'all'
-                  ? 'Try adjusting your search or filters'
-                  : 'No support tickets available'}
-              </p>
-            </div>
+            ))
           )}
         </div>
       </div>

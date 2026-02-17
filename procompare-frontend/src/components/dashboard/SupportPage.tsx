@@ -117,7 +117,11 @@ const SupportPage = () => {
       
       console.log('Ticket created successfully:', response);
       
-      // Show success message FIRST (before closing modal)
+      // Reset form and close modal FIRST
+      setNewTicket({ title: '', description: '', category: 'general', priority: 'medium' });
+      setShowNewTicketModal(false);
+      
+      // Show success message AFTER modal closes (so it's visible)
       const ticketData = response.ticket || response;
       setSuccessMessage('Ticket created successfully!');
       setSuccessDetails({
@@ -125,19 +129,20 @@ const SupportPage = () => {
         timestamp: ticketData.created_at || response.created_at || new Date().toISOString()
       });
       
-      // Reset form
-      setNewTicket({ title: '', description: '', category: 'general', priority: 'medium' });
-      setShowNewTicketModal(false);
-      
       // Refresh tickets list
-      const ticketsResponse = await apiClient.get('/api/auth/support/');
-      setTickets(ticketsResponse.tickets || ticketsResponse.results || ticketsResponse || []);
+      try {
+        const ticketsResponse = await apiClient.get('/api/auth/support/');
+        setTickets(ticketsResponse.tickets || ticketsResponse.results || ticketsResponse || []);
+      } catch (refreshError) {
+        console.error('Failed to refresh tickets list:', refreshError);
+        // Don't fail the whole operation if refresh fails
+      }
       
-      // Keep success message visible longer (10 seconds instead of 5)
+      // Keep success message visible longer (15 seconds)
       setTimeout(() => {
         setSuccessMessage('');
         setSuccessDetails(null);
-      }, 10000);
+      }, 15000);
     } catch (error: any) {
       console.error('Failed to create ticket - Full error:', error);
       console.error('Error type:', typeof error);
