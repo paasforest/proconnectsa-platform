@@ -72,7 +72,7 @@ const SettingsPage = () => {
     confirm_password: ''
   });
   const [showPassword, setShowPassword] = useState(false);
-  const [message, setMessage] = useState<{type: 'success' | 'error' | 'info', text: string} | null>(null);
+  const [message, setMessage] = useState<{type: 'success' | 'error' | 'info' | 'warning', text: string} | null>(null);
   const [verificationStatus, setVerificationStatus] = useState<string>('');
   const [verificationDocs, setVerificationDocs] = useState<Record<string, Array<{url: string; path: string; uploaded_at: string}>>>({});
   const [docType, setDocType] = useState<string>('id_document');
@@ -391,20 +391,89 @@ const SettingsPage = () => {
   };
 
   const handleCheckPremiumPayment = async () => {
+    if (!token) {
+      setMessage({ type: 'error', text: 'Please log in to check payment status' });
+      return;
+    }
+    
     setLoadingPremium(true);
     try {
-      await fetchPremiumStatus();
-      if (premiumStatus?.premium_status === 'active') {
-        setMessage({ type: 'success', text: '✅ Premium listing activated successfully!' });
+      // Fetch fresh status from API
+      apiClient.setToken(token);
+      const response = await fetch('/api/backend-proxy/auth/premium-status/', {
+        headers: {
+          'Authorization': `Token ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+      
+      const data = await response.json();
+      const statusData = data.data || data;
+      
+      // Update state with fresh data
+      setPremiumStatus(statusData);
+      setIsPremiumActive(statusData.premium_listing?.is_active || false);
+      
+      // Update premiumDetails if there's a pending request
+      if (statusData.deposit) {
+        setPremiumDetails({
+          reference_number: statusData.deposit.reference_number,
+          amount: statusData.deposit.amount,
+          plan_type: statusData.deposit.plan_type,
+          customer_code: user?.customer_code
+        });
+      }
+      
+      // Show appropriate message based on status
+      if (statusData.premium_listing?.is_active) {
+        setMessage({ 
+          type: 'success', 
+          text: '🎉 Premium listing is ACTIVE! You can now access unlimited free leads.' 
+        });
         setPremiumDetails(null);
-      } else if (premiumStatus?.deposit?.payment_verified) {
-        setMessage({ type: 'info', text: 'Payment verified! Premium activation is pending admin approval.' });
+      } else if (statusData.deposit?.payment_verified) {
+        setMessage({ 
+          type: 'info', 
+          text: '✅ Payment verified! Your payment has been detected. Admin will approve your premium listing within 24 hours. You\'ll receive an email when it\'s activated.' 
+        });
+      } else if (statusData.deposit) {
+        // Payment not yet verified
+        const hoursAgo = statusData.deposit.created_at 
+          ? Math.round((Date.now() - new Date(statusData.deposit.created_at).getTime()) / (1000 * 60 * 60))
+          : 0;
+        
+        if (hoursAgo < 1) {
+          setMessage({ 
+            type: 'info', 
+            text: '⏳ Payment status: Pending. If you just made the payment, it may take up to 5 minutes to be detected automatically. Please check again in a few minutes.' 
+          });
+        } else if (hoursAgo < 24) {
+          setMessage({ 
+            type: 'info', 
+            text: `⏳ Payment status: Still pending verification. Your request was made ${hoursAgo} hour${hoursAgo > 1 ? 's' : ''} ago. Payment detection can take up to 5 minutes (auto) or 24 hours (manual). Please check again later.` 
+          });
+        } else {
+          setMessage({ 
+            type: 'warning', 
+            text: `⚠️ Payment status: Still pending after ${Math.round(hoursAgo / 24)} day${Math.round(hoursAgo / 24) > 1 ? 's' : ''}. If you have already made the payment, please contact support at support@proconnectsa.co.za with your reference number: ${statusData.deposit.reference_number}` 
+          });
+        }
       } else {
-        setMessage({ type: 'info', text: 'Payment is still pending verification. Please check again later or contact support if payment was made more than 24 hours ago.' });
+        setMessage({ 
+          type: 'info', 
+          text: 'No premium request found. If you just created a request, please refresh the page.' 
+        });
       }
     } catch (error: any) {
       console.error('Failed to check premium payment:', error);
-      setMessage({ type: 'error', text: error.message || 'Failed to check payment status. Please try again.' });
+      setMessage({ 
+        type: 'error', 
+        text: `Failed to check payment status: ${error.message || 'Please try again or contact support if the issue persists.'}` 
+      });
     } finally {
       setLoadingPremium(false);
     }
@@ -433,19 +502,38 @@ const SettingsPage = () => {
         <p className="text-gray-600 mt-2">Manage your profile and account settings</p>
       </div>
 
-      {/* Message */}
+      {/* Message - Enhanced with better visibility and close button */}
       {message && (
-        <div className={`mb-6 p-4 rounded-lg flex items-center ${
+        <div className={`mb-6 p-4 rounded-lg flex items-start shadow-lg ${
           message.type === 'success' 
-            ? 'bg-green-50 text-green-800 border border-green-200' 
-            : 'bg-red-50 text-red-800 border border-red-200'
+            ? 'bg-green-50 text-green-900 border-2 border-green-400' 
+            : message.type === 'info'
+            ? 'bg-blue-50 text-blue-900 border-2 border-blue-400'
+            : message.type === 'warning'
+            ? 'bg-yellow-50 text-yellow-900 border-2 border-yellow-400'
+            : 'bg-red-50 text-red-900 border-2 border-red-400'
         }`}>
-          {message.type === 'success' ? (
-            <CheckCircle className="w-5 h-5 mr-2" />
-          ) : (
-            <AlertCircle className="w-5 h-5 mr-2" />
-          )}
-          {message.text}
+          <div className="flex-shrink-0 mr-3 mt-0.5">
+            {message.type === 'success' ? (
+              <CheckCircle className="w-6 h-6 text-green-600" />
+            ) : message.type === 'info' ? (
+              <AlertCircle className="w-6 h-6 text-blue-600" />
+            ) : message.type === 'warning' ? (
+              <AlertCircle className="w-6 h-6 text-yellow-600" />
+            ) : (
+              <AlertCircle className="w-6 h-6 text-red-600" />
+            )}
+          </div>
+          <div className="flex-1">
+            <p className="font-semibold text-base leading-relaxed">{message.text}</p>
+          </div>
+          <button
+            onClick={() => setMessage(null)}
+            className="ml-3 flex-shrink-0 text-gray-400 hover:text-gray-600 transition-colors"
+            aria-label="Close message"
+          >
+            <XCircle className="w-5 h-5" />
+          </button>
         </div>
       )}
 
@@ -1074,11 +1162,16 @@ const SettingsPage = () => {
                         <button
                           onClick={handleCheckPremiumPayment}
                           disabled={loadingPremium}
-                          className="mt-3 w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 flex items-center justify-center gap-2"
+                          className="mt-3 w-full px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 flex items-center justify-center gap-2 font-semibold shadow-md hover:shadow-lg transition-all"
                         >
-                          <RefreshCw className={`w-4 h-4 ${loadingPremium ? 'animate-spin' : ''}`} />
-                          {loadingPremium ? 'Checking...' : 'Check Payment Status'}
+                          <RefreshCw className={`w-5 h-5 ${loadingPremium ? 'animate-spin' : ''}`} />
+                          {loadingPremium ? 'Checking Payment Status...' : 'Check Payment Status'}
                         </button>
+                        {!loadingPremium && (
+                          <p className="text-xs text-gray-500 mt-2 text-center">
+                            💡 Click to refresh and check the latest payment status
+                          </p>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -1200,11 +1293,16 @@ const SettingsPage = () => {
                       <button
                         onClick={handleCheckPremiumPayment}
                         disabled={loadingPremium}
-                        className="mt-4 inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50"
+                        className="mt-4 w-full px-4 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 flex items-center justify-center gap-2 font-semibold shadow-md hover:shadow-lg transition-all"
                       >
-                        <CheckCircle className="w-4 h-4 mr-2" />
-                        {loadingPremium ? 'Checking...' : 'Check Payment Status'}
+                        <RefreshCw className={`w-5 h-5 ${loadingPremium ? 'animate-spin' : ''}`} />
+                        {loadingPremium ? 'Checking Payment Status...' : 'Check Payment Status'}
                       </button>
+                      {!loadingPremium && (
+                        <p className="text-xs text-gray-500 mt-2 text-center">
+                          💡 Click to refresh and check the latest payment status
+                        </p>
+                      )}
                     </div>
                   )}
                 </>
