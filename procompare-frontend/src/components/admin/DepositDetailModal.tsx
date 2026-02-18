@@ -24,7 +24,7 @@ const DepositDetailModal: React.FC<DepositDetailModalProps> = ({ depositId, onCl
 
       try {
         setLoading(true);
-        const response = await fetch(`https://api.proconnectsa.co.za/api/users/admin/deposits/${depositId}/`, {
+        const response = await fetch(`https://api.proconnectsa.co.za/api/auth/admin/deposits/${depositId}/`, {
           headers: {
             'Authorization': `Token ${token}`,
             'Content-Type': 'application/json'
@@ -70,7 +70,7 @@ const DepositDetailModal: React.FC<DepositDetailModalProps> = ({ depositId, onCl
       }
 
       // Refresh deposit data
-      const fetchResponse = await fetch(`https://api.proconnectsa.co.za/api/users/admin/deposits/${depositId}/`, {
+      const fetchResponse = await fetch(`https://api.proconnectsa.co.za/api/auth/admin/deposits/${depositId}/`, {
         headers: {
           'Authorization': `Token ${token}`,
           'Content-Type': 'application/json'

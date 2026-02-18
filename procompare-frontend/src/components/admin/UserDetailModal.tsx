@@ -21,7 +21,7 @@ const UserDetailModal: React.FC<UserDetailModalProps> = ({ email, onClose }) => 
 
       try {
         setLoading(true);
-        const response = await fetch(`https://api.proconnectsa.co.za/api/users/admin/users/${encodeURIComponent(email)}/`, {
+        const response = await fetch(`https://api.proconnectsa.co.za/api/auth/admin/users/${encodeURIComponent(email)}/`, {
           headers: {
             'Authorization': `Token ${token}`,
             'Content-Type': 'application/json'

@@ -152,7 +152,7 @@ const TechnicalDashboard = () => {
       // Fetch monitoring data for system uptime
       let systemUptime = 99.9;
       try {
-        const monitoringRes = await apiClient.get('/api/admin/monitoring/dashboard/');
+        const monitoringRes = await apiClient.get('/api/auth/admin/monitoring/dashboard/');
         // System uptime would come from monitoring data if available
         systemUptime = monitoringRes?.system_health?.uptime || 99.9;
       } catch (e) {

@@ -118,7 +118,7 @@ const FinanceDashboard = () => {
         auditData = auditRes;
       } else {
         // Fallback to monitoring API if audit API fails
-        const monitoringRes = await fetch('https://api.proconnectsa.co.za/api/admin/monitoring/dashboard/', {
+        const monitoringRes = await fetch('https://api.proconnectsa.co.za/api/auth/admin/monitoring/dashboard/', {
           headers: { 'Authorization': `Token ${token}` },
         });
         
