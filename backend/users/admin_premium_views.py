@@ -200,6 +200,79 @@ def admin_approve_premium(request, deposit_id):
         
         logger.info(f"Premium listing approved for {provider.business_name} ({deposit.account.user.email})")
         
+        # Send activation email to provider
+        try:
+            from backend.utils.sendgrid_service import sendgrid_service
+            
+            expires_text = 'never expires' if plan_type == 'lifetime' else f"expires on {provider.premium_listing_expires_at.strftime('%B %d, %Y')}"
+            
+            email_subject = "🎉 Your Premium Listing is Now Active!"
+            html_content = f"""
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                <h2 style="color: #10B981;">🎉 Premium Listing Activated!</h2>
+                <p>Hello {deposit.account.user.get_full_name() or deposit.account.user.email},</p>
+                <p><strong>Great news!</strong> Your premium listing has been approved and is now active.</p>
+                
+                <div style="background: #ECFDF5; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #10B981;">
+                    <h3 style="color: #065F46; margin-top: 0;">Premium Details</h3>
+                    <p><strong>Plan:</strong> {plan_type.title()} Premium</p>
+                    <p><strong>Status:</strong> <span style="color: #10B981; font-weight: bold;">ACTIVE</span></p>
+                    <p><strong>Expires:</strong> {expires_text}</p>
+                    <p><strong>Payment Reference:</strong> {deposit.reference_number}</p>
+                </div>
+                
+                <div style="background: #FEF3C7; padding: 15px; border-radius: 8px; margin: 20px 0;">
+                    <h3 style="color: #92400E; margin-top: 0;">✨ What You Get Now:</h3>
+                    <ul style="color: #78350F; padding-left: 20px;">
+                        <li>⭐ <strong>Unlimited FREE leads</strong> (no credit deductions)</li>
+                        <li>✓ Enhanced visibility in public directory</li>
+                        <li>✓ Priority matching for new leads</li>
+                        <li>✓ Featured placement in search results</li>
+                        <li>✓ Premium badge on your profile</li>
+                    </ul>
+                </div>
+                
+                <p>You can now access unlimited leads without using credits. Start browsing available leads in your dashboard!</p>
+                
+                <p style="margin-top: 30px;">Best regards,<br>The ProConnectSA Team</p>
+            </div>
+            """
+            text_content = f"""
+🎉 Premium Listing Activated!
+
+Hello {deposit.account.user.get_full_name() or deposit.account.user.email},
+
+Great news! Your premium listing has been approved and is now active.
+
+Premium Details:
+- Plan: {plan_type.title()} Premium
+- Status: ACTIVE
+- Expires: {expires_text}
+- Payment Reference: {deposit.reference_number}
+
+What You Get Now:
+⭐ Unlimited FREE leads (no credit deductions)
+✓ Enhanced visibility in public directory
+✓ Priority matching for new leads
+✓ Featured placement in search results
+✓ Premium badge on your profile
+
+You can now access unlimited leads without using credits. Start browsing available leads in your dashboard!
+
+Best regards,
+The ProConnectSA Team
+            """
+            
+            sendgrid_service.send_email(
+                deposit.account.user.email,
+                email_subject,
+                html_content,
+                text_content
+            )
+            logger.info(f"Premium activation email sent to {deposit.account.user.email}")
+        except Exception as e:
+            logger.warning(f"Failed to send premium activation email: {str(e)}")
+        
         return Response({
             'success': True,
             'message': f'Premium listing approved and activated ({plan_type} plan)',

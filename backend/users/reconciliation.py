@@ -78,15 +78,66 @@ def _process_deposit_request_match(deposit: DepositRequest, bank_tx: dict):
     # Premium listing deposits: no credits, activate premium listing
     if (deposit.credits_to_activate or 0) == 0 and "premium listing request" in (deposit.verification_notes or "").lower():
         _activate_premium_listing_from_deposit(deposit)
+        
+        # Send payment detected email (waiting for admin approval)
         try:
+            from backend.utils.sendgrid_service import sendgrid_service
+            
+            email_subject = "✅ Premium Payment Detected - Awaiting Admin Approval"
+            html_content = f"""
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                <h2 style="color: #3B82F6;">✅ Payment Detected</h2>
+                <p>Hello {deposit.account.user.get_full_name() or deposit.account.user.email},</p>
+                <p>Great news! Your premium listing payment has been detected and verified.</p>
+                
+                <div style="background: #DBEAFE; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #3B82F6;">
+                    <h3 style="color: #1E40AF; margin-top: 0;">Payment Details</h3>
+                    <p><strong>Amount:</strong> R{deposit.amount:.2f}</p>
+                    <p><strong>Reference:</strong> {ref}</p>
+                    <p><strong>Status:</strong> <span style="color: #10B981; font-weight: bold;">Verified ✅</span></p>
+                </div>
+                
+                <div style="background: #FEF3C7; padding: 15px; border-radius: 8px; margin: 20px 0;">
+                    <h3 style="color: #92400E; margin-top: 0;">⏳ What Happens Next:</h3>
+                    <p style="color: #78350F; margin: 0;">An admin will approve your premium listing within <strong>24 hours</strong>. You'll receive another email when it's activated!</p>
+                </div>
+                
+                <p>You can check your premium status anytime in your dashboard Settings page.</p>
+                
+                <p style="margin-top: 30px;">Best regards,<br>The ProConnectSA Team</p>
+            </div>
+            """
+            text_content = f"""
+✅ Premium Payment Detected - Awaiting Admin Approval
+
+Hello {deposit.account.user.get_full_name() or deposit.account.user.email},
+
+Great news! Your premium listing payment has been detected and verified.
+
+Payment Details:
+- Amount: R{deposit.amount:.2f}
+- Reference: {ref}
+- Status: Verified ✅
+
+What Happens Next:
+An admin will approve your premium listing within 24 hours. You'll receive another email when it's activated!
+
+You can check your premium status anytime in your dashboard Settings page.
+
+Best regards,
+The ProConnectSA Team
+            """
+            
             sendgrid_service.send_email(
                 deposit.account.user.email,
-                "Premium listing activated",
-                f"<p>Your premium listing payment was detected and your premium listing is now active.</p><p>Reference: <strong>{ref}</strong></p>",
-                f"Your premium listing payment was detected and your premium listing is now active.\nReference: {ref}",
+                email_subject,
+                html_content,
+                text_content
             )
+            logger.info(f"Premium payment detected email sent to {deposit.account.user.email}")
         except Exception as e:
-            logger.warning(f"Failed to send premium activation email: {e}")
+            logger.warning(f"Failed to send premium payment detected email: {e}")
+        
         return True
 
     # Credit top-up deposit requests: activate credits in wallet like normal reconciliation

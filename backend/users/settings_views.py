@@ -548,6 +548,95 @@ def request_premium_listing(request):
         
         logger.info(f"Premium listing request created for {request.user.email}: {plan_type} plan, reference {reference_number}")
         
+        # Send confirmation email to provider
+        try:
+            from backend.utils.sendgrid_service import sendgrid_service
+            
+            email_subject = f"Premium Listing Request Created - Reference: {reference_number}"
+            html_content = f"""
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                <h2 style="color: #4F46E5;">Premium Listing Request Created</h2>
+                <p>Hello {request.user.get_full_name() or request.user.email},</p>
+                <p>Your premium listing request has been created successfully!</p>
+                
+                <div style="background: #F3F4F6; padding: 20px; border-radius: 8px; margin: 20px 0;">
+                    <h3 style="color: #1F2937; margin-top: 0;">Payment Details</h3>
+                    <p><strong>Plan:</strong> {plan_type.title()} Premium</p>
+                    <p><strong>Amount:</strong> R{amount:.2f}</p>
+                    <p><strong>Reference Number:</strong> <code style="background: #FEF3C7; padding: 4px 8px; border-radius: 4px; font-weight: bold;">{reference_number}</code></p>
+                </div>
+                
+                <div style="background: #FEF3C7; padding: 15px; border-left: 4px solid #F59E0B; margin: 20px 0;">
+                    <h3 style="color: #92400E; margin-top: 0;">Next Steps:</h3>
+                    <ol style="color: #78350F; padding-left: 20px;">
+                        <li>Make an EFT payment of <strong>R{amount:.2f}</strong> to Nedbank</li>
+                        <li>Account: <strong>1313872032</strong>, Branch: <strong>198765</strong></li>
+                        <li>Use the <strong>EXACT</strong> reference: <code>{reference_number}</code></li>
+                        <li>Payment will be auto-detected within 5 minutes</li>
+                        <li>Admin will approve within 24 hours of payment verification</li>
+                        <li>You'll receive an email when premium is activated</li>
+                    </ol>
+                </div>
+                
+                <div style="background: #DBEAFE; padding: 15px; border-radius: 8px; margin: 20px 0;">
+                    <p style="color: #1E40AF; margin: 0;"><strong>Timeline:</strong></p>
+                    <ul style="color: #1E3A8A; padding-left: 20px; margin: 10px 0;">
+                        <li>Payment detection: 5 minutes (auto) or 24 hours (manual)</li>
+                        <li>Admin approval: Within 24 hours of payment verification</li>
+                        <li>Total time: ~24-48 hours from payment to activation</li>
+                    </ul>
+                </div>
+                
+                <p>You can check your payment status anytime in your dashboard Settings page.</p>
+                <p>If you have any questions, please contact support at support@proconnectsa.co.za</p>
+                
+                <p style="margin-top: 30px;">Best regards,<br>The ProConnectSA Team</p>
+            </div>
+            """
+            text_content = f"""
+Premium Listing Request Created
+
+Hello {request.user.get_full_name() or request.user.email},
+
+Your premium listing request has been created successfully!
+
+Payment Details:
+- Plan: {plan_type.title()} Premium
+- Amount: R{amount:.2f}
+- Reference Number: {reference_number}
+
+Next Steps:
+1. Make an EFT payment of R{amount:.2f} to Nedbank
+2. Account: 1313872032, Branch: 198765
+3. Use the EXACT reference: {reference_number}
+4. Payment will be auto-detected within 5 minutes
+5. Admin will approve within 24 hours of payment verification
+6. You'll receive an email when premium is activated
+
+Timeline:
+- Payment detection: 5 minutes (auto) or 24 hours (manual)
+- Admin approval: Within 24 hours of payment verification
+- Total time: ~24-48 hours from payment to activation
+
+You can check your payment status anytime in your dashboard Settings page.
+
+If you have any questions, please contact support at support@proconnectsa.co.za
+
+Best regards,
+The ProConnectSA Team
+            """
+            
+            sendgrid_service.send_email(
+                request.user.email,
+                email_subject,
+                html_content,
+                text_content
+            )
+            logger.info(f"Premium request confirmation email sent to {request.user.email}")
+        except Exception as e:
+            logger.error(f"Failed to send premium request confirmation email: {str(e)}")
+            # Don't fail the request if email fails
+        
         return Response({
             'success': True,
             'reference_number': reference_number,
