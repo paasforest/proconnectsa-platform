@@ -902,6 +902,93 @@ const SettingsPage = () => {
                 </div>
               ) : premiumStatus?.has_premium_request ? (
                 <div className="mb-4 space-y-4">
+                  {/* Step-by-Step Progress Indicator */}
+                  <div className="bg-white border border-gray-200 rounded-lg p-4 mb-4">
+                    <h4 className="font-semibold text-gray-900 mb-3">Premium Request Progress</h4>
+                    <div className="space-y-3">
+                      {/* Step 1: Request Created */}
+                      <div className="flex items-center gap-3">
+                        <div className="flex-shrink-0 w-8 h-8 rounded-full bg-green-500 flex items-center justify-center">
+                          <CheckCircle className="w-5 h-5 text-white" />
+                        </div>
+                        <div className="flex-1">
+                          <p className="text-sm font-medium text-gray-900">Step 1: Request Created</p>
+                          <p className="text-xs text-gray-500">Your premium request has been created</p>
+                        </div>
+                      </div>
+                      
+                      {/* Step 2: Make Payment */}
+                      <div className="flex items-center gap-3">
+                        <div className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${
+                          premiumStatus.deposit?.payment_verified 
+                            ? 'bg-green-500' 
+                            : 'bg-blue-500'
+                        }`}>
+                          {premiumStatus.deposit?.payment_verified ? (
+                            <CheckCircle className="w-5 h-5 text-white" />
+                          ) : (
+                            <span className="text-white text-sm font-bold">2</span>
+                          )}
+                        </div>
+                        <div className="flex-1">
+                          <p className="text-sm font-medium text-gray-900">
+                            Step 2: Make Payment {!premiumStatus.deposit?.payment_verified && '(Current Step)'}
+                          </p>
+                          <p className="text-xs text-gray-500">
+                            {premiumStatus.deposit?.payment_verified 
+                              ? 'Payment completed' 
+                              : 'Make EFT payment using the reference below'}
+                          </p>
+                        </div>
+                      </div>
+                      
+                      {/* Step 3: Payment Verified */}
+                      <div className="flex items-center gap-3">
+                        <div className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${
+                          premiumStatus.deposit?.payment_verified 
+                            ? 'bg-green-500' 
+                            : 'bg-gray-300'
+                        }`}>
+                          {premiumStatus.deposit?.payment_verified ? (
+                            <CheckCircle className="w-5 h-5 text-white" />
+                          ) : (
+                            <span className="text-gray-600 text-sm font-bold">3</span>
+                          )}
+                        </div>
+                        <div className="flex-1">
+                          <p className="text-sm font-medium text-gray-900">Step 3: Payment Verified</p>
+                          <p className="text-xs text-gray-500">
+                            {premiumStatus.deposit?.payment_verified 
+                              ? 'Payment detected and verified' 
+                              : 'Waiting for payment detection (auto: 5 min, manual: 24h)'}
+                          </p>
+                        </div>
+                      </div>
+                      
+                      {/* Step 4: Admin Approval */}
+                      <div className="flex items-center gap-3">
+                        <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gray-300 flex items-center justify-center">
+                          <span className="text-gray-600 text-sm font-bold">4</span>
+                        </div>
+                        <div className="flex-1">
+                          <p className="text-sm font-medium text-gray-900">Step 4: Admin Approval</p>
+                          <p className="text-xs text-gray-500">Admin will approve once payment is verified (usually within 24 hours)</p>
+                        </div>
+                      </div>
+                      
+                      {/* Step 5: Premium Active */}
+                      <div className="flex items-center gap-3">
+                        <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gray-300 flex items-center justify-center">
+                          <span className="text-gray-600 text-sm font-bold">5</span>
+                        </div>
+                        <div className="flex-1">
+                          <p className="text-sm font-medium text-gray-900">Step 5: Premium Active</p>
+                          <p className="text-xs text-gray-500">Premium listing will activate automatically, you'll receive email confirmation</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
                   {/* Pending Request Status */}
                   <div className={`p-4 rounded-lg border ${
                     premiumStatus.deposit?.payment_verified 
@@ -916,17 +1003,42 @@ const SettingsPage = () => {
                       )}
                       <div className="flex-1">
                         <h4 className="font-semibold text-gray-900 mb-1">
-                          Premium Request Pending
+                          {premiumStatus.deposit?.payment_verified 
+                            ? 'Payment Verified - Waiting for Admin Approval' 
+                            : 'Current Step: Make Payment'}
                         </h4>
-                        <p className={`text-sm mb-2 ${
+                        <p className={`text-sm mb-3 ${
                           premiumStatus.deposit?.payment_verified 
                             ? 'text-blue-700' 
                             : 'text-yellow-700'
                         }`}>
                           {premiumStatus.deposit?.payment_verified 
-                            ? 'Payment verified! Premium activation is pending admin approval.'
-                            : 'Payment verification pending. Please make the EFT payment using the reference below.'}
+                            ? 'Great! Your payment has been detected and verified. An admin will approve your premium listing within 24 hours. You\'ll receive an email when it\'s activated.'
+                            : 'Follow these steps to complete your premium listing request:'}
                         </p>
+                        
+                        {!premiumStatus.deposit?.payment_verified && (
+                          <div className="bg-white rounded-lg p-3 mb-3 border border-yellow-200">
+                            <p className="text-sm font-medium text-gray-900 mb-2">📋 What to Do Now:</p>
+                            <ol className="text-sm text-gray-700 space-y-1 list-decimal list-inside">
+                              <li>Copy the reference number below</li>
+                              <li>Make an EFT payment to the Nedbank account shown</li>
+                              <li>Use the <strong>EXACT</strong> reference when making payment</li>
+                              <li>Click "Check Payment Status" after making payment</li>
+                              <li>Wait for admin approval (usually within 24 hours)</li>
+                            </ol>
+                          </div>
+                        )}
+                        
+                        {/* Timeline Information */}
+                        <div className="bg-gray-50 rounded-lg p-3 mb-3 border border-gray-200">
+                          <p className="text-xs font-medium text-gray-700 mb-1">⏱️ Timeline Expectations:</p>
+                          <ul className="text-xs text-gray-600 space-y-1">
+                            <li>• Payment detection: <strong>5 minutes</strong> (auto) or <strong>24 hours</strong> (manual verification)</li>
+                            <li>• Admin approval: <strong>Within 24 hours</strong> of payment verification</li>
+                            <li>• Total time: <strong>~24-48 hours</strong> from payment to activation</li>
+                          </ul>
+                        </div>
                         <div className="mt-3 space-y-2 text-sm">
                           <div className="flex justify-between">
                             <span className="text-gray-600">Reference Number:</span>
@@ -972,17 +1084,46 @@ const SettingsPage = () => {
                   </div>
                   
                   {/* Show banking details if not yet paid */}
-                  {!premiumStatus.deposit?.payment_verified && premiumDetails && (
-                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                      <h4 className="font-semibold text-blue-800 mb-2">EFT Payment Details</h4>
-                      <div className="space-y-1 text-sm text-blue-900">
-                        <p><strong>Bank:</strong> Nedbank</p>
-                        <p><strong>Account Number:</strong> 1313872032</p>
-                        <p><strong>Branch Code:</strong> 198765</p>
-                        <p><strong>Reference:</strong> <span className="font-mono text-lg bg-blue-100 px-2 py-1 rounded">{premiumDetails.reference_number}</span></p>
-                        <p className="text-xs text-blue-600 mt-2">
-                          ⚠️ Use this EXACT reference when making the EFT payment
+                  {!premiumStatus.deposit?.payment_verified && (premiumDetails || premiumStatus.deposit) && (
+                    <div className="bg-gradient-to-br from-blue-50 to-indigo-50 border-2 border-blue-300 rounded-lg p-5 shadow-sm">
+                      <h4 className="font-bold text-blue-900 mb-3 flex items-center gap-2 text-lg">
+                        <span>💳</span>
+                        EFT Payment Details
+                      </h4>
+                      <div className="bg-white rounded-lg p-4 mb-3 border-2 border-blue-200 shadow-sm">
+                        <div className="space-y-3 text-sm">
+                          <div className="flex justify-between items-center py-2 border-b border-gray-200">
+                            <span className="text-gray-700 font-semibold">Bank:</span>
+                            <span className="text-gray-900 font-bold text-base">Nedbank</span>
+                          </div>
+                          <div className="flex justify-between items-center py-2 border-b border-gray-200">
+                            <span className="text-gray-700 font-semibold">Account Number:</span>
+                            <span className="text-gray-900 font-mono font-bold text-base">1313872032</span>
+                          </div>
+                          <div className="flex justify-between items-center py-2 border-b border-gray-200">
+                            <span className="text-gray-700 font-semibold">Branch Code:</span>
+                            <span className="text-gray-900 font-bold text-base">198765</span>
+                          </div>
+                          <div className="flex justify-between items-center py-3 bg-yellow-50 rounded-lg px-3 border-2 border-yellow-400">
+                            <span className="text-gray-700 font-bold">Reference Number:</span>
+                            <span className="font-mono text-xl bg-yellow-100 px-4 py-2 rounded-lg border-2 border-yellow-500 font-black text-yellow-900">
+                              {premiumDetails?.reference_number || premiumStatus.deposit?.reference_number}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="bg-yellow-50 border-2 border-yellow-400 rounded-lg p-4">
+                        <p className="text-sm text-yellow-900 font-bold mb-2 flex items-center gap-2">
+                          <span>⚠️</span>
+                          Critical Instructions:
                         </p>
+                        <ul className="text-xs text-yellow-800 space-y-1.5 list-disc list-inside font-medium">
+                          <li>Use this <strong className="text-yellow-900">EXACT</strong> reference when making the EFT payment</li>
+                          <li>Payment will be <strong>auto-detected within 5 minutes</strong> if reference matches</li>
+                          <li>If payment isn't detected, admin will verify manually within 24 hours</li>
+                          <li>You'll receive an <strong>email confirmation</strong> when premium is activated</li>
+                          <li>Contact support if premium doesn't activate within 48 hours</li>
+                        </ul>
                       </div>
                     </div>
                   )}
