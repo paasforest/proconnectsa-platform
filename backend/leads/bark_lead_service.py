@@ -37,13 +37,22 @@ class BarkLeadService:
                 return cached_result
             
             # Optimized database query with select_related to prevent N+1 queries
+            # IMPORTANT: Exclude test leads - providers should NEVER see test leads
+            from backend.leads.test_lead_utils import exclude_test_leads
+            
             available_leads = Lead.objects.filter(
                 is_available=True,
                 assigned_providers_count__lt=3,  # Less than 3 providers
                 status__in=['verified', 'assigned']
             ).exclude(
                 assignments__provider=provider  # Exclude already claimed by this provider
-            ).select_related('service_category', 'client').order_by('-created_at')[:limit]
+            ).select_related('service_category', 'client')
+            
+            # Filter out test leads
+            available_leads = exclude_test_leads(available_leads)
+            
+            # Apply ordering and limit after filtering
+            available_leads = available_leads.order_by('-created_at')[:limit]
             
             # Batch calculate pricing for all leads at once (much faster)
             leads_with_pricing = []

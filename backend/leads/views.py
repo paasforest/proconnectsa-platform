@@ -67,14 +67,18 @@ class LeadListView(generics.ListAPIView):
     permission_classes = [permissions.IsAuthenticated]
     
     def get_queryset(self):
+        from backend.leads.test_lead_utils import exclude_test_leads
+        
         user = self.request.user
         if user.is_provider:
-            # Providers see assigned leads
-            return Lead.objects.filter(
+            # Providers see assigned leads (but NOT test leads)
+            leads = Lead.objects.filter(
                 assignments__provider=user
             ).distinct().order_by('-created_at')
+            # Filter out test leads
+            return exclude_test_leads(leads)
         else:
-            # Clients see their own leads
+            # Clients see their own leads (including test leads they created)
             return Lead.objects.filter(
                 client=user
             ).order_by('-created_at')
@@ -558,6 +562,8 @@ def available_leads_view(request):
         # - Historical success patterns and conversion rates
         from .services import LeadFilteringService
         
+        from backend.leads.test_lead_utils import exclude_test_leads
+        
         leads = LeadFilteringService.get_filtered_leads_for_provider(
             provider=request.user,
             filters={
@@ -567,6 +573,9 @@ def available_leads_view(request):
                 'limit': 20
             }
         )
+        
+        # IMPORTANT: Filter out test leads - providers should NEVER see test leads
+        leads = exclude_test_leads(leads)
         
         logger.info(f"ML filtering returned {leads.count()} leads for provider {request.user.id}")
         

@@ -718,10 +718,16 @@ class LeadFilteringService:
             ).values_list('id', flat=True)
             
             # Base query
+            # IMPORTANT: Exclude test leads - providers should NEVER see test leads
+            from backend.leads.test_lead_utils import exclude_test_leads
+            
             leads = Lead.objects.filter(
                 **base_filters,
                 service_category__id__in=category_ids
             ).select_related('service_category', 'client')
+            
+            # Filter out test leads
+            leads = exclude_test_leads(leads)
             
             # Apply geographical filter
             if profile.service_areas:

@@ -153,12 +153,18 @@ def available_leads(request):
         # Base query
         # Note: many leads move to `assigned` after distribution, but are still
         # purchasable/unlockable in the wallet marketplace.
+        # IMPORTANT: Exclude test leads - providers should NEVER see test leads
+        from backend.leads.test_lead_utils import exclude_test_leads
+        
         leads = Lead.objects.filter(
             status__in=['verified', 'assigned'],
             service_category__id__in=category_ids,
             is_available=True,
             expires_at__gt=timezone.now()
         ).select_related('service_category', 'client')
+        
+        # Filter out test leads
+        leads = exclude_test_leads(leads)
         
         # Apply geographical filter (case-insensitive, trimmed)
         if profile.service_areas:
