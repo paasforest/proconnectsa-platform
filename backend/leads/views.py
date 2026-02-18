@@ -774,11 +774,17 @@ class EnterpriseLeadFilteringService:
         profile = provider.provider_profile
         
         # Start with base queryset - NO slicing here
+        # IMPORTANT: Exclude test leads - providers should NEVER see test leads
+        from backend.leads.test_lead_utils import exclude_test_leads
+        
         base_query = Lead.objects.filter(
             status='verified',
             is_available=True,
             expires_at__gt=timezone.now()
         )
+        
+        # Filter out test leads
+        base_query = exclude_test_leads(base_query)
         
         # Apply filters step by step, ensuring no slicing until the end
         filtered_query = base_query
