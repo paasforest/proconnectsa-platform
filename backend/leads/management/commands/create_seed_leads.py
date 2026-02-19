@@ -131,14 +131,21 @@ class Command(BaseCommand):
         
         created_leads = []
         
+        # Prioritize common categories that providers typically offer
+        common_categories = ['Plumbing', 'Electrical', 'Cleaning', 'Renovations', 'Painting', 'Handyman']
+        common_category_objs = [cat for cat in service_categories if cat.name in common_categories]
+        
         for i in range(count):
             # Select random city and suburb
             city_data = random.choice(cities_data)
             city = city_data['city']
             suburb = random.choice(city_data['suburbs'])
             
-            # Select random service category
-            service_category = random.choice(list(service_categories))
+            # Prioritize common categories (70% chance), otherwise random
+            if common_category_objs and random.random() < 0.7:
+                service_category = random.choice(common_category_objs)
+            else:
+                service_category = random.choice(list(service_categories))
             service_name = service_category.name.lower()
             
             # Generate realistic title
