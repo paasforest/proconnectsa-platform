@@ -136,8 +136,13 @@ class Command(BaseCommand):
         common_category_objs = [cat for cat in service_categories if cat.name in common_categories]
         
         for i in range(count):
-            # Select random city and suburb
-            city_data = random.choice(cities_data)
+            # Prioritize Johannesburg (40% chance) since most providers are there
+            # Then distribute across other cities
+            if random.random() < 0.4:
+                # Force Johannesburg
+                city_data = next((c for c in cities_data if c['city'] == 'Johannesburg'), cities_data[0])
+            else:
+                city_data = random.choice(cities_data)
             city = city_data['city']
             suburb = random.choice(city_data['suburbs'])
             
