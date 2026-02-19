@@ -637,10 +637,19 @@ const WalletLeadDashboard = () => {
                     <div className="p-8 text-center text-gray-500">
                       <Users className="h-12 w-12 mx-auto mb-4 text-gray-400" />
                       <h3 className="text-lg font-medium text-gray-900 mb-2">No Leads Available</h3>
-                      <p className="text-sm text-gray-500">
+                      <p className="text-sm text-gray-500 mb-4">
                         There are currently no leads available in your service categories.
                         <br />
                         Check back later or contact support if you need assistance.
+                      </p>
+                      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 text-left max-w-md mx-auto">
+                        <p className="text-sm font-medium text-blue-900 mb-2">💡 Quick Tips:</p>
+                        <ul className="text-xs text-blue-800 space-y-1 list-disc list-inside">
+                          <li>Make sure you've added service categories in Settings → Services</li>
+                          <li>Check that your service areas match where leads are located</li>
+                          <li>Try clicking the Refresh button above to reload</li>
+                        </ul>
+                      </div>
                       </p>
                     </div>
                   ) : (
