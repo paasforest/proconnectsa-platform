@@ -197,7 +197,16 @@ const WalletLeadDashboard = () => {
     try {
       setLoading(true); // Set loading to true at the start
       apiClient.setToken(token);
-      const response = await apiClient.get('/api/leads/wallet/available/');
+      
+      // Add timeout to prevent infinite loading
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Request timeout')), 30000)
+      );
+      
+      const response = await Promise.race([
+        apiClient.get('/api/leads/wallet/available/'),
+        timeoutPromise
+      ]);
       
       // Handle different response structures
       const leadsData = response.leads || response.data?.leads || [];
@@ -252,8 +261,9 @@ const WalletLeadDashboard = () => {
       if (walletData.credits !== undefined) {
         setUserCredits(walletData.credits);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('❌ Error fetching leads:', error);
+      console.error('Error details:', error?.message, error?.response);
       // For errors, show empty state instead of sample data
       setLeads([]);
       setSelectedLead(null);
@@ -281,15 +291,19 @@ const WalletLeadDashboard = () => {
   }, [token]);
 
   useEffect(() => {
+    // Only run once when component mounts or when user/token changes
     if (user !== null && token) {
       apiClient.setToken(token);
       fetchLeads();
       fetchUserStats();
       // Don't set loading to false here - let fetchLeads handle it
-    } else {
-      setLoading(false); // Only set to false if no user/token
+    } else if (user === null) {
+      // User is not logged in
+      setLoading(false);
     }
-  }, [user, token, fetchLeads, fetchUserStats]);
+    // Remove fetchLeads and fetchUserStats from dependencies to prevent infinite loops
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user, token]);
 
   const getUrgencyColor = (urgency) => {
     switch (urgency) {
