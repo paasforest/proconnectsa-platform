@@ -251,29 +251,47 @@ def available_leads(request):
             leads = leads.filter(geographical_filter)
     
     # Convert leads to frontend format using integrated ML services
+    # OPTIMIZATION: Batch fetch all LeadAccess data to avoid N+1 queries
+    from .models import LeadAccess
+    from django.db.models import Count
+    
+    # Get all lead IDs
+    lead_ids = [lead.id for lead in leads]
+    
+    # Batch fetch: Get all unlocked leads for this provider in one query
+    unlocked_lead_ids = set(
+        LeadAccess.objects.filter(
+            provider=request.user,
+            lead_id__in=lead_ids,
+            is_active=True
+        ).values_list('lead_id', flat=True)
+    )
+    
+    # Batch fetch: Get current_responses count for all leads in one query
+    responses_counts = dict(
+        LeadAccess.objects.filter(
+            lead_id__in=lead_ids,
+            is_active=True
+        ).values('lead_id').annotate(count=Count('id')).values_list('lead_id', 'count')
+    )
+    
+    # Initialize ML pricing service once (reuse for all leads)
+    from .ml_services import DynamicPricingMLService
+    pricing_service = DynamicPricingMLService()
+    
     leads_data = []
     for lead in leads:
         try:
-            # Use integrated ML pricing service
-            from .ml_services import DynamicPricingMLService
-            pricing_service = DynamicPricingMLService()
+            # Use integrated ML pricing service (cached/reused service instance)
             pricing_result = pricing_service.calculate_dynamic_lead_price(lead, request.user)
             # ML service returns credits directly, not Rands
             credits_cost = max(1, round(pricing_result.get('price', 4), 1))
             
-            # Check if already unlocked by this user using LeadAccess model
-            from .models import LeadAccess
-            is_unlocked = LeadAccess.objects.filter(
-                provider=request.user,
-                lead=lead,
-                is_active=True
-            ).exists()
+            # Check if already unlocked (from batch query)
+            is_unlocked = lead.id in unlocked_lead_ids
             
-            # Get actual count of providers who have purchased this lead (for transparency)
-            current_responses = LeadAccess.objects.filter(
-                lead=lead,
-                is_active=True
-            ).count()
+            # Get actual count of providers who have purchased this lead (from batch query)
+            current_responses = responses_counts.get(lead.id, 0)
             
             # Get max_providers from lead model (default to 5 if not set)
             max_providers = getattr(lead, 'max_providers', 5)

@@ -189,9 +189,13 @@ const WalletLeadDashboard = () => {
   };
 
   const fetchLeads = useCallback(async () => {
-    if (!token) return;
+    if (!token) {
+      setLoading(false);
+      return;
+    }
     
     try {
+      setLoading(true); // Set loading to true at the start
       apiClient.setToken(token);
       const response = await apiClient.get('/api/leads/wallet/available/');
       
@@ -253,6 +257,8 @@ const WalletLeadDashboard = () => {
       // For errors, show empty state instead of sample data
       setLeads([]);
       setSelectedLead(null);
+    } finally {
+      setLoading(false); // Always set loading to false when done
     }
   }, [token]);
 
@@ -279,7 +285,9 @@ const WalletLeadDashboard = () => {
       apiClient.setToken(token);
       fetchLeads();
       fetchUserStats();
-      setLoading(false);
+      // Don't set loading to false here - let fetchLeads handle it
+    } else {
+      setLoading(false); // Only set to false if no user/token
     }
   }, [user, token, fetchLeads, fetchUserStats]);
 
