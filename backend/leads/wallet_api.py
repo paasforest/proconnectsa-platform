@@ -411,8 +411,8 @@ def available_leads(request):
                     'views_count': getattr(lead, 'views_count', 0),
                     'responses_count': getattr(lead, 'responses_count', 0),
                     'max_providers': getattr(lead, 'max_providers', 5),
-                    'current_responses': LeadAccess.objects.filter(lead=lead, is_active=True).count(),
-                    'assigned_providers_count': LeadAccess.objects.filter(lead=lead, is_active=True).count()
+                    'current_responses': responses_counts.get(lead.id, 0),
+                    'assigned_providers_count': responses_counts.get(lead.id, 0)
                 }
                 leads_data.append(lead_data)
             except Exception as fallback_error:
