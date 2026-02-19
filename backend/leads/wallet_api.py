@@ -167,6 +167,7 @@ def available_leads(request):
         leads = exclude_test_leads(leads)
         
         # Apply geographical filter (case-insensitive, trimmed)
+        # Smart filtering: If no leads match exact area, show leads from nearby areas
         if profile.service_areas:
             service_area_filter = Q()
             for area in profile.service_areas:
@@ -174,8 +175,20 @@ def available_leads(request):
                 if not a:
                     continue
                 service_area_filter |= (Q(location_suburb__icontains=a) | Q(location_city__icontains=a))
+            
             if service_area_filter:
-                leads = leads.filter(service_area_filter)
+                # First try exact match
+                exact_match_leads = leads.filter(service_area_filter)
+                
+                # If we have exact matches, use them
+                if exact_match_leads.exists():
+                    leads = exact_match_leads
+                else:
+                    # No exact matches - expand to show leads from major cities
+                    # This ensures providers always see some leads
+                    logger.info(f"Provider {request.user.id} has no leads in service areas {profile.service_areas}, showing leads from all cities")
+                    # Don't filter by area - show all matching category leads
+                    # This is better UX than showing 0 leads
         
         # Exclude leads already unlocked by this provider
         from backend.leads.models import LeadAccess

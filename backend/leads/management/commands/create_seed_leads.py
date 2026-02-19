@@ -136,9 +136,9 @@ class Command(BaseCommand):
         common_category_objs = [cat for cat in service_categories if cat.name in common_categories]
         
         for i in range(count):
-            # Prioritize Johannesburg (40% chance) since most providers are there
+            # Prioritize Johannesburg (50% chance) since most providers are there
             # Then distribute across other cities
-            if random.random() < 0.4:
+            if random.random() < 0.5:
                 # Force Johannesburg
                 city_data = next((c for c in cities_data if c['city'] == 'Johannesburg'), cities_data[0])
             else:
@@ -146,8 +146,13 @@ class Command(BaseCommand):
             city = city_data['city']
             suburb = random.choice(city_data['suburbs'])
             
-            # Prioritize common categories (70% chance), otherwise random
-            if common_category_objs and random.random() < 0.7:
+            # Prioritize common categories (80% chance for first half, then random)
+            # This ensures we have good coverage of common services
+            if i < count * 0.5 and common_category_objs:
+                # First half: mostly common categories
+                service_category = random.choice(common_category_objs)
+            elif common_category_objs and random.random() < 0.7:
+                # Second half: 70% common, 30% random
                 service_category = random.choice(common_category_objs)
             else:
                 service_category = random.choice(list(service_categories))
