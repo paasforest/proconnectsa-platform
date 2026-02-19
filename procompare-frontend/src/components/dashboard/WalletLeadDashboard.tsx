@@ -10,10 +10,16 @@ const WalletLeadDashboard = () => {
   const [leads, setLeads] = useState([]);
   const [selectedLead, setSelectedLead] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false); // For background refresh indicator
   const [userCredits, setUserCredits] = useState(100);
   const [purchasedLeads, setPurchasedLeads] = useState(new Set());
   const [notification, setNotification] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
   const [reserveInfo, setReserveInfo] = useState<any | null>(null);
+  
+  // Cache key for localStorage
+  const CACHE_KEY = `proconnectsa_leads_${user?.id || 'guest'}`;
+  const CACHE_TIMESTAMP_KEY = `proconnectsa_leads_timestamp_${user?.id || 'guest'}`;
+  const CACHE_MAX_AGE = 5 * 60 * 1000; // 5 minutes
 
   // Helper function to show notifications
   const showNotification = (message: string, type: 'success' | 'error' = 'success') => {
@@ -188,19 +194,91 @@ const WalletLeadDashboard = () => {
     return Math.max(1, Math.round(basePrice * 2) / 2);
   };
 
-  const fetchLeads = useCallback(async () => {
+  // Load cached data immediately
+  const loadCachedLeads = useCallback(() => {
+    try {
+      const cachedData = localStorage.getItem(CACHE_KEY);
+      const cachedTimestamp = localStorage.getItem(CACHE_TIMESTAMP_KEY);
+      
+      if (cachedData && cachedTimestamp) {
+        const age = Date.now() - parseInt(cachedTimestamp, 10);
+        if (age < CACHE_MAX_AGE) {
+          const parsed = JSON.parse(cachedData);
+          if (parsed.leads && parsed.leads.length > 0) {
+            setLeads(parsed.leads);
+            if (parsed.leads[0]) {
+              setSelectedLead(parsed.leads[0]);
+            }
+            if (parsed.credits !== undefined) {
+              setUserCredits(parsed.credits);
+            }
+            return true; // Cache loaded successfully
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Error loading cached leads:', error);
+    }
+    return false; // No valid cache
+  }, [CACHE_KEY, CACHE_TIMESTAMP_KEY]);
+
+  // Transform API response to our format
+  const transformLeads = useCallback((leadsData: any[]) => {
+    return leadsData.map((lead, index) => ({
+      id: lead.id,
+      title: lead.service || lead.title || `Service Request ${index + 1}`,
+      description: lead.details || lead.masked_details || lead.description || 'Service details available after purchase',
+      service_category: { 
+        name: lead.service?.split(' • ')[0] || 'General Services', 
+        id: lead.id 
+      },
+      location_city: lead.masked_location?.split(', ')[1] || lead.location_city || 'Location hidden',
+      location_suburb: lead.masked_location?.split(', ')[0] || lead.location_suburb || 'Location hidden',
+      budget_range: lead.budget || lead.budget_range || 'Budget available',
+      urgency: lead.urgency || 'medium',
+      timeline: lead.timeline || 'Flexible',
+      created_at: lead.created_at || new Date().toISOString(),
+      timeAgo: lead.timeAgo || lead.lastActivity || 'Recently posted',
+      client_name: lead.masked_name || 'Client Name',
+      credit_cost: lead.credits || lead.credit_cost || 1,
+      max_providers: lead.max_providers || 5,
+      current_responses: lead.current_responses !== undefined ? lead.current_responses : (lead.assigned_providers_count !== undefined ? lead.assigned_providers_count : (lead.responses_count || 0)),
+      lead_status: lead.status || 'active',
+      client_rating: lead.rating || 4.5,
+      client_jobs_posted: 0,
+      project_details: {
+        property_type: lead.jobSize || 'Standard',
+        special_requirements: lead.category || 'General'
+      },
+      hidden_details: {
+        full_name: lead.name || 'Client Name',
+        phone: lead.phone || 'Phone available',
+        email: lead.email || 'Email available',
+        exact_address: lead.location || lead.masked_location || 'Address available'
+      },
+      isUnlocked: lead.isUnlocked || false
+    }));
+  }, []);
+
+  const fetchLeads = useCallback(async (isBackgroundRefresh = false) => {
     if (!token) {
       setLoading(false);
       return;
     }
     
+    // If background refresh, show refreshing indicator but don't block UI
+    if (isBackgroundRefresh) {
+      setRefreshing(true);
+    } else {
+      setLoading(true);
+    }
+    
     try {
-      setLoading(true); // Set loading to true at the start
       apiClient.setToken(token);
       
-      // Add timeout to prevent infinite loading
+      // Add timeout to prevent infinite loading (reduced to 15s for faster feedback)
       const timeoutPromise = new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('Request timeout')), 30000)
+        setTimeout(() => reject(new Error('Request timeout')), 15000)
       );
       
       const response = await Promise.race([
@@ -213,48 +291,31 @@ const WalletLeadDashboard = () => {
       const walletData = response.wallet || response.data?.wallet || {};
       
       if (leadsData.length > 0) {
-        // Transform API data to match Bark-style format
-        const transformedLeads = leadsData.map((lead, index) => ({
-          id: lead.id,
-          title: lead.service || lead.title || `Service Request ${index + 1}`,
-          description: lead.details || lead.masked_details || lead.description || 'Service details available after purchase',
-          service_category: { 
-            name: lead.service?.split(' • ')[0] || 'General Services', 
-            id: lead.id 
-          },
-          location_city: lead.masked_location?.split(', ')[1] || lead.location_city || 'Location hidden',
-          location_suburb: lead.masked_location?.split(', ')[0] || lead.location_suburb || 'Location hidden',
-          budget_range: lead.budget || lead.budget_range || 'Budget available',
-          urgency: lead.urgency || 'medium',
-          timeline: lead.timeline || 'Flexible',
-          created_at: lead.created_at || new Date().toISOString(),
-          timeAgo: lead.timeAgo || lead.lastActivity || 'Recently posted',
-          client_name: lead.masked_name || 'Client Name',
-          credit_cost: lead.credits || lead.credit_cost || 1,
-          max_providers: lead.max_providers || 5,  // Use API value, fallback to 5
-          current_responses: lead.current_responses !== undefined ? lead.current_responses : (lead.assigned_providers_count !== undefined ? lead.assigned_providers_count : (lead.responses_count || 0)),  // Use actual purchase count
-          lead_status: lead.status || 'active',
-          client_rating: lead.rating || 4.5,
-          client_jobs_posted: 0,
-          project_details: {
-            property_type: lead.jobSize || 'Standard',
-            special_requirements: lead.category || 'General'
-          },
-          hidden_details: {
-            full_name: lead.name || 'Client Name',
-            phone: lead.phone || 'Phone available',
-            email: lead.email || 'Email available',
-            exact_address: lead.location || lead.masked_location || 'Address available'
-          },
-          isUnlocked: lead.isUnlocked || false
-        }));
+        const transformedLeads = transformLeads(leadsData);
         
+        // Update state
         setLeads(transformedLeads);
-        setSelectedLead(transformedLeads[0]);
+        if (transformedLeads[0]) {
+          setSelectedLead(transformedLeads[0]);
+        }
+        
+        // Cache the data
+        try {
+          localStorage.setItem(CACHE_KEY, JSON.stringify({
+            leads: transformedLeads,
+            credits: walletData.credits
+          }));
+          localStorage.setItem(CACHE_TIMESTAMP_KEY, Date.now().toString());
+        } catch (cacheError) {
+          console.warn('Failed to cache leads:', cacheError);
+        }
       } else {
-        // For new providers, show empty state instead of sample data
+        // For new providers, show empty state
         setLeads([]);
         setSelectedLead(null);
+        // Clear cache if no leads
+        localStorage.removeItem(CACHE_KEY);
+        localStorage.removeItem(CACHE_TIMESTAMP_KEY);
       }
       
       // Set credits from wallet data
@@ -263,14 +324,16 @@ const WalletLeadDashboard = () => {
       }
     } catch (error: any) {
       console.error('❌ Error fetching leads:', error);
-      console.error('Error details:', error?.message, error?.response);
-      // For errors, show empty state instead of sample data
-      setLeads([]);
-      setSelectedLead(null);
+      // On error, only clear if it's not a background refresh (keep cached data)
+      if (!isBackgroundRefresh) {
+        setLeads([]);
+        setSelectedLead(null);
+      }
     } finally {
-      setLoading(false); // Always set loading to false when done
+      setLoading(false);
+      setRefreshing(false);
     }
-  }, [token]);
+  }, [token, CACHE_KEY, CACHE_TIMESTAMP_KEY, transformLeads]);
 
   const fetchUserStats = useCallback(async () => {
     if (!token) return;
@@ -294,9 +357,21 @@ const WalletLeadDashboard = () => {
     // Only run once when component mounts or when user/token changes
     if (user !== null && token) {
       apiClient.setToken(token);
-      fetchLeads();
+      
+      // Try to load cached data first for instant display
+      const cacheLoaded = loadCachedLeads();
+      
+      // If cache loaded, do background refresh; otherwise do full load
+      if (cacheLoaded) {
+        setLoading(false); // Show cached data immediately
+        // Refresh in background
+        fetchLeads(true);
+      } else {
+        // No cache, do full load
+        fetchLeads(false);
+      }
+      
       fetchUserStats();
-      // Don't set loading to false here - let fetchLeads handle it
     } else if (user === null) {
       // User is not logged in
       setLoading(false);
@@ -511,16 +586,17 @@ const WalletLeadDashboard = () => {
     return `${Math.floor(diffDays / 30)}mo ago`;
   };
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading available leads...</p>
-        </div>
-      </div>
-    );
-  }
+  // Skeleton loading component
+  const LeadSkeleton = () => (
+    <div className="p-4 border-b border-gray-200 animate-pulse">
+      <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
+      <div className="h-3 bg-gray-200 rounded w-1/2 mb-2"></div>
+      <div className="h-3 bg-gray-200 rounded w-2/3"></div>
+    </div>
+  );
+
+  // Show skeleton only if no cached data and still loading
+  const showSkeleton = loading && leads.length === 0;
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -583,14 +659,31 @@ const WalletLeadDashboard = () => {
           <div className="col-span-4 space-y-4">
             <div className="bg-white rounded-lg shadow-sm">
               <div className="p-4 border-b border-gray-200">
-                <h2 className="text-lg font-semibold text-gray-900">
-                  Available Leads ({leads.length})
-                </h2>
-                <p className="text-sm text-gray-600">Click any lead to view details</p>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h2 className="text-lg font-semibold text-gray-900">
+                      Available Leads ({leads.length})
+                    </h2>
+                    <p className="text-sm text-gray-600">Click any lead to view details</p>
+                  </div>
+                  {refreshing && (
+                    <div className="flex items-center text-xs text-blue-600">
+                      <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-blue-600 mr-2"></div>
+                      Refreshing...
+                    </div>
+                  )}
+                </div>
               </div>
               
                 <div className="max-h-[calc(100vh-300px)] overflow-y-auto">
-                  {leads.length === 0 ? (
+                  {showSkeleton ? (
+                    // Show skeleton while loading (only if no cached data)
+                    <div>
+                      {[...Array(5)].map((_, i) => (
+                        <LeadSkeleton key={i} />
+                      ))}
+                    </div>
+                  ) : leads.length === 0 ? (
                     <div className="p-8 text-center text-gray-500">
                       <Users className="h-12 w-12 mx-auto mb-4 text-gray-400" />
                       <h3 className="text-lg font-medium text-gray-900 mb-2">No Leads Available</h3>
