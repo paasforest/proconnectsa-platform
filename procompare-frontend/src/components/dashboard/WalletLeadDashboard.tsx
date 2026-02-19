@@ -650,7 +650,6 @@ const WalletLeadDashboard = () => {
                           <li>Try clicking the Refresh button above to reload</li>
                         </ul>
                       </div>
-                      </p>
                     </div>
                   ) : (
                     leads.map((lead) => (
