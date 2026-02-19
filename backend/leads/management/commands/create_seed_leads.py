@@ -7,7 +7,7 @@ import random
 from faker import Faker
 
 User = get_user_model()
-fake = Faker('en_ZA')  # South African locale for realistic addresses
+fake = Faker()  # Use default locale (en_US) - we'll use custom SA data
 
 
 class Command(BaseCommand):
