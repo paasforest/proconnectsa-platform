@@ -20,6 +20,17 @@ const WalletLeadDashboard = () => {
   const CACHE_KEY = `proconnectsa_leads_${user?.id || 'guest'}`;
   const CACHE_TIMESTAMP_KEY = `proconnectsa_leads_timestamp_${user?.id || 'guest'}`;
   const CACHE_MAX_AGE = 5 * 60 * 1000; // 5 minutes
+  
+  // Clear cache function (for debugging)
+  const clearCache = useCallback(() => {
+    try {
+      localStorage.removeItem(CACHE_KEY);
+      localStorage.removeItem(CACHE_TIMESTAMP_KEY);
+      console.log('Cache cleared');
+    } catch (error) {
+      console.error('Error clearing cache:', error);
+    }
+  }, [CACHE_KEY, CACHE_TIMESTAMP_KEY]);
 
   // Helper function to show notifications
   const showNotification = (message: string, type: 'success' | 'error' = 'success') => {
