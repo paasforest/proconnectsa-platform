@@ -3,6 +3,8 @@ import { Providers } from "@/components/providers/Providers";
 import { Toaster } from "@/components/ui/sonner";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import { AuthProvider } from "@/components/AuthProvider";
+import { ServiceWorkerRegistration } from "@/components/pwa/ServiceWorkerRegistration";
+import { InstallPrompt } from "@/components/pwa/InstallPrompt";
 import "./globals.css";
 
 // Use system fonts instead of Google Fonts to avoid network issues
@@ -24,6 +26,20 @@ export const metadata: Metadata = {
     telephone: false,
   },
   metadataBase: new URL("https://www.proconnectsa.co.za"),
+  manifest: "/manifest.json",
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#2563eb" },
+    { media: "(prefers-color-scheme: dark)", color: "#1e40af" },
+  ],
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "ProConnectSA",
+  },
+  icons: {
+    icon: "/favicon.ico",
+    apple: "/icon-192.png",
+  },
   openGraph: {
     title: "Local Service Providers in South Africa | Get Free Quotes | ProConnectSA",
     description: "Find trusted local service providers in South Africa. Compare free quotes from verified professionals. No obligation to hire.",
@@ -58,11 +74,13 @@ export default function RootLayout({
   return (
     <html lang="en" className={inter.variable}>
       <body className="font-sans antialiased">
+        <ServiceWorkerRegistration />
         <ErrorBoundary>
           <AuthProvider>
             <Providers>
               {children}
               <Toaster />
+              <InstallPrompt />
             </Providers>
           </AuthProvider>
         </ErrorBoundary>
