@@ -4,7 +4,7 @@ Notification service for creating and managing dashboard notifications
 from django.contrib.auth import get_user_model
 from django.utils import timezone
 from django.db import transaction
-from .models import Notification, NotificationSettings, NotificationTemplate
+from .models import Notification, NotificationSettings
 from .email_service import (
     send_lead_notification_email,
     send_quote_received_email,
