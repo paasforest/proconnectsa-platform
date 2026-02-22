@@ -915,15 +915,17 @@ const SettingsPage = () => {
                 <PushNotificationManager />
               </div>
               
-              <div className="text-xs text-gray-500 mt-4 pt-4 border-t border-gray-200">
-                <p className="font-medium mb-1">How it works:</p>
-                <ul className="list-disc list-inside space-y-1">
-                  <li>Click "Enable Notifications" to allow push notifications</li>
-                  <li>You'll receive instant alerts for new leads matching your services</li>
-                  <li>Notifications work even when the app is closed</li>
-                  <li>You can disable notifications anytime</li>
-                </ul>
-              </div>
+              {permission !== 'denied' && (
+                <div className="text-xs text-gray-500 mt-4 pt-4 border-t border-gray-200">
+                  <p className="font-medium mb-1">How it works:</p>
+                  <ul className="list-disc list-inside space-y-1">
+                    <li>Click "Enable Notifications" to allow push notifications</li>
+                    <li>You'll receive instant alerts for new leads matching your services</li>
+                    <li>Notifications work even when the app is closed</li>
+                    <li>You can disable notifications anytime</li>
+                  </ul>
+                </div>
+              )}
             </div>
           </div>
 

@@ -112,12 +112,65 @@ export function PushNotificationManager() {
     return null;
   }
 
-  // Don't show if permission is denied
+  // Show helpful instructions if permission is denied
   if (permission === 'denied') {
+    const isChrome = typeof window !== 'undefined' && /Chrome/.test(navigator.userAgent) && /Google Inc/.test(navigator.vendor);
+    const isFirefox = typeof window !== 'undefined' && /Firefox/.test(navigator.userAgent);
+    const isSafari = typeof window !== 'undefined' && /Safari/.test(navigator.userAgent) && !/Chrome/.test(navigator.userAgent);
+    const isEdge = typeof window !== 'undefined' && /Edg/.test(navigator.userAgent);
+    
     return (
-      <div className="text-xs text-gray-500 p-2">
-        <BellOff className="h-4 w-4 inline mr-1" />
-        Notifications blocked. Enable in browser settings.
+      <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+        <div className="flex items-start gap-3">
+          <BellOff className="h-5 w-5 text-yellow-600 mt-0.5 flex-shrink-0" />
+          <div className="flex-1">
+            <h4 className="font-medium text-yellow-900 mb-2">Notifications are blocked</h4>
+            <p className="text-sm text-yellow-800 mb-3">
+              To enable push notifications, you need to allow them in your browser settings.
+            </p>
+            
+            <div className="bg-white rounded p-3 text-xs text-yellow-900">
+              <p className="font-medium mb-2">How to enable notifications:</p>
+              {isChrome || isEdge ? (
+                <ol className="list-decimal list-inside space-y-1">
+                  <li>Click the lock icon (🔒) or info icon (ℹ️) in the address bar</li>
+                  <li>Find "Notifications" in the permissions list</li>
+                  <li>Change it from "Block" to "Allow"</li>
+                  <li>Refresh this page</li>
+                </ol>
+              ) : isFirefox ? (
+                <ol className="list-decimal list-inside space-y-1">
+                  <li>Click the lock icon (🔒) in the address bar</li>
+                  <li>Click "More Information"</li>
+                  <li>Go to the "Permissions" tab</li>
+                  <li>Find "Notifications" and change it to "Allow"</li>
+                  <li>Refresh this page</li>
+                </ol>
+              ) : isSafari ? (
+                <ol className="list-decimal list-inside space-y-1">
+                  <li>Go to Safari → Settings → Websites</li>
+                  <li>Click "Notifications" in the left sidebar</li>
+                  <li>Find this website and change it to "Allow"</li>
+                  <li>Refresh this page</li>
+                </ol>
+              ) : (
+                <ol className="list-decimal list-inside space-y-1">
+                  <li>Click the lock or info icon in the address bar</li>
+                  <li>Look for "Notifications" or "Site Settings"</li>
+                  <li>Change notifications from "Block" to "Allow"</li>
+                  <li>Refresh this page</li>
+                </ol>
+              )}
+            </div>
+            
+            <button
+              onClick={() => window.location.reload()}
+              className="mt-3 text-xs px-3 py-1.5 bg-yellow-600 text-white rounded hover:bg-yellow-700 transition-colors"
+            >
+              Refresh Page After Enabling
+            </button>
+          </div>
+        </div>
       </div>
     );
   }
