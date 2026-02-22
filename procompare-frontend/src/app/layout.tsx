@@ -82,6 +82,7 @@ export default function RootLayout({
               {children}
               <Toaster />
               <InstallPrompt />
+              <PushNotificationManager />
             </Providers>
           </AuthProvider>
         </ErrorBoundary>
