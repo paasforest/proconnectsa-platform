@@ -165,19 +165,34 @@ class LeadQualityMLService:
         """Train ML model for lead quality prediction"""
         try:
             min_leads = getattr(settings, 'ML_MIN_QUALITY_TRAINING_LEADS', 50)
-            # Get historical lead data
-            leads = Lead.objects.filter(
+            # Get historical lead data - use verified leads too if we don't have enough completed ones
+            completed_leads = Lead.objects.filter(
                 status__in=['completed', 'cancelled', 'expired']
-            ).select_related('client').values(
-                'title', 'description', 'location_address', 'location_suburb', 
-                'location_city', 'budget_range', 'urgency', 'hiring_intent',
-                'hiring_timeline', 'additional_requirements', 'research_purpose',
-                'verification_score', 'assigned_providers_count', 'total_provider_contacts', 
-                'status', 'client__phone', 'client__email'
             )
             
+            # If we don't have enough completed leads, also include verified leads
+            if completed_leads.count() < min_leads:
+                leads = Lead.objects.filter(
+                    status__in=['completed', 'cancelled', 'expired', 'verified']
+                ).select_related('client').values(
+                    'title', 'description', 'location_address', 'location_suburb', 
+                    'location_city', 'budget_range', 'urgency', 'hiring_intent',
+                    'hiring_timeline', 'additional_requirements', 'research_purpose',
+                    'verification_score', 'assigned_providers_count', 'total_provider_contacts', 
+                    'status', 'client__phone', 'client__email'
+                )
+                logger.info(f"Using {leads.count()} leads (including verified) for training")
+            else:
+                leads = completed_leads.select_related('client').values(
+                    'title', 'description', 'location_address', 'location_suburb', 
+                    'location_city', 'budget_range', 'urgency', 'hiring_intent',
+                    'hiring_timeline', 'additional_requirements', 'research_purpose',
+                    'verification_score', 'assigned_providers_count', 'total_provider_contacts', 
+                    'status', 'client__phone', 'client__email'
+                )
+            
             if len(leads) < min_leads:
-                logger.warning("Not enough data to train quality model")
+                logger.warning(f"Not enough data to train quality model: {len(leads)} < {min_leads}")
                 return False
             
             # Fit TF-IDF vectorizer on historical texts
@@ -221,10 +236,18 @@ class LeadQualityMLService:
                 # Quality score based on outcomes
                 if lead['status'] == 'completed':
                     quality_score = 100
+                elif lead['status'] == 'verified':
+                    # For verified leads, use verification_score as quality target
+                    # Boost score if providers showed interest
+                    base_score = lead['verification_score'] or 50
+                    if lead['assigned_providers_count'] > 0:
+                        quality_score = min(100, base_score + (lead['total_provider_contacts'] * 5))
+                    else:
+                        quality_score = base_score
                 elif lead['assigned_providers_count'] > 0:
                     quality_score = 70 + (lead['total_provider_contacts'] * 5)
                 else:
-                    quality_score = lead['verification_score']
+                    quality_score = lead['verification_score'] or 50
                 
                 y.append(quality_score)
             
