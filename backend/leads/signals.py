@@ -70,3 +70,31 @@ def auto_assign_lead_to_providers(sender, instance, created, **kwargs):
                 
         except Exception as e:
             logger.error(f"❌ AUTO-ASSIGNMENT FAILED: Lead {instance.id} - {str(e)}")
+
+
+@receiver(post_save, sender=Lead)
+def route_verified_lead(sender, instance, created, **kwargs):
+    """
+    Route verified leads to matching providers via lead router.
+    This sends notifications to providers (email + in-app) when a lead becomes verified.
+    
+    Fires on:
+    - New lead created with status='verified'
+    - Existing lead updated to status='verified'
+    """
+    # Only route if lead is verified
+    if instance.status != 'verified':
+        return
+    
+    # Avoid routing the same lead twice if signal fires multiple times
+    # We'll let the router handle idempotency through notification creation
+    
+    logger.info(f"[Signal] Lead {instance.id} is verified — starting routing")
+
+    try:
+        # Import here to avoid circular imports
+        from backend.leads.services.lead_router import route_lead
+        route_lead(instance)
+    except Exception as e:
+        # Belt-and-suspenders: route_lead is already safe, but just in case
+        logger.error(f"[Signal] Unexpected error routing lead {instance.id}: {e}", exc_info=True)

@@ -1,4 +1,5 @@
 from django.contrib import admin
+from django.utils import timezone
 from .models import ServiceCategory, Lead, LeadAssignment
 
 
@@ -106,9 +107,30 @@ class LeadAdmin(admin.ModelAdmin):
     actions = ['mark_as_verified', 'mark_as_expired', 'resend_sms_verification']
     
     def mark_as_verified(self, request, queryset):
-        """Mark selected leads as verified"""
-        updated = queryset.update(status='verified')
-        self.message_user(request, f'{updated} leads marked as verified.')
+        """Mark selected leads as verified
+        
+        Uses individual saves to ensure post_save signals fire,
+        which triggers lead routing and provider notifications.
+        """
+        count = 0
+        for lead in queryset:
+            # Only update if not already verified to avoid unnecessary saves
+            if lead.status != 'verified':
+                lead.status = 'verified'
+                # Set verified_at timestamp if not already set
+                if not lead.verified_at:
+                    lead.verified_at = timezone.now()
+                lead.save()  # ✅ Triggers post_save signals properly
+                count += 1
+        
+        if count > 0:
+            self.message_user(
+                request, 
+                f'{count} lead{"s" if count != 1 else ""} marked as verified. '
+                f'Provider notifications sent.'
+            )
+        else:
+            self.message_user(request, 'No leads needed verification update.')
     mark_as_verified.short_description = 'Mark selected leads as verified'
     
     def mark_as_expired(self, request, queryset):
