@@ -24,16 +24,27 @@ export const initializeFirebase = (): FirebaseApp | null => {
     return null; // Server-side rendering
   }
 
-  if (!app) {
-    const apps = getApps();
-    if (apps.length === 0) {
-      app = initializeApp(firebaseConfig);
-    } else {
-      app = apps[0];
-    }
+  // Check if Firebase config is valid
+  if (!firebaseConfig.apiKey || !firebaseConfig.projectId) {
+    console.warn('Firebase configuration is missing. Push notifications will be disabled.');
+    return null;
   }
 
-  return app;
+  try {
+    if (!app) {
+      const apps = getApps();
+      if (apps.length === 0) {
+        app = initializeApp(firebaseConfig);
+        console.log('Firebase initialized successfully');
+      } else {
+        app = apps[0];
+      }
+    }
+    return app;
+  } catch (error) {
+    console.error('Failed to initialize Firebase:', error);
+    return null;
+  }
 };
 
 export const getFirebaseMessaging = async (): Promise<Messaging | null> => {
@@ -211,15 +222,29 @@ export const onForegroundMessage = (callback: (payload: any) => void) => {
     return () => {}; // Server-side rendering
   }
 
-  getFirebaseMessaging().then((messagingInstance) => {
-    if (messagingInstance) {
-      onMessage(messagingInstance, (payload) => {
-        console.log('Foreground message received:', payload);
-        callback(payload);
-      });
-    }
-  });
+  let unsubscribe: (() => void) | null = null;
+
+  getFirebaseMessaging()
+    .then((messagingInstance) => {
+      if (messagingInstance) {
+        try {
+          onMessage(messagingInstance, (payload) => {
+            console.log('Foreground message received:', payload);
+            callback(payload);
+          });
+        } catch (error) {
+          console.error('Error setting up foreground message listener:', error);
+        }
+      }
+    })
+    .catch((error) => {
+      console.error('Error getting Firebase Messaging for foreground messages:', error);
+    });
 
   // Return cleanup function
-  return () => {};
+  return () => {
+    if (unsubscribe) {
+      unsubscribe();
+    }
+  };
 };

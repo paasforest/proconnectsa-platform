@@ -6,11 +6,25 @@ import { subscribeToPushNotifications, unsubscribeFromPushNotifications, onForeg
 import { Bell, BellOff } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
+// Check if Firebase is configured
+const isFirebaseConfigured = () => {
+  if (typeof window === 'undefined') return false;
+  return !!(
+    process.env.NEXT_PUBLIC_FIREBASE_API || 
+    process.env.NEXT_PUBLIC_FIREBASE_API_KEY
+  ) && !!process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID;
+};
+
 export function PushNotificationManager() {
   const { user, token } = useAuth();
   const [isSubscribed, setIsSubscribed] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [permission, setPermission] = useState<NotificationPermission>('default');
+
+  // Don't render if Firebase is not configured
+  if (!isFirebaseConfigured()) {
+    return null;
+  }
 
   useEffect(() => {
     // Check current permission status
@@ -18,22 +32,36 @@ export function PushNotificationManager() {
       setPermission(Notification.permission);
     }
 
-    // Listen for foreground messages
-    const unsubscribe = onForegroundMessage((payload) => {
-      // Show notification even when app is open
-      if (payload.notification) {
-        new Notification(payload.notification.title, {
-          body: payload.notification.body,
-          icon: '/icon-192.png',
-          badge: '/icon-192.png',
-          tag: payload.data?.lead_id || 'notification',
-          data: payload.data,
+    // Listen for foreground messages (only if permission is granted)
+    let unsubscribe: (() => void) | null = null;
+    
+    if (typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'granted') {
+      try {
+        unsubscribe = onForegroundMessage((payload) => {
+          // Show notification even when app is open
+          if (payload?.notification && Notification.permission === 'granted') {
+            try {
+              new Notification(payload.notification.title, {
+                body: payload.notification.body,
+                icon: '/icon-192.png',
+                badge: '/icon-192.png',
+                tag: payload.data?.lead_id || 'notification',
+                data: payload.data,
+              });
+            } catch (error) {
+              console.error('Error showing notification:', error);
+            }
+          }
         });
+      } catch (error) {
+        console.error('Error setting up foreground message listener:', error);
       }
-    });
+    }
 
     return () => {
-      unsubscribe();
+      if (unsubscribe) {
+        unsubscribe();
+      }
     };
   }, []);
 
@@ -48,10 +76,13 @@ export function PushNotificationManager() {
       const success = await subscribeToPushNotifications(token);
       if (success) {
         setIsSubscribed(true);
-        setPermission('granted');
+        if (typeof window !== 'undefined' && 'Notification' in window) {
+          setPermission(Notification.permission);
+        }
       }
     } catch (error) {
       console.error('Error subscribing to push notifications:', error);
+      // Don't crash the app, just log the error
     } finally {
       setIsLoading(false);
     }
@@ -70,6 +101,7 @@ export function PushNotificationManager() {
       }
     } catch (error) {
       console.error('Error unsubscribing from push notifications:', error);
+      // Don't crash the app, just log the error
     } finally {
       setIsLoading(false);
     }
