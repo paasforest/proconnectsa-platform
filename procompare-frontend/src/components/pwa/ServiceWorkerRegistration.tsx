@@ -4,11 +4,10 @@ import { useEffect } from 'react';
 
 export function ServiceWorkerRegistration() {
   useEffect(() => {
-    // Only register service worker in production and if supported
+    // Register service worker (both development and production for testing)
     if (
       typeof window !== 'undefined' &&
-      'serviceWorker' in navigator &&
-      process.env.NODE_ENV === 'production'
+      'serviceWorker' in navigator
     ) {
       navigator.serviceWorker
         .register('/sw.js')

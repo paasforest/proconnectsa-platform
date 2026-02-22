@@ -110,11 +110,13 @@ def match_providers(lead):
 
 def notify_providers(lead, providers):
     """
-    Send email notifications to matched providers about a new lead.
+    Notify matched providers about a new lead.
+    Sends email, in-app notification, and push notification (if enabled).
 
     - Sends individual emails (not BCC) so each provider gets a personal notification
     - Records a Notification object for each provider
-    - Failures are caught per-provider so one bad email doesn't block others
+    - Sends push notification if provider has FCM subscription
+    - Failures are caught per-provider so one bad notification doesn't block others
 
     Args:
         lead: Lead instance
@@ -130,6 +132,7 @@ def notify_providers(lead, providers):
         try:
             _send_lead_email(lead, provider, lead_url)
             _create_notification(lead, provider)
+            _send_push_notification(lead, provider)
             logger.info(
                 f"[LeadRouter] Notified provider {provider.email} "
                 f"about lead {lead.id}"
@@ -212,6 +215,52 @@ def _create_notification(lead, provider):
         )
     except Exception as e:
         logger.warning(f"[LeadRouter] Could not create in-app notification: {e}")
+
+
+def _send_push_notification(lead, provider):
+    """
+    Send push notification to provider about new lead.
+    Uses FCM service if available and provider has active subscription.
+    """
+    try:
+        from backend.notifications.fcm_service import FCMService
+        
+        # Check if FCM is enabled
+        if not getattr(settings, 'FCM_ENABLED', True):
+            return
+        
+        # Check if provider has notification settings that allow push
+        from backend.notifications.models import NotificationSettings
+        try:
+            settings_obj = NotificationSettings.objects.get(user=provider)
+            if not settings_obj.push_enabled or not settings_obj.push_new_leads:
+                logger.debug(f"[LeadRouter] Push notifications disabled for provider {provider.id}")
+                return
+        except NotificationSettings.DoesNotExist:
+            # No settings = default to enabled
+            pass
+        
+        # Send push notification
+        title = f"New {lead.service_category.name} Lead"
+        location = f"{lead.location_suburb}, {lead.location_city}" if lead.location_suburb else lead.location_city
+        budget = getattr(lead, 'budget_range', 'Budget available')
+        body = f"{location} • {budget}"
+        
+        FCMService.send_lead_notification(
+            user=provider,
+            lead=lead,
+            title=title,
+            body=body,
+        )
+        
+        logger.info(f"[LeadRouter] Push notification sent to provider {provider.id} for lead {lead.id}")
+        
+    except ImportError:
+        # FCM service not available
+        logger.debug("[LeadRouter] FCM service not available, skipping push notification")
+    except Exception as e:
+        # Never let push notification failure block other notifications
+        logger.warning(f"[LeadRouter] Failed to send push notification to {provider.id}: {e}")
 
 
 def route_lead(lead):

@@ -1,5 +1,5 @@
 // Service Worker for ProConnectSA PWA
-// Version: 1.0.1 - Fixed API route handling
+// Version: 1.0.2 - Added push notification handling
 
 const CACHE_NAME = 'proconnectsa-v1';
 const RUNTIME_CACHE = 'proconnectsa-runtime-v1';
@@ -115,5 +115,94 @@ self.addEventListener('fetch', (event) => {
             throw error;
           });
       })
+  );
+});
+
+// Push notification event handler
+self.addEventListener('push', (event) => {
+  console.log('[SW] Push notification received:', event);
+  
+  let notificationData = {
+    title: 'ProConnectSA',
+    body: 'You have a new notification',
+    icon: '/icon-192.png',
+    badge: '/icon-192.png',
+    tag: 'proconnectsa-notification',
+    data: {},
+  };
+
+  // Parse push data
+  if (event.data) {
+    try {
+      const payload = event.data.json();
+      if (payload.notification) {
+        notificationData = {
+          ...notificationData,
+          title: payload.notification.title || notificationData.title,
+          body: payload.notification.body || notificationData.body,
+          icon: payload.notification.icon || notificationData.icon,
+          badge: payload.notification.badge || notificationData.badge,
+        };
+      }
+      if (payload.data) {
+        notificationData.data = payload.data;
+        notificationData.tag = payload.data.lead_id || payload.data.type || notificationData.tag;
+      }
+    } catch (e) {
+      // If JSON parsing fails, try text
+      const text = event.data.text();
+      if (text) {
+        notificationData.body = text;
+      }
+    }
+  }
+
+  // Show notification
+  event.waitUntil(
+    self.registration.showNotification(notificationData.title, {
+      body: notificationData.body,
+      icon: notificationData.icon,
+      badge: notificationData.badge,
+      tag: notificationData.tag,
+      data: notificationData.data,
+      requireInteraction: false,
+      vibrate: [200, 100, 200],
+    })
+  );
+});
+
+// Notification click handler
+self.addEventListener('notificationclick', (event) => {
+  console.log('[SW] Notification clicked:', event);
+  
+  event.notification.close();
+
+  // Get notification data
+  const data = event.notification.data || {};
+  const leadId = data.lead_id;
+  const action = data.action || 'view_dashboard';
+
+  // Determine URL based on action
+  let url = '/dashboard';
+  if (leadId && action === 'view_lead') {
+    url = `/dashboard/leads/${leadId}`;
+  } else if (action === 'view_notifications') {
+    url = '/dashboard/notifications';
+  }
+
+  // Open or focus the app
+  event.waitUntil(
+    clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
+      // Check if there's already a window open
+      for (const client of clientList) {
+        if (client.url === url && 'focus' in client) {
+          return client.focus();
+        }
+      }
+      // If no window is open, open a new one
+      if (clients.openWindow) {
+        return clients.openWindow(url);
+      }
+    })
   );
 });

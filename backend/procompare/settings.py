@@ -403,6 +403,20 @@ SMS_SENDER_ID = config('SMS_SENDER_ID', default='ProConnectSA')
 SMS_TIMEOUT = config('SMS_TIMEOUT', default=30, cast=int)
 SMS_RETRY_ATTEMPTS = config('SMS_RETRY_ATTEMPTS', default=3, cast=int)
 
+# =============================================================================
+# FIREBASE CLOUD MESSAGING (FCM) CONFIGURATION
+# =============================================================================
+
+# Firebase project configuration
+FIREBASE_PROJECT_ID = config('FIREBASE_PROJECT_ID', default='proconnectsa-c521c')
+FIREBASE_CREDENTIALS_PATH = config('FIREBASE_CREDENTIALS_PATH', default=None)
+
+# Enable/disable push notifications
+FCM_ENABLED = config('FCM_ENABLED', default=True, cast=bool)
+
+# Firebase VAPID key (for web push)
+FIREBASE_VAPID_KEY = config('FIREBASE_VAPID_KEY', default='BE6QY39MVold1j2s98d5xmGSYcRIKIKaCfe6phiVGc5c4m9F9Wxgeyf6QraRBPYJKwwMHySL9ZuT41JHbHHOITY')
+
 # Frontend URL
 FRONTEND_URL = config('FRONTEND_URL', default='http://localhost:3000')
 
