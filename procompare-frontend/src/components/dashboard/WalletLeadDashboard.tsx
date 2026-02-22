@@ -551,25 +551,25 @@ const WalletLeadDashboard = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <header className="bg-white shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-6 py-4">
-          <div className="flex justify-between items-center">
+      <header className="bg-white shadow-sm border-b sticky top-0 z-40">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 sm:py-4">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-0">
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">ProConnectSA</h1>
-              <p className="text-gray-600">Find and purchase qualified leads</p>
+              <h1 className="text-xl sm:text-2xl font-bold text-gray-900">ProConnectSA</h1>
+              <p className="text-sm sm:text-base text-gray-600">Find and purchase qualified leads</p>
             </div>
-            <div className="flex items-center space-x-6">
-              <div className="bg-green-50 px-4 py-2 rounded-lg border border-green-200">
+            <div className="flex items-center space-x-3 sm:space-x-6 w-full sm:w-auto justify-between sm:justify-end">
+              <div className="bg-green-50 px-3 sm:px-4 py-2 rounded-lg border border-green-200">
                 <div className="flex items-center space-x-2">
-                  <DollarSign className="h-5 w-5 text-green-600" />
-                  <span className="font-semibold text-green-700">{userCredits} Credits</span>
+                  <DollarSign className="h-4 w-4 sm:h-5 sm:w-5 text-green-600" />
+                  <span className="font-semibold text-sm sm:text-base text-green-700">{userCredits} Credits</span>
                 </div>
               </div>
               <button 
                 onClick={() => router.push('/dashboard/wallet')}
-                className="text-blue-600 hover:text-blue-700 font-medium"
+                className="text-sm sm:text-base text-blue-600 hover:text-blue-700 font-medium whitespace-nowrap"
               >
-                Buy More Credits
+                Buy Credits
               </button>
             </div>
           </div>
@@ -578,23 +578,24 @@ const WalletLeadDashboard = () => {
 
       {/* Notification */}
       {notification && (
-        <div className={`fixed top-4 right-4 z-50 max-w-sm p-4 rounded-lg shadow-lg transition-all duration-300 ${
+        <div className={`fixed top-4 left-4 right-4 sm:left-auto sm:right-4 sm:max-w-sm z-50 p-3 sm:p-4 rounded-lg shadow-lg transition-all duration-300 ${
           notification.type === 'success' 
             ? 'bg-green-50 border border-green-200 text-green-800' 
             : 'bg-red-50 border border-red-200 text-red-800'
         }`}>
           <div className="flex items-center justify-between">
-            <div className="flex items-center">
+            <div className="flex items-center min-w-0 flex-1">
               {notification.type === 'success' ? (
-                <CheckCircle className="h-5 w-5 text-green-600 mr-2" />
+                <CheckCircle className="h-4 w-4 sm:h-5 sm:w-5 text-green-600 mr-2 flex-shrink-0" />
               ) : (
-                <AlertCircle className="h-5 w-5 text-red-600 mr-2" />
+                <AlertCircle className="h-4 w-4 sm:h-5 sm:w-5 text-red-600 mr-2 flex-shrink-0" />
               )}
-              <span className="font-medium">{notification.message}</span>
+              <span className="font-medium text-sm sm:text-base break-words">{notification.message}</span>
             </div>
             <button 
               onClick={() => setNotification(null)}
-              className="ml-4 text-gray-400 hover:text-gray-600"
+              className="ml-2 sm:ml-4 text-gray-400 hover:text-gray-600 flex-shrink-0 text-xl sm:text-2xl leading-none"
+              aria-label="Close notification"
             >
               ×
             </button>
@@ -602,30 +603,31 @@ const WalletLeadDashboard = () => {
         </div>
       )}
 
-      <div className="max-w-7xl mx-auto px-6 py-8">
-        <div className="grid grid-cols-12 gap-8 min-h-[calc(100vh-200px)]">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 sm:py-8">
+        <div className="flex flex-col lg:grid lg:grid-cols-12 gap-4 sm:gap-6 lg:gap-8 min-h-[calc(100vh-200px)]">
           
           {/* LEFT PANEL: Leads List */}
-          <div className="col-span-4 space-y-4">
+          <div className="lg:col-span-4 space-y-4 order-1 lg:order-1">
             <div className="bg-white rounded-lg shadow-sm">
-              <div className="p-4 border-b border-gray-200">
+              <div className="p-3 sm:p-4 border-b border-gray-200">
                 <div className="flex items-center justify-between">
-                  <div>
-                    <h2 className="text-lg font-semibold text-gray-900">
+                  <div className="flex-1 min-w-0">
+                    <h2 className="text-base sm:text-lg font-semibold text-gray-900 truncate">
                       Available Leads ({leads.length})
                     </h2>
-                    <p className="text-sm text-gray-600">Click any lead to view details</p>
+                    <p className="text-xs sm:text-sm text-gray-600 hidden sm:block">Click any lead to view details</p>
+                    <p className="text-xs text-gray-600 sm:hidden">Tap to view details</p>
                   </div>
                   {refreshing && (
-                    <div className="flex items-center text-xs text-blue-600">
+                    <div className="flex items-center text-xs text-blue-600 ml-2 flex-shrink-0">
                       <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-blue-600 mr-2"></div>
-                      Refreshing...
+                      <span className="hidden sm:inline">Refreshing...</span>
                     </div>
                   )}
                 </div>
               </div>
               
-                <div className="max-h-[calc(100vh-300px)] overflow-y-auto">
+                <div className="max-h-[400px] sm:max-h-[500px] lg:max-h-[calc(100vh-300px)] overflow-y-auto">
                   {showSkeleton ? (
                     // Show skeleton while loading (only if no cached data)
                     <div>
@@ -655,62 +657,62 @@ const WalletLeadDashboard = () => {
                     leads.map((lead) => (
                       <div
                         key={lead.id}
-                        className={`p-4 border-b border-gray-100 cursor-pointer hover:bg-gray-50 transition-all ${
+                        className={`p-3 sm:p-4 border-b border-gray-100 cursor-pointer active:bg-gray-50 hover:bg-gray-50 transition-all touch-manipulation ${
                           selectedLead?.id === lead.id ? 'bg-blue-50 border-l-4 border-l-blue-500' : ''
                         }`}
                         onClick={() => setSelectedLead(lead)}
                       >
-                    <div className="flex justify-between items-start mb-2">
-                      <h3 className="font-semibold text-gray-900 text-sm line-clamp-2">
+                    <div className="flex justify-between items-start mb-2 gap-2">
+                      <h3 className="font-semibold text-gray-900 text-sm sm:text-base line-clamp-2 flex-1 min-w-0">
                         {lead.title}
                       </h3>
-                      <div className="flex items-center space-x-1 ml-2">
-                        <span className={`px-2 py-1 rounded-full text-xs font-medium border ${getUrgencyColor(lead.urgency)}`}>
+                      <div className="flex items-center space-x-1 ml-2 flex-shrink-0">
+                        <span className={`px-2 py-1 rounded-full text-xs font-medium border whitespace-nowrap ${getUrgencyColor(lead.urgency)}`}>
                           {lead.urgency}
                         </span>
                       </div>
                     </div>
                     
-                    <p className="text-sm text-gray-600 line-clamp-2 mb-3">
+                    <p className="text-xs sm:text-sm text-gray-600 line-clamp-2 mb-3">
                       {lead.description}
                     </p>
                     
                     <div className="space-y-2">
                       <div className="flex items-center text-xs text-gray-500">
-                        <MapPin className="h-3 w-3 mr-1" />
-                        <span>{lead.location_suburb}, {lead.location_city}</span>
+                        <MapPin className="h-3 w-3 mr-1 flex-shrink-0" />
+                        <span className="truncate">{lead.location_suburb}, {lead.location_city}</span>
                       </div>
                       
-                      <div className="flex items-center justify-between text-xs">
-                        <div className="flex items-center text-green-600">
-                          <DollarSign className="h-3 w-3 mr-1" />
-                          <span className="font-medium">{lead.budget_range}</span>
+                      <div className="flex items-center justify-between text-xs gap-2">
+                        <div className="flex items-center text-green-600 min-w-0">
+                          <DollarSign className="h-3 w-3 mr-1 flex-shrink-0" />
+                          <span className="font-medium truncate">{lead.budget_range}</span>
                         </div>
-                        <div className="flex items-center text-blue-600">
+                        <div className="flex items-center text-blue-600 flex-shrink-0">
                           <span className="font-medium">{lead.credit_cost} credits</span>
                         </div>
                       </div>
                       
-                      <div className="flex items-center justify-between text-xs text-gray-500">
-                        <div className="flex items-center">
-                          <Clock className="h-3 w-3 mr-1" />
-                          <span>{lead.timeAgo || 'Recently posted'}</span>
+                      <div className="flex items-center justify-between text-xs text-gray-500 gap-2">
+                        <div className="flex items-center min-w-0">
+                          <Clock className="h-3 w-3 mr-1 flex-shrink-0" />
+                          <span className="truncate">{lead.timeAgo || 'Recently posted'}</span>
                         </div>
-                        <div className="flex items-center">
+                        <div className="flex items-center flex-shrink-0">
                           <Users className="h-3 w-3 mr-1" />
-                          <span>{lead.current_responses}/{lead.max_providers} responses</span>
+                          <span>{lead.current_responses}/{lead.max_providers}</span>
                         </div>
                       </div>
                       
                       {lead.current_responses >= lead.max_providers && (
                         <div className={`px-2 py-1 rounded text-xs font-medium border ${getStatusColor('limited')}`}>
-                          Lead Full - No longer available
+                          Lead Full
                         </div>
                       )}
                       
                       {purchasedLeads.has(lead.id) && (
                         <div className="px-2 py-1 rounded text-xs font-medium bg-green-100 text-green-700 border border-green-200">
-                          ✓ Purchased - Contact details unlocked
+                          ✓ Purchased
                         </div>
                       )}
                       </div>
@@ -722,34 +724,34 @@ const WalletLeadDashboard = () => {
           </div>
 
           {/* CENTER PANEL: Lead Details */}
-          <div className="col-span-5">
+          <div className="lg:col-span-5 order-3 lg:order-2">
             {selectedLead ? (
               <div className="bg-white rounded-lg shadow-sm h-full flex flex-col">
-                <div className="p-6 border-b border-gray-200">
-                  <div className="flex justify-between items-start mb-4">
-                    <div>
-                      <h2 className="text-xl font-bold text-gray-900 mb-2">
+                <div className="p-4 sm:p-6 border-b border-gray-200">
+                  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-0 mb-4">
+                    <div className="flex-1 min-w-0">
+                      <h2 className="text-lg sm:text-xl font-bold text-gray-900 mb-2 break-words">
                         {selectedLead.title}
                       </h2>
-                      <div className="flex items-center space-x-4 text-sm text-gray-600">
-                        <span className="bg-blue-100 text-blue-700 px-2 py-1 rounded">
+                      <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-xs sm:text-sm text-gray-600">
+                        <span className="bg-blue-100 text-blue-700 px-2 py-1 rounded whitespace-nowrap">
                           {selectedLead.service_category.name}
                         </span>
                         <div className="flex items-center">
-                          <Clock className="h-4 w-4 mr-1" />
+                          <Clock className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
                           <span>{selectedLead.timeAgo || 'Recently posted'}</span>
                         </div>
                       </div>
                     </div>
-                    <div className="flex items-center space-x-2">
-                      <span className={`px-3 py-1 rounded-full text-sm font-medium border ${getUrgencyColor(selectedLead.urgency)}`}>
+                    <div className="flex items-center space-x-2 flex-shrink-0">
+                      <span className={`px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-medium border whitespace-nowrap ${getUrgencyColor(selectedLead.urgency)}`}>
                         {selectedLead.urgency} priority
                       </span>
                     </div>
                   </div>
                 </div>
                 
-                <div className="flex-1 p-6 overflow-y-auto space-y-6">
+                <div className="flex-1 p-4 sm:p-6 overflow-y-auto space-y-4 sm:space-y-6">
                   {/* Project Description */}
                   <div>
                     <h3 className="font-semibold text-gray-900 mb-3 flex items-center">
@@ -762,48 +764,48 @@ const WalletLeadDashboard = () => {
                   </div>
 
                   {/* Project Details */}
-                  <div className="grid grid-cols-2 gap-6">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                     <div>
-                      <h4 className="font-medium text-gray-900 mb-2">Location</h4>
-                      <div className="text-gray-700">
+                      <h4 className="font-medium text-sm sm:text-base text-gray-900 mb-2">Location</h4>
+                      <div className="text-sm sm:text-base text-gray-700">
                         <div className="flex items-center mb-1">
-                          <MapPin className="h-4 w-4 mr-2 text-gray-400" />
-                          <span>{selectedLead.location_suburb}, {selectedLead.location_city}</span>
+                          <MapPin className="h-4 w-4 mr-2 text-gray-400 flex-shrink-0" />
+                          <span className="break-words">{selectedLead.location_suburb}, {selectedLead.location_city}</span>
                         </div>
                         {purchasedLeads.has(selectedLead.id) ? (
-                          <div className="text-sm text-green-600 mt-1">
+                          <div className="text-xs sm:text-sm text-green-600 mt-1 break-words">
                             ✓ Exact address: {selectedLead.hidden_details.exact_address}
                           </div>
                         ) : (
-                          <div className="text-sm text-gray-500 flex items-center mt-1">
-                            <Lock className="h-3 w-3 mr-1" />
-                            Exact address hidden until purchased
+                          <div className="text-xs sm:text-sm text-gray-500 flex items-center mt-1">
+                            <Lock className="h-3 w-3 mr-1 flex-shrink-0" />
+                            <span>Exact address hidden until purchased</span>
                           </div>
                         )}
                       </div>
                     </div>
                     
                     <div>
-                      <h4 className="font-medium text-gray-900 mb-2">Budget Range</h4>
-                      <div className="flex items-center text-green-600 font-semibold">
-                        <DollarSign className="h-4 w-4 mr-1" />
-                        {selectedLead.budget_range}
+                      <h4 className="font-medium text-sm sm:text-base text-gray-900 mb-2">Budget Range</h4>
+                      <div className="flex items-center text-green-600 font-semibold text-sm sm:text-base">
+                        <DollarSign className="h-4 w-4 mr-1 flex-shrink-0" />
+                        <span className="break-words">{selectedLead.budget_range}</span>
                       </div>
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-6">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                     <div>
-                      <h4 className="font-medium text-gray-900 mb-2">Timeline</h4>
-                      <div className="flex items-center text-gray-700">
-                        <Calendar className="h-4 w-4 mr-2 text-gray-400" />
-                        {selectedLead.timeline}
+                      <h4 className="font-medium text-sm sm:text-base text-gray-900 mb-2">Timeline</h4>
+                      <div className="flex items-center text-sm sm:text-base text-gray-700">
+                        <Calendar className="h-4 w-4 mr-2 text-gray-400 flex-shrink-0" />
+                        <span className="break-words">{selectedLead.timeline}</span>
                       </div>
                     </div>
                     
                     <div>
-                      <h4 className="font-medium text-gray-900 mb-2">Property Type</h4>
-                      <div className="text-gray-700">
+                      <h4 className="font-medium text-sm sm:text-base text-gray-900 mb-2">Property Type</h4>
+                      <div className="text-sm sm:text-base text-gray-700 break-words">
                         {selectedLead.project_details.property_type}
                       </div>
                     </div>
@@ -879,18 +881,18 @@ const WalletLeadDashboard = () => {
           </div>
 
           {/* RIGHT PANEL: Purchase Actions */}
-          <div className="col-span-3">
+          <div className="lg:col-span-3 order-2 lg:order-3">
             {selectedLead ? (
-              <div className="bg-white rounded-lg shadow-sm p-6 sticky top-8">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">
+              <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6 lg:sticky lg:top-8">
+                <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-4">
                   Lead Purchase
                 </h3>
                 
                 {/* Lead Status */}
-                <div className="mb-6">
+                <div className="mb-4 sm:mb-6">
                   <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm text-gray-600">Responses</span>
-                    <span className="font-medium text-gray-900">
+                    <span className="text-xs sm:text-sm text-gray-600">Responses</span>
+                    <span className="font-medium text-sm sm:text-base text-gray-900">
                       {selectedLead.current_responses}/{selectedLead.max_providers}
                     </span>
                   </div>
@@ -908,16 +910,16 @@ const WalletLeadDashboard = () => {
                 </div>
 
                 {/* Credit Cost */}
-                <div className="bg-blue-50 rounded-lg p-4 mb-6">
+                <div className="bg-blue-50 rounded-lg p-3 sm:p-4 mb-4 sm:mb-6">
                   <div className="flex items-center justify-between mb-2">
-                    <span className="font-medium text-blue-900">Lead Cost</span>
+                    <span className="font-medium text-sm sm:text-base text-blue-900">Lead Cost</span>
                     <div className="flex items-center text-blue-900">
-                      <DollarSign className="h-5 w-5 mr-1" />
-                      <span className="text-2xl font-bold">{selectedLead.credit_cost}</span>
-                      <span className="text-sm ml-1">credits</span>
+                      <DollarSign className="h-4 w-4 sm:h-5 sm:w-5 mr-1" />
+                      <span className="text-xl sm:text-2xl font-bold">{selectedLead.credit_cost}</span>
+                      <span className="text-xs sm:text-sm ml-1">credits</span>
                     </div>
                   </div>
-                  <p className="text-sm text-blue-700">
+                  <p className="text-xs sm:text-sm text-blue-700">
                     Unlock full contact details and project information
                   </p>
                 </div>
@@ -952,13 +954,13 @@ const WalletLeadDashboard = () => {
                       <div className="grid grid-cols-1 gap-3">
                         <button 
                           onClick={() => purchaseLead(selectedLead.id)}
-                          className="w-full bg-green-600 text-white py-3 px-4 rounded-lg hover:bg-green-700 transition-colors font-semibold"
+                          className="w-full bg-green-600 text-white py-3 px-4 rounded-lg active:bg-green-700 hover:bg-green-700 transition-colors font-semibold text-sm sm:text-base touch-manipulation"
                         >
                           Reserve Lead & Get EFT Instructions
                         </button>
                         <button 
                           onClick={() => router.push('/dashboard/wallet')}
-                          className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 transition-colors font-semibold"
+                          className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg active:bg-blue-700 hover:bg-blue-700 transition-colors font-semibold text-sm sm:text-base touch-manipulation"
                         >
                           Buy More Credits
                         </button>
@@ -967,7 +969,7 @@ const WalletLeadDashboard = () => {
                   ) : (
                     <button
                       onClick={() => purchaseLead(selectedLead.id)}
-                      className="w-full bg-green-600 text-white py-3 px-4 rounded-lg hover:bg-green-700 transition-colors font-semibold"
+                      className="w-full bg-green-600 text-white py-3 px-4 rounded-lg active:bg-green-700 hover:bg-green-700 transition-colors font-semibold text-sm sm:text-base touch-manipulation"
                     >
                       Purchase Lead ({selectedLead.credit_cost} Credits)
                     </button>
@@ -975,9 +977,9 @@ const WalletLeadDashboard = () => {
                 </div>
 
                 {/* What's Included */}
-                <div className="mt-6 pt-6 border-t border-gray-200">
-                  <h4 className="font-medium text-gray-900 mb-3">What's included:</h4>
-                  <ul className="space-y-2 text-sm text-gray-600">
+                <div className="mt-4 sm:mt-6 pt-4 sm:pt-6 border-t border-gray-200">
+                  <h4 className="font-medium text-sm sm:text-base text-gray-900 mb-3">What's included:</h4>
+                  <ul className="space-y-2 text-xs sm:text-sm text-gray-600">
                     <li className="flex items-center">
                       <CheckCircle className="h-4 w-4 text-green-500 mr-2 flex-shrink-0" />
                       Client's full name and contact details
@@ -1008,8 +1010,8 @@ const WalletLeadDashboard = () => {
       </div>
       {/* Reserve Instructions Modal */}
       {reserveInfo && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="bg-white rounded-lg shadow-xl max-w-lg w-full mx-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="bg-white rounded-lg shadow-xl max-w-lg w-full max-h-[90vh] overflow-y-auto">
             <div className="p-6 border-b">
               <h3 className="text-lg font-semibold text-gray-900">Complete EFT to Unlock This Lead</h3>
               <p className="text-sm text-gray-600 mt-1">{reserveInfo.message}</p>
