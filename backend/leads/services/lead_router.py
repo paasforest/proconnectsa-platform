@@ -217,12 +217,24 @@ def _create_notification(lead, provider):
 def route_lead(lead):
     """
     Main entry point: match providers and notify them.
+    Now includes quality gate to filter out spam/low-quality leads.
     Called from signal. Fully exception-safe.
 
     Args:
         lead: Lead instance (should be status='verified')
     """
     try:
+        # Quality gate: Check if lead passes quality thresholds
+        passed, reason = passes_quality_gate(lead)
+        if not passed:
+            logger.warning(
+                f"[LeadRouter] Lead {lead.id} blocked by quality gate: {reason}"
+            )
+            # Flag it for admin review instead of routing
+            _flag_for_review(lead, reason)
+            return
+
+        # All quality checks passed - route to providers
         providers = match_providers(lead)
         if providers:
             notify_providers(lead, providers)
@@ -235,3 +247,190 @@ def route_lead(lead):
         # This function is called from a post_save signal.
         # We MUST NOT raise — it would silently break lead creation.
         logger.error(f"[LeadRouter] Routing failed for lead {lead.id}: {e}", exc_info=True)
+
+
+def passes_quality_gate(lead):
+    """
+    Rule-based quality checks before routing to providers.
+    Uses existing verification_score from auto-verification system.
+    Integrates with ML service if available.
+    
+    Returns:
+        (True, None) if passes, (False, reason) if blocked.
+    """
+    from django.utils import timezone
+    from datetime import timedelta
+    
+    # === LAYER 1: Hard Rules (Must Pass) ===
+    
+    # 1. Minimum verification score (from auto-verification system)
+    # Very low threshold (30) - just to catch obvious spam
+    if not hasattr(lead, 'verification_score') or lead.verification_score < 30:
+        return False, f"low_verification_score:{getattr(lead, 'verification_score', 0)}"
+    
+    # 2. Description quality check
+    description = (lead.description or '').strip()
+    if len(description) < 20:
+        return False, "description_too_short"
+    
+    if _is_gibberish(description):
+        return False, "gibberish_description"
+    
+    # 3. Disposable email detection
+    if lead.client and lead.client.email:
+        email = lead.client.email.lower()
+        disposable_domains = [
+            'mailinator.com', 'tempmail.com', 'guerrillamail.com',
+            'yopmail.com', '10minutemail.com', 'throwaway.email'
+        ]
+        if any(email.endswith(d) for d in disposable_domains):
+            return False, "disposable_email"
+    
+    # === LAYER 2: ML Quality Score (If Available) ===
+    # Use existing LeadQualityMLService if model is trained
+    try:
+        from backend.leads.ml_services import LeadQualityMLService
+        
+        ml_service = LeadQualityMLService()
+        
+        # Prepare lead data for ML
+        lead_data = {
+            'title': lead.title or '',
+            'description': lead.description or '',
+            'location_address': lead.location_address or '',
+            'location_suburb': lead.location_suburb or '',
+            'location_city': lead.location_city or '',
+            'budget_range': lead.budget_range or '',
+            'urgency': lead.urgency or 'flexible',
+            'hiring_intent': getattr(lead, 'hiring_intent', 'researching'),
+            'hiring_timeline': getattr(lead, 'hiring_timeline', 'flexible'),
+            'additional_requirements': getattr(lead, 'additional_requirements', ''),
+            'research_purpose': getattr(lead, 'research_purpose', ''),
+            'verification_score': lead.verification_score,
+            'contact_phone': lead.client.phone if lead.client else '',
+            'client__email': lead.client.email if lead.client else '',
+        }
+        
+        ml_score = ml_service.predict_lead_quality(lead_data)
+        
+        # ML threshold: 40/100 (low quality leads blocked)
+        if ml_score < 40:
+            return False, f"ml_quality_score_too_low:{ml_score:.1f}"
+            
+    except Exception as e:
+        # ML service not available or not trained - skip this layer
+        logger.debug(f"[QualityGate] ML check skipped for lead {lead.id}: {e}")
+    
+    # === LAYER 3: Duplicate Detection ===
+    # Same client + same category + within 24 hours = likely duplicate
+    if lead.client:
+        from backend.leads.models import Lead
+        
+        recent_duplicate = Lead.objects.filter(
+            client=lead.client,
+            service_category=lead.service_category,
+            created_at__gte=timezone.now() - timedelta(hours=24),
+        ).exclude(id=lead.id).exists()
+        
+        if recent_duplicate:
+            return False, "duplicate_lead"
+    
+    # All checks passed
+    return True, None
+
+
+def _is_gibberish(text):
+    """
+    Simple gibberish detector.
+    Flags text with no spaces, repeated characters, or suspicious patterns.
+    """
+    if not text:
+        return True
+    
+    words = text.split()
+    
+    # Too few words
+    if len(words) < 3:
+        return True
+    
+    # Average word length unreasonably high (random char strings)
+    avg_word_len = sum(len(w) for w in words) / len(words)
+    if avg_word_len > 15:
+        return True
+    
+    # Single repeated character pattern like "aaaaaaa" or "111111"
+    text_no_spaces = text.replace(' ', '').replace('\n', '')
+    if len(text_no_spaces) > 10 and len(set(text_no_spaces)) < 4:
+        return True
+    
+    # Too many repeated words (spam pattern)
+    if len(words) > 5:
+        word_counts = {}
+        for word in words:
+            word_counts[word.lower()] = word_counts.get(word.lower(), 0) + 1
+        max_repeats = max(word_counts.values())
+        if max_repeats > len(words) * 0.5:  # Same word > 50% of text
+            return True
+    
+    return False
+
+
+def _flag_for_review(lead, reason):
+    """
+    Flag a suspicious lead for admin review instead of routing it.
+    Updates verification_notes and sets status back to 'pending'.
+    """
+    flag_messages = {
+        'low_verification_score': 'Blocked: Verification score too low',
+        'gibberish_description': 'Blocked: Description appears to be gibberish',
+        'description_too_short': 'Blocked: Description too short',
+        'duplicate_lead': 'Blocked: Duplicate lead from same client within 24h',
+        'disposable_email': 'Blocked: Client using disposable email address',
+        'ml_quality_score_too_low': 'Blocked: ML quality score too low',
+    }
+    
+    # Extract reason key (handle cases like "low_verification_score:25")
+    reason_key = reason.split(':')[0]
+    note = flag_messages.get(reason_key, f'Blocked: {reason}')
+    
+    # Add full reason details if available
+    if ':' in reason:
+        note += f" ({reason})"
+    
+    # Update lead to flag for review
+    from backend.leads.models import Lead
+    Lead.objects.filter(id=lead.id).update(
+        verification_notes=note,
+        status='pending'  # Kick back to pending for admin review
+    )
+    
+    logger.warning(f"[QualityGate] Lead {lead.id} flagged for review → {note}")
+    
+    # Optionally notify admin (but don't block if this fails)
+    try:
+        from backend.notifications.models import Notification
+        from backend.users.models import User
+        
+        admin_users = User.objects.filter(
+            is_staff=True
+        ).distinct()[:5]  # Limit to 5 admins to avoid spam
+        
+        for admin in admin_users:
+            Notification.objects.create(
+                user=admin,
+                notification_type='system',
+                title=f"Lead Flagged for Review: {lead.title[:50]}",
+                message=(
+                    f"Lead {lead.id} was blocked by quality gate: {note}. "
+                    f"Please review and verify manually if needed."
+                ),
+                priority='medium',
+                lead=lead,
+                data={
+                    'lead_id': str(lead.id),
+                    'block_reason': reason,
+                    'action_required': 'review_lead',
+                }
+            )
+    except Exception as e:
+        logger.warning(f"[QualityGate] Failed to notify admins: {e}")
