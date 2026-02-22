@@ -26,7 +26,8 @@ const nextConfig: NextConfig = {
   async headers() {
     return [
       {
-        source: '/(.*)',
+        // Apply headers to all routes EXCEPT static files and Next.js internals
+        source: '/((?!_next/static|_next/image|favicon.ico|sw.js|manifest.json|icon-.*\\.png).*)',
         headers: [
           {
             key: 'X-Frame-Options',
