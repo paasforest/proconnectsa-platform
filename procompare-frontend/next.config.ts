@@ -23,11 +23,11 @@ const nextConfig: NextConfig = {
   // },
 
   // Headers for CORS and security
+  // Note: Next.js automatically excludes /_next/* paths from custom headers
   async headers() {
     return [
       {
-        // Apply headers to all routes EXCEPT static files and Next.js internals
-        source: '/((?!_next/static|_next/image|favicon.ico|sw.js|manifest.json|icon-.*\\.png).*)',
+        source: '/:path*',
         headers: [
           {
             key: 'X-Frame-Options',

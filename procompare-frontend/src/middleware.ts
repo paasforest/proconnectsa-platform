@@ -4,6 +4,16 @@ import type { NextRequest } from "next/server"
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
 
+  // NEVER interfere with Next.js internals or static files
+  if (
+    pathname.startsWith('/_next/') ||
+    pathname.startsWith('/api/') ||
+    pathname.startsWith('/static/') ||
+    pathname.includes('.') // Static files have extensions
+  ) {
+    return NextResponse.next()
+  }
+
   // Allow access to public routes
   const publicRoutes = [
     "/",
@@ -32,12 +42,17 @@ export function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    "/dashboard/:path*",
-    "/client/:path*",
-    "/admin/:path*",
-    "/profile/:path*",
-    "/settings/:path*",
-    "/leads/:path*",
+    /*
+     * Match all request paths except for the ones starting with:
+     * - api (API routes)
+     * - _next/static (static files)
+     * - _next/image (image optimization files)
+     * - favicon.ico (favicon file)
+     * - sw.js (service worker)
+     * - manifest.json (PWA manifest)
+     * - icon-*.png (PWA icons)
+     */
+    '/((?!api|_next/static|_next/image|favicon.ico|sw.js|manifest.json|icon-.*\\.png).*)',
   ],
 }
 
