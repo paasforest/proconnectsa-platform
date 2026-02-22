@@ -172,24 +172,21 @@ class LeadQualityMLService:
             
             # If we don't have enough completed leads, also include verified leads
             if completed_leads.count() < min_leads:
-                leads = Lead.objects.filter(
+                leads_qs = Lead.objects.filter(
                     status__in=['completed', 'cancelled', 'expired', 'verified']
-                ).select_related('client').values(
-                    'title', 'description', 'location_address', 'location_suburb', 
-                    'location_city', 'budget_range', 'urgency', 'hiring_intent',
-                    'hiring_timeline', 'additional_requirements', 'research_purpose',
-                    'verification_score', 'assigned_providers_count', 'total_provider_contacts', 
-                    'status', 'client__phone', 'client__email'
-                )
-                logger.info(f"Using {leads.count()} leads (including verified) for training")
+                ).select_related('client')
+                logger.info(f"Using {leads_qs.count()} leads (including verified) for training")
             else:
-                leads = completed_leads.select_related('client').values(
-                    'title', 'description', 'location_address', 'location_suburb', 
-                    'location_city', 'budget_range', 'urgency', 'hiring_intent',
-                    'hiring_timeline', 'additional_requirements', 'research_purpose',
-                    'verification_score', 'assigned_providers_count', 'total_provider_contacts', 
-                    'status', 'client__phone', 'client__email'
-                )
+                leads_qs = completed_leads.select_related('client')
+            
+            # Convert to list of dicts
+            leads = list(leads_qs.values(
+                'title', 'description', 'location_address', 'location_suburb', 
+                'location_city', 'budget_range', 'urgency', 'hiring_intent',
+                'hiring_timeline', 'additional_requirements', 'research_purpose',
+                'verification_score', 'assigned_providers_count', 'total_provider_contacts', 
+                'status', 'client__phone', 'client__email'
+            ))
             
             if len(leads) < min_leads:
                 logger.warning(f"Not enough data to train quality model: {len(leads)} < {min_leads}")
