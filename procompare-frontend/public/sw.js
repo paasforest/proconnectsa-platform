@@ -1,8 +1,12 @@
 // Service Worker for ProConnectSA PWA
-// Version: 1.0.2 - Added push notification handling
+// Version: 1.0.3 - Added update detection and version management
+// This file's modification triggers automatic updates
 
-const CACHE_NAME = 'proconnectsa-v1';
-const RUNTIME_CACHE = 'proconnectsa-runtime-v1';
+// Use a version that changes with each deployment
+// The service worker file itself acts as the version - when it changes, browser detects update
+const CACHE_VERSION = 'v1.0.3';
+const CACHE_NAME = `proconnectsa-${CACHE_VERSION}`;
+const RUNTIME_CACHE = `proconnectsa-runtime-${CACHE_VERSION}`;
 
 // Assets to cache on install
 const STATIC_ASSETS = [
@@ -13,13 +17,17 @@ const STATIC_ASSETS = [
 
 // Install event - cache static assets
 self.addEventListener('install', (event) => {
+  console.log('[SW] Installing service worker version:', APP_VERSION);
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then((cache) => {
         console.log('[SW] Caching static assets');
         return cache.addAll(STATIC_ASSETS);
       })
-      .then(() => self.skipWaiting())
+      .then(() => {
+        // Skip waiting to activate immediately
+        return self.skipWaiting();
+      })
   );
 });
 
@@ -205,4 +213,12 @@ self.addEventListener('notificationclick', (event) => {
       }
     })
   );
+});
+
+// Listen for skip waiting message from client
+self.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'SKIP_WAITING') {
+    console.log('[SW] Received SKIP_WAITING message, activating new service worker');
+    self.skipWaiting();
+  }
 });
