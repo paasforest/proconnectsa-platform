@@ -171,11 +171,11 @@ class LeadQualityMLService:
             )
             
             # If we don't have enough completed leads, also include verified leads
-            if completed_leads.count() < min_leads:
+            completed_count = completed_leads.count()
+            if completed_count < min_leads:
                 leads_qs = Lead.objects.filter(
                     status__in=['completed', 'cancelled', 'expired', 'verified']
                 ).select_related('client')
-                logger.info(f"Using {leads_qs.count()} leads (including verified) for training")
             else:
                 leads_qs = completed_leads.select_related('client')
             
@@ -188,21 +188,28 @@ class LeadQualityMLService:
                 'status', 'client__phone', 'client__email'
             ))
             
+            logger.info(f"Using {len(leads)} leads for training (completed: {completed_count})")
+            
             if len(leads) < min_leads:
                 logger.warning(f"Not enough data to train quality model: {len(leads)} < {min_leads}")
                 return False
             
             # Fit TF-IDF vectorizer on historical texts
-            texts = [f"{l['title']} {l['description']}" for l in leads]
-            try:
-                self.text_vectorizer = TfidfVectorizer(
-                    max_features=500,
-                    ngram_range=(1, 2),
-                    stop_words='english'
-                )
-                self.text_vectorizer.fit(texts)
-            except Exception as e:
-                logger.warning(f"TF-IDF vectorizer fit failed, proceeding without: {e}")
+            texts = [f"{l.get('title', '')} {l.get('description', '')}" for l in leads if l.get('title') or l.get('description')]
+            if texts and len(texts) > 0:
+                try:
+                    self.text_vectorizer = TfidfVectorizer(
+                        max_features=500,
+                        ngram_range=(1, 2),
+                        stop_words='english'
+                    )
+                    self.text_vectorizer.fit(texts)
+                    logger.info(f"TF-IDF vectorizer fitted on {len(texts)} texts")
+                except Exception as e:
+                    logger.warning(f"TF-IDF vectorizer fit failed, proceeding without: {e}")
+                    self.text_vectorizer = None
+            else:
+                logger.warning("No text data available for TF-IDF vectorizer")
                 self.text_vectorizer = None
 
             # Prepare data
@@ -227,8 +234,16 @@ class LeadQualityMLService:
                     'contact_email': lead['client__email'],
                 }
                 
-                features = self.extract_features(lead_data)
-                X.append(list(features.values()))
+                try:
+                    features = self.extract_features(lead_data)
+                    if features and isinstance(features, dict):
+                        X.append(list(features.values()))
+                    else:
+                        logger.warning(f"Skipping lead with invalid features: {lead.get('title', 'unknown')}")
+                        continue
+                except Exception as e:
+                    logger.warning(f"Error extracting features for lead: {e}")
+                    continue
                 
                 # Quality score based on outcomes
                 if lead['status'] == 'completed':
