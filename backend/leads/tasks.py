@@ -1626,3 +1626,26 @@ def bulletproof_flow_check():
         }
 
 
+
+@shared_task
+def auto_verify_pending_leads_task():
+    """
+    Periodic task to auto-verify pending leads that meet quality criteria.
+    Runs every 5 minutes to catch any leads that were missed during creation.
+    """
+    try:
+        from backend.leads.services.lead_auto_verifier import auto_verify_pending_leads
+        result = auto_verify_pending_leads()
+        logger.info(
+            f"🤖 Auto-verification task completed: "
+            f"{result['auto_verified']} verified, "
+            f"{result['needs_review']} need review"
+        )
+        return result
+    except Exception as e:
+        logger.error(f"Auto-verification task failed: {str(e)}", exc_info=True)
+        return {
+            'success': False,
+            'error': str(e),
+            'timestamp': timezone.now().isoformat()
+        }

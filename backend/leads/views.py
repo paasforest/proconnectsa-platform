@@ -470,12 +470,21 @@ def create_public_lead(request):
         validated_data = serializer.validated_data
         validated_data['client'] = client_user
         
-        # Auto-verify public leads since they come from our website form
-        validated_data['status'] = 'verified'
-        validated_data['verification_score'] = 75  # Good score for website leads
-        validated_data['verified_at'] = timezone.now()
+        # Set source to 'website' for public form leads
+        validated_data['source'] = 'website'
+        
+        # Start as 'pending' - auto-verification signal will verify if quality is good
+        # This ensures all leads go through quality scoring, even from website
+        validated_data['status'] = 'pending'
         
         lead = Lead.objects.create(**validated_data)
+        
+        # Auto-verify will run via signal, but we can also trigger it here for immediate processing
+        try:
+            from backend.leads.services.lead_auto_verifier import auto_verify_lead
+            auto_verify_lead(lead)
+        except Exception as e:
+            logger.warning(f"Auto-verification failed for lead {lead.id}, will retry via signal: {e}")
         
         # Calculate and store credit cost for this lead
         try:

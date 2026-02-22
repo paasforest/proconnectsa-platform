@@ -1,5 +1,11 @@
 # Lead routing services
 from .lead_router import route_lead, match_providers, notify_providers
+from .lead_auto_verifier import (
+    auto_verify_lead,
+    calculate_lead_verification_score,
+    auto_verify_pending_leads,
+    notify_admin_review_needed
+)
 
 # Re-export existing services from parent services.py to maintain backward compatibility
 # Import using absolute import to avoid package context issues
@@ -40,4 +46,9 @@ _spec.loader.exec_module(_leads_services)
 LeadAssignmentService = _leads_services.LeadAssignmentService
 LeadFilteringService = _leads_services.LeadFilteringService
 
-__all__ = ['route_lead', 'match_providers', 'notify_providers', 'LeadAssignmentService', 'LeadFilteringService']
+__all__ = [
+    'route_lead', 'match_providers', 'notify_providers',
+    'LeadAssignmentService', 'LeadFilteringService',
+    'auto_verify_lead', 'calculate_lead_verification_score',
+    'auto_verify_pending_leads', 'notify_admin_review_needed'
+]

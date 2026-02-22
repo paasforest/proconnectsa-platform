@@ -73,6 +73,38 @@ def auto_assign_lead_to_providers(sender, instance, created, **kwargs):
 
 
 @receiver(post_save, sender=Lead)
+def auto_verify_new_lead(sender, instance, created, **kwargs):
+    """
+    Automatically verify new leads based on quality scores.
+    Only runs for newly created leads with status='pending'.
+    """
+    if not created:
+        return  # Only process new leads
+    
+    if instance.status != 'pending':
+        return  # Only process pending leads (skip already verified ones)
+    
+    # Skip if verification_score is already set (means it was manually set)
+    if instance.verification_score and instance.verification_score > 0:
+        # Score already calculated, just check if we should auto-verify
+        if instance.verification_score >= 70:
+            if instance.status != 'verified':
+                instance.status = 'verified'
+                from django.utils import timezone
+                instance.verified_at = timezone.now()
+                instance.save(update_fields=['status', 'verified_at'])
+                logger.info(f"✅ Auto-verified lead {instance.id} (score: {instance.verification_score})")
+        return
+    
+    # Calculate and auto-verify
+    try:
+        from backend.leads.services.lead_auto_verifier import auto_verify_lead
+        auto_verify_lead(instance)
+    except Exception as e:
+        logger.error(f"Failed to auto-verify lead {instance.id}: {e}", exc_info=True)
+
+
+@receiver(post_save, sender=Lead)
 def route_verified_lead(sender, instance, created, **kwargs):
     """
     Route verified leads to matching providers via lead router.

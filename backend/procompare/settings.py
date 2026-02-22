@@ -433,6 +433,10 @@ CELERY_BEAT_SCHEDULE = {
         'task': 'backend.leads.tasks.bulletproof_flow_check',
         'schedule': 3600.0,  # Every hour (3600 seconds) - SYSTEM INTEGRITY
     },
+    'auto-verify-pending-leads': {
+        'task': 'backend.leads.tasks.auto_verify_pending_leads_task',
+        'schedule': 300.0,  # Every 5 minutes (300 seconds) - Auto-verify pending leads
+    },
 }
 
 # ML training thresholds
