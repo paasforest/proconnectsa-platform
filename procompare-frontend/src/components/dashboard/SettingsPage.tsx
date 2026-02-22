@@ -3,11 +3,12 @@
 import React, { useState, useEffect } from 'react';
 import {
   User, Mail, Phone, MapPin, Save, Eye, EyeOff, 
-  Camera, Upload, CheckCircle, AlertCircle, Star, XCircle, Copy, RefreshCw
+  Camera, Upload, CheckCircle, AlertCircle, Star, XCircle, Copy, RefreshCw, Bell
 } from 'lucide-react';
 import { apiClient } from '@/lib/api-simple';
 import { useAuth } from '@/components/AuthProvider';
 import GoogleReviewForm from './GoogleReviewForm';
+import { PushNotificationManager } from '@/components/pwa/PushNotificationManager';
 
 interface UserProfile {
   id: string;
@@ -896,6 +897,34 @@ const SettingsPage = () => {
             >
               Change Password
             </button>
+          </div>
+
+          {/* Push Notifications */}
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+              <Bell className="w-5 h-5" />
+              Push Notifications
+            </h3>
+            
+            <div className="space-y-4">
+              <p className="text-sm text-gray-600">
+                Get instant notifications about new leads, messages, and important updates directly on your device.
+              </p>
+              
+              <div className="pt-2">
+                <PushNotificationManager />
+              </div>
+              
+              <div className="text-xs text-gray-500 mt-4 pt-4 border-t border-gray-200">
+                <p className="font-medium mb-1">How it works:</p>
+                <ul className="list-disc list-inside space-y-1">
+                  <li>Click "Enable Notifications" to allow push notifications</li>
+                  <li>You'll receive instant alerts for new leads matching your services</li>
+                  <li>Notifications work even when the app is closed</li>
+                  <li>You can disable notifications anytime</li>
+                </ul>
+              </div>
+            </div>
           </div>
 
           {/* Password Change Form */}
