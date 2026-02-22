@@ -9,8 +9,9 @@ export function ServiceWorkerRegistration() {
       typeof window !== 'undefined' &&
       'serviceWorker' in navigator
     ) {
+      // Register service worker with error handling
       navigator.serviceWorker
-        .register('/sw.js')
+        .register('/sw.js', { scope: '/' })
         .then((registration) => {
           console.log('[SW] Service Worker registered:', registration);
 
@@ -34,7 +35,9 @@ export function ServiceWorkerRegistration() {
           });
         })
         .catch((error) => {
-          console.error('[SW] Service Worker registration failed:', error);
+          // Don't crash the app if service worker fails - it's optional
+          console.warn('[SW] Service Worker registration failed (non-critical):', error.message || error);
+          // Service worker is optional - app will work without it
         });
     }
   }, []);
