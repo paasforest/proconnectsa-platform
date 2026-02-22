@@ -1,5 +1,5 @@
 // Service Worker for ProConnectSA PWA
-// Version: 1.0.0
+// Version: 1.0.1 - Fixed API route handling
 
 const CACHE_NAME = 'proconnectsa-v1';
 const RUNTIME_CACHE = 'proconnectsa-runtime-v1';
@@ -44,16 +44,30 @@ self.addEventListener('activate', (event) => {
 
 // Fetch event - serve from cache, fallback to network
 self.addEventListener('fetch', (event) => {
-  // Skip non-GET requests
+  const url = new URL(event.request.url);
+  
+  // Skip non-GET requests (POST, PUT, DELETE, etc.)
   if (event.request.method !== 'GET') {
     return;
   }
 
-  // Skip cross-origin requests
-  if (!event.request.url.startsWith(self.location.origin)) {
+  // Skip cross-origin requests (API calls to external domains)
+  if (!url.origin.startsWith(self.location.origin)) {
     return;
   }
 
+  // IMPORTANT: Skip API routes - they should always go to network
+  // API routes should never be cached
+  if (url.pathname.startsWith('/api/')) {
+    return; // Let the browser handle API calls normally
+  }
+
+  // Skip service worker and manifest requests
+  if (url.pathname === '/sw.js' || url.pathname === '/manifest.json') {
+    return;
+  }
+
+  // Only cache static assets and pages
   event.respondWith(
     caches.match(event.request)
       .then((cachedResponse) => {
@@ -70,22 +84,35 @@ self.addEventListener('fetch', (event) => {
               return response;
             }
 
-            // Clone the response for caching
-            const responseToCache = response.clone();
+            // Only cache HTML pages and static assets (images, CSS, JS)
+            const shouldCache = 
+              event.request.destination === 'document' || // HTML pages
+              event.request.destination === 'image' ||     // Images
+              event.request.destination === 'style' ||     // CSS
+              event.request.destination === 'script' ||   // JavaScript
+              event.request.destination === 'font';        // Fonts
 
-            // Cache the response
-            caches.open(RUNTIME_CACHE)
-              .then((cache) => {
-                cache.put(event.request, responseToCache);
-              });
+            if (shouldCache) {
+              // Clone the response for caching
+              const responseToCache = response.clone();
+
+              // Cache the response
+              caches.open(RUNTIME_CACHE)
+                .then((cache) => {
+                  cache.put(event.request, responseToCache);
+                });
+            }
 
             return response;
           })
-          .catch(() => {
+          .catch((error) => {
+            console.error('[SW] Fetch failed:', error);
             // If network fails and no cache, return offline page if available
             if (event.request.destination === 'document') {
               return caches.match('/');
             }
+            // For other requests, let the error propagate
+            throw error;
           });
       })
   );
