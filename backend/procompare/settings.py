@@ -409,7 +409,11 @@ SMS_RETRY_ATTEMPTS = config('SMS_RETRY_ATTEMPTS', default=3, cast=int)
 
 # Firebase project configuration
 FIREBASE_PROJECT_ID = config('FIREBASE_PROJECT_ID', default='proconnectsa-c521c')
-FIREBASE_CREDENTIALS_PATH = config('FIREBASE_CREDENTIALS_PATH', default=None)
+# Try both possible filenames (some downloads add .json extension)
+FIREBASE_CREDENTIALS_PATH = config(
+    'FIREBASE_CREDENTIALS_PATH', 
+    default='/opt/proconnectsa/firebase-credentials.json.json'  # Default to double .json extension
+)
 
 # Enable/disable push notifications
 FCM_ENABLED = config('FCM_ENABLED', default=True, cast=bool)

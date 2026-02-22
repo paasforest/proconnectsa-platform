@@ -54,6 +54,7 @@ class FCMService:
             
             if cred_path:
                 import os
+                # Try the specified path first
                 if os.path.exists(cred_path):
                     cred = credentials.Certificate(cred_path)
                     firebase_admin.initialize_app(cred)
@@ -61,7 +62,21 @@ class FCMService:
                     logger.info(f"Firebase initialized with credentials from {cred_path}")
                     return True
                 else:
-                    logger.error(f"Firebase credentials file not found: {cred_path}")
+                    # Try alternative paths (handle double .json extension)
+                    alt_paths = [
+                        cred_path.replace('.json.json', '.json'),
+                        cred_path.replace('.json', '.json.json'),
+                        '/opt/proconnectsa/firebase-credentials.json.json',
+                        '/opt/proconnectsa/firebase-credentials.json',
+                    ]
+                    for alt_path in alt_paths:
+                        if alt_path != cred_path and os.path.exists(alt_path):
+                            cred = credentials.Certificate(alt_path)
+                            firebase_admin.initialize_app(cred)
+                            cls._initialized = True
+                            logger.info(f"Firebase initialized with credentials from {alt_path}")
+                            return True
+                    logger.error(f"Firebase credentials file not found: {cred_path} (also tried: {', '.join(alt_paths)})")
                     return False
             else:
                 # Try to use default credentials (for Google Cloud environments)

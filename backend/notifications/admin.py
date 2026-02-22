@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Notification, NotificationSettings, NotificationTemplate
+from .models import Notification, NotificationSettings, PushSubscription
 
 
 @admin.register(Notification)
@@ -69,15 +69,16 @@ class NotificationAdmin(admin.ModelAdmin):
 @admin.register(NotificationSettings)
 class NotificationSettingsAdmin(admin.ModelAdmin):
     """Admin configuration for NotificationSettings model"""
-    list_display = ['user', 'email_notifications', 'sms_notifications', 'dashboard_notifications']
-    list_filter = ['email_notifications', 'sms_notifications', 'dashboard_notifications']
+    list_display = ['user', 'push_enabled', 'email_enabled', 'sms_enabled']
+    list_filter = ['push_enabled', 'email_enabled', 'sms_enabled']
     search_fields = ['user__username', 'user__email']
 
 
-@admin.register(NotificationTemplate)
-class NotificationTemplateAdmin(admin.ModelAdmin):
-    """Admin configuration for NotificationTemplate model"""
-    list_display = ['name', 'notification_type', 'priority', 'is_active']
-    list_filter = ['notification_type', 'priority', 'is_active']
-    search_fields = ['name', 'title_template', 'message_template']
+@admin.register(PushSubscription)
+class PushSubscriptionAdmin(admin.ModelAdmin):
+    """Admin configuration for PushSubscription model"""
+    list_display = ['user', 'device_type', 'is_active', 'created_at', 'last_used_at']
+    list_filter = ['device_type', 'is_active', 'created_at']
+    search_fields = ['user__username', 'user__email', 'token']
+    readonly_fields = ['created_at', 'updated_at', 'last_used_at']
 
