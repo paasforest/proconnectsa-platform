@@ -144,44 +144,108 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
 
   // Fetch notifications from API
   useEffect(() => {
+    if (!token) return;
+    
+    let intervalId: NodeJS.Timeout | null = null;
+    let shouldStop = false;
+    
     const fetchNotifications = async () => {
-      if (!token) return;
+      if (!token || shouldStop) return;
       
       try {
         apiClient.setToken(token);
         const response = await apiClient.get('/api/notifications/');
         setNotifications(response.results || response);
-      } catch (error) {
+      } catch (error: any) {
+        // Stop polling on 401 Unauthorized
+        if (error?.response?.status === 401 || error?.message?.includes('401')) {
+          console.log('[Notifications] Token expired, stopping polling');
+          shouldStop = true;
+          if (intervalId) {
+            clearInterval(intervalId);
+            intervalId = null;
+          }
+          setNotifications([]);
+          return;
+        }
         setNotifications([]);
       }
     };
 
+    // Initial fetch
+    fetchNotifications();
+    
+    // Only start polling if token is valid
     if (token) {
-      fetchNotifications();
-      const interval = setInterval(fetchNotifications, 30000);
-      return () => clearInterval(interval);
+      intervalId = setInterval(() => {
+        if (!shouldStop && token) {
+          fetchNotifications();
+        } else if (intervalId) {
+          clearInterval(intervalId);
+          intervalId = null;
+        }
+      }, 30000);
     }
+    
+    return () => {
+      shouldStop = true;
+      if (intervalId) {
+        clearInterval(intervalId);
+      }
+    };
   }, [token]);
 
   // Fetch notification count
   useEffect(() => {
+    if (!token || !user) return;
+    
+    let intervalId: NodeJS.Timeout | null = null;
+    let shouldStop = false;
+    
     const fetchNotificationCount = async () => {
-      if (!token) return;
+      if (!token || !user || shouldStop) return;
       
       try {
         apiClient.setToken(token);
         const response = await apiClient.getNotificationCount();
         setNotificationCount((response as any).unread_count || 0);
-      } catch (error) {
+      } catch (error: any) {
+        // Stop polling on 401 Unauthorized
+        if (error?.response?.status === 401 || error?.message?.includes('401')) {
+          console.log('[Notification Count] Token expired, stopping polling');
+          shouldStop = true;
+          if (intervalId) {
+            clearInterval(intervalId);
+            intervalId = null;
+          }
+          setNotificationCount(0);
+          return;
+        }
         setNotificationCount(0);
       }
     };
 
-    if (user) {
-      fetchNotificationCount();
-      const interval = setInterval(fetchNotificationCount, 10000);
-      return () => clearInterval(interval);
+    // Initial fetch
+    fetchNotificationCount();
+    
+    // Only start polling if user and token are valid
+    if (user && token) {
+      intervalId = setInterval(() => {
+        if (!shouldStop && token && user) {
+          fetchNotificationCount();
+        } else if (intervalId) {
+          clearInterval(intervalId);
+          intervalId = null;
+        }
+      }, 10000);
     }
+    
+    return () => {
+      shouldStop = true;
+      if (intervalId) {
+        clearInterval(intervalId);
+      }
+    };
   }, [user, token]);
 
   const handleLogout = async () => {
