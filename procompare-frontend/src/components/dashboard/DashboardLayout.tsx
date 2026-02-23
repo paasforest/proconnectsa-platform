@@ -10,7 +10,6 @@ import {
 } from 'lucide-react';
 import { apiClient } from '@/lib/api-simple';
 import PersonalizedHeader from './PersonalizedHeader';
-import { PushNotificationWrapper } from '@/components/pwa/PushNotificationWrapper';
 
 interface UserStats {
   credit_balance: number;
@@ -497,11 +496,6 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
           {children}
         </main>
       </div>
-      
-      {/* Push Notifications - Only for providers, wrapped in error boundary */}
-      {user && (user.user_type === 'provider' || user.user_type === 'service_provider' || (user as any).business_name) && (
-        <PushNotificationWrapper />
-      )}
     </div>
   );
 };

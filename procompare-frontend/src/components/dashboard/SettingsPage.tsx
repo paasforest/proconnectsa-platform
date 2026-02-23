@@ -8,7 +8,6 @@ import {
 import { apiClient } from '@/lib/api-simple';
 import { useAuth } from '@/components/AuthProvider';
 import GoogleReviewForm from './GoogleReviewForm';
-import { PushNotificationManager } from '@/components/pwa/PushNotificationManager';
 
 interface UserProfile {
   id: string;
@@ -911,21 +910,16 @@ const SettingsPage = () => {
                 Get instant notifications about new leads, messages, and important updates directly on your device.
               </p>
               
-              <div className="pt-2">
-                <PushNotificationManager />
-              </div>
               
-              {permission !== 'denied' && (
-                <div className="text-xs text-gray-500 mt-4 pt-4 border-t border-gray-200">
-                  <p className="font-medium mb-1">How it works:</p>
-                  <ul className="list-disc list-inside space-y-1">
-                    <li>Click "Enable Notifications" to allow push notifications</li>
-                    <li>You'll receive instant alerts for new leads matching your services</li>
-                    <li>Notifications work even when the app is closed</li>
-                    <li>You can disable notifications anytime</li>
-                  </ul>
-                </div>
-              )}
+              <div className="text-xs text-gray-500 mt-4 pt-4 border-t border-gray-200">
+                <p className="font-medium mb-1">How it works:</p>
+                <ul className="list-disc list-inside space-y-1">
+                  <li>Click "Enable Notifications" to allow push notifications</li>
+                  <li>You'll receive instant alerts for new leads matching your services</li>
+                  <li>Notifications work even when the app is closed</li>
+                  <li>You can disable notifications anytime</li>
+                </ul>
+              </div>
             </div>
           </div>
 

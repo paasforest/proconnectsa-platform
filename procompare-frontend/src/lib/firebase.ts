@@ -92,25 +92,48 @@ export const requestNotificationPermission = async (): Promise<string | null> =>
 
   try {
     // Check if notifications are supported
-    if (!('Notification' in window)) {
+    if (typeof window === 'undefined' || !('Notification' in window)) {
       console.warn('This browser does not support notifications');
       return null;
     }
 
-    // Request permission - ensure Notification API is available
-    if (!('Notification' in window)) {
+    // Request permission - ensure Notification API is available and permission property exists
+    if (typeof window === 'undefined' || !('Notification' in window) || typeof Notification === 'undefined') {
       console.warn('Notification API not available');
       return null;
     }
     
-    let permission: NotificationPermission = Notification.permission;
+    // CRITICAL: Safely get permission status with fallback
+    // This prevents "permission is not defined" errors in minified builds
+    let permission: NotificationPermission = 'default';
+    try {
+      if (Notification && 'permission' in Notification && typeof Notification.permission !== 'undefined') {
+        permission = Notification.permission;
+      } else {
+        console.warn('Notification.permission not available, defaulting to "default"');
+        permission = 'default';
+      }
+    } catch (error) {
+      console.warn('Error accessing Notification.permission:', error);
+      permission = 'default';
+    }
     
     if (permission === 'default') {
-      permission = await Notification.requestPermission();
+      try {
+        if (Notification && typeof Notification.requestPermission === 'function') {
+          permission = await Notification.requestPermission();
+        } else {
+          console.warn('Notification.requestPermission not available');
+          return null;
+        }
+      } catch (error) {
+        console.warn('Error requesting notification permission:', error);
+        return null;
+      }
     }
 
     if (permission !== 'granted') {
-      console.warn('Notification permission denied');
+      console.warn('Notification permission denied or not granted');
       return null;
     }
 
