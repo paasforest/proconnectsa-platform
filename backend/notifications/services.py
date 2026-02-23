@@ -74,6 +74,9 @@ class NotificationService:
                 
                 notification.save()
                 
+                # Send push notification if enabled
+                self._send_push_notification(notification, settings)
+                
                 logger.info(f"Notification created for user {user.email}: {title}")
                 return notification
                 
@@ -126,6 +129,66 @@ class NotificationService:
                 
         except Exception as e:
             logger.error(f"Error sending notification SMS: {str(e)}")
+    
+    def _send_push_notification(self, notification, settings):
+        """Send push notification for notification"""
+        try:
+            # Check if push notifications are enabled for this user
+            if not settings.push_enabled:
+                logger.debug(f"Push notifications disabled for user {notification.user.id}")
+                return
+            
+            # Check if this notification type should trigger push
+            should_send = False
+            if notification.notification_type in ['lead_assigned', 'lead_verified']:
+                should_send = settings.push_new_leads or settings.push_lead_assigned
+            elif notification.notification_type == 'credit_purchase':
+                should_send = settings.push_credits
+            elif notification.notification_type in ['system', 'system_update']:
+                should_send = settings.push_system
+            else:
+                # Default to True for other types
+                should_send = True
+            
+            if not should_send:
+                logger.debug(f"Push notification disabled for type {notification.notification_type} for user {notification.user.id}")
+                return
+            
+            # Import FCMService
+            from .fcm_service import FCMService
+            
+            # Prepare data payload
+            data = {
+                'notification_id': str(notification.id),
+                'notification_type': notification.notification_type,
+            }
+            
+            # Add lead_id if available
+            if notification.lead:
+                data['lead_id'] = str(notification.lead.id)
+            
+            # Merge any additional data from notification
+            if notification.data:
+                data.update(notification.data)
+            
+            # Send push notification
+            success = FCMService.send_push_notification(
+                user=notification.user,
+                title=notification.title,
+                body=notification.message,
+                data=data,
+                notification_type=notification.notification_type,
+                lead_id=str(notification.lead.id) if notification.lead else None
+            )
+            
+            if success:
+                logger.info(f"Push notification sent successfully to user {notification.user.id} for notification {notification.id}")
+            else:
+                logger.debug(f"Push notification not sent for user {notification.user.id} (no active subscriptions or FCM not initialized)")
+                
+        except Exception as e:
+            # Never let push notification failure break notification creation
+            logger.warning(f"Push notification failed for notification {notification.id}: {str(e)}")
     
     def get_user_notifications(self, user, limit=20, unread_only=False):
         """Get notifications for a user"""
