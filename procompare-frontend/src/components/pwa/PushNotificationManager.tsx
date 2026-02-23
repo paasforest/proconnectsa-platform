@@ -11,7 +11,9 @@ export function PushNotificationManager() {
   const { user, token } = useAuth();
   const [isSubscribed, setIsSubscribed] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [permission, setPermission] = useState<NotificationPermission>('default');
+  // CRITICAL: Initialize permission state with a safe default value
+  // This prevents "permission is not defined" errors in minified builds
+  const [permissionState, setPermissionState] = useState<NotificationPermission>('default');
   const [isMounted, setIsMounted] = useState(false);
   const [isFirebaseReady, setIsFirebaseReady] = useState(false);
 
@@ -38,10 +40,10 @@ export function PushNotificationManager() {
 
     // Check current permission status
     try {
-      setPermission(Notification.permission);
+      setPermissionState(Notification.permission);
     } catch (error) {
       console.warn('Error checking notification permission:', error);
-      setPermission('default');
+      setPermissionState('default');
     }
 
     // Listen for foreground messages (only if permission is granted)
@@ -90,7 +92,7 @@ export function PushNotificationManager() {
         setIsSubscribed(true);
         if (typeof window !== 'undefined' && 'Notification' in window) {
           try {
-            setPermission(Notification.permission);
+            setPermissionState(Notification.permission);
           } catch (error) {
             console.warn('Error updating permission state:', error);
           }
@@ -130,15 +132,21 @@ export function PushNotificationManager() {
   }
 
   // CRITICAL: Ensure permission is always defined before any use
+  // Use permissionState (renamed from permission to avoid minification conflicts)
   // This prevents "permission is not defined" errors in minified builds
-  // Check state first, then fallback to Notification API, then default
   let currentPermission: NotificationPermission = 'default';
   
   try {
-    if (typeof permission !== 'undefined' && permission) {
-      currentPermission = permission;
+    // Always use permissionState - it's guaranteed to be defined (initialized in useState)
+    if (permissionState && permissionState !== 'default') {
+      currentPermission = permissionState;
     } else if (typeof window !== 'undefined' && 'Notification' in window) {
+      // Fallback to checking Notification API directly
       currentPermission = Notification.permission;
+      // Update state if it differs
+      if (currentPermission !== permissionState) {
+        setPermissionState(currentPermission);
+      }
     }
   } catch (error) {
     // If anything fails, use default
