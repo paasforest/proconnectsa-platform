@@ -9,6 +9,9 @@ export function middleware(request: NextRequest) {
     pathname.startsWith('/_next/') ||
     pathname.startsWith('/api/') ||
     pathname.startsWith('/static/') ||
+    pathname === '/firebase-messaging-sw.js' || // Firebase messaging service worker
+    pathname === '/sw.js' || // Main service worker
+    pathname === '/manifest.json' || // PWA manifest
     pathname.includes('.') // Static files have extensions
   ) {
     return NextResponse.next()
@@ -42,17 +45,7 @@ export function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    /*
-     * Match all request paths except for the ones starting with:
-     * - api (API routes)
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
-     * - sw.js (service worker)
-     * - manifest.json (PWA manifest)
-     * - icon-*.png (PWA icons)
-     */
-    '/((?!api|_next/static|_next/image|favicon.ico|sw.js|manifest.json|icon-.*\\.png).*)',
+    '/((?!firebase-messaging-sw.js|_next|favicon|icon-|manifest|sw.js).*)',
   ],
 }
 
