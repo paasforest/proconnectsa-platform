@@ -43,23 +43,22 @@ export function PushNotificationManager() {
     if (typeof window !== 'undefined' && 'Notification' in window) {
       try {
         if (Notification.permission === 'granted') {
-      try {
-        unsubscribe = onForegroundMessage((payload) => {
-          // Show notification even when app is open
-          if (payload?.notification && Notification.permission === 'granted') {
-            try {
-              new Notification(payload.notification.title, {
-                body: payload.notification.body,
-                icon: '/icon-192.png',
-                badge: '/icon-192.png',
-                tag: payload.data?.lead_id || 'notification',
-                data: payload.data,
-              });
-            } catch (error) {
-              console.error('Error showing notification:', error);
+          unsubscribe = onForegroundMessage((payload) => {
+            // Show notification even when app is open
+            if (payload?.notification && Notification.permission === 'granted') {
+              try {
+                new Notification(payload.notification.title, {
+                  body: payload.notification.body,
+                  icon: '/icon-192.png',
+                  badge: '/icon-192.png',
+                  tag: payload.data?.lead_id || 'notification',
+                  data: payload.data,
+                });
+              } catch (error) {
+                console.error('Error showing notification:', error);
+              }
             }
-          }
-        });
+          });
         }
       } catch (error) {
         console.error('Error setting up foreground message listener:', error);
