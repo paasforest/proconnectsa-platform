@@ -33,6 +33,11 @@ export function PushNotificationManager() {
   }
 
   useEffect(() => {
+    // Only run if component is mounted and Firebase is configured
+    if (!isMounted || !isFirebaseConfigured()) {
+      return;
+    }
+
     // Check current permission status
     if (typeof window !== 'undefined' && 'Notification' in window) {
       try {
@@ -76,7 +81,7 @@ export function PushNotificationManager() {
         unsubscribe();
       }
     };
-  }, []);
+  }, [isMounted]);
 
   const handleSubscribe = async () => {
     if (!user || !token) {
