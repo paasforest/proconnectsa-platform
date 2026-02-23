@@ -20,9 +20,15 @@ export function PushNotificationManager() {
   const [isSubscribed, setIsSubscribed] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [permission, setPermission] = useState<NotificationPermission>('default');
+  const [isMounted, setIsMounted] = useState(false);
 
-  // Don't render if Firebase is not configured
-  if (!isFirebaseConfigured()) {
+  // Ensure component only renders on client side
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  // Don't render if Firebase is not configured or not mounted
+  if (!isFirebaseConfigured() || !isMounted) {
     return null;
   }
 
@@ -119,12 +125,15 @@ export function PushNotificationManager() {
   };
 
   // Don't show if user is not authenticated
-  if (!user || !token) {
+  if (!user || !token || !isMounted) {
     return null;
   }
 
+  // Ensure permission is always defined (safety check)
+  const currentPermission = permission || 'default';
+
   // Show helpful instructions if permission is denied
-  if (permission === 'denied') {
+  if (currentPermission === 'denied') {
     const isChrome = typeof window !== 'undefined' && /Chrome/.test(navigator.userAgent) && /Google Inc/.test(navigator.vendor);
     const isFirefox = typeof window !== 'undefined' && /Firefox/.test(navigator.userAgent);
     const isSafari = typeof window !== 'undefined' && /Safari/.test(navigator.userAgent) && !/Chrome/.test(navigator.userAgent);
@@ -187,7 +196,7 @@ export function PushNotificationManager() {
   }
 
   // Show subscribe button if not subscribed
-  if (!isSubscribed && permission !== 'granted') {
+  if (!isSubscribed && currentPermission !== 'granted') {
     return (
       <Button
         onClick={handleSubscribe}
@@ -203,7 +212,7 @@ export function PushNotificationManager() {
   }
 
   // Show unsubscribe button if subscribed
-  if (isSubscribed || permission === 'granted') {
+  if (isSubscribed || currentPermission === 'granted') {
     return (
       <Button
         onClick={handleUnsubscribe}
