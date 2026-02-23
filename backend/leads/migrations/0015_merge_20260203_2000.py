@@ -3,13 +3,11 @@ from django.db import migrations
 
 class Migration(migrations.Migration):
     """
-    Merge migration to resolve multiple 0014 leaf nodes in production:
-    - 0014_leadreservation (already exists on the server)
-    - 0014_add_additional_service_categories (added for SEO/service catalog)
+    Merge migration to resolve multiple 0014 leaf nodes in production.
+    Note: 0014_leadreservation was removed, so this now only depends on 0014_add_additional_service_categories
     """
 
     dependencies = [
-        ("leads", "0014_leadreservation"),
         ("leads", "0014_add_additional_service_categories"),
     ]
 
