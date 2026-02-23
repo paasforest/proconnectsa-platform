@@ -129,14 +129,22 @@ export function PushNotificationManager() {
     return null;
   }
 
-  // Ensure permission is always defined (safety check)
-  // Double-check that permission state exists and is valid
-  const currentPermission: NotificationPermission = 
-    (typeof permission !== 'undefined' && permission) 
-      ? permission 
-      : (typeof window !== 'undefined' && 'Notification' in window 
-          ? Notification.permission 
-          : 'default');
+  // CRITICAL: Ensure permission is always defined before any use
+  // This prevents "permission is not defined" errors in minified builds
+  // Check state first, then fallback to Notification API, then default
+  let currentPermission: NotificationPermission = 'default';
+  
+  try {
+    if (typeof permission !== 'undefined' && permission) {
+      currentPermission = permission;
+    } else if (typeof window !== 'undefined' && 'Notification' in window) {
+      currentPermission = Notification.permission;
+    }
+  } catch (error) {
+    // If anything fails, use default
+    console.warn('Error reading notification permission:', error);
+    currentPermission = 'default';
+  }
 
   // Show helpful instructions if permission is denied
   if (currentPermission === 'denied') {

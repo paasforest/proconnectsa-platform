@@ -24,9 +24,14 @@ export const initializeFirebase = (): FirebaseApp | null => {
     return null; // Server-side rendering
   }
 
-  // Check if Firebase config is valid
-  if (!firebaseConfig.apiKey || !firebaseConfig.projectId) {
-    console.warn('Firebase configuration is missing. Push notifications will be disabled.');
+  // Check if Firebase config is valid - ALL required fields must be present
+  if (!firebaseConfig.apiKey || !firebaseConfig.projectId || !firebaseConfig.messagingSenderId) {
+    console.warn('Firebase configuration is incomplete. Missing:', {
+      apiKey: !firebaseConfig.apiKey,
+      projectId: !firebaseConfig.projectId,
+      messagingSenderId: !firebaseConfig.messagingSenderId,
+    });
+    console.warn('Push notifications will be disabled. Please set NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID in your environment variables.');
     return null;
   }
 
@@ -92,8 +97,13 @@ export const requestNotificationPermission = async (): Promise<string | null> =>
       return null;
     }
 
-    // Request permission
-    let permission = Notification.permission;
+    // Request permission - ensure Notification API is available
+    if (!('Notification' in window)) {
+      console.warn('Notification API not available');
+      return null;
+    }
+    
+    let permission: NotificationPermission = Notification.permission;
     
     if (permission === 'default') {
       permission = await Notification.requestPermission();
