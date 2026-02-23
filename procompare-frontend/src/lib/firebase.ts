@@ -11,6 +11,24 @@ const firebaseConfig = {
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
 }
 
+// Log config values (without exposing sensitive data)
+if (typeof window !== 'undefined') {
+  console.log('[Firebase] Config check:', {
+    hasApiKey: !!firebaseConfig.apiKey,
+    hasAuthDomain: !!firebaseConfig.authDomain,
+    hasProjectId: !!firebaseConfig.projectId,
+    hasStorageBucket: !!firebaseConfig.storageBucket,
+    hasMessagingSenderId: !!firebaseConfig.messagingSenderId,
+    messagingSenderId: firebaseConfig.messagingSenderId, // Log the actual value to debug
+    hasAppId: !!firebaseConfig.appId,
+  })
+  
+  if (!firebaseConfig.messagingSenderId) {
+    console.error('[Firebase] ❌ CRITICAL: messagingSenderId is missing!')
+    console.error('[Firebase] Environment variable NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID is not set')
+  }
+}
+
 // ─── App initialisation ───────────────────────────────────────────────────────
 
 function getFirebaseApp(): FirebaseApp | null {
@@ -19,10 +37,12 @@ function getFirebaseApp(): FirebaseApp | null {
     return null
   }
   
-  if (!firebaseConfig.apiKey || !firebaseConfig.projectId) {
-    console.error('[Firebase] getFirebaseApp: Missing config', {
+  if (!firebaseConfig.apiKey || !firebaseConfig.projectId || !firebaseConfig.messagingSenderId) {
+    console.error('[Firebase] getFirebaseApp: Missing required config', {
       hasApiKey: !!firebaseConfig.apiKey,
-      hasProjectId: !!firebaseConfig.projectId
+      hasProjectId: !!firebaseConfig.projectId,
+      hasMessagingSenderId: !!firebaseConfig.messagingSenderId,
+      messagingSenderId: firebaseConfig.messagingSenderId
     })
     return null
   }
