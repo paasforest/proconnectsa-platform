@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import {
   User, Mail, Phone, MapPin, Save, Eye, EyeOff, 
-  Camera, Upload, CheckCircle, AlertCircle, Star, XCircle, Copy, RefreshCw, Bell
+  Camera, Upload, CheckCircle, AlertCircle, Star, XCircle, Copy, RefreshCw, Bell, Download
 } from 'lucide-react';
 import { apiClient } from '@/lib/api-simple';
 import { useAuth } from '@/components/AuthProvider';
@@ -82,6 +82,9 @@ const SettingsPage = () => {
   const [premiumStatus, setPremiumStatus] = useState<any>(null);
   const [showGoogleReviewForm, setShowGoogleReviewForm] = useState(false);
   const [myGoogleReviews, setMyGoogleReviews] = useState<any[]>([]);
+  const [pushNotificationStatus, setPushNotificationStatus] = useState<'default' | 'granted' | 'denied' | 'checking'>('checking');
+  const [isRegisteringPush, setIsRegisteringPush] = useState(false);
+  const [isCheckingUpdate, setIsCheckingUpdate] = useState(false);
 
   useEffect(() => {
     if (!user) {
@@ -200,6 +203,88 @@ const SettingsPage = () => {
       if (premiumInterval) clearInterval(premiumInterval);
     };
   }, [user, token]);
+
+  // Check push notification permission status
+  useEffect(() => {
+    if (typeof window === 'undefined' || !('Notification' in window)) {
+      setPushNotificationStatus('denied');
+      return;
+    }
+    
+    setPushNotificationStatus(Notification.permission);
+  }, []);
+
+  const handleEnablePushNotifications = async () => {
+    if (typeof window === 'undefined' || !('Notification' in window)) {
+      setMessage({ type: 'error', text: 'Push notifications are not supported in this browser.' });
+      return;
+    }
+
+    if (!token) {
+      setMessage({ type: 'error', text: 'Please log in to enable push notifications.' });
+      return;
+    }
+
+    setIsRegisteringPush(true);
+    try {
+      const { registerFCMToken } = await import('@/lib/firebase');
+      const success = await registerFCMToken(token);
+      
+      if (success) {
+        setPushNotificationStatus('granted');
+        setMessage({ type: 'success', text: '✅ Push notifications enabled! You will now receive instant alerts for new leads and updates.' });
+      } else {
+        const currentPermission = Notification.permission;
+        if (currentPermission === 'denied') {
+          setMessage({ type: 'error', text: 'Push notifications were blocked. Please enable them in your browser settings and try again.' });
+          setPushNotificationStatus('denied');
+        } else {
+          setMessage({ type: 'warning', text: 'Could not enable push notifications. Please check your browser settings.' });
+          setPushNotificationStatus(currentPermission);
+        }
+      }
+    } catch (error: any) {
+      console.error('Error enabling push notifications:', error);
+      setMessage({ type: 'error', text: `Failed to enable push notifications: ${error.message || 'Unknown error'}` });
+    } finally {
+      setIsRegisteringPush(false);
+    }
+  };
+
+  const handleCheckForUpdate = async () => {
+    if (typeof window === 'undefined' || !('serviceWorker' in navigator)) {
+      setMessage({ type: 'info', text: 'Service worker not available. Updates are handled automatically.' });
+      return;
+    }
+
+    setIsCheckingUpdate(true);
+    try {
+      const registration = await navigator.serviceWorker.getRegistration();
+      if (!registration) {
+        setMessage({ type: 'info', text: 'No service worker found. The app will update automatically when available.' });
+        return;
+      }
+
+      await registration.update();
+      
+      // Check if there's a waiting service worker
+      if (registration.waiting) {
+        // Tell the service worker to skip waiting and activate
+        registration.waiting.postMessage({ type: 'SKIP_WAITING' });
+        setMessage({ type: 'success', text: '✅ Update found! The app will reload in a moment to apply the update.' });
+        setTimeout(() => {
+          window.location.reload();
+        }, 1000);
+      } else {
+        setMessage({ type: 'success', text: '✅ You are using the latest version of the app!' });
+      }
+    } catch (error: any) {
+      console.error('Error checking for update:', error);
+      setMessage({ type: 'error', text: `Failed to check for update: ${error.message || 'Unknown error'}` });
+    } finally {
+      setIsCheckingUpdate(false);
+    }
+  };
 
   const handleSaveProfile = async () => {
     try {
@@ -910,6 +995,70 @@ const SettingsPage = () => {
                 Get instant notifications about new leads, messages, and important updates directly on your device.
               </p>
               
+              {/* Status indicator */}
+              {pushNotificationStatus !== 'checking' && (
+                <div className={`p-3 rounded-lg ${
+                  pushNotificationStatus === 'granted' 
+                    ? 'bg-green-50 border border-green-200' 
+                    : pushNotificationStatus === 'denied'
+                    ? 'bg-red-50 border border-red-200'
+                    : 'bg-yellow-50 border border-yellow-200'
+                }`}>
+                  <div className="flex items-center gap-2">
+                    {pushNotificationStatus === 'granted' ? (
+                      <>
+                        <CheckCircle className="w-5 h-5 text-green-600" />
+                        <span className="text-sm font-medium text-green-800">Push notifications enabled</span>
+                      </>
+                    ) : pushNotificationStatus === 'denied' ? (
+                      <>
+                        <AlertCircle className="w-5 h-5 text-red-600" />
+                        <span className="text-sm font-medium text-red-800">Push notifications blocked</span>
+                      </>
+                    ) : (
+                      <>
+                        <AlertCircle className="w-5 h-5 text-yellow-600" />
+                        <span className="text-sm font-medium text-yellow-800">Push notifications not enabled</span>
+                      </>
+                    )}
+                  </div>
+                </div>
+              )}
+              
+              {/* Enable button */}
+              {pushNotificationStatus !== 'granted' && (
+                <button
+                  onClick={handleEnablePushNotifications}
+                  disabled={isRegisteringPush || pushNotificationStatus === 'denied'}
+                  className={`w-full px-4 py-3 rounded-lg font-medium flex items-center justify-center gap-2 transition-colors ${
+                    pushNotificationStatus === 'denied'
+                      ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                      : 'bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50'
+                  }`}
+                >
+                  {isRegisteringPush ? (
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                      <span>Enabling...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Bell className="w-5 h-5" />
+                      <span>Enable Notifications</span>
+                    </>
+                  )}
+                </button>
+              )}
+              
+              {pushNotificationStatus === 'denied' && (
+                <p className="text-xs text-red-600">
+                  Push notifications were blocked. Please enable them in your browser settings:
+                  <br />
+                  <strong>Chrome/Edge:</strong> Click the lock icon → Site settings → Notifications → Allow
+                  <br />
+                  <strong>Firefox:</strong> Click the lock icon → More information → Permissions → Notifications → Allow
+                </p>
+              )}
               
               <div className="text-xs text-gray-500 mt-4 pt-4 border-t border-gray-200">
                 <p className="font-medium mb-1">How it works:</p>
@@ -918,6 +1067,47 @@ const SettingsPage = () => {
                   <li>You'll receive instant alerts for new leads matching your services</li>
                   <li>Notifications work even when the app is closed</li>
                   <li>You can disable notifications anytime</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          {/* App Updates - Mobile friendly */}
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+              <Download className="w-5 h-5" />
+              App Updates
+            </h3>
+            
+            <div className="space-y-4">
+              <p className="text-sm text-gray-600">
+                Check for app updates manually. On mobile devices, updates may take longer to appear automatically.
+              </p>
+              
+              <button
+                onClick={handleCheckForUpdate}
+                disabled={isCheckingUpdate}
+                className="w-full px-4 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 font-medium flex items-center justify-center gap-2"
+              >
+                {isCheckingUpdate ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                    <span>Checking for updates...</span>
+                  </>
+                ) : (
+                  <>
+                    <RefreshCw className="w-5 h-5" />
+                    <span>Check for Updates</span>
+                  </>
+                )}
+              </button>
+              
+              <div className="text-xs text-gray-500 pt-4 border-t border-gray-200">
+                <p className="font-medium mb-1">About updates:</p>
+                <ul className="list-disc list-inside space-y-1">
+                  <li>Updates are usually automatic, but may be slow on mobile</li>
+                  <li>Click "Check for Updates" to manually trigger an update check</li>
+                  <li>The app will reload automatically if an update is found</li>
                 </ul>
               </div>
             </div>
