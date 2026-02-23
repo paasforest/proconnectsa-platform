@@ -61,10 +61,35 @@ def admin_monitoring_dashboard(request):
         hours = int(hours_param)
         time_window = timezone.now() - timedelta(hours=hours)
         
+        # Debug logging
+        logger.info(f"Admin monitoring dashboard requested - hours: {hours}, time_window: {time_window}")
+        
         # 1. USER REGISTRATIONS
-        new_users = User.objects.filter(date_joined__gte=time_window).order_by('-date_joined')
+        # Use created_at instead of date_joined for more reliable tracking
+        # created_at is explicitly defined in User model and consistent with other models
+        new_users = User.objects.filter(created_at__gte=time_window).order_by('-created_at')
         new_providers = new_users.filter(user_type='provider')
         new_clients = new_users.filter(user_type='client')
+        
+        # Debug logging
+        total_count = new_users.count()
+        providers_count = new_providers.count()
+        clients_count = new_clients.count()
+        logger.info(f"Found {total_count} new users in last {hours} hours (providers: {providers_count}, clients: {clients_count})")
+        
+        # Log sample user emails for debugging
+        if total_count > 0:
+            sample_users = list(new_users[:5].values_list('email', 'created_at'))
+            logger.info(f"Sample new users: {sample_users}")
+        else:
+            # Check if there are ANY users at all
+            all_users_count = User.objects.count()
+            logger.info(f"No new users found. Total users in database: {all_users_count}")
+            # Check most recent user
+            most_recent = User.objects.order_by('-created_at').first()
+            if most_recent:
+                logger.info(f"Most recent user: {most_recent.email}, created_at: {most_recent.created_at}, time_window: {time_window}")
+                logger.info(f"Most recent user is within window: {most_recent.created_at >= time_window}")
         
         # 2. FAILED LOGIN ATTEMPTS (from logs or cache)
         # Note: We'll track this in a new model or Redis
@@ -93,18 +118,20 @@ def admin_monitoring_dashboard(request):
         return Response({
             'monitoring_period': f'Last {hours} hours',
             'timestamp': timezone.now().isoformat(),
+            'time_window_start': time_window.isoformat(),
+            'current_time': timezone.now().isoformat(),
             
             # NEW REGISTRATIONS
             'registrations': {
-                'total': new_users.count(),
-                'providers': new_providers.count(),
-                'clients': new_clients.count(),
+                'total': total_count,
+                'providers': providers_count,
+                'clients': clients_count,
                 'details': [
                     {
                         'email': u.email,
                         'name': f'{u.first_name} {u.last_name}',
                         'type': u.user_type,
-                        'registered_at': u.date_joined.isoformat(),
+                        'registered_at': u.created_at.isoformat(),  # Use created_at instead of date_joined
                         'is_active': u.is_active,
                         'has_logged_in': u.last_login is not None
                     } for u in new_users
@@ -200,11 +227,11 @@ def recent_activity_feed(request):
         activities = []
         
         # Recent registrations
-        recent_users = User.objects.all().order_by('-date_joined')[:limit]
+        recent_users = User.objects.all().order_by('-created_at')[:limit]  # Use created_at for consistency
         for user in recent_users:
             activities.append({
                 'type': 'registration',
-                'timestamp': user.date_joined.isoformat(),
+                'timestamp': user.created_at.isoformat(),  # Use created_at instead of date_joined
                 'user': user.email,
                 'details': f'New {user.user_type} registered',
                 'icon': '👤'
@@ -258,7 +285,7 @@ def problem_detection(request):
         # 1. Users who registered but never logged in (>24 hours)
         day_ago = timezone.now() - timedelta(hours=24)
         never_logged_in = User.objects.filter(
-            date_joined__lt=day_ago,
+            created_at__lt=day_ago,  # Use created_at instead of date_joined for consistency
             last_login__isnull=True
         ).select_related('provider_profile')
         
@@ -400,7 +427,8 @@ def user_detail_by_email(request, email):
             'email': user.email,
             'name': f'{user.first_name} {user.last_name}'.strip() or 'N/A',
             'user_type': user.user_type,
-            'date_joined': user.date_joined.isoformat(),
+            'date_joined': user.date_joined.isoformat() if user.date_joined else None,  # Keep for backward compatibility
+            'created_at': user.created_at.isoformat(),  # Primary field for tracking
             'last_login': user.last_login.isoformat() if user.last_login else None,
             'is_active': user.is_active,
             'is_email_verified': user.is_email_verified,

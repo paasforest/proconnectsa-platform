@@ -2,6 +2,10 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
+    # Push notification endpoints
+    path('push/subscribe/', views.subscribe_push, name='subscribe-push'),
+    path('push/unsubscribe/', views.unsubscribe_push, name='unsubscribe-push'),
+    path('push/subscriptions/', views.push_subscriptions, name='push-subscriptions'),
     # Notifications
     path('', views.NotificationListView.as_view(), name='notification-list'),
     path('<uuid:pk>/', views.NotificationDetailView.as_view(), name='notification-detail'),

@@ -10,6 +10,7 @@ import {
 } from 'lucide-react';
 import { apiClient } from '@/lib/api-simple';
 import PersonalizedHeader from './PersonalizedHeader';
+import PushNotifications from '@/components/pwa/PushNotifications';
 
 interface UserStats {
   credit_balance: number;
@@ -490,6 +491,9 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
             onProfile={() => router.push('/profile')}
           />
         )}
+
+        {/* Push Notifications - Only for providers */}
+        {user?.user_type === 'provider' && <PushNotifications />}
 
         {/* Page content */}
         <main className="flex-1">

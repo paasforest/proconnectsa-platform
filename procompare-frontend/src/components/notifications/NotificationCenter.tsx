@@ -28,6 +28,7 @@ export default function NotificationCenter() {
     const fetchNotifications = async () => {
       try {
         // Get token from custom auth
+        if (typeof window === 'undefined') return;
         const token = localStorage.getItem('token')
         
         if (token) {
