@@ -29,13 +29,20 @@ export function PushNotificationManager() {
   useEffect(() => {
     // Check current permission status
     if (typeof window !== 'undefined' && 'Notification' in window) {
-      setPermission(Notification.permission);
+      try {
+        setPermission(Notification.permission);
+      } catch (error) {
+        console.warn('Error checking notification permission:', error);
+        setPermission('default');
+      }
     }
 
     // Listen for foreground messages (only if permission is granted)
     let unsubscribe: (() => void) | null = null;
     
-    if (typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'granted') {
+    if (typeof window !== 'undefined' && 'Notification' in window) {
+      try {
+        if (Notification.permission === 'granted') {
       try {
         unsubscribe = onForegroundMessage((payload) => {
           // Show notification even when app is open
@@ -53,6 +60,7 @@ export function PushNotificationManager() {
             }
           }
         });
+        }
       } catch (error) {
         console.error('Error setting up foreground message listener:', error);
       }
@@ -77,7 +85,11 @@ export function PushNotificationManager() {
       if (success) {
         setIsSubscribed(true);
         if (typeof window !== 'undefined' && 'Notification' in window) {
-          setPermission(Notification.permission);
+          try {
+            setPermission(Notification.permission);
+          } catch (error) {
+            console.warn('Error updating permission state:', error);
+          }
         }
       }
     } catch (error) {
