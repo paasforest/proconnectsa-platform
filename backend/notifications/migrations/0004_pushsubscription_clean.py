@@ -15,7 +15,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ('leads', '0016_leadreservation'),
+        ('leads', '0015_merge_20260203_2000'),
         ('notifications', '0003_notificationsettings_notificationtemplate_and_more'),
     ]
 
