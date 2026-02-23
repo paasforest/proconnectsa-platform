@@ -54,12 +54,7 @@ class NotificationService:
                 
                 # Get user notification settings
                 settings, created = NotificationSettings.objects.get_or_create(
-                    user=user,
-                    defaults={
-                        'email_notifications': True,
-                        'sms_notifications': False,
-                        'dashboard_notifications': True
-                    }
+                    user=user
                 )
                 
                 # Send email if enabled

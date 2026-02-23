@@ -62,19 +62,17 @@ class NotificationSettingsSerializer(serializers.ModelSerializer):
     class Meta:
         model = NotificationSettings
         fields = [
-            'email_notifications',
+            'push_enabled',
+            'push_new_leads',
+            'push_lead_assigned',
+            'push_credits',
+            'push_system',
+            'email_enabled',
+            'email_new_leads',
             'email_lead_assigned',
-            'email_quote_received',
-            'email_quote_response',
-            'email_credit_purchase',
-            'email_deposit_verified',
+            'email_credits',
             'email_system',
-            'sms_notifications',
-            'sms_lead_assigned',
-            'sms_quote_received',
+            'sms_enabled',
             'sms_urgent_only',
-            'dashboard_notifications',
-            'show_popup',
-            'sound_enabled',
-            'digest_frequency'
         ]
+        read_only_fields = ['id']

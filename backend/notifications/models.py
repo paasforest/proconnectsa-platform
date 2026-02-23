@@ -1,70 +1,69 @@
 """
-Notification models for dashboard notifications
+Notification models for ProConnectSA
 """
 from django.db import models
 from django.contrib.auth import get_user_model
 from django.utils import timezone
-import uuid
+from backend.leads.models import Lead
 
 User = get_user_model()
 
+# Notification types
+NOTIFICATION_TYPES = [
+    ('lead_assigned', 'Lead Assigned'),
+    ('quote_received', 'Quote Received'),
+    ('quote_response', 'Quote Response'),
+    ('credit_purchase', 'Credit Purchase'),
+    ('deposit_verified', 'Deposit Verified'),
+    ('lead_verified', 'Lead Verified'),
+    ('system', 'System Notification'),
+    ('system_update', 'System Update'),
+    ('reminder', 'Reminder'),
+]
+
+PRIORITY_CHOICES = [
+    ('low', 'Low'),
+    ('medium', 'Medium'),
+    ('high', 'High'),
+    ('urgent', 'Urgent'),
+]
+
 
 class Notification(models.Model):
-    """Dashboard notification model"""
-    
-    NOTIFICATION_TYPES = [
-        ('lead_assigned', 'Lead Assigned'),
-        ('quote_received', 'Quote Received'),
-        ('quote_response', 'Quote Response'),
-        ('credit_purchase', 'Credit Purchase'),
-        ('deposit_verified', 'Deposit Verified'),
-        ('lead_verified', 'Lead Verified'),
-        ('system', 'System Notification'),
-        ('system_update', 'System Update'),
-        ('reminder', 'Reminder'),
-    ]
-    
-    PRIORITY_LEVELS = [
-        ('low', 'Low'),
-        ('medium', 'Medium'),
-        ('high', 'High'),
-        ('urgent', 'Urgent'),
-    ]
-    
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    """In-app notifications for users"""
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='notifications')
+    notification_type = models.CharField(max_length=50, choices=NOTIFICATION_TYPES)
     title = models.CharField(max_length=200)
     message = models.TextField()
-    notification_type = models.CharField(max_length=50, choices=NOTIFICATION_TYPES)
-    priority = models.CharField(max_length=20, choices=PRIORITY_LEVELS, default='medium')
+    priority = models.CharField(max_length=10, choices=PRIORITY_CHOICES, default='medium')
     
-    # Related objects (optional)
-    lead = models.ForeignKey('leads.Lead', on_delete=models.CASCADE, null=True, blank=True)
+    # Optional foreign keys
+    lead = models.ForeignKey(Lead, on_delete=models.CASCADE, null=True, blank=True, related_name='notifications')
     provider = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True, related_name='provider_notifications')
     
-    # Status and metadata
+    # Status flags
     is_read = models.BooleanField(default=False)
     is_email_sent = models.BooleanField(default=False)
     is_sms_sent = models.BooleanField(default=False)
+    is_push_sent = models.BooleanField(default=False)
     
     # Timestamps
     created_at = models.DateTimeField(auto_now_add=True)
     read_at = models.DateTimeField(null=True, blank=True)
     expires_at = models.DateTimeField(null=True, blank=True)
     
-    # Additional data
+    # Additional data (JSON)
     data = models.JSONField(default=dict, blank=True)
     
     class Meta:
         ordering = ['-created_at']
         indexes = [
-            models.Index(fields=['user', 'is_read']),
-            models.Index(fields=['notification_type']),
-            models.Index(fields=['created_at']),
+            models.Index(fields=['user', 'is_read', '-created_at']),
+            models.Index(fields=['user', 'notification_type']),
         ]
     
     def __str__(self):
-        return f"{self.title} - {self.user.email}"
+        return f"{self.user.username} - {self.title}"
     
     def mark_as_read(self):
         """Mark notification as read"""
@@ -78,11 +77,10 @@ class Notification(models.Model):
         if self.expires_at:
             return timezone.now() > self.expires_at
         return False
-
+    
     @classmethod
     def create_for_user(
         cls,
-        *,
         user,
         notification_type,
         title,
@@ -90,31 +88,10 @@ class Notification(models.Model):
         priority='medium',
         lead=None,
         provider=None,
-        expires_at=None,
         data=None,
-        **extra_context,
+        expires_at=None,
     ):
-        """Convenience factory used by signals/services.
-
-        Any unknown keyword args are merged into the JSON `data` field to avoid
-        tight coupling between callers and model schema (e.g. lead_assignment).
-        """
-        def _make_jsonable(value):
-            if value is None or isinstance(value, (str, int, float, bool)):
-                return value
-            if isinstance(value, (list, tuple)):
-                return [_make_jsonable(v) for v in value]
-            if isinstance(value, dict):
-                return {k: _make_jsonable(v) for k, v in value.items()}
-            # Django model instance or other complex object
-            obj_id = getattr(value, 'id', None)
-            return str(obj_id) if obj_id is not None else str(value)
-
-        payload = _make_jsonable(data or {}).copy()
-        if extra_context:
-            for k, v in extra_context.items():
-                payload[k] = _make_jsonable(v)
-
+        """Create a notification for a user"""
         return cls.objects.create(
             user=user,
             notification_type=notification_type,
@@ -123,110 +100,90 @@ class Notification(models.Model):
             priority=priority,
             lead=lead,
             provider=provider,
+            data=data or {},
             expires_at=expires_at,
-            data=payload,
         )
 
 
-class NotificationTemplate(models.Model):
-    """Template for different notification types"""
+class PushSubscription(models.Model):
+    """FCM push notification subscriptions"""
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='push_subscriptions')
+    token = models.TextField(unique=True)  # FCM registration token
+    endpoint = models.URLField(null=True, blank=True)  # Web push endpoint (if using Web Push API)
+    keys = models.JSONField(default=dict, blank=True)  # Web push keys (p256dh, auth)
     
-    name = models.CharField(max_length=100, unique=True)
-    notification_type = models.CharField(max_length=50, choices=Notification.NOTIFICATION_TYPES)
-    title_template = models.CharField(max_length=200)
-    message_template = models.TextField()
-    email_template = models.TextField(blank=True)
-    sms_template = models.TextField(blank=True)
-    priority = models.CharField(max_length=20, choices=Notification.PRIORITY_LEVELS, default='medium')
+    # Device info
+    user_agent = models.TextField(null=True, blank=True)
+    device_type = models.CharField(max_length=50, null=True, blank=True)  # 'android', 'ios', 'web'
+    
+    # Status
     is_active = models.BooleanField(default=True)
     
+    # Timestamps
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    last_used_at = models.DateTimeField(null=True, blank=True)
+    
+    class Meta:
+        unique_together = [['user', 'token']]
+        indexes = [
+            models.Index(fields=['user', 'is_active']),
+        ]
     
     def __str__(self):
-        return f"{self.name} ({self.notification_type})"
-    
-    def render_notification(self, context):
-        """Render notification with context variables"""
-        try:
-            title = self.title_template.format(**context)
-            message = self.message_template.format(**context)
-            return title, message
-        except KeyError as e:
-            # Fallback to template name if context is missing
-            return self.name, self.message_template
+        return f"{self.user.username} - {self.device_type or 'Unknown'}"
 
 
 class NotificationSettings(models.Model):
-    """User notification preferences"""
-    
+    """User preferences for notifications"""
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='notification_settings')
     
+    # Push notification preferences
+    push_enabled = models.BooleanField(default=True)
+    push_new_leads = models.BooleanField(default=True)
+    push_lead_assigned = models.BooleanField(default=True)
+    push_credits = models.BooleanField(default=True)
+    push_system = models.BooleanField(default=True)
+    
     # Email preferences
-    email_notifications = models.BooleanField(default=True)
+    email_enabled = models.BooleanField(default=True)
+    email_new_leads = models.BooleanField(default=True)
     email_lead_assigned = models.BooleanField(default=True)
-    email_quote_received = models.BooleanField(default=True)
-    email_quote_response = models.BooleanField(default=True)
-    email_credit_purchase = models.BooleanField(default=True)
-    email_deposit_verified = models.BooleanField(default=True)
+    email_credits = models.BooleanField(default=True)
     email_system = models.BooleanField(default=True)
     
     # SMS preferences
-    sms_notifications = models.BooleanField(default=False)
-    sms_lead_assigned = models.BooleanField(default=False)
-    sms_quote_received = models.BooleanField(default=False)
+    sms_enabled = models.BooleanField(default=False)
     sms_urgent_only = models.BooleanField(default=True)
     
-    # Dashboard preferences
-    dashboard_notifications = models.BooleanField(default=True)
-    show_popup = models.BooleanField(default=True)
-    sound_enabled = models.BooleanField(default=True)
-    
-    # Frequency settings
-    digest_frequency = models.CharField(
-        max_length=20,
-        choices=[
-            ('immediate', 'Immediate'),
-            ('hourly', 'Hourly'),
-            ('daily', 'Daily'),
-            ('weekly', 'Weekly'),
-        ],
-        default='immediate'
-    )
-    
+    # Timestamps
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     
     def __str__(self):
-        return f"Notification Settings - {self.user.email}"
+        return f"Notification settings for {self.user.username}"
     
     def should_send_email(self, notification_type):
-        """Check if email should be sent for notification type"""
-        if not self.email_notifications:
+        """Check if email should be sent for this notification type"""
+        if not self.email_enabled:
             return False
         
-        type_mapping = {
-            'lead_assigned': self.email_lead_assigned,
-            'quote_received': self.email_quote_received,
-            'quote_response': self.email_quote_response,
-            'credit_purchase': self.email_credit_purchase,
-            'deposit_verified': self.email_deposit_verified,
-            'system': self.email_system,
-        }
+        if notification_type == 'lead_verified' or notification_type == 'lead_assigned':
+            return self.email_new_leads or self.email_lead_assigned
+        elif notification_type == 'credit_purchase':
+            return self.email_credits
+        elif notification_type in ['system', 'system_update']:
+            return self.email_system
         
-        return type_mapping.get(notification_type, True)
+        return True  # Default to True for other types
     
-    def should_send_sms(self, notification_type, priority='medium'):
-        """Check if SMS should be sent for notification type"""
-        if not self.sms_notifications:
+    def should_send_sms(self, notification_type, priority):
+        """Check if SMS should be sent for this notification"""
+        if not self.sms_enabled:
             return False
         
-        if self.sms_urgent_only and priority not in ['high', 'urgent']:
+        # Only send SMS for urgent notifications if sms_urgent_only is True
+        if self.sms_urgent_only and priority != 'urgent':
             return False
         
-        type_mapping = {
-            'lead_assigned': self.sms_lead_assigned,
-            'quote_received': self.sms_quote_received,
-        }
-        
-        return type_mapping.get(notification_type, False)
+        return True
