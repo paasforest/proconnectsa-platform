@@ -10,33 +10,46 @@ export default function PushNotifications() {
   const { user, token } = useAuth()
 
   useEffect(() => {
-    console.log('[PushNotifications] Component mounted, checking conditions...')
-    console.log('[PushNotifications] User:', user?.email, 'Token:', !!token)
+    console.log('[PushNotifications] ===== COMPONENT MOUNTED =====')
+    console.log('[PushNotifications] User:', user?.email || 'NO USER')
+    console.log('[PushNotifications] User type:', (user as any)?.user_type || 'NO TYPE')
+    console.log('[PushNotifications] Token:', !!token, token ? token.substring(0, 20) + '...' : 'NO TOKEN')
+    console.log('[PushNotifications] Window:', typeof window !== 'undefined' ? 'OK' : 'UNDEFINED')
+    console.log('[PushNotifications] Notification support:', 'Notification' in window ? 'YES' : 'NO')
     
     if (!user || !token) {
-      console.log('[PushNotifications] Missing user or token, skipping registration')
+      console.log('[PushNotifications] ❌ Missing user or token, skipping registration')
       return
     }
     if (typeof window === 'undefined') {
-      console.log('[PushNotifications] Window undefined, skipping')
+      console.log('[PushNotifications] ❌ Window undefined, skipping')
       return
     }
     if (!('Notification' in window)) {
-      console.log('[PushNotifications] Notifications not supported, skipping')
+      console.log('[PushNotifications] ❌ Notifications not supported, skipping')
       return
     }
 
-    console.log('[PushNotifications] All conditions met, starting registration...')
+    console.log('[PushNotifications] ✅ All conditions met, starting registration...')
+    
+    // Check VAPID key
+    const vapidKey = process.env.NEXT_PUBLIC_FIREBASE_VAPID_KEY
+    console.log('[PushNotifications] VAPID key:', vapidKey ? 'SET (' + vapidKey.substring(0, 10) + '...)' : 'MISSING!')
+    
+    if (!vapidKey) {
+      console.error('[PushNotifications] ❌ VAPID key is missing! Cannot register FCM token.')
+      return
+    }
     
     // Register FCM token with backend
     registerFCMToken(token).then((success) => {
       if (success) {
-        console.log('[PushNotifications] ✅ Registered successfully')
+        console.log('[PushNotifications] ✅✅✅ Registered successfully!')
       } else {
-        console.error('[PushNotifications] ❌ Registration failed')
+        console.error('[PushNotifications] ❌❌❌ Registration failed - check Firebase logs above')
       }
     }).catch((error) => {
-      console.error('[PushNotifications] Registration error:', error)
+      console.error('[PushNotifications] ❌ Registration error:', error)
     })
 
     // Handle foreground messages as toasts
