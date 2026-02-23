@@ -1,6 +1,7 @@
 """
 Notification models for ProConnectSA
 """
+import uuid
 from django.db import models
 from django.contrib.auth import get_user_model
 from django.utils import timezone
@@ -31,6 +32,7 @@ PRIORITY_CHOICES = [
 
 class Notification(models.Model):
     """In-app notifications for users"""
+    id = models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='notifications')
     notification_type = models.CharField(max_length=50, choices=NOTIFICATION_TYPES)
     title = models.CharField(max_length=200)
