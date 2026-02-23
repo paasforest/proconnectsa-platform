@@ -496,11 +496,20 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
         {(() => {
           const isProvider = user?.user_type === 'provider' || user?.user_type === 'service_provider' || !!(user as any)?.business_name;
           console.log('[DashboardLayout] PushNotifications check:', {
+            user: user?.email,
             user_type: user?.user_type,
             isProvider,
-            hasBusinessName: !!(user as any)?.business_name
+            hasBusinessName: !!(user as any)?.business_name,
+            userObject: user ? Object.keys(user) : 'NO USER'
           });
-          return isProvider ? <PushNotifications /> : null;
+          
+          // Temporarily always render for debugging
+          if (user) {
+            console.log('[DashboardLayout] Rendering PushNotifications component...');
+            return <PushNotifications />;
+          }
+          
+          return null;
         })()}
 
         {/* Page content */}
