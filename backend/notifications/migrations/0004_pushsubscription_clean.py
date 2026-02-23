@@ -2,7 +2,7 @@
 # This migration only includes safe operations:
 # - Create PushSubscription table
 # - Delete NotificationTemplate (unused)
-# - Update NotificationSettings fields
+# - Update NotificationSettings fields (handles existing fields)
 # - Update Notification indexes
 # - NO primary key changes
 
@@ -77,110 +77,46 @@ class Migration(migrations.Migration):
             index=models.Index(fields=['user', 'notification_type'], name='notificatio_user_id_f77590_idx'),
         ),
         
-        # 6. Update NotificationSettings - Remove old fields
-        migrations.RemoveField(
-            model_name='notificationsettings',
-            name='dashboard_notifications',
-        ),
-        migrations.RemoveField(
-            model_name='notificationsettings',
-            name='digest_frequency',
-        ),
-        migrations.RemoveField(
-            model_name='notificationsettings',
-            name='email_credit_purchase',
-        ),
-        migrations.RemoveField(
-            model_name='notificationsettings',
-            name='email_deposit_verified',
-        ),
-        migrations.RemoveField(
-            model_name='notificationsettings',
-            name='email_notifications',
-        ),
-        migrations.RemoveField(
-            model_name='notificationsettings',
-            name='email_quote_received',
-        ),
-        migrations.RemoveField(
-            model_name='notificationsettings',
-            name='email_quote_response',
-        ),
-        migrations.RemoveField(
-            model_name='notificationsettings',
-            name='show_popup',
-        ),
-        migrations.RemoveField(
-            model_name='notificationsettings',
-            name='sms_lead_assigned',
-        ),
-        migrations.RemoveField(
-            model_name='notificationsettings',
-            name='sms_notifications',
-        ),
-        migrations.RemoveField(
-            model_name='notificationsettings',
-            name='sms_quote_received',
+        # 6. Update NotificationSettings - Add new fields (only if they don't exist)
+        # Using RunSQL to handle existing fields gracefully
+        migrations.RunSQL(
+            sql="""
+                DO $$
+                BEGIN
+                    -- Add fields that don't exist
+                    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='notifications_notificationsettings' AND column_name='email_enabled') THEN
+                        ALTER TABLE notifications_notificationsettings ADD COLUMN email_enabled BOOLEAN DEFAULT TRUE;
+                    END IF;
+                    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='notifications_notificationsettings' AND column_name='email_new_leads') THEN
+                        ALTER TABLE notifications_notificationsettings ADD COLUMN email_new_leads BOOLEAN DEFAULT TRUE;
+                    END IF;
+                    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='notifications_notificationsettings' AND column_name='push_enabled') THEN
+                        ALTER TABLE notifications_notificationsettings ADD COLUMN push_enabled BOOLEAN DEFAULT TRUE;
+                    END IF;
+                    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='notifications_notificationsettings' AND column_name='push_new_leads') THEN
+                        ALTER TABLE notifications_notificationsettings ADD COLUMN push_new_leads BOOLEAN DEFAULT TRUE;
+                    END IF;
+                    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='notifications_notificationsettings' AND column_name='push_lead_assigned') THEN
+                        ALTER TABLE notifications_notificationsettings ADD COLUMN push_lead_assigned BOOLEAN DEFAULT TRUE;
+                    END IF;
+                    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='notifications_notificationsettings' AND column_name='push_credits') THEN
+                        ALTER TABLE notifications_notificationsettings ADD COLUMN push_credits BOOLEAN DEFAULT TRUE;
+                    END IF;
+                    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='notifications_notificationsettings' AND column_name='push_system') THEN
+                        ALTER TABLE notifications_notificationsettings ADD COLUMN push_system BOOLEAN DEFAULT TRUE;
+                    END IF;
+                    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='notifications_notificationsettings' AND column_name='email_credits') THEN
+                        ALTER TABLE notifications_notificationsettings ADD COLUMN email_credits BOOLEAN DEFAULT TRUE;
+                    END IF;
+                    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='notifications_notificationsettings' AND column_name='sms_enabled') THEN
+                        ALTER TABLE notifications_notificationsettings ADD COLUMN sms_enabled BOOLEAN DEFAULT FALSE;
+                    END IF;
+                END $$;
+            """,
+            reverse_sql=migrations.RunSQL.noop,
         ),
         
-        # 7. Update NotificationSettings - Add new fields
-        migrations.AddField(
-            model_name='notificationsettings',
-            name='email_enabled',
-            field=models.BooleanField(default=True),
-        ),
-        migrations.AddField(
-            model_name='notificationsettings',
-            name='email_new_leads',
-            field=models.BooleanField(default=True),
-        ),
-        migrations.AddField(
-            model_name='notificationsettings',
-            name='push_enabled',
-            field=models.BooleanField(default=True),
-        ),
-        migrations.AddField(
-            model_name='notificationsettings',
-            name='push_new_leads',
-            field=models.BooleanField(default=True),
-        ),
-        migrations.AddField(
-            model_name='notificationsettings',
-            name='push_lead_assigned',
-            field=models.BooleanField(default=True),
-        ),
-        migrations.AddField(
-            model_name='notificationsettings',
-            name='push_credits',
-            field=models.BooleanField(default=True),
-        ),
-        migrations.AddField(
-            model_name='notificationsettings',
-            name='push_system',
-            field=models.BooleanField(default=True),
-        ),
-        migrations.AddField(
-            model_name='notificationsettings',
-            name='email_lead_assigned',
-            field=models.BooleanField(default=True),
-        ),
-        migrations.AddField(
-            model_name='notificationsettings',
-            name='email_credits',
-            field=models.BooleanField(default=True),
-        ),
-        migrations.AddField(
-            model_name='notificationsettings',
-            name='email_system',
-            field=models.BooleanField(default=True),
-        ),
-        migrations.AddField(
-            model_name='notificationsettings',
-            name='sms_enabled',
-            field=models.BooleanField(default=False),
-        ),
-        
-        # 8. Update Notification.priority field max_length (10 instead of 20)
+        # 7. Update Notification.priority field max_length (10 instead of 20)
         migrations.AlterField(
             model_name='notification',
             name='priority',
@@ -191,7 +127,7 @@ class Migration(migrations.Migration):
             ),
         ),
         
-        # 9. Ensure Notification.lead field matches model (should already be correct)
+        # 8. Ensure Notification.lead field matches model (should already be correct)
         migrations.AlterField(
             model_name='notification',
             name='lead',
@@ -206,4 +142,6 @@ class Migration(migrations.Migration):
         
         # NOTE: We are NOT changing Notification.id from UUIDField to BigAutoField
         # The model now explicitly defines id = UUIDField() to match the database
+        # NOTE: We are NOT removing old NotificationSettings fields to avoid breaking existing data
+        # The model will work with both old and new field names
     ]
