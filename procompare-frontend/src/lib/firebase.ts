@@ -14,11 +14,37 @@ const firebaseConfig = {
 // ─── App initialisation ───────────────────────────────────────────────────────
 
 function getFirebaseApp(): FirebaseApp | null {
-  if (typeof window === 'undefined') return null
-  if (!firebaseConfig.apiKey || !firebaseConfig.projectId) return null
+  if (typeof window === 'undefined') {
+    console.log('[Firebase] getFirebaseApp: Window undefined')
+    return null
+  }
+  
+  if (!firebaseConfig.apiKey || !firebaseConfig.projectId) {
+    console.error('[Firebase] getFirebaseApp: Missing config', {
+      hasApiKey: !!firebaseConfig.apiKey,
+      hasProjectId: !!firebaseConfig.projectId
+    })
+    return null
+  }
+  
   try {
-    return getApps().length ? getApps()[0] : initializeApp(firebaseConfig)
-  } catch {
+    const existingApps = getApps()
+    if (existingApps.length > 0) {
+      console.log('[Firebase] getFirebaseApp: Using existing app:', existingApps[0].name)
+      return existingApps[0]
+    }
+    
+    console.log('[Firebase] getFirebaseApp: Initializing new app...')
+    const app = initializeApp(firebaseConfig)
+    console.log('[Firebase] getFirebaseApp: ✅ App initialized:', app.name)
+    return app
+  } catch (error: any) {
+    console.error('[Firebase] getFirebaseApp: ❌ Error:', error)
+    console.error('[Firebase] Error details:', {
+      name: error?.name,
+      message: error?.message,
+      code: error?.code
+    })
     return null
   }
 }
@@ -26,15 +52,54 @@ function getFirebaseApp(): FirebaseApp | null {
 // ─── Messaging ────────────────────────────────────────────────────────────────
 
 async function getFirebaseMessaging(): Promise<Messaging | null> {
-  if (typeof window === 'undefined') return null
-  const { isSupported } = await import('firebase/messaging')
-  const supported = await isSupported()
-  if (!supported) return null
-  const firebaseApp = getFirebaseApp()
-  if (!firebaseApp) return null
+  console.log('[Firebase] getFirebaseMessaging() called')
+  
+  if (typeof window === 'undefined') {
+    console.log('[Firebase] Window undefined, returning null')
+    return null
+  }
+  
+  console.log('[Firebase] Checking if messaging is supported...')
   try {
-    return getMessaging(firebaseApp)
-  } catch {
+    const { isSupported } = await import('firebase/messaging')
+    const supported = await isSupported()
+    console.log('[Firebase] Messaging supported:', supported)
+    
+    if (!supported) {
+      console.error('[Firebase] Messaging is not supported in this browser')
+      return null
+    }
+    
+    console.log('[Firebase] Getting Firebase app...')
+    const firebaseApp = getFirebaseApp()
+    if (!firebaseApp) {
+      console.error('[Firebase] Failed to get Firebase app')
+      return null
+    }
+    console.log('[Firebase] Firebase app obtained:', firebaseApp.name)
+    
+    console.log('[Firebase] Creating messaging instance...')
+    try {
+      const messaging = getMessaging(firebaseApp)
+      console.log('[Firebase] ✅ Messaging instance created successfully')
+      return messaging
+    } catch (error: any) {
+      console.error('[Firebase] ❌ getMessaging() error:', error)
+      console.error('[Firebase] Error details:', {
+        name: error?.name,
+        message: error?.message,
+        code: error?.code,
+        stack: error?.stack?.substring(0, 300)
+      })
+      return null
+    }
+  } catch (error: any) {
+    console.error('[Firebase] ❌ Error importing/checking messaging support:', error)
+    console.error('[Firebase] Error details:', {
+      name: error?.name,
+      message: error?.message,
+      code: error?.code
+    })
     return null
   }
 }
