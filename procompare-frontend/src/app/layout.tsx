@@ -5,7 +5,6 @@ import ErrorBoundary from "@/components/ErrorBoundary";
 import { AuthProvider } from "@/components/AuthProvider";
 import { ServiceWorkerRegistration } from "@/components/pwa/ServiceWorkerRegistration";
 import { InstallPrompt } from "@/components/pwa/InstallPrompt";
-import { PushNotificationManager } from "@/components/pwa/PushNotificationManager";
 import "./globals.css";
 
 // Use system fonts instead of Google Fonts to avoid network issues
@@ -82,7 +81,6 @@ export default function RootLayout({
               {children}
               <Toaster />
               <InstallPrompt />
-              <PushNotificationManager />
             </Providers>
           </AuthProvider>
         </ErrorBoundary>
