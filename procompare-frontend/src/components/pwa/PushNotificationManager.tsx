@@ -6,74 +6,68 @@ import { subscribeToPushNotifications, unsubscribeFromPushNotifications, onForeg
 import { Bell, BellOff } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
-// Check if Firebase is configured
-const isFirebaseConfigured = () => {
-  if (typeof window === 'undefined') return false;
-  return !!(
-    process.env.NEXT_PUBLIC_FIREBASE_API || 
-    process.env.NEXT_PUBLIC_FIREBASE_API_KEY
-  ) && !!process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID;
-};
-
 export function PushNotificationManager() {
+  // ALL hooks must be at the top level - no conditional hook calls
   const { user, token } = useAuth();
   const [isSubscribed, setIsSubscribed] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [permission, setPermission] = useState<NotificationPermission>('default');
   const [isMounted, setIsMounted] = useState(false);
+  const [isFirebaseReady, setIsFirebaseReady] = useState(false);
 
   // Ensure component only renders on client side
   useEffect(() => {
     setIsMounted(true);
+    
+    // Check Firebase configuration inside useEffect (not during render)
+    if (typeof window !== 'undefined') {
+      const firebaseConfigured = !!(
+        process.env.NEXT_PUBLIC_FIREBASE_API || 
+        process.env.NEXT_PUBLIC_FIREBASE_API_KEY
+      ) && !!process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID;
+      setIsFirebaseReady(firebaseConfigured);
+    }
   }, []);
 
-  // Don't render if Firebase is not configured or not mounted
-  if (!isFirebaseConfigured() || !isMounted) {
-    return null;
-  }
-
   useEffect(() => {
-    // Only run if component is mounted and Firebase is configured
-    if (!isMounted || !isFirebaseConfigured()) {
-      return;
-    }
+    // ALL browser checks go INSIDE the hook - never conditionally call hooks
+    if (typeof window === 'undefined') return;
+    if (!isMounted) return;
+    if (!isFirebaseReady) return;
+    if (!('Notification' in window)) return;
 
     // Check current permission status
-    if (typeof window !== 'undefined' && 'Notification' in window) {
-      try {
-        setPermission(Notification.permission);
-      } catch (error) {
-        console.warn('Error checking notification permission:', error);
-        setPermission('default');
-      }
+    try {
+      setPermission(Notification.permission);
+    } catch (error) {
+      console.warn('Error checking notification permission:', error);
+      setPermission('default');
     }
 
     // Listen for foreground messages (only if permission is granted)
     let unsubscribe: (() => void) | null = null;
     
-    if (typeof window !== 'undefined' && 'Notification' in window) {
-      try {
-        if (Notification.permission === 'granted') {
-          unsubscribe = onForegroundMessage((payload) => {
-            // Show notification even when app is open
-            if (payload?.notification && Notification.permission === 'granted') {
-              try {
-                new Notification(payload.notification.title, {
-                  body: payload.notification.body,
-                  icon: '/icon-192.png',
-                  badge: '/icon-192.png',
-                  tag: payload.data?.lead_id || 'notification',
-                  data: payload.data,
-                });
-              } catch (error) {
-                console.error('Error showing notification:', error);
-              }
+    try {
+      if (Notification.permission === 'granted') {
+        unsubscribe = onForegroundMessage((payload) => {
+          // Show notification even when app is open
+          if (payload?.notification && Notification.permission === 'granted') {
+            try {
+              new Notification(payload.notification.title, {
+                body: payload.notification.body,
+                icon: '/icon-192.png',
+                badge: '/icon-192.png',
+                tag: payload.data?.lead_id || 'notification',
+                data: payload.data,
+              });
+            } catch (error) {
+              console.error('Error showing notification:', error);
             }
-          });
-        }
-      } catch (error) {
-        console.error('Error setting up foreground message listener:', error);
+          }
+        });
       }
+    } catch (error) {
+      console.error('Error setting up foreground message listener:', error);
     }
 
     return () => {
@@ -81,7 +75,7 @@ export function PushNotificationManager() {
         unsubscribe();
       }
     };
-  }, [isMounted]);
+  }, [isMounted, isFirebaseReady]);
 
   const handleSubscribe = async () => {
     if (!user || !token) {
@@ -129,8 +123,9 @@ export function PushNotificationManager() {
     }
   };
 
-  // Don't show if user is not authenticated
-  if (!user || !token || !isMounted) {
+  // Early return AFTER all hooks are called - this is safe
+  // Don't show if user is not authenticated, not mounted, or Firebase not ready
+  if (!user || !token || !isMounted || !isFirebaseReady) {
     return null;
   }
 
