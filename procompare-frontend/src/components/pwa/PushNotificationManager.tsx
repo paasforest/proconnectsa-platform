@@ -130,7 +130,13 @@ export function PushNotificationManager() {
   }
 
   // Ensure permission is always defined (safety check)
-  const currentPermission = permission || 'default';
+  // Double-check that permission state exists and is valid
+  const currentPermission: NotificationPermission = 
+    (typeof permission !== 'undefined' && permission) 
+      ? permission 
+      : (typeof window !== 'undefined' && 'Notification' in window 
+          ? Notification.permission 
+          : 'default');
 
   // Show helpful instructions if permission is denied
   if (currentPermission === 'denied') {

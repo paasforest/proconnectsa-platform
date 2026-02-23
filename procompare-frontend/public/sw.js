@@ -17,7 +17,7 @@ const STATIC_ASSETS = [
 
 // Install event - cache static assets
 self.addEventListener('install', (event) => {
-  console.log('[SW] Installing service worker version:', APP_VERSION);
+  console.log('[SW] Installing service worker version:', CACHE_VERSION);
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then((cache) => {
