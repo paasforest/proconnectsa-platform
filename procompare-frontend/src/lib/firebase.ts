@@ -42,22 +42,68 @@ async function getFirebaseMessaging(): Promise<Messaging | null> {
 // ─── Public API ───────────────────────────────────────────────────────────────
 
 export async function getFCMToken(): Promise<string | null> {
-  if (typeof window === 'undefined') return null
-  if (!('Notification' in window)) return null
+  console.log('[Firebase] getFCMToken() called')
+  
+  if (typeof window === 'undefined') {
+    console.log('[Firebase] Window undefined, returning null')
+    return null
+  }
+  
+  if (!('Notification' in window)) {
+    console.log('[Firebase] Notification API not available, returning null')
+    return null
+  }
 
+  // Check current permission first
+  const currentPermission = Notification.permission
+  console.log('[Firebase] Current notification permission:', currentPermission)
+  
   // Note: variable intentionally named notifPerm to avoid minifier collisions
-  const notifPerm = await Notification.requestPermission()
-  if (notifPerm !== 'granted') return null
+  let notifPerm: NotificationPermission = currentPermission
+  if (currentPermission === 'default') {
+    console.log('[Firebase] Requesting notification permission...')
+    notifPerm = await Notification.requestPermission()
+    console.log('[Firebase] Permission result:', notifPerm)
+  }
+  
+  if (notifPerm !== 'granted') {
+    console.error('[Firebase] Notification permission not granted:', notifPerm)
+    return null
+  }
 
   const vapidKey = process.env.NEXT_PUBLIC_FIREBASE_VAPID_KEY
-  if (!vapidKey) return null
+  if (!vapidKey) {
+    console.error('[Firebase] VAPID key missing!')
+    return null
+  }
+  console.log('[Firebase] VAPID key found:', vapidKey.substring(0, 10) + '...')
 
+  console.log('[Firebase] Getting Firebase messaging instance...')
   const messagingInstance = await getFirebaseMessaging()
-  if (!messagingInstance) return null
+  if (!messagingInstance) {
+    console.error('[Firebase] Failed to get messaging instance')
+    return null
+  }
+  console.log('[Firebase] Messaging instance obtained')
 
   try {
-    return await getToken(messagingInstance, { vapidKey })
-  } catch {
+    console.log('[Firebase] Calling getToken()...')
+    const token = await getToken(messagingInstance, { vapidKey })
+    if (token) {
+      console.log('[Firebase] ✅ FCM token obtained:', token.substring(0, 30) + '...')
+      return token
+    } else {
+      console.error('[Firebase] getToken() returned null/empty')
+      return null
+    }
+  } catch (error: any) {
+    console.error('[Firebase] ❌ getToken() error:', error)
+    console.error('[Firebase] Error details:', {
+      name: error?.name,
+      message: error?.message,
+      code: error?.code,
+      stack: error?.stack?.substring(0, 200)
+    })
     return null
   }
 }
