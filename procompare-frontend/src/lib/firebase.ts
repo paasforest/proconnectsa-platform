@@ -63,23 +63,45 @@ export async function getFCMToken(): Promise<string | null> {
 }
 
 export async function registerFCMToken(apiToken: string): Promise<boolean> {
+  console.log('[Firebase] Starting FCM token registration...')
+  
   const fcmToken = await getFCMToken()
-  if (!fcmToken) return false
+  if (!fcmToken) {
+    console.error('[Firebase] Failed to get FCM token')
+    return false
+  }
+
+  console.log('[Firebase] FCM token obtained:', fcmToken.substring(0, 20) + '...')
+  console.log('[Firebase] Registering token with backend...')
 
   try {
-    const res = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/api/notifications/push/subscribe/`,
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Token ${apiToken}`,
-        },
-        body: JSON.stringify({ token: fcmToken }),
-      }
-    )
-    return res.ok
-  } catch {
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://api.proconnectsa.co.za'
+    const url = `${apiUrl}/api/notifications/push/subscribe/`
+    
+    console.log('[Firebase] POST to:', url)
+    
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Token ${apiToken}`,
+      },
+      body: JSON.stringify({ token: fcmToken }),
+    })
+    
+    console.log('[Firebase] Response status:', res.status, res.statusText)
+    
+    if (!res.ok) {
+      const errorText = await res.text()
+      console.error('[Firebase] Registration failed:', errorText)
+      return false
+    }
+    
+    const data = await res.json()
+    console.log('[Firebase] Registration successful:', data)
+    return true
+  } catch (error) {
+    console.error('[Firebase] Registration error:', error)
     return false
   }
 }

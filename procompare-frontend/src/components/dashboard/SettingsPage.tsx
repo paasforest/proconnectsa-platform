@@ -239,25 +239,45 @@ const SettingsPage = () => {
 
     setIsRegisteringPush(true);
     try {
+      // Check for VAPID key
+      const vapidKey = process.env.NEXT_PUBLIC_FIREBASE_VAPID_KEY;
+      if (!vapidKey) {
+        console.error('VAPID key missing:', vapidKey);
+        setMessage({ type: 'error', text: 'Push notification configuration error. Please contact support.' });
+        setIsRegisteringPush(false);
+        return;
+      }
+
+      console.log('[Push] Starting registration...');
       const { registerFCMToken } = await import('@/lib/firebase');
+      console.log('[Push] Calling registerFCMToken...');
       const success = await registerFCMToken(token);
+      console.log('[Push] Registration result:', success);
       
       if (success) {
         setPushNotificationStatus('granted');
         setMessage({ type: 'success', text: '✅ Push notifications enabled! You will now receive instant alerts for new leads and updates.' });
       } else {
         const currentPermission = Notification.permission;
-        if (currentPermission === 'denied') {
+        console.log('[Push] Registration failed. Permission:', currentPermission);
+        
+        // Check if VAPID key is the issue
+        if (!vapidKey) {
+          setMessage({ type: 'error', text: 'Push notification configuration missing. Please contact support.' });
+        } else if (currentPermission === 'denied') {
           setMessage({ type: 'error', text: 'Push notifications were blocked. Please enable them in your browser settings and try again.' });
           setPushNotificationStatus('denied');
+        } else if (currentPermission === 'default') {
+          setMessage({ type: 'warning', text: 'Please allow notifications in the browser prompt that appeared.' });
+          setPushNotificationStatus('default');
         } else {
-          setMessage({ type: 'warning', text: 'Could not enable push notifications. Please check your browser settings.' });
+          setMessage({ type: 'warning', text: 'Could not enable push notifications. Check browser console for errors or contact support.' });
           setPushNotificationStatus(currentPermission);
         }
       }
     } catch (error: any) {
-      console.error('Error enabling push notifications:', error);
-      setMessage({ type: 'error', text: `Failed to enable push notifications: ${error.message || 'Unknown error'}` });
+      console.error('[Push] Error enabling push notifications:', error);
+      setMessage({ type: 'error', text: `Failed to enable push notifications: ${error.message || 'Unknown error'}. Check browser console for details.` });
     } finally {
       setIsRegisteringPush(false);
     }
