@@ -7,7 +7,12 @@ import { useAuth } from '@/components/AuthProvider'
 import { toast } from 'sonner'
 
 export default function PushNotifications() {
+  // Log immediately when component renders
+  console.log('[PushNotifications] ===== COMPONENT RENDERED =====')
+  
   const { user, token } = useAuth()
+  
+  console.log('[PushNotifications] After useAuth - User:', user?.email || 'NO USER', 'Token:', !!token)
 
   useEffect(() => {
     console.log('[PushNotifications] ===== COMPONENT MOUNTED =====')

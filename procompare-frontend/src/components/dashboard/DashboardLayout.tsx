@@ -493,7 +493,15 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
         )}
 
         {/* Push Notifications - Only for providers */}
-        {user?.user_type === 'provider' && <PushNotifications />}
+        {(() => {
+          const isProvider = user?.user_type === 'provider' || user?.user_type === 'service_provider' || !!(user as any)?.business_name;
+          console.log('[DashboardLayout] PushNotifications check:', {
+            user_type: user?.user_type,
+            isProvider,
+            hasBusinessName: !!(user as any)?.business_name
+          });
+          return isProvider ? <PushNotifications /> : null;
+        })()}
 
         {/* Page content */}
         <main className="flex-1">
