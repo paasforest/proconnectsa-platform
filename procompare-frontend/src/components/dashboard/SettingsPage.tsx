@@ -204,25 +204,23 @@ const SettingsPage = () => {
     };
   }, [user, token]);
 
-  // Check push notification permission status
+  // Check push notification permission status - Run immediately on mount
   useEffect(() => {
-    if (typeof window === 'undefined' || !('Notification' in window)) {
-      setPushNotificationStatus('denied');
-      return;
-    }
-    
-    // Set status immediately
-    const permission = Notification.permission;
-    setPushNotificationStatus(permission);
-    
-    // Also listen for permission changes
     const checkPermission = () => {
-      if ('Notification' in window) {
-        setPushNotificationStatus(Notification.permission);
+      if (typeof window === 'undefined' || !('Notification' in window)) {
+        setPushNotificationStatus('denied');
+        return;
       }
+      
+      // Set status immediately
+      const permission = Notification.permission as 'default' | 'granted' | 'denied';
+      setPushNotificationStatus(permission);
     };
     
-    // Check periodically in case permission changes
+    // Check immediately
+    checkPermission();
+    
+    // Also check periodically in case permission changes
     const interval = setInterval(checkPermission, 2000);
     
     return () => clearInterval(interval);
@@ -1009,14 +1007,12 @@ const SettingsPage = () => {
                 Get instant notifications about new leads, messages, and important updates directly on your device.
               </p>
               
-              {/* Status indicator - Always show if not checking */}
-              {pushNotificationStatus !== 'checking' && (
+              {/* Status indicator - Show if not checking */}
+              {pushNotificationStatus !== 'checking' && pushNotificationStatus !== 'default' && (
                 <div className={`p-3 rounded-lg ${
                   pushNotificationStatus === 'granted' 
                     ? 'bg-green-50 border border-green-200' 
-                    : pushNotificationStatus === 'denied'
-                    ? 'bg-red-50 border border-red-200'
-                    : 'bg-yellow-50 border border-yellow-200'
+                    : 'bg-red-50 border border-red-200'
                 }`}>
                   <div className="flex items-center gap-2">
                     {pushNotificationStatus === 'granted' ? (
@@ -1024,52 +1020,43 @@ const SettingsPage = () => {
                         <CheckCircle className="w-5 h-5 text-green-600" />
                         <span className="text-sm font-medium text-green-800">Push notifications enabled</span>
                       </>
-                    ) : pushNotificationStatus === 'denied' ? (
+                    ) : (
                       <>
                         <AlertCircle className="w-5 h-5 text-red-600" />
                         <span className="text-sm font-medium text-red-800">Push notifications blocked</span>
-                      </>
-                    ) : (
-                      <>
-                        <AlertCircle className="w-5 h-5 text-yellow-600" />
-                        <span className="text-sm font-medium text-yellow-800">Push notifications not enabled</span>
                       </>
                     )}
                   </div>
                 </div>
               )}
               
-              {/* Enable button - Always show unless granted */}
-              {pushNotificationStatus !== 'granted' ? (
-                <button
-                  onClick={handleEnablePushNotifications}
-                  disabled={isRegisteringPush || pushNotificationStatus === 'denied'}
-                  className={`w-full px-4 py-3 rounded-lg font-medium flex items-center justify-center gap-2 transition-colors ${
-                    pushNotificationStatus === 'denied'
-                      ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                      : 'bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50'
-                  }`}
-                >
-                  {isRegisteringPush ? (
-                    <>
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                      <span>Enabling...</span>
-                    </>
-                  ) : (
-                    <>
-                      <Bell className="w-5 h-5" />
-                      <span>Enable Notifications</span>
-                    </>
-                  )}
-                </button>
-              ) : (
-                <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
-                  <div className="flex items-center gap-2">
-                    <CheckCircle className="w-5 h-5 text-green-600" />
-                    <span className="text-sm font-medium text-green-800">Push notifications are already enabled</span>
-                  </div>
-                </div>
-              )}
+              {/* Enable button - ALWAYS SHOW unless granted */}
+              <button
+                onClick={handleEnablePushNotifications}
+                disabled={isRegisteringPush || pushNotificationStatus === 'denied' || pushNotificationStatus === 'granted'}
+                className={`w-full px-4 py-3 rounded-lg font-medium flex items-center justify-center gap-2 transition-colors ${
+                  pushNotificationStatus === 'denied' || pushNotificationStatus === 'granted'
+                    ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                    : 'bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50'
+                }`}
+              >
+                {isRegisteringPush ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                    <span>Enabling...</span>
+                  </>
+                ) : pushNotificationStatus === 'granted' ? (
+                  <>
+                    <CheckCircle className="w-5 h-5" />
+                    <span>Notifications Enabled</span>
+                  </>
+                ) : (
+                  <>
+                    <Bell className="w-5 h-5" />
+                    <span>Enable Notifications</span>
+                  </>
+                )}
+              </button>
               
               {pushNotificationStatus === 'denied' && (
                 <p className="text-xs text-red-600">
