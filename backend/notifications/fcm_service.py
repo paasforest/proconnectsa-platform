@@ -150,70 +150,63 @@ class FCMService:
         if data:
             message_data.update({k: str(v) for k, v in data.items()})
         
-        # Prepare message
-        message = messaging.MulticastMessage(
-            notification=notification,
-            data=message_data,
-            android=messaging.AndroidConfig(
-                priority='high',
-                notification=messaging.AndroidNotification(
-                    sound='default',
-                    channel_id='proconnectsa_notifications',
-                ),
-            ),
-            apns=messaging.APNSConfig(
-                payload=messaging.APNSPayload(
-                    aps=messaging.Aps(
-                        sound='default',
-                        badge=1,
-                    ),
-                ),
-            ),
-            webpush=messaging.WebpushConfig(
-                notification=messaging.WebpushNotification(
-                    icon='/icon-192.png',
-                    badge='/icon-192.png',
-                ),
-                fcm_options=messaging.WebpushFCMOptions(
-                    link='/dashboard',
-                ),
-            ),
-        )
-        
         # Get tokens
         tokens = [sub.token for sub in subscriptions]
         
         if not tokens:
             return False
         
+        # Prepare message (using Message instead of MulticastMessage for compatibility)
+        success_count = 0
+        
         try:
-            # Send to all user's devices
-            response = messaging.send_multicast(
-                message=message,
-                tokens=tokens,
-            )
+            # Send to each device individually (more reliable)
+            for idx, token in enumerate(tokens):
+                try:
+                    message = messaging.Message(
+                        notification=notification,
+                        data=message_data,
+                        token=token,
+                        android=messaging.AndroidConfig(
+                            priority='high',
+                            notification=messaging.AndroidNotification(
+                                sound='default',
+                                channel_id='proconnectsa_notifications',
+                            ),
+                        ),
+                        apns=messaging.APNSConfig(
+                            payload=messaging.APNSPayload(
+                                aps=messaging.Aps(
+                                    sound='default',
+                                    badge=1,
+                                ),
+                            ),
+                        ),
+                        webpush=messaging.WebpushConfig(
+                            notification=messaging.WebpushNotification(
+                                icon='/icon-192.png',
+                                badge='/icon-192.png',
+                            ),
+                            fcm_options=messaging.WebpushFCMOptions(
+                                link='/dashboard',
+                            ),
+                        ),
+                    )
+                    
+                    # Send message
+                    messaging.send(message)
+                    success_count += 1
+                    logger.debug(f"Sent push notification to token {token[:20]}...")
+                    
+                except messaging.UnregisteredError:
+                    # Token is invalid, deactivate it
+                    subscriptions[idx].is_active = False
+                    subscriptions[idx].save()
+                    logger.info(f"Removed invalid FCM token for user {user.id}")
+                except Exception as e:
+                    logger.warning(f"Failed to send to token {token[:20]}...: {e}")
             
-            # Handle failures
-            if response.failure_count > 0:
-                for idx, response_item in enumerate(response.responses):
-                    if not response_item.success:
-                        # Remove invalid tokens
-                        if response_item.exception.code == 'registration-token-not-registered':
-                            subscriptions[idx].is_active = False
-                            subscriptions[idx].save()
-                            logger.info(f"Removed invalid FCM token for user {user.id}")
-            
-            success_count = response.success_count
             logger.info(f"Sent push notification to {success_count}/{len(tokens)} devices for user {user.id}")
-            
-            # Also create in-app notification
-            Notification.create_for_user(
-                user=user,
-                notification_type=notification_type,
-                title=title,
-                message=body,
-                data=message_data,
-            )
             
             return success_count > 0
             
