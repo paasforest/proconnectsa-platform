@@ -61,7 +61,7 @@ const nextConfig: NextConfig = {
               "style-src 'self' 'unsafe-inline'",
               "img-src 'self' data: https: blob:",
               "font-src 'self' data:",
-              "connect-src 'self' https://api.proconnectsa.co.za wss://api.proconnectsa.co.za https://vercel.live wss://ws.pusherapp.com https://sockjs.pusher.com",
+              "connect-src 'self' https://api.proconnectsa.co.za wss://api.proconnectsa.co.za https://vercel.live wss://ws.pusherapp.com https://sockjs.pusher.com https://firebaseinstallations.googleapis.com https://fcmregistrations.googleapis.com https://firebase.googleapis.com https://identitytoolkit.googleapis.com",
               "frame-ancestors 'none'",
               "base-uri 'self'",
               "form-action 'self'",
