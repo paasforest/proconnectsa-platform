@@ -21,32 +21,69 @@ export function InstallPrompt() {
       return;
     }
 
-    // Check if running on mobile
+    // Check if running on mobile or tablet
     const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
       navigator.userAgent
     );
 
-    if (!isMobile) {
-      return; // Don't show prompt on desktop
+    // Also check for standalone mode (already installed)
+    const isStandalone = (window.navigator as any).standalone || 
+                         window.matchMedia('(display-mode: standalone)').matches;
+
+    if (isStandalone) {
+      setIsInstalled(true);
+      return;
     }
 
-    // Listen for beforeinstallprompt event
+    // Listen for beforeinstallprompt event (Chrome/Edge)
     const handleBeforeInstallPrompt = (e: Event) => {
       e.preventDefault();
+      console.log('[PWA] beforeinstallprompt event fired');
       setDeferredPrompt(e as BeforeInstallPromptEvent);
       setShowPrompt(true);
     };
 
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
 
-    // Check if user has dismissed the prompt before (using localStorage)
-    const dismissed = localStorage.getItem('pwa-install-dismissed');
-    if (dismissed) {
-      const dismissedTime = parseInt(dismissed, 10);
-      const daysSinceDismissed = (Date.now() - dismissedTime) / (1000 * 60 * 60 * 24);
-      // Show again after 7 days
-      if (daysSinceDismissed < 7) {
-        setShowPrompt(false);
+    // For iOS Safari, show manual install instructions after a delay
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as any).MSStream;
+    const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+
+    if (isIOS && isSafari) {
+      // On iOS, show prompt after user engagement (3 seconds after page load)
+      setTimeout(() => {
+        const dismissed = localStorage.getItem('pwa-install-dismissed');
+        if (!dismissed) {
+          setShowPrompt(true);
+        } else {
+          const dismissedTime = parseInt(dismissed, 10);
+          const daysSinceDismissed = (Date.now() - dismissedTime) / (1000 * 60 * 60 * 24);
+          if (daysSinceDismissed >= 7) {
+            setShowPrompt(true);
+          }
+        }
+      }, 3000);
+    } else if (isMobile) {
+      // For Android, wait for beforeinstallprompt or show after engagement
+      // Check if user has dismissed the prompt before
+      const dismissed = localStorage.getItem('pwa-install-dismissed');
+      if (dismissed) {
+        const dismissedTime = parseInt(dismissed, 10);
+        const daysSinceDismissed = (Date.now() - dismissedTime) / (1000 * 60 * 60 * 24);
+        // Show again after 7 days
+        if (daysSinceDismissed < 7) {
+          setShowPrompt(false);
+        } else {
+          // Show after user engagement (5 seconds)
+          setTimeout(() => {
+            setShowPrompt(true);
+          }, 5000);
+        }
+      } else {
+        // First time - show after user engagement (5 seconds)
+        setTimeout(() => {
+          setShowPrompt(true);
+        }, 5000);
       }
     }
 
@@ -56,28 +93,42 @@ export function InstallPrompt() {
   }, []);
 
   const handleInstallClick = async () => {
-    if (!deferredPrompt) {
-      return;
-    }
+    // Check if we have the deferred prompt (Chrome/Edge)
+    if (deferredPrompt) {
+      try {
+        // Show the install prompt
+        await deferredPrompt.prompt();
 
-    try {
-      // Show the install prompt
-      await deferredPrompt.prompt();
+        // Wait for user response
+        const { outcome } = await deferredPrompt.userChoice;
 
-      // Wait for user response
-      const { outcome } = await deferredPrompt.userChoice;
+        if (outcome === 'accepted') {
+          console.log('User accepted the install prompt');
+          setIsInstalled(true);
+        } else {
+          console.log('User dismissed the install prompt');
+        }
 
-      if (outcome === 'accepted') {
-        console.log('User accepted the install prompt');
-        setIsInstalled(true);
-      } else {
-        console.log('User dismissed the install prompt');
+        setDeferredPrompt(null);
+        setShowPrompt(false);
+      } catch (error) {
+        console.error('Error showing install prompt:', error);
       }
-
-      setDeferredPrompt(null);
-      setShowPrompt(false);
-    } catch (error) {
-      console.error('Error showing install prompt:', error);
+    } else {
+      // Manual install instructions for browsers that don't support beforeinstallprompt
+      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as any).MSStream;
+      const isAndroid = /Android/.test(navigator.userAgent);
+      
+      if (isIOS) {
+        // Show iOS instructions
+        alert('To install this app on your iOS device:\n\n1. Tap the Share button (square with arrow)\n2. Scroll down and tap "Add to Home Screen"\n3. Tap "Add" in the top right');
+      } else if (isAndroid) {
+        // Show Android instructions
+        alert('To install this app on your Android device:\n\n1. Tap the menu (3 dots) in the top right\n2. Tap "Install app" or "Add to Home screen"\n3. Tap "Install" to confirm');
+      } else {
+        // Generic instructions
+        alert('To install this app:\n\n1. Look for the install icon in your browser\'s address bar\n2. Or use your browser\'s menu to find "Install" or "Add to Home Screen"');
+      }
     }
   };
 
@@ -86,8 +137,13 @@ export function InstallPrompt() {
     localStorage.setItem('pwa-install-dismissed', Date.now().toString());
   };
 
-  // Don't show if already installed or no prompt available
-  if (isInstalled || !showPrompt || !deferredPrompt) {
+  // Don't show if already installed
+  if (isInstalled) {
+    return null;
+  }
+
+  // Show prompt if user engagement detected or deferredPrompt available
+  if (!showPrompt && !deferredPrompt) {
     return null;
   }
 
