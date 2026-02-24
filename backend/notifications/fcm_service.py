@@ -188,7 +188,7 @@ class FCMService:
                                 badge='/icon-192.png',
                             ),
                             fcm_options=messaging.WebpushFCMOptions(
-                                link='/dashboard',
+                                link='https://www.proconnectsa.co.za/dashboard',
                             ),
                         ),
                     )
