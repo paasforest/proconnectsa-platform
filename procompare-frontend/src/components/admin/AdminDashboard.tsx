@@ -301,24 +301,30 @@ const OverviewDashboard = () => {
               )}
             </div>
           </div>
-          {!loading && (monitoringData?.leads?.recent_leads?.length ?? 0) > 0 && (
+          {!loading && (
             <div className="mt-4 pt-4 border-t border-gray-100">
-              <p className="text-xs font-medium text-gray-500 mb-2">Sent by</p>
-              <ul className="space-y-2 max-h-32 overflow-y-auto">
-                {(monitoringData.leads.recent_leads as any[]).slice(0, 8).map((lead: any, idx: number) => (
-                  <li key={idx} className="text-sm text-gray-700">
-                    <span className="font-medium truncate block" title={lead.title}>{lead.title}</span>
-                    <span className="text-gray-500">
-                      {lead.client_name ? `${lead.client_name} (${lead.client || '—'})` : (lead.client || '—')}
-                    </span>
-                    {lead.created_at && (
-                      <span className="text-gray-400 text-xs ml-1">
-                        {new Date(lead.created_at).toLocaleDateString()}
-                      </span>
-                    )}
-                  </li>
-                ))}
-              </ul>
+              {(monitoringData?.leads?.recent_leads?.length ?? 0) > 0 ? (
+                <>
+                  <p className="text-xs font-medium text-gray-500 mb-2">Sent by (last 24h)</p>
+                  <ul className="space-y-2 max-h-32 overflow-y-auto">
+                    {(monitoringData.leads.recent_leads as any[]).slice(0, 8).map((lead: any, idx: number) => (
+                      <li key={idx} className="text-sm text-gray-700">
+                        <span className="font-medium truncate block" title={lead.title}>{lead.title}</span>
+                        <span className="text-gray-500">
+                          {lead.client_name ? `${lead.client_name} (${lead.client || '—'})` : (lead.client || '—')}
+                        </span>
+                        {lead.created_at && (
+                          <span className="text-gray-400 text-xs ml-1">
+                            {new Date(lead.created_at).toLocaleDateString()}
+                          </span>
+                        )}
+                      </li>
+                    ))}
+                  </ul>
+                </>
+              ) : (
+                <p className="text-xs text-gray-400">No new leads in the last 24 hours. New submissions will show here with who sent them.</p>
+              )}
             </div>
           )}
         </div>
