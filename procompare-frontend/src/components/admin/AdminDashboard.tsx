@@ -194,29 +194,15 @@ const OverviewDashboard = () => {
       
       // Fetch monitoring dashboard data
       try {
-        console.log('[Admin Dashboard] Fetching monitoring data...');
         const monitoringData = await apiClient.get('/api/auth/admin/monitoring/dashboard/');
-        console.log('[Admin Dashboard] Raw monitoring response:', monitoringData);
-        console.log('[Admin Dashboard] Response type:', typeof monitoringData);
-        console.log('[Admin Dashboard] Has data key?', monitoringData?.data !== undefined);
-        console.log('[Admin Dashboard] Has registrations?', monitoringData?.registrations !== undefined || monitoringData?.data?.registrations !== undefined);
-        
-        // Handle both direct response and nested data
         const data = monitoringData?.data || monitoringData;
-        console.log('[Admin Dashboard] Processed data:', data);
-        console.log('[Admin Dashboard] Registrations total:', data?.registrations?.total);
-        console.log('[Admin Dashboard] Registrations details:', data?.registrations?.details);
-        
         if (data && typeof data === 'object') {
           setMonitoringData(data);
         } else {
-          console.warn('[Admin Dashboard] Invalid data format, setting defaults');
           setMonitoringData({ registrations: { total: 0 }, payments: { total_deposited: 0 }, leads: { new_leads: 0 } });
         }
       } catch (error: any) {
-        console.error('[Admin Dashboard] Failed to fetch monitoring dashboard:', error);
-        console.error('[Admin Dashboard] Error details:', error.response || error.message);
-        // Set empty data on error so UI doesn't show loading forever
+        console.error('[Admin Dashboard] Failed to fetch monitoring dashboard:', error?.response || error?.message);
         setMonitoringData({ registrations: { total: 0 }, payments: { total_deposited: 0 }, leads: { new_leads: 0 } });
       }
       
