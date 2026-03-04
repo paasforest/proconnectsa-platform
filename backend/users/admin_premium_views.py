@@ -202,7 +202,7 @@ def admin_approve_premium(request, deposit_id):
         
         # Send activation email to provider
         try:
-            from backend.utils.sendgrid_service import sendgrid_service
+            from backend.utils.resend_service import send_email as resend_send_email
             
             expires_text = 'never expires' if plan_type == 'lifetime' else f"expires on {provider.premium_listing_expires_at.strftime('%B %d, %Y')}"
             
@@ -263,7 +263,7 @@ Best regards,
 The ProConnectSA Team
             """
             
-            sendgrid_service.send_email(
+            resend_send_email(
                 deposit.account.user.email,
                 email_subject,
                 html_content,

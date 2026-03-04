@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useCallback } from 'react';
+import { useRouter } from 'next/navigation';
 import { useAuth } from '@/components/AuthProvider';
 import {
   Search, Filter, MapPin, Clock, DollarSign, Phone, Mail, 
@@ -69,8 +70,9 @@ const LeadsPage = () => {
   });
   const [unlockingLead, setUnlockingLead] = useState<string | null>(null);
 
-  // Authentication
+  // Authentication and routing
   const { user, token } = useAuth();
+  const router = useRouter();
 
   const serviceCategories = [
     'Plumbing', 'Electrical', 'Cleaning', 'Legal', 'Marketing', 
@@ -141,10 +143,10 @@ const LeadsPage = () => {
       let helpText = '';
       
       if (error.response?.data) {
-        if (error.response.data.error) {
-          errorMessage = error.response.data.error;
-        } else if (error.response.data.message) {
+        if (error.response.data.message) {
           errorMessage = error.response.data.message;
+        } else if (error.response.data.error) {
+          errorMessage = error.response.data.error;
         }
         
         // Include help text if available
@@ -153,11 +155,22 @@ const LeadsPage = () => {
         }
       }
       
+      const isInsufficientCredits = error.response?.status === 402 ||
+        error.response?.data?.error === 'INSUFFICIENT_CREDITS';
+      
       // Show error message with help text
       if (helpText) {
         alert(`${errorMessage}\n\n${helpText}`);
       } else {
         alert(errorMessage);
+      }
+      
+      // When credits are insufficient, offer to go to credits page (no free leads)
+      if (isInsufficientCredits) {
+        const goToCredits = window.confirm('Would you like to top up your credits now?');
+        if (goToCredits) {
+          router.push('/credits');
+        }
       }
     } finally {
       setUnlockingLead(null);

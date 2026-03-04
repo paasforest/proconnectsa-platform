@@ -292,7 +292,7 @@ const OverviewDashboard = () => {
             <div className="p-2 bg-yellow-100 rounded-lg">
               <LayoutDashboard className="w-6 h-6 text-yellow-600" />
             </div>
-            <div className="ml-4">
+            <div className="ml-4 flex-1">
               <p className="text-sm font-medium text-gray-600">New Leads</p>
               {loading ? (
                 <div className="h-8 w-20 bg-gray-200 animate-pulse rounded"></div>
@@ -301,6 +301,26 @@ const OverviewDashboard = () => {
               )}
             </div>
           </div>
+          {!loading && (monitoringData?.leads?.recent_leads?.length ?? 0) > 0 && (
+            <div className="mt-4 pt-4 border-t border-gray-100">
+              <p className="text-xs font-medium text-gray-500 mb-2">Sent by</p>
+              <ul className="space-y-2 max-h-32 overflow-y-auto">
+                {(monitoringData.leads.recent_leads as any[]).slice(0, 8).map((lead: any, idx: number) => (
+                  <li key={idx} className="text-sm text-gray-700">
+                    <span className="font-medium truncate block" title={lead.title}>{lead.title}</span>
+                    <span className="text-gray-500">
+                      {lead.client_name ? `${lead.client_name} (${lead.client || '—'})` : (lead.client || '—')}
+                    </span>
+                    {lead.created_at && (
+                      <span className="text-gray-400 text-xs ml-1">
+                        {new Date(lead.created_at).toLocaleDateString()}
+                      </span>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
         </div>
 
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">

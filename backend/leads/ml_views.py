@@ -13,7 +13,8 @@ from datetime import timedelta
 from .models import Lead, LeadAssignment, LeadAccess
 from .ml_services import LeadQualityMLService, LeadConversionMLService, LeadAccessControlMLService
 from backend.notifications.consumers import NotificationConsumer
-from backend.utils.sendgrid_service import sendgrid_service
+from backend.utils.resend_service import send_email as resend_send_email
+from backend.utils.resend_service import send_lead_status_update
 import logging
 
 logger = logging.getLogger(__name__)
@@ -836,7 +837,7 @@ def purchase_lead_access_view(request, lead_id):
 
                 # Send email with EFT instructions to provider
                 try:
-                    sendgrid_service.send_email(
+                    resend_send_email(
                         request.user.email,
                         "Your lead is reserved — complete EFT to unlock",
                         f"""
@@ -1002,7 +1003,7 @@ Use the exact reference so we can auto-activate your credits."""
         # Step 7: Send email notifications
         try:
             # Send notification to the provider who unlocked the lead
-            sendgrid_service.send_lead_status_update(
+            send_lead_status_update(
                 user=request.user,
                 lead=lead,
                 status="unlocked",
@@ -1010,7 +1011,7 @@ Use the exact reference so we can auto-activate your credits."""
             )
             
             # Send notification to the client whose lead was unlocked
-            sendgrid_service.send_lead_status_update(
+            send_lead_status_update(
                 user=lead.client,
                 lead=lead,
                 status="claimed",

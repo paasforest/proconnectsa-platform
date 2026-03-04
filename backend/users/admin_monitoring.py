@@ -100,8 +100,8 @@ def admin_monitoring_dashboard(request):
             created_at__gte=time_window
         ).select_related('account__user')
         
-        # 4. NEW LEADS
-        new_leads = Lead.objects.filter(created_at__gte=time_window)
+        # 4. NEW LEADS (with client info for "who sent it")
+        new_leads = Lead.objects.filter(created_at__gte=time_window).select_related('client', 'service_category').order_by('-created_at')
         
         # 5. SYSTEM ERRORS (from Django logs)
         # We'll return log file location for now
@@ -171,8 +171,9 @@ def admin_monitoring_dashboard(request):
                 'recent_leads': [
                     {
                         'title': lead.title,
-                        'category': lead.service_category.name,
-                        'client': lead.client.email,
+                        'category': lead.service_category.name if lead.service_category else '',
+                        'client': lead.client.email if lead.client else '',
+                        'client_name': f'{lead.client.first_name or ""} {lead.client.last_name or ""}'.strip() or (lead.client.email if lead.client else ''),
                         'location': f'{lead.location_suburb}, {lead.location_city}',
                         'status': lead.status,
                         'created_at': lead.created_at.isoformat()

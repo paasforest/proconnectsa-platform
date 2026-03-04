@@ -1,6 +1,7 @@
 """
-SendGrid Email Service for ProConnectSA
-Enhanced email delivery with SendGrid API
+SendGrid Email Service for ProConnectSA — DISABLED.
+Resend is now the primary email provider (see backend.utils.resend_service).
+This file is kept for reference only; no code paths use it.
 """
 import logging
 import os

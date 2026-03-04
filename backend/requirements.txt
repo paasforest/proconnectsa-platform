@@ -24,7 +24,8 @@ django-celery-beat==2.5.0
 # Caching
 django-redis==5.4.0
 
-# Email and SMS
+# Email and SMS (Resend is primary; SendGrid disabled)
+resend>=2.0.0
 django-anymail==10.1
 requests==2.31.0
 

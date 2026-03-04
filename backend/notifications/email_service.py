@@ -267,12 +267,13 @@ def send_welcome_email(user):
 def send_lead_notification_email(provider, lead):
     """Send lead notification to a provider"""
     try:
-        # Use SendGrid service if available, otherwise fall back to Django email
+        # Primary: Resend. Fallback: Django email backend.
         try:
-            from utils.sendgrid_service import sendgrid_service
-            return sendgrid_service.send_lead_notification(provider, lead)
-        except ImportError:
-            logger.warning("SendGrid service not available, using Django email backend")
+            from backend.utils.resend_service import send_lead_notification
+            if send_lead_notification(provider, lead):
+                return True
+        except Exception as e:
+            logger.warning("Resend lead notification failed: %s, using Django email backend", e)
             # Fallback to Django email backend
             subject = f"New {lead.service_category.name} lead in {lead.location_city}"
             
@@ -759,28 +760,27 @@ def send_password_reset_email(email, reset_code, reset_token):
         © 2024 ProConnectSA. All rights reserved.
         """
         
-        # Use SendGrid service if available, otherwise fall back to Django email
+        # Primary: Resend. Fallback: Django email backend.
         try:
-            from utils.sendgrid_service import sendgrid_service
-            return sendgrid_service.send_password_reset_email(email, reset_code, reset_token)
-        except ImportError:
-            logger.warning("SendGrid service not available, using Django email backend")
-            # Fallback to Django email backend
-            email_service = EmailService()
-            success = email_service.send_email(
-                to_email=email,
-                subject=subject,
-                html_content=html_content,
-                text_content=text_content
-            )
-            
-            if success:
-                logger.info(f"Password reset email sent successfully to {email}")
+            from backend.utils.resend_service import send_password_reset_email as resend_password_reset
+            if resend_password_reset(email, reset_code, reset_token):
                 return True
-            else:
-                logger.error(f"Failed to send password reset email to {email}")
-                return False
-            
+        except Exception as e:
+            logger.warning("Resend password reset email failed: %s, using Django email backend", e)
+        # Fallback to Django email backend
+        email_service = EmailService()
+        success = email_service.send_email(
+            to_email=email,
+            subject=subject,
+            html_content=html_content,
+            text_content=text_content
+        )
+        if success:
+            logger.info(f"Password reset email sent successfully to {email}")
+        else:
+            logger.error(f"Failed to send password reset email to {email}")
+        return success
+
     except Exception as e:
         logger.error(f"Failed to send password reset email: {str(e)}")
         return False

@@ -15,11 +15,13 @@ from django.conf import settings
 
 logger = logging.getLogger(__name__)
 
+# Primary: Resend. Fallback: Django SMTP/console (when Resend not configured).
+RESEND_PRIMARY_EMAIL = True
+
 
 def match_providers(lead):
     """
-    Find top matching active providers for a given lead.
-
+    Find top matching active providers for a given le
     Matching criteria (in order of priority):
     1. Provider must have can_receive_leads == True
        (verification_status == 'verified' + active subscription)
@@ -146,11 +148,18 @@ def notify_providers(lead, providers):
 
 
 def _send_lead_email(lead, provider, lead_url):
-    """Send a lead notification email to a single provider."""
+    """Send a lead notification email to a single provider. Uses Resend first, then Django backend."""
+    if RESEND_PRIMARY_EMAIL:
+        try:
+            from backend.utils.resend_service import send_lead_notification
+            if send_lead_notification(provider, lead):
+                return
+            # Resend failed or not configured — fall back to Django
+        except Exception as e:
+            logger.warning(f"[LeadRouter] Resend lead email failed for {provider.email}: {e}, falling back to Django email")
+    # Fallback: Django send_mail (SMTP or console)
     subject = f"New Lead Available: {lead.title} in {lead.location_suburb}"
-
     first_name = getattr(provider, 'first_name', '') or 'there'
-
     message = f"""Hi {first_name},
 
 A new lead matching your services is available on ProConnectSA.
@@ -172,7 +181,6 @@ View & Claim Lead:
 You're receiving this because your ProConnectSA profile matches this lead.
 To update your service areas or categories, visit your profile settings.
 """
-
     send_mail(
         subject=subject,
         message=message,

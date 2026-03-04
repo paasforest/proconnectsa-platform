@@ -35,7 +35,7 @@ def create_welcome_notification(sender, instance, created, **kwargs):
 
 @receiver(post_save, sender=ProviderProfile)
 def create_provider_welcome_notification(sender, instance, created, **kwargs):
-    """Create welcome notification for new provider profiles"""
+    """Create welcome notification and send pro welcome email for new provider profiles"""
     if created:
         Notification.create_for_user(
             user=instance.user,
@@ -44,4 +44,11 @@ def create_provider_welcome_notification(sender, instance, created, **kwargs):
             message=f'Your provider profile for {instance.business_name} has been created. Please complete verification to start receiving leads.',
             priority='high'
         )
+        # Pro welcome email: how leads work, how to respond, how to upgrade
+        try:
+            from backend.utils.resend_service import send_pro_welcome_email
+            send_pro_welcome_email(instance.user)
+        except Exception as e:
+            import logging
+            logging.getLogger(__name__).error(f"Failed to send pro welcome email: {e}", exc_info=True)
 

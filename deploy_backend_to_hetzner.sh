@@ -13,7 +13,7 @@ HETZNER_DIR="/opt/proconnectsa"
 
 echo ""
 echo "📦 Step 1: Syncing ALL backend files..."
-rsync -avz --exclude='venv' --exclude='__pycache__' --exclude='*.pyc' --exclude='db.sqlite3' --exclude='*.log' \
+rsync -avz --exclude='venv' --exclude='.venv' --exclude='__pycache__' --exclude='*.pyc' --exclude='db.sqlite3' --exclude='*.log' \
   /home/immigrant/work_platform/backend/ \
   root@${HETZNER_IP}:${HETZNER_DIR}/backend/
 

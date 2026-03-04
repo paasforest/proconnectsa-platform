@@ -550,7 +550,7 @@ def request_premium_listing(request):
         
         # Send confirmation email to provider
         try:
-            from backend.utils.sendgrid_service import sendgrid_service
+            from backend.utils.resend_service import send_email as resend_send_email
             
             email_subject = f"Premium Listing Request Created - Reference: {reference_number}"
             html_content = f"""
@@ -626,7 +626,7 @@ Best regards,
 The ProConnectSA Team
             """
             
-            sendgrid_service.send_email(
+            resend_send_email(
                 request.user.email,
                 email_subject,
                 html_content,

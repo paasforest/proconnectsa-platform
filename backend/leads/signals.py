@@ -127,6 +127,13 @@ def route_verified_lead(sender, instance, created, **kwargs):
         # Import here to avoid circular imports
         from backend.leads.services.lead_router import route_lead
         route_lead(instance)
+        # Client email (Option B): send "We've received your request" when pros are notified
+        if getattr(instance, 'client', None) and getattr(instance.client, 'email', None):
+            try:
+                from backend.utils.resend_service import send_lead_received_client_email
+                send_lead_received_client_email(instance)
+            except Exception as email_err:
+                logger.error(f"[Signal] Failed to send lead-received email to client: {email_err}", exc_info=True)
     except Exception as e:
         # Belt-and-suspenders: route_lead is already safe, but just in case
         logger.error(f"[Signal] Unexpected error routing lead {instance.id}: {e}", exc_info=True)

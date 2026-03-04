@@ -7,7 +7,8 @@ import json
 from django.conf import settings
 
 from .models import Wallet, WalletTransaction
-from backend.utils.sendgrid_service import sendgrid_service
+from backend.utils.resend_service import send_email as resend_send_email
+from backend.utils.resend_service import send_payment_confirmation
 from backend.payments.models import DepositRequest, TransactionStatus
 from datetime import timedelta
 
@@ -81,8 +82,6 @@ def _process_deposit_request_match(deposit: DepositRequest, bank_tx: dict):
         
         # Send payment detected email (waiting for admin approval)
         try:
-            from backend.utils.sendgrid_service import sendgrid_service
-            
             email_subject = "✅ Premium Payment Detected - Awaiting Admin Approval"
             html_content = f"""
             <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
@@ -128,7 +127,7 @@ Best regards,
 The ProConnectSA Team
             """
             
-            sendgrid_service.send_email(
+            resend_send_email(
                 deposit.account.user.email,
                 email_subject,
                 html_content,
@@ -415,7 +414,7 @@ def send_deposit_notification(user, credits_added, total_credits):
         
         if latest_transaction:
             # Send payment confirmation email
-            sendgrid_service.send_payment_confirmation(user, latest_transaction)
+            send_payment_confirmation(user, latest_transaction)
             logger.info(f"📧 Payment confirmation email sent to {user.email}")
         
         logger.info(f"Deposit notification: {user.username} received {credits_added} credits (total: {total_credits})")
