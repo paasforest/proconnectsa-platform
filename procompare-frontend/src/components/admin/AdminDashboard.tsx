@@ -334,82 +334,111 @@ const OverviewDashboard = () => {
 
       {/* Problems Alert */}
       {problems && problems.problems_detected > 0 && (
-        <div className="mb-6 bg-red-50 border border-red-200 rounded-lg p-6">
-          <h3 className="text-lg font-semibold text-red-900 mb-4 flex items-center">
-            <Bell className="w-5 h-5 mr-2" />
-            ⚠️ {problems.problems_detected} Problem(s) Need Attention
+        <div className="mb-6 bg-red-50/80 border border-red-200 rounded-xl p-6 shadow-sm">
+          <h3 className="text-lg font-semibold text-red-900 mb-4 flex items-center gap-2">
+            <Bell className="w-5 h-5 shrink-0" />
+            {problems.problems_detected} Problem(s) Need Attention
           </h3>
-          <div className="space-y-3">
+          <div className="space-y-4">
             {problems.problems.map((problem: any, index: number) => (
-              <div key={index} className="bg-white rounded p-4 border border-red-200">
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
+              <div key={index} className="bg-white rounded-lg border border-red-100 p-4 shadow-sm">
+                <div className="flex items-start justify-between gap-4">
+                  <div className="flex-1 min-w-0">
                     <p className="font-medium text-gray-900">{problem.message}</p>
-                    <p className="text-sm text-gray-600 mt-1">{problem.action}</p>
-                    
-                    {/* Show user emails if available */}
+                    <p className="text-sm text-gray-600 mt-0.5">{problem.action}</p>
+
+                    {/* Affected Users: one per row, email + business name */}
                     {problem.users && problem.users.length > 0 && (
-                      <div className="mt-3">
-                        <p className="text-xs font-semibold text-gray-700 mb-1">Affected Users ({problem.users.length}):</p>
-                        <div className="max-h-32 overflow-y-auto">
-                          <div className="flex flex-wrap gap-1">
-                            {problem.users.slice(0, 10).map((user: any, idx: number) => {
+                      <div className="mt-4">
+                        <p className="text-xs font-semibold text-gray-600 uppercase tracking-wide mb-2">
+                          Affected Users ({problem.users.length})
+                        </p>
+                        <div className="max-h-48 overflow-y-auto rounded border border-gray-100 bg-gray-50/50">
+                          <ul className="divide-y divide-gray-100 p-1">
+                            {problem.users.slice(0, 20).map((user: any, idx: number) => {
                               const email = typeof user === 'string' ? user : user.email;
                               const businessName = typeof user === 'object' ? user.business_name : null;
                               return (
-                                <button
-                                  key={idx}
-                                  onClick={() => setSelectedUserEmail(email)}
-                                  className="text-xs bg-gray-100 hover:bg-gray-200 px-2 py-1 rounded text-gray-700 cursor-pointer transition-colors"
-                                  title={businessName ? `Click to view details - ${businessName}` : 'Click to view details'}
-                                >
-                                  {email}
-                                  {businessName && <span className="ml-1 text-gray-500">({businessName})</span>}
-                                </button>
+                                <li key={idx}>
+                                  <button
+                                    type="button"
+                                    onClick={() => setSelectedUserEmail(email)}
+                                    className="w-full text-left px-3 py-2 rounded hover:bg-gray-100 transition-colors group"
+                                    title="View user details"
+                                  >
+                                    <span className="text-sm text-gray-900 block truncate group-hover:text-blue-600">
+                                      {email}
+                                    </span>
+                                    {businessName && (
+                                      <span className="text-xs text-gray-500 block truncate mt-0.5">
+                                        {businessName}
+                                      </span>
+                                    )}
+                                  </button>
+                                </li>
                               );
                             })}
-                            {problem.users.length > 10 && (
-                              <span className="text-xs text-gray-500 px-2 py-1">
-                                +{problem.users.length - 10} more
-                              </span>
-                            )}
-                          </div>
+                          </ul>
+                          {problem.users.length > 20 && (
+                            <p className="text-xs text-gray-500 px-3 py-2 border-t border-gray-100 bg-white">
+                              +{problem.users.length - 20} more
+                            </p>
+                          )}
                         </div>
                       </div>
                     )}
-                    
-                    {/* Show deposit details if available */}
+
+                    {/* Deposit Details: one card per deposit with clear fields */}
                     {problem.details && problem.details.length > 0 && (
-                      <div className="mt-3">
-                        <p className="text-xs font-semibold text-gray-700 mb-1">Deposit Details ({problem.details.length}):</p>
-                        <div className="max-h-32 overflow-y-auto space-y-1">
-                          {problem.details.slice(0, 5).map((detail: any, idx: number) => (
+                      <div className="mt-4">
+                        <p className="text-xs font-semibold text-gray-600 uppercase tracking-wide mb-2">
+                          Deposit Details ({problem.details.length})
+                        </p>
+                        <div className="max-h-64 overflow-y-auto space-y-2">
+                          {problem.details.slice(0, 15).map((detail: any, idx: number) => (
                             <button
                               key={idx}
+                              type="button"
                               onClick={() => setSelectedDepositId(detail.deposit_id)}
-                              className="text-xs bg-gray-50 hover:bg-gray-100 px-2 py-1 rounded w-full text-left transition-colors"
-                              title="Click to view deposit details"
+                              className="w-full text-left rounded-lg border border-gray-200 bg-gray-50/80 hover:bg-gray-100 hover:border-gray-300 px-3 py-2.5 transition-colors"
+                              title="View deposit details"
                             >
-                              <span className="font-medium">{detail.business_name || detail.user}</span>: R{detail.amount} ({detail.age_hours?.toFixed(1)}h ago)
-                              {detail.reference_number && (
-                                <span className="text-gray-500 ml-1">- {detail.reference_number}</span>
-                              )}
+                              <div className="flex flex-wrap items-baseline justify-between gap-x-2">
+                                <span className="font-medium text-gray-900">
+                                  {detail.business_name || detail.user}
+                                </span>
+                                <span className="text-sm text-gray-700">
+                                  R{Number(detail.amount).toFixed(2)}
+                                </span>
+                              </div>
+                              <div className="flex flex-wrap items-center gap-x-3 mt-1 text-xs text-gray-500">
+                                <span>{detail.age_hours != null ? `${Number(detail.age_hours).toFixed(1)}h ago` : '—'}</span>
+                                {detail.reference_number && (
+                                  <span className="font-mono truncate" title={detail.reference_number}>
+                                    Ref: {detail.reference_number}
+                                  </span>
+                                )}
+                              </div>
                             </button>
                           ))}
-                          {problem.details.length > 5 && (
-                            <span className="text-xs text-gray-500 px-2 py-1">
-                              +{problem.details.length - 5} more deposits
-                            </span>
+                          {problem.details.length > 15 && (
+                            <p className="text-xs text-gray-500 py-1">
+                              +{problem.details.length - 15} more deposits
+                            </p>
                           )}
                         </div>
                       </div>
                     )}
                   </div>
-                  <span className={`px-2 py-1 text-xs font-medium rounded-full ${
-                    problem.severity === 'high' ? 'bg-red-100 text-red-800' :
-                    problem.severity === 'medium' ? 'bg-yellow-100 text-yellow-800' :
-                    'bg-blue-100 text-blue-800'
-                  }`}>
+                  <span
+                    className={`shrink-0 px-2.5 py-1 text-xs font-medium rounded-full capitalize ${
+                      problem.severity === 'high'
+                        ? 'bg-red-100 text-red-800'
+                        : problem.severity === 'medium'
+                          ? 'bg-amber-100 text-amber-800'
+                          : 'bg-sky-100 text-sky-800'
+                    }`}
+                  >
                     {problem.severity}
                   </span>
                 </div>
