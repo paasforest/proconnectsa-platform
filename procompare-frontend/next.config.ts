@@ -26,6 +26,15 @@ const nextConfig: NextConfig = {
   // Note: Next.js automatically excludes /_next/* paths from custom headers
   async headers() {
     return [
+      // Avoid caching dashboard/admin so UI updates show after deploy
+      {
+        source: '/dashboard/:path*',
+        headers: [{ key: 'Cache-Control', value: 'no-store, must-revalidate' }],
+      },
+      {
+        source: '/admin/:path*',
+        headers: [{ key: 'Cache-Control', value: 'no-store, must-revalidate' }],
+      },
       {
         source: '/:path*',
         headers: [
