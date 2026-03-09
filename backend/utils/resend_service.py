@@ -141,7 +141,7 @@ def send_lead_notification(provider, lead):
                 </div>
                 <div class="footer">
                     <p>ProConnectSA - Connecting you with the best service providers</p>
-                    <p>Email: support@proconnectsa.co.za | Phone: +27 67 951 8124</p>
+                    <p>Email: support@proconnectsa.co.za | Phone: 077 438 8845</p>
                 </div>
             </div>
         </body>
@@ -213,7 +213,7 @@ def send_lead_received_client_email(lead):
                     <p>Best regards,<br>The ProConnectSA Team</p>
                 </div>
                 <div class="footer">
-                    <p>ProConnectSA - support@proconnectsa.co.za | +27 67 951 8124</p>
+                    <p>ProConnectSA - support@proconnectsa.co.za | 077 438 8845</p>
                 </div>
             </div>
         </body>
@@ -291,7 +291,7 @@ def send_pro_welcome_email(user):
                     <p>Best regards,<br>The ProConnectSA Team</p>
                 </div>
                 <div class="footer">
-                    <p>ProConnectSA - support@proconnectsa.co.za | +27 67 951 8124</p>
+                    <p>ProConnectSA - support@proconnectsa.co.za | 077 438 8845</p>
                 </div>
             </div>
         </body>
@@ -432,7 +432,7 @@ def send_payment_confirmation(user, transaction):
                     <p>Best regards,<br>The ProConnectSA Team</p>
                 </div>
                 <div class="footer">
-                    <p>ProConnectSA - support@proconnectsa.co.za | +27 67 951 8124</p>
+                    <p>ProConnectSA - support@proconnectsa.co.za | 077 438 8845</p>
                 </div>
             </div>
         </body>
@@ -500,7 +500,7 @@ def send_lead_status_update(user, lead, status, message=""):
                     <p>Best regards,<br>The ProConnectSA Team</p>
                 </div>
                 <div class="footer">
-                    <p>ProConnectSA - support@proconnectsa.co.za | +27 67 951 8124</p>
+                    <p>ProConnectSA - support@proconnectsa.co.za | 077 438 8845</p>
                 </div>
             </div>
         </body>

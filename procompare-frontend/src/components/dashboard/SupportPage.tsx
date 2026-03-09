@@ -340,7 +340,7 @@ const SupportPage = () => {
             </p>
             <div className="flex flex-col sm:flex-row gap-3">
               <a
-                href="https://wa.me/27679518124"
+                href="https://wa.me/27774388845"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center justify-center px-6 py-3 bg-green-500 hover:bg-green-600 text-white font-semibold rounded-lg transition-colors shadow-md hover:shadow-lg"
@@ -350,7 +350,7 @@ const SupportPage = () => {
               </a>
               <div className="flex items-center text-sm text-gray-600">
                 <Phone className="w-4 h-4 mr-2" />
-                <span>+27 67 951 8124</span>
+                <span>077 438 8845</span>
                 <span className="mx-2">•</span>
                 <Clock className="w-4 h-4 mr-2" />
                 <span>Mon-Fri: 8am-6pm</span>

@@ -102,8 +102,8 @@ export default function PressPage() {
                     <Phone className="w-5 h-5 text-emerald-600" />
                     <div>
                       <div className="font-semibold text-gray-900">Phone</div>
-                      <a href="tel:+27679518124" className="text-emerald-700 hover:text-emerald-800 hover:underline">
-                        +27 67 951 8124
+                      <a href="tel:+27774388845" className="text-emerald-700 hover:text-emerald-800 hover:underline">
+                        077 438 8845
                       </a>
                     </div>
                   </div>
