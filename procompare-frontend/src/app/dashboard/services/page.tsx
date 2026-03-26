@@ -4,13 +4,6 @@ import { withAuth } from '@/components/AuthProvider';
 import DashboardLayout from '@/components/dashboard/DashboardLayout'
 import ServicesPage from '@/components/dashboard/ServicesPage'
 
-export const metadata = {
-  robots: {
-    index: false,
-    follow: false,
-  },
-}
-
 function ServicesPageRoute({ user }: { user: any }) {
   return (
     <DashboardLayout>
