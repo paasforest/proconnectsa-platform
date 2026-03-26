@@ -692,5 +692,1266 @@ export const resourceGuides: ResourceGuide[] = [
       "painting-cost-cape-town",
     ],
   },
+
+  {
+    slug: "cleaning-service-costs",
+    service: "Cleaning Services",
+    city: "South Africa",
+    province: "Nationwide",
+    ctaLink: "/services/cleaning",
+    metaTitle: "Cleaning Services Cost in South Africa | 2026 Pricing Guide | ProConnectSA",
+    metaDescription: "cleaning services in South Africa cost R80\u2013R220. Compare verified local quotes \u2014 free, no obligation.",
+    intro: "This guide explains what cleaning services cost across South Africa in 2026, from hourly cleaning to deep cleans and move-out work. Use it to compare realistic price ranges before requesting verified quotes.",
+    lastUpdated: "March 2026",
+    pricing: [
+      { label: "Hourly rate (1 cleaner)", range: "R80 \u2013 R220/hr" },
+      { label: "Standard home clean", range: "R600 \u2013 R2,400" },
+      { label: "Deep clean", range: "R1,300 \u2013 R3,800" },
+      { label: "Move-in / move-out clean", range: "R1,600 \u2013 R4,500" },
+      { label: "Office cleaning (small office)", range: "R1,200 \u2013 R4,000" },
+    ],
+    priceFactors: [
+      "Property size and number of bathrooms",
+      "One-off deep clean vs recurring schedule",
+      "City, suburb, and travel time",
+      "Add-ons like windows, ovens, and carpets",
+      "Whether products/equipment are included",
+      "Weekend or urgent booking windows",
+    ],
+    tips: [
+      "Get at least three itemized quotes with scope matched.",
+      "Book recurring cleans for better per-visit rates.",
+      "Share photos and room count before quoting.",
+      "Confirm whether products and transport are included.",
+    ],
+    faqs: [
+      {
+        question: "How much do cleaning services cost in South Africa?",
+        answer: "Most services range from about R80\u2013R220 per hour, with full-job pricing based on home size and cleaning depth." ,
+      },
+      {
+        question: "Is it cheaper to hire hourly or per job?",
+        answer: "Hourly can be cheaper for small jobs; fixed-job rates are often better for deep cleans where scope is clear." ,
+      },
+      {
+        question: "What is included in a standard clean?",
+        answer: "Usually dusting, mopping, vacuuming, and kitchen/bathroom surface cleaning; extras are charged separately." ,
+      },
+      {
+        question: "Do cleaning companies bring supplies?",
+        answer: "Many companies do, but independent cleaners may ask clients to provide products\u2014confirm this before booking." ,
+      },
+      {
+        question: "How can I choose a reliable cleaner?",
+        answer: "Check reviews, request references, compare quote details, and verify availability before confirming a booking." ,
+      },
+    ],
+    relatedSlugs: [
+      "cleaning-cost-cape-town",
+      "cleaning-cost-johannesburg",
+      "handyman-costs",
+    ],
+  },
+
+  {
+    slug: "painting-costs",
+    service: "House Painting",
+    city: "South Africa",
+    province: "Nationwide",
+    ctaLink: "/services/painting",
+    metaTitle: "House Painting Cost in South Africa | 2026 Pricing Guide | ProConnectSA",
+    metaDescription: "house painting in South Africa cost R50\u2013R130. Compare verified local quotes \u2014 free, no obligation.",
+    intro: "This guide explains realistic South Africa painting costs for 2026, from standard room repaints to full interior and exterior projects. It helps you compare quotes and understand what is included before you hire.",
+    lastUpdated: "March 2026",
+    pricing: [
+      { label: "Interior painting (per m\u00b2)", range: "R50 \u2013 R130/m\u00b2" },
+      { label: "Exterior painting (per m\u00b2)", range: "R70 \u2013 R170/m\u00b2" },
+      { label: "Standard room repaint", range: "R2,800 \u2013 R7,500" },
+      { label: "Open-plan / large area", range: "R5,500 \u2013 R14,000" },
+      { label: "Ceiling and trim work", range: "R45 \u2013 R110/m\u00b2" },
+    ],
+    priceFactors: [
+      "Surface prep (cracks, sanding, primer)",
+      "Paint brand and number of coats",
+      "Accessibility and working height",
+      "Interior vs exterior weather exposure",
+      "Complex trim/detail requirements",
+      "Timeline urgency and crew size",
+    ],
+    tips: [
+      "Compare quotes using the same paint specification.",
+      "Ask exactly what prep work is included.",
+      "Bundle multiple rooms for better rates.",
+      "Request workmanship and paint warranty terms.",
+    ],
+    faqs: [
+      {
+        question: "How much does painting cost in South Africa?",
+        answer: "Painting in South Africa is usually priced by square meter and prep effort, with interiors generally cheaper than exteriors." ,
+      },
+      {
+        question: "Is paint included in most painting quotes?",
+        answer: "Some contractors include paint while others quote labour only, so always confirm the exact paint system included." ,
+      },
+      {
+        question: "What affects the final painting price most?",
+        answer: "Surface prep, number of coats, paint quality, and access difficulty usually drive the largest price differences." ,
+      },
+      {
+        question: "How long does a typical painting job take?",
+        answer: "A single room can take 1\u20132 days while full-home projects often take several days to a couple of weeks." ,
+      },
+      {
+        question: "How do I choose a reliable painter in South Africa?",
+        answer: "Compare like-for-like quotes, verify previous work, and choose painters who provide clear scope and guarantees." ,
+      },
+    ],
+    relatedSlugs: [
+      "painting-cost-cape-town",
+      "handyman-costs",
+      "renovation-cost-cape-town",
+    ],
+  },
+
+  {
+    slug: "painting-cost-durban",
+    service: "House Painting",
+    city: "Durban",
+    province: "KwaZulu-Natal",
+    ctaLink: "/durban/painting",
+    metaTitle: "House Painting Cost in Durban | 2026 Pricing Guide | ProConnectSA",
+    metaDescription: "house painting in Durban cost R50\u2013R130. Compare verified local quotes \u2014 free, no obligation.",
+    intro: "This guide explains realistic Durban painting costs for 2026, from standard room repaints to full interior and exterior projects. It helps you compare quotes and understand what is included before you hire.",
+    lastUpdated: "March 2026",
+    pricing: [
+      { label: "Interior painting (per m\u00b2)", range: "R50 \u2013 R130/m\u00b2" },
+      { label: "Exterior painting (per m\u00b2)", range: "R70 \u2013 R170/m\u00b2" },
+      { label: "Standard room repaint", range: "R2,800 \u2013 R7,500" },
+      { label: "Open-plan / large area", range: "R5,500 \u2013 R14,000" },
+      { label: "Ceiling and trim work", range: "R45 \u2013 R110/m\u00b2" },
+    ],
+    priceFactors: [
+      "Surface prep (cracks, sanding, primer)",
+      "Paint brand and number of coats",
+      "Accessibility and working height",
+      "Interior vs exterior weather exposure",
+      "Complex trim/detail requirements",
+      "Timeline urgency and crew size",
+    ],
+    tips: [
+      "Compare quotes using the same paint specification.",
+      "Ask exactly what prep work is included.",
+      "Bundle multiple rooms for better rates.",
+      "Request workmanship and paint warranty terms.",
+    ],
+    faqs: [
+      {
+        question: "How much does painting cost in Durban?",
+        answer: "Painting in Durban is usually priced by square meter and prep effort, with interiors generally cheaper than exteriors." ,
+      },
+      {
+        question: "Is paint included in most painting quotes?",
+        answer: "Some contractors include paint while others quote labour only, so always confirm the exact paint system included." ,
+      },
+      {
+        question: "What affects the final painting price most?",
+        answer: "Surface prep, number of coats, paint quality, and access difficulty usually drive the largest price differences." ,
+      },
+      {
+        question: "How long does a typical painting job take?",
+        answer: "A single room can take 1\u20132 days while full-home projects often take several days to a couple of weeks." ,
+      },
+      {
+        question: "How do I choose a reliable painter in Durban?",
+        answer: "Compare like-for-like quotes, verify previous work, and choose painters who provide clear scope and guarantees." ,
+      },
+    ],
+    relatedSlugs: [
+      "painting-cost-cape-town",
+      "handyman-costs",
+      "renovation-cost-cape-town",
+    ],
+  },
+
+  {
+    slug: "painting-cost-pretoria",
+    service: "House Painting",
+    city: "Pretoria",
+    province: "Gauteng",
+    ctaLink: "/pretoria/painting",
+    metaTitle: "House Painting Cost in Pretoria | 2026 Pricing Guide | ProConnectSA",
+    metaDescription: "house painting in Pretoria cost R50\u2013R130. Compare verified local quotes \u2014 free, no obligation.",
+    intro: "This guide explains realistic Pretoria painting costs for 2026, from standard room repaints to full interior and exterior projects. It helps you compare quotes and understand what is included before you hire.",
+    lastUpdated: "March 2026",
+    pricing: [
+      { label: "Interior painting (per m\u00b2)", range: "R50 \u2013 R130/m\u00b2" },
+      { label: "Exterior painting (per m\u00b2)", range: "R70 \u2013 R170/m\u00b2" },
+      { label: "Standard room repaint", range: "R2,800 \u2013 R7,500" },
+      { label: "Open-plan / large area", range: "R5,500 \u2013 R14,000" },
+      { label: "Ceiling and trim work", range: "R45 \u2013 R110/m\u00b2" },
+    ],
+    priceFactors: [
+      "Surface prep (cracks, sanding, primer)",
+      "Paint brand and number of coats",
+      "Accessibility and working height",
+      "Interior vs exterior weather exposure",
+      "Complex trim/detail requirements",
+      "Timeline urgency and crew size",
+    ],
+    tips: [
+      "Compare quotes using the same paint specification.",
+      "Ask exactly what prep work is included.",
+      "Bundle multiple rooms for better rates.",
+      "Request workmanship and paint warranty terms.",
+    ],
+    faqs: [
+      {
+        question: "How much does painting cost in Pretoria?",
+        answer: "Painting in Pretoria is usually priced by square meter and prep effort, with interiors generally cheaper than exteriors." ,
+      },
+      {
+        question: "Is paint included in most painting quotes?",
+        answer: "Some contractors include paint while others quote labour only, so always confirm the exact paint system included." ,
+      },
+      {
+        question: "What affects the final painting price most?",
+        answer: "Surface prep, number of coats, paint quality, and access difficulty usually drive the largest price differences." ,
+      },
+      {
+        question: "How long does a typical painting job take?",
+        answer: "A single room can take 1\u20132 days while full-home projects often take several days to a couple of weeks." ,
+      },
+      {
+        question: "How do I choose a reliable painter in Pretoria?",
+        answer: "Compare like-for-like quotes, verify previous work, and choose painters who provide clear scope and guarantees." ,
+      },
+    ],
+    relatedSlugs: [
+      "painting-cost-cape-town",
+      "handyman-costs",
+      "renovation-cost-cape-town",
+    ],
+  },
+
+  {
+    slug: "handyman-costs",
+    service: "Handyman Services",
+    city: "South Africa",
+    province: "Nationwide",
+    ctaLink: "/services/handyman",
+    metaTitle: "Handyman Services Cost in South Africa | 2026 Pricing Guide | ProConnectSA",
+    metaDescription: "handyman services in South Africa cost R250\u2013R700. Compare verified local quotes \u2014 free, no obligation.",
+    intro: "Use this guide to estimate handyman pricing in South Africa for 2026, including hourly labour, call-out fees, and common repair jobs. It helps you compare practical quote ranges before booking.",
+    lastUpdated: "March 2026",
+    pricing: [
+      { label: "Hourly labour rate", range: "R250 \u2013 R700/hr" },
+      { label: "Minimum call-out fee", range: "R350 \u2013 R950" },
+      { label: "Mounting and installation jobs", range: "R450 \u2013 R1,800" },
+      { label: "Minor repair jobs", range: "R400 \u2013 R1,600" },
+      { label: "Half-day maintenance visit", range: "R1,200 \u2013 R3,200" },
+    ],
+    priceFactors: [
+      "Number of tasks and total on-site time",
+      "Wall type and installation complexity",
+      "Whether tools or special anchors are needed",
+      "Materials supplied by client vs handyman",
+      "Travel distance and parking/access",
+      "Urgent or after-hours appointments",
+    ],
+    tips: [
+      "Group small jobs into one booking to reduce minimum fees.",
+      "Provide photos and measurements before quoting.",
+      "Confirm whether materials are included.",
+      "Pick specialists with reviews in your exact job type.",
+    ],
+    faqs: [
+      {
+        question: "How much does a handyman cost in South Africa?",
+        answer: "Handyman rates in South Africa usually include an hourly fee and often a minimum call-out for small jobs." ,
+      },
+      {
+        question: "What jobs are best for a handyman?",
+        answer: "Handymen are ideal for minor repairs, installations, mounting, and general maintenance tasks." ,
+      },
+      {
+        question: "Do handymen include materials in the quote?",
+        answer: "Quotes vary: some include basic consumables while major materials are usually billed separately." ,
+      },
+      {
+        question: "Is there a minimum booking fee?",
+        answer: "Yes, many providers apply a minimum charge to cover travel and setup time." ,
+      },
+      {
+        question: "How can I get an accurate handyman quote in South Africa?",
+        answer: "Share photos, measurements, and a full task list so the provider can quote realistically." ,
+      },
+    ],
+    relatedSlugs: [
+      "handyman-cost-cape-town",
+      "painting-cost-cape-town",
+      "plumber-cost-johannesburg",
+    ],
+  },
+
+  {
+    slug: "handyman-cost-johannesburg",
+    service: "Handyman Services",
+    city: "Johannesburg",
+    province: "Gauteng",
+    ctaLink: "/johannesburg/handyman",
+    metaTitle: "Handyman Services Cost in Johannesburg | 2026 Pricing Guide | ProConnectSA",
+    metaDescription: "handyman services in Johannesburg cost R250\u2013R700. Compare verified local quotes \u2014 free, no obligation.",
+    intro: "Use this guide to estimate handyman pricing in Johannesburg for 2026, including hourly labour, call-out fees, and common repair jobs. It helps you compare practical quote ranges before booking.",
+    lastUpdated: "March 2026",
+    pricing: [
+      { label: "Hourly labour rate", range: "R250 \u2013 R700/hr" },
+      { label: "Minimum call-out fee", range: "R350 \u2013 R950" },
+      { label: "Mounting and installation jobs", range: "R450 \u2013 R1,800" },
+      { label: "Minor repair jobs", range: "R400 \u2013 R1,600" },
+      { label: "Half-day maintenance visit", range: "R1,200 \u2013 R3,200" },
+    ],
+    priceFactors: [
+      "Number of tasks and total on-site time",
+      "Wall type and installation complexity",
+      "Whether tools or special anchors are needed",
+      "Materials supplied by client vs handyman",
+      "Travel distance and parking/access",
+      "Urgent or after-hours appointments",
+    ],
+    tips: [
+      "Group small jobs into one booking to reduce minimum fees.",
+      "Provide photos and measurements before quoting.",
+      "Confirm whether materials are included.",
+      "Pick specialists with reviews in your exact job type.",
+    ],
+    faqs: [
+      {
+        question: "How much does a handyman cost in Johannesburg?",
+        answer: "Handyman rates in Johannesburg usually include an hourly fee and often a minimum call-out for small jobs." ,
+      },
+      {
+        question: "What jobs are best for a handyman?",
+        answer: "Handymen are ideal for minor repairs, installations, mounting, and general maintenance tasks." ,
+      },
+      {
+        question: "Do handymen include materials in the quote?",
+        answer: "Quotes vary: some include basic consumables while major materials are usually billed separately." ,
+      },
+      {
+        question: "Is there a minimum booking fee?",
+        answer: "Yes, many providers apply a minimum charge to cover travel and setup time." ,
+      },
+      {
+        question: "How can I get an accurate handyman quote in Johannesburg?",
+        answer: "Share photos, measurements, and a full task list so the provider can quote realistically." ,
+      },
+    ],
+    relatedSlugs: [
+      "handyman-cost-cape-town",
+      "painting-cost-cape-town",
+      "plumber-cost-johannesburg",
+    ],
+  },
+
+  {
+    slug: "renovation-cost-johannesburg",
+    service: "Home Renovation",
+    city: "Johannesburg",
+    province: "Gauteng",
+    ctaLink: "/johannesburg/handyman",
+    metaTitle: "Home Renovation Cost in Johannesburg | 2026 Pricing Guide | ProConnectSA",
+    metaDescription: "home renovation in Johannesburg cost R35,000\u2013R120,000. Compare verified local quotes \u2014 free, no obligation.",
+    intro: "This 2026 guide outlines typical renovation costs in Johannesburg across bathrooms, kitchens, flooring, and full-home upgrades. It gives realistic budgets so you can compare contractor quotes with confidence.",
+    lastUpdated: "March 2026",
+    pricing: [
+      { label: "Bathroom refresh", range: "R35,000 \u2013 R120,000" },
+      { label: "Kitchen renovation", range: "R60,000 \u2013 R220,000" },
+      { label: "Flooring replacement (full home)", range: "R25,000 \u2013 R140,000" },
+      { label: "Interior repaint + minor repairs", range: "R15,000 \u2013 R65,000" },
+      { label: "Major structural renovation", range: "R180,000 \u2013 R650,000+" },
+    ],
+    priceFactors: [
+      "Scope of demolition and structural changes",
+      "Material quality and fixture brands",
+      "Plumbing/electrical relocation needs",
+      "Council approvals and compliance work",
+      "Contractor team size and project duration",
+      "Unexpected defects uncovered during work",
+    ],
+    tips: [
+      "Set a written scope with exclusions before work starts.",
+      "Get staged quotes and payment milestones.",
+      "Prioritize must-have upgrades first.",
+      "Keep a 10\u201315% contingency for surprises.",
+    ],
+    faqs: [
+      {
+        question: "How much does home renovation cost in Johannesburg?",
+        answer: "Renovation pricing in Johannesburg depends heavily on scope, materials, and whether structural work is required." ,
+      },
+      {
+        question: "What rooms are most expensive to renovate?",
+        answer: "Kitchens and bathrooms are usually the costliest because of plumbing, electrical, and fixture requirements." ,
+      },
+      {
+        question: "Should I renovate in phases?",
+        answer: "Phasing helps cashflow control and lets you complete high-impact areas first while reducing project risk." ,
+      },
+      {
+        question: "How much contingency should I budget?",
+        answer: "A 10\u201315% contingency is common for hidden defects, compliance updates, and material price changes." ,
+      },
+      {
+        question: "How do I compare renovation quotes in Johannesburg?",
+        answer: "Compare scope, material specs, timelines, payment terms, and warranty commitments\u2014not just total price." ,
+      },
+    ],
+    relatedSlugs: [
+      "renovation-cost-cape-town",
+      "renovation-cost-johannesburg",
+      "painting-cost-cape-town",
+    ],
+  },
+
+  {
+    slug: "renovation-cost-cape-town",
+    service: "Home Renovation",
+    city: "Cape Town",
+    province: "Western Cape",
+    ctaLink: "/cape-town/handyman",
+    metaTitle: "Home Renovation Cost in Cape Town | 2026 Pricing Guide | ProConnectSA",
+    metaDescription: "home renovation in Cape Town cost R35,000\u2013R120,000. Compare verified local quotes \u2014 free, no obligation.",
+    intro: "This 2026 guide outlines typical renovation costs in Cape Town across bathrooms, kitchens, flooring, and full-home upgrades. It gives realistic budgets so you can compare contractor quotes with confidence.",
+    lastUpdated: "March 2026",
+    pricing: [
+      { label: "Bathroom refresh", range: "R35,000 \u2013 R120,000" },
+      { label: "Kitchen renovation", range: "R60,000 \u2013 R220,000" },
+      { label: "Flooring replacement (full home)", range: "R25,000 \u2013 R140,000" },
+      { label: "Interior repaint + minor repairs", range: "R15,000 \u2013 R65,000" },
+      { label: "Major structural renovation", range: "R180,000 \u2013 R650,000+" },
+    ],
+    priceFactors: [
+      "Scope of demolition and structural changes",
+      "Material quality and fixture brands",
+      "Plumbing/electrical relocation needs",
+      "Council approvals and compliance work",
+      "Contractor team size and project duration",
+      "Unexpected defects uncovered during work",
+    ],
+    tips: [
+      "Set a written scope with exclusions before work starts.",
+      "Get staged quotes and payment milestones.",
+      "Prioritize must-have upgrades first.",
+      "Keep a 10\u201315% contingency for surprises.",
+    ],
+    faqs: [
+      {
+        question: "How much does home renovation cost in Cape Town?",
+        answer: "Renovation pricing in Cape Town depends heavily on scope, materials, and whether structural work is required." ,
+      },
+      {
+        question: "What rooms are most expensive to renovate?",
+        answer: "Kitchens and bathrooms are usually the costliest because of plumbing, electrical, and fixture requirements." ,
+      },
+      {
+        question: "Should I renovate in phases?",
+        answer: "Phasing helps cashflow control and lets you complete high-impact areas first while reducing project risk." ,
+      },
+      {
+        question: "How much contingency should I budget?",
+        answer: "A 10\u201315% contingency is common for hidden defects, compliance updates, and material price changes." ,
+      },
+      {
+        question: "How do I compare renovation quotes in Cape Town?",
+        answer: "Compare scope, material specs, timelines, payment terms, and warranty commitments\u2014not just total price." ,
+      },
+    ],
+    relatedSlugs: [
+      "renovation-cost-cape-town",
+      "renovation-cost-johannesburg",
+      "painting-cost-cape-town",
+    ],
+  },
+
+  {
+    slug: "renovation-cost-durban",
+    service: "Home Renovation",
+    city: "Durban",
+    province: "KwaZulu-Natal",
+    ctaLink: "/durban/handyman",
+    metaTitle: "Home Renovation Cost in Durban | 2026 Pricing Guide | ProConnectSA",
+    metaDescription: "home renovation in Durban cost R35,000\u2013R120,000. Compare verified local quotes \u2014 free, no obligation.",
+    intro: "This 2026 guide outlines typical renovation costs in Durban across bathrooms, kitchens, flooring, and full-home upgrades. It gives realistic budgets so you can compare contractor quotes with confidence.",
+    lastUpdated: "March 2026",
+    pricing: [
+      { label: "Bathroom refresh", range: "R35,000 \u2013 R120,000" },
+      { label: "Kitchen renovation", range: "R60,000 \u2013 R220,000" },
+      { label: "Flooring replacement (full home)", range: "R25,000 \u2013 R140,000" },
+      { label: "Interior repaint + minor repairs", range: "R15,000 \u2013 R65,000" },
+      { label: "Major structural renovation", range: "R180,000 \u2013 R650,000+" },
+    ],
+    priceFactors: [
+      "Scope of demolition and structural changes",
+      "Material quality and fixture brands",
+      "Plumbing/electrical relocation needs",
+      "Council approvals and compliance work",
+      "Contractor team size and project duration",
+      "Unexpected defects uncovered during work",
+    ],
+    tips: [
+      "Set a written scope with exclusions before work starts.",
+      "Get staged quotes and payment milestones.",
+      "Prioritize must-have upgrades first.",
+      "Keep a 10\u201315% contingency for surprises.",
+    ],
+    faqs: [
+      {
+        question: "How much does home renovation cost in Durban?",
+        answer: "Renovation pricing in Durban depends heavily on scope, materials, and whether structural work is required." ,
+      },
+      {
+        question: "What rooms are most expensive to renovate?",
+        answer: "Kitchens and bathrooms are usually the costliest because of plumbing, electrical, and fixture requirements." ,
+      },
+      {
+        question: "Should I renovate in phases?",
+        answer: "Phasing helps cashflow control and lets you complete high-impact areas first while reducing project risk." ,
+      },
+      {
+        question: "How much contingency should I budget?",
+        answer: "A 10\u201315% contingency is common for hidden defects, compliance updates, and material price changes." ,
+      },
+      {
+        question: "How do I compare renovation quotes in Durban?",
+        answer: "Compare scope, material specs, timelines, payment terms, and warranty commitments\u2014not just total price." ,
+      },
+    ],
+    relatedSlugs: [
+      "renovation-cost-cape-town",
+      "renovation-cost-johannesburg",
+      "painting-cost-cape-town",
+    ],
+  },
+
+  {
+    slug: "hvac-cost-south-africa",
+    service: "HVAC Installation",
+    city: "South Africa",
+    province: "Nationwide",
+    ctaLink: "/services/hvac",
+    metaTitle: "HVAC Installation Cost in South Africa | 2026 Pricing Guide | ProConnectSA",
+    metaDescription: "hvac installation in South Africa cost R8,500\u2013R19,000. Compare verified local quotes \u2014 free, no obligation.",
+    intro: "This guide covers 2026 HVAC installation and servicing costs in South Africa, from split units to larger ducted systems. Use it to compare quotes and avoid hidden installation charges.",
+    lastUpdated: "March 2026",
+    pricing: [
+      { label: "Split AC supply + install (9k\u201312k BTU)", range: "R8,500 \u2013 R19,000" },
+      { label: "Mid-size inverter AC (18k BTU)", range: "R14,000 \u2013 R30,000" },
+      { label: "Multi-room or ducted setup", range: "R45,000 \u2013 R180,000" },
+      { label: "Annual service and regas", range: "R1,000 \u2013 R3,500" },
+      { label: "Ventilation/extraction upgrades", range: "R3,500 \u2013 R25,000" },
+    ],
+    priceFactors: [
+      "Unit capacity and energy-efficiency rating",
+      "Ducting length and installation complexity",
+      "Brand, warranty, and parts availability",
+      "Electrical upgrades or DB board changes",
+      "Building type and outdoor unit access",
+      "Seasonal demand during peak summer periods",
+    ],
+    tips: [
+      "Match unit size to room load, not only floor area.",
+      "Compare installer warranties and after-sales support.",
+      "Ask for full installed price including brackets/cabling.",
+      "Book pre-summer to avoid peak-season markups.",
+    ],
+    faqs: [
+      {
+        question: "How much does HVAC installation cost in South Africa?",
+        answer: "Costs vary by unit size, brand, and installation complexity, with larger systems priced significantly higher." ,
+      },
+      {
+        question: "Does HVAC price include installation materials?",
+        answer: "Good quotes should include mounting, piping, cabling, and commissioning\u2014always confirm inclusions." ,
+      },
+      {
+        question: "How often should HVAC systems be serviced?",
+        answer: "Most residential systems should be serviced annually, with more frequent checks in heavy-use environments." ,
+      },
+      {
+        question: "Are inverter units worth the extra cost?",
+        answer: "Inverter units usually cost more upfront but can reduce running costs and improve comfort over time." ,
+      },
+      {
+        question: "How do I choose an HVAC installer in South Africa?",
+        answer: "Look for verified installers with clear warranty terms and service support after installation." ,
+      },
+    ],
+    relatedSlugs: [
+      "hvac-cost-cape-town",
+      "hvac-cost-johannesburg",
+      "electrician-cost-cape-town",
+    ],
+  },
+
+  {
+    slug: "hvac-cost-cape-town",
+    service: "HVAC Installation",
+    city: "Cape Town",
+    province: "Western Cape",
+    ctaLink: "/cape-town/hvac",
+    metaTitle: "HVAC Installation Cost in Cape Town | 2026 Pricing Guide | ProConnectSA",
+    metaDescription: "hvac installation in Cape Town cost R8,500\u2013R19,000. Compare verified local quotes \u2014 free, no obligation.",
+    intro: "This guide covers 2026 HVAC installation and servicing costs in Cape Town, from split units to larger ducted systems. Use it to compare quotes and avoid hidden installation charges.",
+    lastUpdated: "March 2026",
+    pricing: [
+      { label: "Split AC supply + install (9k\u201312k BTU)", range: "R8,500 \u2013 R19,000" },
+      { label: "Mid-size inverter AC (18k BTU)", range: "R14,000 \u2013 R30,000" },
+      { label: "Multi-room or ducted setup", range: "R45,000 \u2013 R180,000" },
+      { label: "Annual service and regas", range: "R1,000 \u2013 R3,500" },
+      { label: "Ventilation/extraction upgrades", range: "R3,500 \u2013 R25,000" },
+    ],
+    priceFactors: [
+      "Unit capacity and energy-efficiency rating",
+      "Ducting length and installation complexity",
+      "Brand, warranty, and parts availability",
+      "Electrical upgrades or DB board changes",
+      "Building type and outdoor unit access",
+      "Seasonal demand during peak summer periods",
+    ],
+    tips: [
+      "Match unit size to room load, not only floor area.",
+      "Compare installer warranties and after-sales support.",
+      "Ask for full installed price including brackets/cabling.",
+      "Book pre-summer to avoid peak-season markups.",
+    ],
+    faqs: [
+      {
+        question: "How much does HVAC installation cost in Cape Town?",
+        answer: "Costs vary by unit size, brand, and installation complexity, with larger systems priced significantly higher." ,
+      },
+      {
+        question: "Does HVAC price include installation materials?",
+        answer: "Good quotes should include mounting, piping, cabling, and commissioning\u2014always confirm inclusions." ,
+      },
+      {
+        question: "How often should HVAC systems be serviced?",
+        answer: "Most residential systems should be serviced annually, with more frequent checks in heavy-use environments." ,
+      },
+      {
+        question: "Are inverter units worth the extra cost?",
+        answer: "Inverter units usually cost more upfront but can reduce running costs and improve comfort over time." ,
+      },
+      {
+        question: "How do I choose an HVAC installer in Cape Town?",
+        answer: "Look for verified installers with clear warranty terms and service support after installation." ,
+      },
+    ],
+    relatedSlugs: [
+      "hvac-cost-cape-town",
+      "hvac-cost-johannesburg",
+      "electrician-cost-cape-town",
+    ],
+  },
+
+  {
+    slug: "hvac-cost-johannesburg",
+    service: "HVAC Installation",
+    city: "Johannesburg",
+    province: "Gauteng",
+    ctaLink: "/johannesburg/hvac",
+    metaTitle: "HVAC Installation Cost in Johannesburg | 2026 Pricing Guide | ProConnectSA",
+    metaDescription: "hvac installation in Johannesburg cost R8,500\u2013R19,000. Compare verified local quotes \u2014 free, no obligation.",
+    intro: "This guide covers 2026 HVAC installation and servicing costs in Johannesburg, from split units to larger ducted systems. Use it to compare quotes and avoid hidden installation charges.",
+    lastUpdated: "March 2026",
+    pricing: [
+      { label: "Split AC supply + install (9k\u201312k BTU)", range: "R8,500 \u2013 R19,000" },
+      { label: "Mid-size inverter AC (18k BTU)", range: "R14,000 \u2013 R30,000" },
+      { label: "Multi-room or ducted setup", range: "R45,000 \u2013 R180,000" },
+      { label: "Annual service and regas", range: "R1,000 \u2013 R3,500" },
+      { label: "Ventilation/extraction upgrades", range: "R3,500 \u2013 R25,000" },
+    ],
+    priceFactors: [
+      "Unit capacity and energy-efficiency rating",
+      "Ducting length and installation complexity",
+      "Brand, warranty, and parts availability",
+      "Electrical upgrades or DB board changes",
+      "Building type and outdoor unit access",
+      "Seasonal demand during peak summer periods",
+    ],
+    tips: [
+      "Match unit size to room load, not only floor area.",
+      "Compare installer warranties and after-sales support.",
+      "Ask for full installed price including brackets/cabling.",
+      "Book pre-summer to avoid peak-season markups.",
+    ],
+    faqs: [
+      {
+        question: "How much does HVAC installation cost in Johannesburg?",
+        answer: "Costs vary by unit size, brand, and installation complexity, with larger systems priced significantly higher." ,
+      },
+      {
+        question: "Does HVAC price include installation materials?",
+        answer: "Good quotes should include mounting, piping, cabling, and commissioning\u2014always confirm inclusions." ,
+      },
+      {
+        question: "How often should HVAC systems be serviced?",
+        answer: "Most residential systems should be serviced annually, with more frequent checks in heavy-use environments." ,
+      },
+      {
+        question: "Are inverter units worth the extra cost?",
+        answer: "Inverter units usually cost more upfront but can reduce running costs and improve comfort over time." ,
+      },
+      {
+        question: "How do I choose an HVAC installer in Johannesburg?",
+        answer: "Look for verified installers with clear warranty terms and service support after installation." ,
+      },
+    ],
+    relatedSlugs: [
+      "hvac-cost-cape-town",
+      "hvac-cost-johannesburg",
+      "electrician-cost-cape-town",
+    ],
+  },
+
+  {
+    slug: "landscaping-cost-south-africa",
+    service: "Landscaping",
+    city: "South Africa",
+    province: "Nationwide",
+    ctaLink: "/services/landscaping",
+    metaTitle: "Landscaping Cost in South Africa | 2026 Pricing Guide | ProConnectSA",
+    metaDescription: "landscaping in South Africa cost R350\u2013R800. Compare verified local quotes \u2014 free, no obligation.",
+    intro: "Use this guide to benchmark 2026 landscaping costs in South Africa, from clean-ups and lawn installs to design and irrigation projects. It helps you compare local quotes based on real scope drivers.",
+    lastUpdated: "March 2026",
+    pricing: [
+      { label: "Landscaper hourly rate", range: "R350 \u2013 R800/hr" },
+      { label: "Garden clean-up and waste removal", range: "R900 \u2013 R3,200" },
+      { label: "New lawn installation (per m\u00b2)", range: "R250 \u2013 R700/m\u00b2" },
+      { label: "Irrigation setup (small garden)", range: "R4,000 \u2013 R15,000" },
+      { label: "Garden design and planting project", range: "R8,000 \u2013 R80,000+" },
+    ],
+    priceFactors: [
+      "Yard size, slope, and existing condition",
+      "Plant choices, soil prep, and materials",
+      "Irrigation, drainage, and water access",
+      "Waste removal and skip requirements",
+      "Hardscaping elements like paving/edging",
+      "Seasonality and project turnaround expectations",
+    ],
+    tips: [
+      "Get site-based quotes, not phone-only estimates.",
+      "Separate labour and materials in the quote.",
+      "Phase bigger projects to control budget.",
+      "Choose water-wise plants for lower maintenance costs.",
+    ],
+    faqs: [
+      {
+        question: "How much does landscaping cost in South Africa?",
+        answer: "Landscaping in South Africa ranges from basic cleanups to full redesigns, with costs tied to size and materials." ,
+      },
+      {
+        question: "How much does new lawn installation cost?",
+        answer: "Pricing is usually per square meter and depends on prep work, turf choice, and irrigation requirements." ,
+      },
+      {
+        question: "Is irrigation included in landscaping quotes?",
+        answer: "Sometimes; many providers quote irrigation separately, so request a breakdown to compare accurately." ,
+      },
+      {
+        question: "Can landscaping be done in phases?",
+        answer: "Yes, phased execution is common and helps manage budgets for larger outdoor projects." ,
+      },
+      {
+        question: "How do I compare landscaper quotes in South Africa?",
+        answer: "Compare plant lists, material specs, waste removal, and maintenance plans, not just headline price." ,
+      },
+    ],
+    relatedSlugs: [
+      "landscaping-cost-cape-town",
+      "landscaping-cost-johannesburg",
+      "roofing-cost-south-africa",
+    ],
+  },
+
+  {
+    slug: "landscaping-cost-johannesburg",
+    service: "Landscaping",
+    city: "Johannesburg",
+    province: "Gauteng",
+    ctaLink: "/johannesburg/landscaping",
+    metaTitle: "Landscaping Cost in Johannesburg | 2026 Pricing Guide | ProConnectSA",
+    metaDescription: "landscaping in Johannesburg cost R350\u2013R800. Compare verified local quotes \u2014 free, no obligation.",
+    intro: "Use this guide to benchmark 2026 landscaping costs in Johannesburg, from clean-ups and lawn installs to design and irrigation projects. It helps you compare local quotes based on real scope drivers.",
+    lastUpdated: "March 2026",
+    pricing: [
+      { label: "Landscaper hourly rate", range: "R350 \u2013 R800/hr" },
+      { label: "Garden clean-up and waste removal", range: "R900 \u2013 R3,200" },
+      { label: "New lawn installation (per m\u00b2)", range: "R250 \u2013 R700/m\u00b2" },
+      { label: "Irrigation setup (small garden)", range: "R4,000 \u2013 R15,000" },
+      { label: "Garden design and planting project", range: "R8,000 \u2013 R80,000+" },
+    ],
+    priceFactors: [
+      "Yard size, slope, and existing condition",
+      "Plant choices, soil prep, and materials",
+      "Irrigation, drainage, and water access",
+      "Waste removal and skip requirements",
+      "Hardscaping elements like paving/edging",
+      "Seasonality and project turnaround expectations",
+    ],
+    tips: [
+      "Get site-based quotes, not phone-only estimates.",
+      "Separate labour and materials in the quote.",
+      "Phase bigger projects to control budget.",
+      "Choose water-wise plants for lower maintenance costs.",
+    ],
+    faqs: [
+      {
+        question: "How much does landscaping cost in Johannesburg?",
+        answer: "Landscaping in Johannesburg ranges from basic cleanups to full redesigns, with costs tied to size and materials." ,
+      },
+      {
+        question: "How much does new lawn installation cost?",
+        answer: "Pricing is usually per square meter and depends on prep work, turf choice, and irrigation requirements." ,
+      },
+      {
+        question: "Is irrigation included in landscaping quotes?",
+        answer: "Sometimes; many providers quote irrigation separately, so request a breakdown to compare accurately." ,
+      },
+      {
+        question: "Can landscaping be done in phases?",
+        answer: "Yes, phased execution is common and helps manage budgets for larger outdoor projects." ,
+      },
+      {
+        question: "How do I compare landscaper quotes in Johannesburg?",
+        answer: "Compare plant lists, material specs, waste removal, and maintenance plans, not just headline price." ,
+      },
+    ],
+    relatedSlugs: [
+      "landscaping-cost-cape-town",
+      "landscaping-cost-johannesburg",
+      "roofing-cost-south-africa",
+    ],
+  },
+
+  {
+    slug: "roofing-cost-south-africa",
+    service: "Roofing",
+    city: "South Africa",
+    province: "Nationwide",
+    ctaLink: "/services/roofing",
+    metaTitle: "Roofing Cost in South Africa | 2026 Pricing Guide | ProConnectSA",
+    metaDescription: "roofing in South Africa cost R1,500\u2013R8,000. Compare verified local quotes \u2014 free, no obligation.",
+    intro: "This guide breaks down 2026 roofing costs in South Africa, including repairs, waterproofing, and full replacement scenarios. Use these benchmarks to compare quotes from verified roofing professionals.",
+    lastUpdated: "March 2026",
+    pricing: [
+      { label: "Roof inspection and minor repairs", range: "R1,500 \u2013 R8,000" },
+      { label: "Leak detection and waterproofing", range: "R2,000 \u2013 R15,000" },
+      { label: "Partial roof replacement", range: "R25,000 \u2013 R120,000" },
+      { label: "Full roof replacement (standard home)", range: "R90,000 \u2013 R320,000" },
+      { label: "Repainting and maintenance coating", range: "R12,000 \u2013 R60,000" },
+    ],
+    priceFactors: [
+      "Roof size, pitch, and height accessibility",
+      "Material type (tile, metal, concrete, slate)",
+      "Extent of structural timber damage",
+      "Waterproofing and flashing requirements",
+      "Scaffolding and safety compliance needs",
+      "Weather delays and emergency call-out timing",
+    ],
+    tips: [
+      "Get photos/videos with the quote scope documented.",
+      "Compare material specs, not just total price.",
+      "Schedule preventive maintenance before rainy season.",
+      "Confirm workmanship guarantee duration in writing.",
+    ],
+    faqs: [
+      {
+        question: "How much do roofing jobs cost in South Africa?",
+        answer: "Roofing costs in South Africa vary by roof size, material type, and whether repairs or full replacement are needed." ,
+      },
+      {
+        question: "How much does leak repair usually cost?",
+        answer: "Leak repair pricing depends on source complexity and access; waterproofing and flashing often affect cost." ,
+      },
+      {
+        question: "When should I replace instead of repair a roof?",
+        answer: "Replacement is often better when recurring leaks or widespread material failure make repairs uneconomical." ,
+      },
+      {
+        question: "Do roof quotes include scaffolding and disposal?",
+        answer: "Not always; confirm safety access, rubble disposal, and material transport in writing." ,
+      },
+      {
+        question: "How do I choose a roofing contractor in South Africa?",
+        answer: "Use verified contractors, check warranty terms, and compare detailed scope with material specifications." ,
+      },
+    ],
+    relatedSlugs: [
+      "roofing-cost-cape-town",
+      "roofing-cost-johannesburg",
+      "renovation-cost-cape-town",
+    ],
+  },
+
+  {
+    slug: "roofing-cost-cape-town",
+    service: "Roofing",
+    city: "Cape Town",
+    province: "Western Cape",
+    ctaLink: "/cape-town/handyman",
+    metaTitle: "Roofing Cost in Cape Town | 2026 Pricing Guide | ProConnectSA",
+    metaDescription: "roofing in Cape Town cost R1,500\u2013R8,000. Compare verified local quotes \u2014 free, no obligation.",
+    intro: "This guide breaks down 2026 roofing costs in Cape Town, including repairs, waterproofing, and full replacement scenarios. Use these benchmarks to compare quotes from verified roofing professionals.",
+    lastUpdated: "March 2026",
+    pricing: [
+      { label: "Roof inspection and minor repairs", range: "R1,500 \u2013 R8,000" },
+      { label: "Leak detection and waterproofing", range: "R2,000 \u2013 R15,000" },
+      { label: "Partial roof replacement", range: "R25,000 \u2013 R120,000" },
+      { label: "Full roof replacement (standard home)", range: "R90,000 \u2013 R320,000" },
+      { label: "Repainting and maintenance coating", range: "R12,000 \u2013 R60,000" },
+    ],
+    priceFactors: [
+      "Roof size, pitch, and height accessibility",
+      "Material type (tile, metal, concrete, slate)",
+      "Extent of structural timber damage",
+      "Waterproofing and flashing requirements",
+      "Scaffolding and safety compliance needs",
+      "Weather delays and emergency call-out timing",
+    ],
+    tips: [
+      "Get photos/videos with the quote scope documented.",
+      "Compare material specs, not just total price.",
+      "Schedule preventive maintenance before rainy season.",
+      "Confirm workmanship guarantee duration in writing.",
+    ],
+    faqs: [
+      {
+        question: "How much do roofing jobs cost in Cape Town?",
+        answer: "Roofing costs in Cape Town vary by roof size, material type, and whether repairs or full replacement are needed." ,
+      },
+      {
+        question: "How much does leak repair usually cost?",
+        answer: "Leak repair pricing depends on source complexity and access; waterproofing and flashing often affect cost." ,
+      },
+      {
+        question: "When should I replace instead of repair a roof?",
+        answer: "Replacement is often better when recurring leaks or widespread material failure make repairs uneconomical." ,
+      },
+      {
+        question: "Do roof quotes include scaffolding and disposal?",
+        answer: "Not always; confirm safety access, rubble disposal, and material transport in writing." ,
+      },
+      {
+        question: "How do I choose a roofing contractor in Cape Town?",
+        answer: "Use verified contractors, check warranty terms, and compare detailed scope with material specifications." ,
+      },
+    ],
+    relatedSlugs: [
+      "roofing-cost-cape-town",
+      "roofing-cost-johannesburg",
+      "renovation-cost-cape-town",
+    ],
+  },
+
+  {
+    slug: "flooring-cost-south-africa",
+    service: "Flooring Installation",
+    city: "South Africa",
+    province: "Nationwide",
+    ctaLink: "/services/flooring",
+    metaTitle: "Flooring Installation Cost in South Africa | 2026 Pricing Guide | ProConnectSA",
+    metaDescription: "flooring installation in South Africa cost R220\u2013R650. Compare verified local quotes \u2014 free, no obligation.",
+    intro: "This 2026 flooring guide shows realistic installed pricing in South Africa for laminate, tile, vinyl, and engineered wood. It helps you understand total project costs before accepting quotes.",
+    lastUpdated: "March 2026",
+    pricing: [
+      { label: "Laminate/vinyl install (per m\u00b2)", range: "R220 \u2013 R650/m\u00b2" },
+      { label: "Porcelain/ceramic tiling (per m\u00b2)", range: "R280 \u2013 R900/m\u00b2" },
+      { label: "Engineered wood (per m\u00b2)", range: "R550 \u2013 R1,500/m\u00b2" },
+      { label: "Screed and subfloor prep (per m\u00b2)", range: "R120 \u2013 R450/m\u00b2" },
+      { label: "Full-home flooring project", range: "R25,000 \u2013 R220,000+" },
+    ],
+    priceFactors: [
+      "Flooring material type and brand tier",
+      "Condition of existing subfloor",
+      "Room layout, cuts, and transitions",
+      "Adhesives, underlay, and skirting needs",
+      "Removal/disposal of old flooring",
+      "Moisture barriers and leveling requirements",
+    ],
+    tips: [
+      "Choose material based on traffic and moisture exposure.",
+      "Request a subfloor assessment before final pricing.",
+      "Compare installed cost per m\u00b2 including prep.",
+      "Buy a little extra material for future repairs.",
+    ],
+    faqs: [
+      {
+        question: "How much does flooring installation cost in South Africa?",
+        answer: "Flooring in South Africa is typically priced per square meter and varies by material and subfloor prep requirements." ,
+      },
+      {
+        question: "Which flooring type is cheapest to install?",
+        answer: "Vinyl and laminate are usually more affordable than engineered wood or premium tile systems." ,
+      },
+      {
+        question: "Is old flooring removal included in quotes?",
+        answer: "Some contractors include removal; others quote it separately, so always confirm this line item." ,
+      },
+      {
+        question: "Why does subfloor prep add so much?",
+        answer: "Levelling, moisture barriers, and repairs are labour-intensive but essential for durability and finish quality." ,
+      },
+      {
+        question: "How do I compare flooring quotes in South Africa?",
+        answer: "Compare installed rates, prep inclusions, trim/skirting, and material warranties for a true like-for-like view." ,
+      },
+    ],
+    relatedSlugs: [
+      "flooring-cost-cape-town",
+      "flooring-cost-johannesburg",
+      "renovation-cost-johannesburg",
+    ],
+  },
+
+  {
+    slug: "flooring-cost-cape-town",
+    service: "Flooring Installation",
+    city: "Cape Town",
+    province: "Western Cape",
+    ctaLink: "/cape-town/handyman",
+    metaTitle: "Flooring Installation Cost in Cape Town | 2026 Pricing Guide | ProConnectSA",
+    metaDescription: "flooring installation in Cape Town cost R220\u2013R650. Compare verified local quotes \u2014 free, no obligation.",
+    intro: "This 2026 flooring guide shows realistic installed pricing in Cape Town for laminate, tile, vinyl, and engineered wood. It helps you understand total project costs before accepting quotes.",
+    lastUpdated: "March 2026",
+    pricing: [
+      { label: "Laminate/vinyl install (per m\u00b2)", range: "R220 \u2013 R650/m\u00b2" },
+      { label: "Porcelain/ceramic tiling (per m\u00b2)", range: "R280 \u2013 R900/m\u00b2" },
+      { label: "Engineered wood (per m\u00b2)", range: "R550 \u2013 R1,500/m\u00b2" },
+      { label: "Screed and subfloor prep (per m\u00b2)", range: "R120 \u2013 R450/m\u00b2" },
+      { label: "Full-home flooring project", range: "R25,000 \u2013 R220,000+" },
+    ],
+    priceFactors: [
+      "Flooring material type and brand tier",
+      "Condition of existing subfloor",
+      "Room layout, cuts, and transitions",
+      "Adhesives, underlay, and skirting needs",
+      "Removal/disposal of old flooring",
+      "Moisture barriers and leveling requirements",
+    ],
+    tips: [
+      "Choose material based on traffic and moisture exposure.",
+      "Request a subfloor assessment before final pricing.",
+      "Compare installed cost per m\u00b2 including prep.",
+      "Buy a little extra material for future repairs.",
+    ],
+    faqs: [
+      {
+        question: "How much does flooring installation cost in Cape Town?",
+        answer: "Flooring in Cape Town is typically priced per square meter and varies by material and subfloor prep requirements." ,
+      },
+      {
+        question: "Which flooring type is cheapest to install?",
+        answer: "Vinyl and laminate are usually more affordable than engineered wood or premium tile systems." ,
+      },
+      {
+        question: "Is old flooring removal included in quotes?",
+        answer: "Some contractors include removal; others quote it separately, so always confirm this line item." ,
+      },
+      {
+        question: "Why does subfloor prep add so much?",
+        answer: "Levelling, moisture barriers, and repairs are labour-intensive but essential for durability and finish quality." ,
+      },
+      {
+        question: "How do I compare flooring quotes in Cape Town?",
+        answer: "Compare installed rates, prep inclusions, trim/skirting, and material warranties for a true like-for-like view." ,
+      },
+    ],
+    relatedSlugs: [
+      "flooring-cost-cape-town",
+      "flooring-cost-johannesburg",
+      "renovation-cost-johannesburg",
+    ],
+  },
+
+  {
+    slug: "flooring-cost-johannesburg",
+    service: "Flooring Installation",
+    city: "Johannesburg",
+    province: "Gauteng",
+    ctaLink: "/johannesburg/handyman",
+    metaTitle: "Flooring Installation Cost in Johannesburg | 2026 Pricing Guide | ProConnectSA",
+    metaDescription: "flooring installation in Johannesburg cost R220\u2013R650. Compare verified local quotes \u2014 free, no obligation.",
+    intro: "This 2026 flooring guide shows realistic installed pricing in Johannesburg for laminate, tile, vinyl, and engineered wood. It helps you understand total project costs before accepting quotes.",
+    lastUpdated: "March 2026",
+    pricing: [
+      { label: "Laminate/vinyl install (per m\u00b2)", range: "R220 \u2013 R650/m\u00b2" },
+      { label: "Porcelain/ceramic tiling (per m\u00b2)", range: "R280 \u2013 R900/m\u00b2" },
+      { label: "Engineered wood (per m\u00b2)", range: "R550 \u2013 R1,500/m\u00b2" },
+      { label: "Screed and subfloor prep (per m\u00b2)", range: "R120 \u2013 R450/m\u00b2" },
+      { label: "Full-home flooring project", range: "R25,000 \u2013 R220,000+" },
+    ],
+    priceFactors: [
+      "Flooring material type and brand tier",
+      "Condition of existing subfloor",
+      "Room layout, cuts, and transitions",
+      "Adhesives, underlay, and skirting needs",
+      "Removal/disposal of old flooring",
+      "Moisture barriers and leveling requirements",
+    ],
+    tips: [
+      "Choose material based on traffic and moisture exposure.",
+      "Request a subfloor assessment before final pricing.",
+      "Compare installed cost per m\u00b2 including prep.",
+      "Buy a little extra material for future repairs.",
+    ],
+    faqs: [
+      {
+        question: "How much does flooring installation cost in Johannesburg?",
+        answer: "Flooring in Johannesburg is typically priced per square meter and varies by material and subfloor prep requirements." ,
+      },
+      {
+        question: "Which flooring type is cheapest to install?",
+        answer: "Vinyl and laminate are usually more affordable than engineered wood or premium tile systems." ,
+      },
+      {
+        question: "Is old flooring removal included in quotes?",
+        answer: "Some contractors include removal; others quote it separately, so always confirm this line item." ,
+      },
+      {
+        question: "Why does subfloor prep add so much?",
+        answer: "Levelling, moisture barriers, and repairs are labour-intensive but essential for durability and finish quality." ,
+      },
+      {
+        question: "How do I compare flooring quotes in Johannesburg?",
+        answer: "Compare installed rates, prep inclusions, trim/skirting, and material warranties for a true like-for-like view." ,
+      },
+    ],
+    relatedSlugs: [
+      "flooring-cost-cape-town",
+      "flooring-cost-johannesburg",
+      "renovation-cost-johannesburg",
+    ],
+  },
+
+  {
+    slug: "roofing-cost-johannesburg",
+    service: "Roofing",
+    city: "Johannesburg",
+    province: "Gauteng",
+    ctaLink: "/johannesburg/handyman",
+    metaTitle: "Roofing Cost in Johannesburg | 2026 Pricing Guide | ProConnectSA",
+    metaDescription: "roofing in Johannesburg cost R1,500\u2013R8,000. Compare verified local quotes \u2014 free, no obligation.",
+    intro: "This guide explains typical 2026 roofing costs in Johannesburg for inspections, repairs, waterproofing, and full replacements. Use it to benchmark quotes before hiring a roofer.",
+    lastUpdated: "March 2026",
+    pricing: [
+      { label: "Roof inspection and minor repairs", range: "R1,500 \u2013 R8,000" },
+      { label: "Leak detection and waterproofing", range: "R2,000 \u2013 R15,000" },
+      { label: "Partial roof replacement", range: "R25,000 \u2013 R120,000" },
+      { label: "Full roof replacement (standard home)", range: "R90,000 \u2013 R320,000" },
+      { label: "Repainting and maintenance coating", range: "R12,000 \u2013 R60,000" },
+    ],
+    priceFactors: [
+      "Roof size, pitch, and height accessibility",
+      "Material type (tile, metal, concrete, slate)",
+      "Extent of structural timber damage",
+      "Waterproofing and flashing requirements",
+      "Scaffolding and safety compliance needs",
+      "Weather delays and emergency call-out timing",
+    ],
+    tips: [
+      "Get photos/videos with the quote scope documented.",
+      "Compare material specs, not just total price.",
+      "Schedule preventive maintenance before rainy season.",
+      "Confirm workmanship guarantee duration in writing.",
+    ],
+    faqs: [
+      {
+        question: "How much does roof replacement cost in Johannesburg?",
+        answer: "Replacement pricing depends on roof size, structure condition, and chosen material system." ,
+      },
+      {
+        question: "What is the cost of fixing a leaking roof?",
+        answer: "Minor leak fixes are cheaper, but recurring leaks may indicate broader waterproofing or structural issues." ,
+      },
+      {
+        question: "Are roofing quotes fixed or estimate-based?",
+        answer: "Many start as estimates and become fixed after site inspection and detailed scope confirmation." ,
+      },
+      {
+        question: "How long does a typical roofing project take?",
+        answer: "Small repairs may take hours or days; larger replacements can run for one to several weeks." ,
+      },
+      {
+        question: "How do I avoid roofing overcharges?",
+        answer: "Request itemized scope, compare materials, and choose verified contractors with written warranties." ,
+      },
+    ],
+    relatedSlugs: [
+      "roofing-cost-cape-town",
+      "roofing-cost-south-africa",
+      "renovation-cost-johannesburg",
+    ],
+  },
+
+  {
+    slug: "how-to-choose-a-plumber",
+    service: "Plumber Hiring Guide",
+    city: "South Africa",
+    province: "Nationwide",
+    ctaLink: "/services/plumbing",
+    metaTitle: "Plumber Hiring Guide Cost in South Africa | 2026 Pricing Guide | ProConnectSA",
+    metaDescription: "plumber hiring guide in South Africa cost R350\u2013R900. Compare verified local quotes \u2014 free, no obligation.",
+    intro: "Choosing a plumber can save or cost you thousands depending on the quality of work and pricing transparency. This guide explains how to vet plumbers, compare quotes, and avoid common hiring mistakes in 2026.",
+    lastUpdated: "March 2026",
+    pricing: [
+      { label: "Standard call-out fee", range: "R350 \u2013 R900" },
+      { label: "Hourly labour range", range: "R450 \u2013 R1,050/hr" },
+      { label: "Leak/tap/toilet minor repairs", range: "R450 \u2013 R1,800" },
+      { label: "Drain and blockage jobs", range: "R700 \u2013 R2,500" },
+      { label: "Geyser service/repair", range: "R900 \u2013 R3,500" },
+    ],
+    priceFactors: [
+      "Type of issue and urgency level",
+      "Parts quality and supplier availability",
+      "Property age and pipe accessibility",
+      "After-hours/weekend availability",
+      "Compliance/certificate requirements",
+      "Travel distance and call-out structure",
+    ],
+    tips: [
+      "Always request itemized quotes before approval.",
+      "Check reviews specific to your plumbing issue.",
+      "Ask whether call-out is waived if work proceeds.",
+      "Confirm guarantees on both labour and parts.",
+    ],
+    faqs: [
+      {
+        question: "How do I choose a reliable plumber in South Africa?",
+        answer: "Check verification, reviews, and experience with your exact issue, then compare at least three itemized quotes." ,
+      },
+      {
+        question: "What should be included in a plumbing quote?",
+        answer: "A proper quote should show call-out, labour rate, parts, VAT, and any guarantees or compliance requirements." ,
+      },
+      {
+        question: "When should I call an emergency plumber?",
+        answer: "Burst pipes, major leaks, blocked sewage lines, and no-water issues usually require urgent professional help." ,
+      },
+      {
+        question: "How do I compare plumbing quotes fairly?",
+        answer: "Compare scope, parts quality, response time, and warranties\u2014not just the cheapest headline total." ,
+      },
+      {
+        question: "Can I reduce plumbing costs without compromising quality?",
+        answer: "Yes: fix issues early, bundle small jobs, and schedule non-urgent work during normal business hours." ,
+      },
+    ],
+    relatedSlugs: [
+      "plumber-cost-cape-town",
+      "plumber-cost-johannesburg",
+      "cleaning-service-costs",
+    ],
+  },
+
 ]
 
