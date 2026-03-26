@@ -15,20 +15,31 @@ type Props = { params: Promise<{ city: string }> }
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { city } = await params
   const cityData = getCityBySlug(city)
+  const canonicalUrl = `https://www.proconnectsa.co.za/${city}/services`
   
   if (!cityData) {
     return {
       title: "Services | ProConnectSA",
       description: "Find service providers near you.",
+      alternates: {
+        canonical: canonicalUrl,
+      },
+      openGraph: {
+        url: canonicalUrl,
+      },
     }
   }
 
   return {
     title: `All Services in ${cityData.name} | Get Free Quotes | ProConnectSA`,
     description: `Find trusted service providers in ${cityData.name}, ${cityData.provinceName}. Compare free quotes from verified professionals for plumbing, electrical, cleaning, painting, and more. No obligation to hire.`,
+    alternates: {
+      canonical: canonicalUrl,
+    },
     openGraph: {
       title: `All Services in ${cityData.name} | ProConnectSA`,
       description: `Find verified service providers in ${cityData.name}. Compare free quotes from local professionals.`,
+      url: canonicalUrl,
       type: "website",
     },
     robots: {

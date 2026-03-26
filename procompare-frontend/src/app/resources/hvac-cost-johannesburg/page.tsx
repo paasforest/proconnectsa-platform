@@ -11,7 +11,11 @@ export const dynamic = "force-dynamic"
 export const metadata: Metadata = {
   title: "HVAC Installation Cost in Johannesburg (2026 Guide) | ProConnectSA",
   description: "Complete guide to HVAC installation costs in Johannesburg. Average prices for air conditioning, heating, and ventilation systems. Get free quotes from verified HVAC installers.",
+  alternates: {
+    canonical: 'https://www.proconnectsa.co.za/resources/hvac-cost-johannesburg',
+  },
   openGraph: {
+    url: 'https://www.proconnectsa.co.za/resources/hvac-cost-johannesburg',
     title: "HVAC Installation Cost in Johannesburg (2026 Guide) | ProConnectSA",
     description: "Average HVAC installation costs, air conditioning prices, and system costs in Johannesburg. Compare quotes from verified HVAC professionals.",
     type: "article",

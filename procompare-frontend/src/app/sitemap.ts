@@ -8,18 +8,18 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const categories = await fetchServiceCategories()
 
   const core: MetadataRoute.Sitemap = [
-    { url: `${baseUrl}/`, lastModified: new Date() },
-    { url: `${baseUrl}/services`, lastModified: new Date() },
-    { url: `${baseUrl}/how-it-works`, lastModified: new Date() },
-    { url: `${baseUrl}/providers/browse`, lastModified: new Date() },
-    { url: `${baseUrl}/for-pros`, lastModified: new Date() },
-    { url: `${baseUrl}/pricing`, lastModified: new Date() },
-    { url: `${baseUrl}/resources`, lastModified: new Date() },
-    { url: `${baseUrl}/press`, lastModified: new Date() },
+    { url: `${baseUrl}/`, lastModified: new Date(), changeFrequency: "daily", priority: 1.0 },
+    { url: `${baseUrl}/services`, lastModified: new Date(), changeFrequency: "weekly", priority: 0.8 },
+    { url: `${baseUrl}/how-it-works`, lastModified: new Date(), changeFrequency: "weekly", priority: 0.8 },
+    { url: `${baseUrl}/providers/browse`, lastModified: new Date(), changeFrequency: "weekly", priority: 0.8 },
+    { url: `${baseUrl}/for-pros`, lastModified: new Date(), changeFrequency: "weekly", priority: 0.8 },
+    { url: `${baseUrl}/pricing`, lastModified: new Date(), changeFrequency: "weekly", priority: 0.8 },
+    { url: `${baseUrl}/resources`, lastModified: new Date(), changeFrequency: "weekly", priority: 0.8 },
+    { url: `${baseUrl}/press`, lastModified: new Date(), changeFrequency: "weekly", priority: 0.8 },
     // Gauteng province pages
-    { url: `${baseUrl}/gauteng/local-services`, lastModified: new Date() },
-    { url: `${baseUrl}/gauteng/get-quotes`, lastModified: new Date() },
-    { url: `${baseUrl}/gauteng/find-service-providers`, lastModified: new Date() },
+    { url: `${baseUrl}/gauteng/local-services`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.4 },
+    { url: `${baseUrl}/gauteng/get-quotes`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.4 },
+    { url: `${baseUrl}/gauteng/find-service-providers`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.4 },
   ]
 
   const cats = (categories.length ? categories : [
@@ -36,6 +36,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const categoryUrls: MetadataRoute.Sitemap = cats.map((c) => ({
     url: `${baseUrl}/services/${c.slug}`,
     lastModified: new Date(),
+    changeFrequency: "weekly",
+    priority: 0.8,
   }))
 
   const provinceUrls: MetadataRoute.Sitemap = []
@@ -44,6 +46,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       provinceUrls.push({
         url: `${baseUrl}/services/${c.slug}/${p.slug}`,
         lastModified: new Date(),
+        changeFrequency: "monthly",
+        priority: 0.4,
       })
     }
   }
@@ -52,6 +56,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const cityHubUrls: MetadataRoute.Sitemap = MAJOR_CITIES.map((city) => ({
     url: `${baseUrl}/${city.slug}/services`,
     lastModified: new Date(),
+    changeFrequency: "weekly",
+    priority: 0.7,
   }))
 
   // City + Service pages - prioritize top services and major cities
@@ -62,43 +68,45 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       cityServiceUrls.push({
         url: `${baseUrl}/${city.slug}/${service}`,
         lastModified: new Date(),
+        changeFrequency: "weekly",
+        priority: 0.6,
       })
     }
   }
 
   // Resource guides and cost guides (30 total)
   const resourceUrls: MetadataRoute.Sitemap = [
-    { url: `${baseUrl}/resources/how-to-choose-a-plumber`, lastModified: new Date() },
-    { url: `${baseUrl}/resources/plumber-cost-cape-town`, lastModified: new Date() },
-    { url: `${baseUrl}/resources/plumber-cost-johannesburg`, lastModified: new Date() },
-    { url: `${baseUrl}/resources/electrician-cost-johannesburg`, lastModified: new Date() },
-    { url: `${baseUrl}/resources/electrician-cost-cape-town`, lastModified: new Date() },
-    { url: `${baseUrl}/resources/solar-installation-cost-south-africa`, lastModified: new Date() },
-    { url: `${baseUrl}/resources/cleaning-service-costs`, lastModified: new Date() },
-    { url: `${baseUrl}/resources/painting-costs`, lastModified: new Date() },
-    { url: `${baseUrl}/resources/handyman-costs`, lastModified: new Date() },
-    { url: `${baseUrl}/resources/painting-cost-durban`, lastModified: new Date() },
-    { url: `${baseUrl}/resources/painting-cost-cape-town`, lastModified: new Date() },
-    { url: `${baseUrl}/resources/painting-cost-pretoria`, lastModified: new Date() },
-    { url: `${baseUrl}/resources/renovation-cost-johannesburg`, lastModified: new Date() },
-    { url: `${baseUrl}/resources/renovation-cost-cape-town`, lastModified: new Date() },
-    { url: `${baseUrl}/resources/renovation-cost-durban`, lastModified: new Date() },
-    { url: `${baseUrl}/resources/cleaning-cost-cape-town`, lastModified: new Date() },
-    { url: `${baseUrl}/resources/cleaning-cost-johannesburg`, lastModified: new Date() },
-    { url: `${baseUrl}/resources/handyman-cost-cape-town`, lastModified: new Date() },
-    { url: `${baseUrl}/resources/handyman-cost-johannesburg`, lastModified: new Date() },
-    { url: `${baseUrl}/resources/hvac-cost-south-africa`, lastModified: new Date() },
-    { url: `${baseUrl}/resources/hvac-cost-cape-town`, lastModified: new Date() },
-    { url: `${baseUrl}/resources/hvac-cost-johannesburg`, lastModified: new Date() },
-    { url: `${baseUrl}/resources/landscaping-cost-south-africa`, lastModified: new Date() },
-    { url: `${baseUrl}/resources/landscaping-cost-cape-town`, lastModified: new Date() },
-    { url: `${baseUrl}/resources/landscaping-cost-johannesburg`, lastModified: new Date() },
-    { url: `${baseUrl}/resources/roofing-cost-south-africa`, lastModified: new Date() },
-    { url: `${baseUrl}/resources/roofing-cost-cape-town`, lastModified: new Date() },
-    { url: `${baseUrl}/resources/roofing-cost-johannesburg`, lastModified: new Date() },
-    { url: `${baseUrl}/resources/flooring-cost-south-africa`, lastModified: new Date() },
-    { url: `${baseUrl}/resources/flooring-cost-cape-town`, lastModified: new Date() },
-    { url: `${baseUrl}/resources/flooring-cost-johannesburg`, lastModified: new Date() },
+    { url: `${baseUrl}/resources/how-to-choose-a-plumber`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.5 },
+    { url: `${baseUrl}/resources/plumber-cost-cape-town`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.5 },
+    { url: `${baseUrl}/resources/plumber-cost-johannesburg`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.5 },
+    { url: `${baseUrl}/resources/electrician-cost-johannesburg`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.5 },
+    { url: `${baseUrl}/resources/electrician-cost-cape-town`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.5 },
+    { url: `${baseUrl}/resources/solar-installation-cost-south-africa`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.5 },
+    { url: `${baseUrl}/resources/cleaning-service-costs`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.5 },
+    { url: `${baseUrl}/resources/painting-costs`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.5 },
+    { url: `${baseUrl}/resources/handyman-costs`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.5 },
+    { url: `${baseUrl}/resources/painting-cost-durban`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.5 },
+    { url: `${baseUrl}/resources/painting-cost-cape-town`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.5 },
+    { url: `${baseUrl}/resources/painting-cost-pretoria`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.5 },
+    { url: `${baseUrl}/resources/renovation-cost-johannesburg`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.5 },
+    { url: `${baseUrl}/resources/renovation-cost-cape-town`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.5 },
+    { url: `${baseUrl}/resources/renovation-cost-durban`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.5 },
+    { url: `${baseUrl}/resources/cleaning-cost-cape-town`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.5 },
+    { url: `${baseUrl}/resources/cleaning-cost-johannesburg`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.5 },
+    { url: `${baseUrl}/resources/handyman-cost-cape-town`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.5 },
+    { url: `${baseUrl}/resources/handyman-cost-johannesburg`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.5 },
+    { url: `${baseUrl}/resources/hvac-cost-south-africa`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.5 },
+    { url: `${baseUrl}/resources/hvac-cost-cape-town`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.5 },
+    { url: `${baseUrl}/resources/hvac-cost-johannesburg`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.5 },
+    { url: `${baseUrl}/resources/landscaping-cost-south-africa`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.5 },
+    { url: `${baseUrl}/resources/landscaping-cost-cape-town`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.5 },
+    { url: `${baseUrl}/resources/landscaping-cost-johannesburg`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.5 },
+    { url: `${baseUrl}/resources/roofing-cost-south-africa`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.5 },
+    { url: `${baseUrl}/resources/roofing-cost-cape-town`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.5 },
+    { url: `${baseUrl}/resources/roofing-cost-johannesburg`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.5 },
+    { url: `${baseUrl}/resources/flooring-cost-south-africa`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.5 },
+    { url: `${baseUrl}/resources/flooring-cost-cape-town`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.5 },
+    { url: `${baseUrl}/resources/flooring-cost-johannesburg`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.5 },
   ]
 
   return [...core, ...categoryUrls, ...provinceUrls, ...cityHubUrls, ...cityServiceUrls, ...resourceUrls]

@@ -11,7 +11,11 @@ export const dynamic = "force-dynamic"
 export const metadata: Metadata = {
   title: "Handyman Service Costs in South Africa (2026 Guide) | ProConnectSA",
   description: "Complete guide to handyman costs in South Africa. Average hourly rates, common job costs, and how to save money. Get free quotes from verified handymen.",
+  alternates: {
+    canonical: 'https://www.proconnectsa.co.za/resources/handyman-costs',
+  },
   openGraph: {
+    url: 'https://www.proconnectsa.co.za/resources/handyman-costs',
     title: "Handyman Service Costs in South Africa (2026 Guide) | ProConnectSA",
     description: "Average handyman costs, hourly rates, and job pricing in South Africa. Compare quotes from verified handymen.",
     type: "article",

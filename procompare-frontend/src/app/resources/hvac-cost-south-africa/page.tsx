@@ -11,7 +11,11 @@ export const dynamic = "force-dynamic"
 export const metadata: Metadata = {
   title: "HVAC Installation Cost in South Africa (2026 Guide) | ProConnectSA",
   description: "Complete guide to HVAC installation costs in South Africa. Average prices for air conditioning, heating, and ventilation systems. Get free quotes from verified HVAC installers.",
+  alternates: {
+    canonical: 'https://www.proconnectsa.co.za/resources/hvac-cost-south-africa',
+  },
   openGraph: {
+    url: 'https://www.proconnectsa.co.za/resources/hvac-cost-south-africa',
     title: "HVAC Installation Cost in South Africa (2026 Guide) | ProConnectSA",
     description: "Average HVAC installation costs, air conditioning prices, and system costs in South Africa. Compare quotes from verified HVAC professionals.",
     type: "article",

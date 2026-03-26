@@ -10,6 +10,12 @@ export const dynamic = "force-dynamic"
 export const metadata: Metadata = {
   title: "Resources & Guides | ProConnectSA - Home Service Tips & Advice",
   description: "Expert guides and resources for finding and hiring service providers in South Africa. Learn how to choose the right plumber, electrician, cleaner, and more.",
+  alternates: {
+    canonical: 'https://www.proconnectsa.co.za/resources',
+  },
+  openGraph: {
+    url: 'https://www.proconnectsa.co.za/resources',
+  },
   robots: {
     index: true,
     follow: true,

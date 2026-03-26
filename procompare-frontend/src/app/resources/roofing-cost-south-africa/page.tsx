@@ -11,7 +11,11 @@ export const dynamic = "force-dynamic"
 export const metadata: Metadata = {
   title: "Roofing Costs in South Africa (2026 Guide) | ProConnectSA",
   description: "Complete guide to roofing costs in South Africa. Average prices for roof repairs, replacements, and installations. Get free quotes from verified roofers.",
+  alternates: {
+    canonical: 'https://www.proconnectsa.co.za/resources/roofing-cost-south-africa',
+  },
   openGraph: {
+    url: 'https://www.proconnectsa.co.za/resources/roofing-cost-south-africa',
     title: "Roofing Costs in South Africa (2026 Guide) | ProConnectSA",
     description: "Average roofing costs, repair prices, and replacement costs in South Africa. Compare quotes from verified roofers.",
     type: "article",

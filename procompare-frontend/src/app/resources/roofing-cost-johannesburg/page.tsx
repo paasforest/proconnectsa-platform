@@ -11,7 +11,11 @@ export const dynamic = "force-dynamic"
 export const metadata: Metadata = {
   title: "Roofing Costs in Johannesburg (2026 Guide) | ProConnectSA",
   description: "Complete guide to roofing costs in Johannesburg. Average prices for roof repairs, replacements, and installations. Get free quotes from verified roofers.",
+  alternates: {
+    canonical: 'https://www.proconnectsa.co.za/resources/roofing-cost-johannesburg',
+  },
   openGraph: {
+    url: 'https://www.proconnectsa.co.za/resources/roofing-cost-johannesburg',
     title: "Roofing Costs in Johannesburg (2026 Guide) | ProConnectSA",
     description: "Average roofing costs, repair prices, and replacement costs in Johannesburg. Compare quotes from verified roofers.",
     type: "article",

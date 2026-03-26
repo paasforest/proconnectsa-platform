@@ -11,7 +11,11 @@ export const dynamic = "force-dynamic"
 export const metadata: Metadata = {
   title: "Painting Costs in Pretoria (2026 Guide) | ProConnectSA",
   description: "Complete guide to painting costs in Pretoria. Average prices per square meter, room costs, and how to save money. Get free quotes from verified painters.",
+  alternates: {
+    canonical: 'https://www.proconnectsa.co.za/resources/painting-cost-pretoria',
+  },
   openGraph: {
+    url: 'https://www.proconnectsa.co.za/resources/painting-cost-pretoria',
     title: "Painting Costs in Pretoria (2026 Guide) | ProConnectSA",
     description: "Average painting costs, prices per square meter, and room pricing in Pretoria. Compare quotes from verified painters.",
     type: "article",

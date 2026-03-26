@@ -11,7 +11,11 @@ export const dynamic = "force-dynamic"
 export const metadata: Metadata = {
   title: "How to Choose a Plumber in South Africa | Complete Guide | ProConnectSA",
   description: "Complete guide to finding and hiring the right plumber in South Africa. Learn what to look for, questions to ask, red flags to avoid, and average costs.",
+  alternates: {
+    canonical: 'https://www.proconnectsa.co.za/resources/how-to-choose-a-plumber',
+  },
   openGraph: {
+    url: 'https://www.proconnectsa.co.za/resources/how-to-choose-a-plumber',
     title: "How to Choose a Plumber in South Africa | ProConnectSA",
     description: "Expert guide to selecting a qualified plumber. Tips, questions, and what to avoid.",
     type: "article",

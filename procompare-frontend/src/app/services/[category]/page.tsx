@@ -16,9 +16,16 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const categories = await fetchServiceCategories()
   const c = categories.find((x) => x.slug === category)
   const name = c?.name || category
+  const canonicalUrl = `https://www.proconnectsa.co.za/services/${category}`
   return {
     title: `${name} Quotes Near You | ProConnectSA`,
     description: `Compare free quotes from verified ${name.toLowerCase()} professionals near you. Fast matching and no obligation.`,
+    alternates: {
+      canonical: canonicalUrl,
+    },
+    openGraph: {
+      url: canonicalUrl,
+    },
   }
 }
 

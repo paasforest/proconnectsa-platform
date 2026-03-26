@@ -11,7 +11,11 @@ export const dynamic = "force-dynamic"
 export const metadata: Metadata = {
   title: "Landscaping Costs in South Africa (2026 Guide) | ProConnectSA",
   description: "Complete guide to landscaping costs in South Africa. Average prices for garden design, lawn installation, and maintenance. Get free quotes from verified landscapers.",
+  alternates: {
+    canonical: 'https://www.proconnectsa.co.za/resources/landscaping-cost-south-africa',
+  },
   openGraph: {
+    url: 'https://www.proconnectsa.co.za/resources/landscaping-cost-south-africa',
     title: "Landscaping Costs in South Africa (2026 Guide) | ProConnectSA",
     description: "Average landscaping costs, garden design prices, and maintenance costs in South Africa. Compare quotes from verified landscapers.",
     type: "article",

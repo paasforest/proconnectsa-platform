@@ -11,7 +11,11 @@ export const dynamic = "force-dynamic"
 export const metadata: Metadata = {
   title: "Landscaping Costs in Johannesburg (2026 Guide) | ProConnectSA",
   description: "Complete guide to landscaping costs in Johannesburg. Average prices for garden design, lawn installation, and maintenance. Get free quotes from verified landscapers.",
+  alternates: {
+    canonical: 'https://www.proconnectsa.co.za/resources/landscaping-cost-johannesburg',
+  },
   openGraph: {
+    url: 'https://www.proconnectsa.co.za/resources/landscaping-cost-johannesburg',
     title: "Landscaping Costs in Johannesburg (2026 Guide) | ProConnectSA",
     description: "Average landscaping costs, garden design prices, and maintenance costs in Johannesburg. Compare quotes from verified landscapers.",
     type: "article",

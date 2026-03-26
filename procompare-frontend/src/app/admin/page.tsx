@@ -4,6 +4,13 @@ import { authOptions } from "@/lib/auth"
 import AdminDashboard from '@/components/admin/AdminDashboard';
 import AdminLoginForm from '@/components/admin/AdminLoginForm';
 
+export const metadata = {
+  robots: {
+    index: false,
+    follow: false,
+  },
+}
+
 export default async function AdminPage() {
   // ALWAYS show admin login form for security
   // Admin access requires explicit authentication every time

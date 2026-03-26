@@ -43,11 +43,18 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { city, service } = await params
   const cityData = getCityBySlug(city)
   const serviceName = SERVICE_SLUG_TO_NAME[service] || service.charAt(0).toUpperCase() + service.slice(1).replace(/-/g, " ")
+  const canonicalUrl = `https://www.proconnectsa.co.za/${city}/${service}`
   
   if (!cityData) {
     return {
       title: `${serviceName} Services | ProConnectSA`,
       description: `Find ${serviceName.toLowerCase()} professionals near you.`,
+      alternates: {
+        canonical: canonicalUrl,
+      },
+      openGraph: {
+        url: canonicalUrl,
+      },
     }
   }
 
@@ -231,9 +238,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title: getOptimizedTitle(serviceName, cityName, service),
     description: getOptimizedDescription(serviceName, cityName, provinceName, service),
+    alternates: {
+      canonical: canonicalUrl,
+    },
     openGraph: {
       title: getOptimizedTitle(serviceName, cityName, service),
       description: getOptimizedDescription(serviceName, cityName, provinceName, service),
+      url: canonicalUrl,
       type: "website",
     },
     robots: {

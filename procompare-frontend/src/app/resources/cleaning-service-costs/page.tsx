@@ -11,7 +11,11 @@ export const dynamic = "force-dynamic"
 export const metadata: Metadata = {
   title: "Cleaning Service Costs in South Africa (2026 Guide) | ProConnectSA",
   description: "Complete guide to cleaning service costs in South Africa. Average hourly rates, one-time cleaning prices, and how to save money. Get free quotes from verified cleaners.",
+  alternates: {
+    canonical: 'https://www.proconnectsa.co.za/resources/cleaning-service-costs',
+  },
   openGraph: {
+    url: 'https://www.proconnectsa.co.za/resources/cleaning-service-costs',
     title: "Cleaning Service Costs in South Africa (2026 Guide) | ProConnectSA",
     description: "Average cleaning service costs, hourly rates, and pricing in South Africa. Compare quotes from verified cleaning professionals.",
     type: "article",

@@ -11,7 +11,11 @@ export const dynamic = "force-dynamic"
 export const metadata: Metadata = {
   title: "Flooring Costs in Johannesburg (2026 Guide) | ProConnectSA",
   description: "Complete guide to flooring costs in Johannesburg. Average prices for tiles, laminate, hardwood, and carpet installation. Get free quotes from verified flooring contractors.",
+  alternates: {
+    canonical: 'https://www.proconnectsa.co.za/resources/flooring-cost-johannesburg',
+  },
   openGraph: {
+    url: 'https://www.proconnectsa.co.za/resources/flooring-cost-johannesburg',
     title: "Flooring Costs in Johannesburg (2026 Guide) | ProConnectSA",
     description: "Average flooring costs, tile prices, and installation costs in Johannesburg. Compare quotes from verified flooring professionals.",
     type: "article",

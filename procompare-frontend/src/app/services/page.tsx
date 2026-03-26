@@ -1,3 +1,4 @@
+import type { Metadata } from "next"
 import Link from "next/link"
 import { ClientHeader } from "@/components/layout/ClientHeader"
 import { Footer } from "@/components/layout/Footer"
@@ -6,6 +7,15 @@ import { PROVINCES } from "@/lib/seo-locations"
 import { Button } from "@/components/ui/button"
 
 export const dynamic = "force-dynamic"
+
+export const metadata: Metadata = {
+  alternates: {
+    canonical: "https://www.proconnectsa.co.za/services",
+  },
+  openGraph: {
+    url: "https://www.proconnectsa.co.za/services",
+  },
+}
 
 export default async function ServicesPage() {
   const categories = await fetchServiceCategories()

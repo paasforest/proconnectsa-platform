@@ -72,6 +72,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const p = getProvinceBySlug(province)
   const name = c?.name || category
   const provinceName = p?.name || province
+  const canonicalUrl = `https://www.proconnectsa.co.za/services/${category}/${province}`
 
   const key = `${category}/${province}`
   const custom = SEO_SERVICE_PROVINCE_PAGES[key]
@@ -79,6 +80,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     return {
       title: custom.seoTitle,
       description: custom.metaDescription,
+      alternates: {
+        canonical: canonicalUrl,
+      },
+      openGraph: {
+        url: canonicalUrl,
+      },
       robots: {
         index: true,
         follow: true,
@@ -111,6 +118,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title: getOptimizedTitle(name, provinceName),
     description: `Get free quotes from 3 verified ${name.toLowerCase()} professionals in ${provinceName}. Compare pricing, reviews, and availability. No obligation to hire. Fast matching in 60 seconds.`,
+    alternates: {
+      canonical: canonicalUrl,
+    },
+    openGraph: {
+      url: canonicalUrl,
+    },
     robots: {
       index: true,
       follow: true,

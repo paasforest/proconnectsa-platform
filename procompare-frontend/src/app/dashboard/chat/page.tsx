@@ -4,6 +4,13 @@ import { withAuth } from '@/components/AuthProvider';
 import DashboardLayout from '@/components/dashboard/DashboardLayout'
 import ChatPage from '@/components/dashboard/ChatPage'
 
+export const metadata = {
+  robots: {
+    index: false,
+    follow: false,
+  },
+}
+
 function ChatPageRoute({ user }: { user: any }) {
   return (
     <DashboardLayout>

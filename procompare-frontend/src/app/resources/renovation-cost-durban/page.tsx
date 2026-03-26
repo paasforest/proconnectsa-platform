@@ -11,7 +11,11 @@ export const dynamic = "force-dynamic"
 export const metadata: Metadata = {
   title: "Renovation Costs in Durban (2026 Guide) | ProConnectSA",
   description: "Complete guide to renovation costs in Durban. Average prices for kitchen, bathroom, and home renovations. Get free quotes from verified contractors.",
+  alternates: {
+    canonical: 'https://www.proconnectsa.co.za/resources/renovation-cost-durban',
+  },
   openGraph: {
+    url: 'https://www.proconnectsa.co.za/resources/renovation-cost-durban',
     title: "Renovation Costs in Durban (2026 Guide) | ProConnectSA",
     description: "Average renovation costs, kitchen and bathroom prices, and project costs in Durban. Compare quotes from verified contractors.",
     type: "article",
