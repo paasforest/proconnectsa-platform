@@ -1,0 +1,319 @@
+'use client'
+
+import type { ResourceGuide } from '@/lib/resourceGuides'
+import { resourceGuides } from '@/lib/resourceGuides'
+import Link from 'next/link'
+import Script from 'next/script'
+import { useMemo, useState } from 'react'
+
+function truncate(text: string, maxChars: number) {
+  if (text.length <= maxChars) return text
+  const trimmed = text.slice(0, maxChars)
+  const lastSpace = trimmed.lastIndexOf(' ')
+  return `${trimmed.slice(0, lastSpace > 40 ? lastSpace : maxChars).trim()}…`
+}
+
+function Chevron({ open }: { open: boolean }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      aria-hidden="true"
+      className={[
+        'h-5 w-5 flex-none text-gray-600 transition-transform duration-200',
+        open ? 'rotate-180' : 'rotate-0',
+      ].join(' ')}
+    >
+      <path
+        d="M6.7 9.2a1 1 0 0 1 1.4 0L12 13.1l3.9-3.9a1 1 0 1 1 1.4 1.4l-4.6 4.6a1 1 0 0 1-1.4 0l-4.6-4.6a1 1 0 0 1 0-1.4Z"
+        fill="currentColor"
+      />
+    </svg>
+  )
+}
+
+export function ResourcePageTemplate({ guide }: { guide: ResourceGuide }) {
+  const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(0)
+
+  const faqSchema = useMemo(
+    () => ({
+      '@context': 'https://schema.org',
+      '@type': 'FAQPage',
+      mainEntity: guide.faqs.map((faq) => ({
+        '@type': 'Question',
+        name: faq.question,
+        acceptedAnswer: {
+          '@type': 'Answer',
+          text: faq.answer,
+        },
+      })),
+    }),
+    [guide.faqs],
+  )
+
+  const articleSchema = useMemo(
+    () => ({
+      '@context': 'https://schema.org',
+      '@type': 'Article',
+      headline: guide.metaTitle,
+      description: guide.metaDescription,
+      dateModified: guide.lastUpdated,
+      publisher: {
+        '@type': 'Organization',
+        name: 'ProConnectSA',
+        url: 'https://www.proconnectsa.co.za',
+      },
+    }),
+    [guide.lastUpdated, guide.metaDescription, guide.metaTitle],
+  )
+
+  const relatedGuides = useMemo(
+    () =>
+      guide.relatedSlugs
+        .map((slug) => resourceGuides.find((g) => g.slug === slug))
+        .filter((g): g is ResourceGuide => Boolean(g)),
+    [guide.relatedSlugs],
+  )
+
+  const pageTitle = `${guide.service} Cost in ${guide.city} — 2026 Pricing Guide`
+
+  return (
+    <main className="flex-1">
+      {/* A) FAQ + Article JSON-LD Schema */}
+      <Script
+        id={`faq-schema-${guide.slug}`}
+        type="application/ld+json"
+        strategy="beforeInteractive"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
+      />
+      <Script
+        id={`article-schema-${guide.slug}`}
+        type="application/ld+json"
+        strategy="beforeInteractive"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(articleSchema) }}
+      />
+
+      <section className="bg-gradient-to-br from-amber-50 to-orange-50 py-10">
+        <div className="container mx-auto px-4">
+          <div className="mx-auto max-w-5xl">
+            {/* B) Breadcrumb */}
+            <nav aria-label="Breadcrumb" className="mb-4 text-sm text-gray-600">
+              <ol className="flex flex-wrap items-center gap-2">
+                <li>
+                  <Link href="/" className="hover:text-gray-900">
+                    Home
+                  </Link>
+                </li>
+                <li aria-hidden="true">/</li>
+                <li>
+                  <Link href="/resources" className="hover:text-gray-900">
+                    Resources
+                  </Link>
+                </li>
+                <li aria-hidden="true">/</li>
+                <li className="text-gray-900 font-medium">{`${guide.service} Cost ${guide.city}`}</li>
+              </ol>
+            </nav>
+
+            {/* C) Hero block */}
+            <h1 className="text-3xl md:text-5xl font-bold text-gray-900 mb-4">{pageTitle}</h1>
+
+            <div className="flex flex-wrap gap-2 mb-5">
+              <span className="inline-flex items-center rounded-full bg-white/80 border border-amber-200 px-3 py-1 text-sm text-gray-800">
+                📍 {guide.city}, {guide.province}
+              </span>
+              <span className="inline-flex items-center rounded-full bg-white/80 border border-amber-200 px-3 py-1 text-sm text-gray-800">
+                🗓 Updated {guide.lastUpdated}
+              </span>
+            </div>
+
+            <p className="text-gray-700 text-base md:text-lg mb-6 max-w-3xl">{guide.intro}</p>
+
+            <div className="flex flex-wrap gap-3">
+              <Link
+                href={guide.ctaLink}
+                className="inline-flex items-center justify-center rounded-full bg-amber-500 hover:bg-amber-600 text-gray-900 font-bold px-6 py-3 shadow-sm transition-colors"
+              >
+                Get Free {guide.service} Quotes in {guide.city} →
+              </Link>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* D) Quick price overview */}
+      <section className="py-10">
+        <div className="container mx-auto px-4">
+          <div className="mx-auto max-w-5xl">
+            <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-4">
+              How Much Does {guide.service} Cost in {guide.city}?
+            </h2>
+
+            <div className="overflow-x-auto rounded-2xl border border-gray-200 bg-white">
+              <table className="min-w-[640px] w-full text-left">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-4 py-3 text-sm font-semibold text-gray-900">Job Type</th>
+                    <th className="px-4 py-3 text-sm font-semibold text-gray-900">Estimated Cost</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {guide.pricing.map((row, idx) => (
+                    <tr key={`${row.label}-${idx}`} className={idx % 2 === 0 ? 'bg-white' : 'bg-amber-50/40'}>
+                      <td className="px-4 py-3 text-sm text-gray-900">{row.label}</td>
+                      <td className="px-4 py-3 text-sm font-semibold text-gray-900">{row.range}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            <p className="text-sm text-gray-600 mt-4">
+              Prices reflect 2026 South African market rates. Actual quotes may vary by provider, location, and job complexity.
+            </p>
+            <p className="text-sm text-gray-700 mt-2">
+              <Link href={guide.ctaLink} className="text-amber-700 hover:text-amber-800 hover:underline font-semibold">
+                Compare real quotes →
+              </Link>
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* E) What affects the price */}
+      <section className="py-10 bg-white">
+        <div className="container mx-auto px-4">
+          <div className="mx-auto max-w-5xl">
+            <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-6">
+              What Affects the Cost of {guide.service} in {guide.city}?
+            </h2>
+
+            <ul className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              {guide.priceFactors.map((factor, idx) => (
+                <li
+                  key={`${factor}-${idx}`}
+                  className="flex items-start gap-3 rounded-xl border border-gray-200 bg-white p-4"
+                >
+                  <span className="mt-0.5 inline-flex h-6 w-6 items-center justify-center rounded-full bg-amber-100 text-amber-800 font-bold">
+                    ✓
+                  </span>
+                  <span className="text-gray-800">{factor}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      {/* F) How to get the best price */}
+      <section className="py-10 bg-gray-50">
+        <div className="container mx-auto px-4">
+          <div className="mx-auto max-w-5xl">
+            <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-6">
+              How to Get the Best Price on {guide.service} in {guide.city}
+            </h2>
+
+            <div className="grid grid-cols-1 gap-4">
+              {guide.tips.map((tip, idx) => (
+                <div key={`${tip}-${idx}`} className="rounded-2xl border border-gray-200 bg-white p-5">
+                  <div className="flex items-start gap-4">
+                    <div className="flex-none">
+                      <div className="h-10 w-10 rounded-full bg-amber-100 text-amber-800 font-extrabold flex items-center justify-center">
+                        {idx + 1}
+                      </div>
+                    </div>
+                    <p className="text-gray-800">{tip}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* G) FAQ Accordion */}
+      <section className="py-10 bg-white">
+        <div className="container mx-auto px-4">
+          <div className="mx-auto max-w-5xl">
+            <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-6">Frequently Asked Questions</h2>
+
+            <div className="space-y-3">
+              {guide.faqs.map((faq, idx) => {
+                const isOpen = openFaqIndex === idx
+                return (
+                  <div key={`${faq.question}-${idx}`} className="rounded-2xl border border-gray-200 bg-white">
+                    <button
+                      type="button"
+                      className="w-full flex items-center justify-between gap-4 px-5 py-4 text-left"
+                      aria-expanded={isOpen}
+                      onClick={() => setOpenFaqIndex((current) => (current === idx ? null : idx))}
+                    >
+                      <span className="font-semibold text-gray-900">{faq.question}</span>
+                      <Chevron open={isOpen} />
+                    </button>
+                    <div
+                      className={[
+                        'px-5 overflow-hidden transition-[max-height,opacity] duration-300 ease-in-out',
+                        isOpen ? 'max-h-40 opacity-100 pb-4' : 'max-h-0 opacity-0',
+                      ].join(' ')}
+                    >
+                      <p className="text-gray-600">{faq.answer}</p>
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* H) Main CTA block */}
+      <section className="py-12 bg-gray-950">
+        <div className="container mx-auto px-4">
+          <div className="mx-auto max-w-5xl rounded-3xl border border-amber-500/30 bg-gradient-to-br from-gray-950 to-gray-900 p-8 md:p-10">
+            <h2 className="text-2xl md:text-3xl font-bold text-white mb-3">
+              Ready to Get Quotes from Verified {guide.service} Providers in {guide.city}?
+            </h2>
+            <p className="text-gray-200 mb-6">
+              Free, no obligation. Compare up to 3 verified quotes and choose the best fit for your budget.
+            </p>
+            <Link
+              href={guide.ctaLink}
+              className="inline-flex items-center justify-center rounded-full bg-amber-500 hover:bg-amber-600 text-gray-900 font-bold px-7 py-4 shadow-sm transition-colors"
+            >
+              Get Free Quotes Now →
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* I) Related guides */}
+      <section className="py-10 bg-white">
+        <div className="container mx-auto px-4">
+          <div className="mx-auto max-w-5xl">
+            <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-6">Related Cost Guides</h2>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+              {relatedGuides.slice(0, 3).map((g) => (
+                <div
+                  key={g.slug}
+                  className="rounded-2xl border border-gray-200 bg-white p-5 hover:shadow-lg transition-shadow"
+                >
+                  <div className="text-xs font-semibold text-amber-700 mb-1">{g.service}</div>
+                  <div className="text-lg font-semibold text-gray-900 mb-2">{g.city}</div>
+                  <p className="text-sm text-gray-600 mb-4">{truncate(g.intro, 100)}</p>
+                  <Link
+                    href={`/resources/${g.slug}`}
+                    className="text-amber-700 hover:text-amber-800 hover:underline font-semibold text-sm"
+                  >
+                    Read guide →
+                  </Link>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  )
+}
+
