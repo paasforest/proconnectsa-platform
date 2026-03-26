@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import type { Metadata } from "next";
+import { getFindProListingUrl } from "@/lib/findpro";
 import { 
   Star, 
   MapPin, 
@@ -115,6 +116,10 @@ export default async function ProviderDetailPage({ params }: { params: Promise<{
   const { id } = await params;
   const provider = await fetchProvider(id);
   if (!provider) return notFound();
+  const findProUrl = await getFindProListingUrl({
+    providerSlug: provider.slug,
+    businessName: provider.business_name,
+  });
 
   const location = [provider.suburb, provider.city].filter(Boolean).join(", ") || "Location not specified";
   const hasPricing = provider.hourly_rate_min || provider.hourly_rate_max || provider.minimum_job_value;
@@ -527,6 +532,16 @@ export default async function ProviderDetailPage({ params }: { params: Promise<{
                     </Button>
                   </Link>
                   <p className="text-xs text-gray-500 mt-2">Free service • Get multiple quotes</p>
+                  {findProUrl && (
+                    <p className="mt-3">
+                      <a
+                        href={findProUrl}
+                        className="text-sm text-gray-600 hover:text-gray-800 hover:underline"
+                      >
+                        View full business profile on FindPro →
+                      </a>
+                    </p>
+                  )}
                 </div>
               </div>
             </div>

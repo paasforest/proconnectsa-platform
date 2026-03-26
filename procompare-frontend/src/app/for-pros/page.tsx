@@ -103,6 +103,24 @@ export default function ForProsPage() {
             </div>
           </div>
         </section>
+
+        <section className="py-16">
+          <div className="container mx-auto px-4">
+            <div className="max-w-4xl mx-auto bg-white border rounded-2xl p-8 md:p-10">
+              <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-3">
+                Bonus: Get a Free Business Listing on FindPro
+              </h2>
+              <p className="text-gray-600 text-base md:text-lg mb-6">
+                When you join ProConnectSA, you also get a free listing on FindPro.co.za — South Africa's home services directory with 1,800+ professionals. More visibility. Zero extra cost.
+              </p>
+              <Button asChild className="bg-emerald-600 hover:bg-emerald-700 text-white px-8 py-6 text-lg rounded-xl">
+                <Link href="https://www.findpro.co.za/add-business?utm_source=proconnectsa&utm_medium=for_pros&utm_campaign=findpro_listing_bonus">
+                  Claim Your Free FindPro Listing
+                </Link>
+              </Button>
+            </div>
+          </div>
+        </section>
       </main>
       <Footer />
     </div>
