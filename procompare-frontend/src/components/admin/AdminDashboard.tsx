@@ -16,8 +16,19 @@ import PremiumRequestsManagement from './PremiumRequestsManagement';
 import VerificationDocumentsManagement from './VerificationDocumentsManagement';
 import UserDetailModal from './UserDetailModal';
 import DepositDetailModal from './DepositDetailModal';
+import ProvidersManagement from './ProvidersManagement';
 
-type DashboardView = 'overview' | 'support' | 'staff' | 'finance' | 'technical' | 'settings' | 'google-reviews' | 'premium-requests' | 'verifications';
+type DashboardView =
+  | 'overview'
+  | 'providers'
+  | 'support'
+  | 'staff'
+  | 'finance'
+  | 'technical'
+  | 'settings'
+  | 'google-reviews'
+  | 'premium-requests'
+  | 'verifications';
 
 const AdminDashboard = () => {
   const { user, logout } = useAuth();
@@ -26,6 +37,7 @@ const AdminDashboard = () => {
 
   const navigation = [
     { id: 'overview', name: 'Overview', icon: LayoutDashboard, current: currentView === 'overview' },
+    { id: 'providers', name: 'Providers', icon: Users, current: currentView === 'providers' },
     { id: 'support', name: 'Support Tickets', icon: MessageSquare, current: currentView === 'support' },
     { id: 'google-reviews', name: 'Google Reviews', icon: Star, current: currentView === 'google-reviews' },
     { id: 'premium-requests', name: 'Premium Requests', icon: BarChart3, current: currentView === 'premium-requests' },
@@ -38,6 +50,8 @@ const AdminDashboard = () => {
 
   const renderCurrentView = () => {
     switch (currentView) {
+      case 'providers':
+        return <ProvidersManagement />;
       case 'support':
         return <AdminSupportDashboard />;
       case 'google-reviews':

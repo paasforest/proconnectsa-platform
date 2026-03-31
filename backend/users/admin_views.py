@@ -51,12 +51,32 @@ def support_users_list(request):
                 Q(phone__icontains=search)
             )
         
-        # Serialize users
+        # Providers: include basic provider profile fields for admin UI
+        users = users.select_related('provider_profile')
+
         serializer = UserSerializer(users, many=True)
+        serialized = serializer.data
+
+        # Add provider profile fields inline (without breaking existing clients)
+        for i, u in enumerate(users):
+            try:
+                if getattr(u, 'user_type', None) == 'provider' and hasattr(u, 'provider_profile'):
+                    p = u.provider_profile
+                    serialized[i]['provider_profile'] = {
+                        'business_name': getattr(p, 'business_name', None),
+                        'verification_status': getattr(p, 'verification_status', None),
+                        'subscription_tier': getattr(p, 'subscription_tier', None),
+                        'credit_balance': str(getattr(p, 'credit_balance', '0')),
+                        'receives_lead_notifications': getattr(p, 'receives_lead_notifications', True),
+                        'notification_methods': getattr(p, 'notification_methods', []) or [],
+                    }
+            except Exception:
+                # Never let profile issues break the list endpoint
+                pass
         
         return Response({
             'success': True,
-            'users': serializer.data,
+            'users': serialized,
             'count': users.count()
         })
         

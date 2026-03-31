@@ -1,5 +1,6 @@
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+from django.utils import timezone
 from .models import User, ProviderProfile, Wallet
 from backend.payments.models import PaymentAccount
 from backend.notifications.models import Notification
@@ -47,7 +48,9 @@ def create_provider_welcome_notification(sender, instance, created, **kwargs):
         # Pro welcome email: how leads work, how to respond, how to upgrade
         try:
             from backend.utils.resend_service import send_pro_welcome_email
-            send_pro_welcome_email(instance.user)
+            if send_pro_welcome_email(instance.user):
+                instance.pro_welcome_email_sent_at = timezone.now()
+                instance.save(update_fields=['pro_welcome_email_sent_at'])
         except Exception as e:
             import logging
             logging.getLogger(__name__).error(f"Failed to send pro welcome email: {e}", exc_info=True)

@@ -130,61 +130,17 @@ class LeadAssignmentService:
                 lead_data=lead_data,
                 compatibility_scores=compatibility_scores
             )
-            
-            # Send SMS notifications to providers
-            self._send_sms_lead_alerts(lead, provider_ids, compatibility_scores)
-            
+            # SMS on lead match is disabled (cost / unreliable gateway). Providers get email from
+            # backend.leads.services.lead_router.notify_providers → _send_lead_email.
+
             logger.info(f"Sent real-time lead alerts to {len(provider_ids)} providers for lead {lead.id}")
             
         except Exception as e:
             logger.error(f"Error sending real-time lead alerts: {str(e)}")
     
     def _send_sms_lead_alerts(self, lead, provider_ids, compatibility_scores):
-        """Send SMS alerts to matched providers"""
-        try:
-            from backend.notifications.sms_service import SMSService
-            from django.contrib.auth import get_user_model
-            
-            User = get_user_model()
-            sms_service = SMSService()
-            
-            # Get provider users and send SMS
-            providers = User.objects.filter(id__in=provider_ids, user_type='provider')
-            
-            for provider in providers:
-                try:
-                    # Get provider phone number
-                    phone_number = getattr(provider, 'phone', None)
-                    if not phone_number and hasattr(provider, 'provider_profile'):
-                        phone_number = getattr(provider.provider_profile, 'phone', None)
-                    
-                    if phone_number:
-                        # Get compatibility score
-                        compatibility = compatibility_scores.get(provider.id, 0)
-                        
-                        # Create secure SMS notification (no sensitive details)
-                        # Only include generic service category and general location
-                        generic_title = f"{lead.service_category.name} Service Request"
-                        safe_location = f"{lead.location_suburb}, {lead.location_city}"
-                        
-                        result = sms_service.send_provider_notification_sms(
-                            phone_number, 
-                            generic_title, 
-                            safe_location
-                        )
-                        
-                        if result['success']:
-                            logger.info(f"SMS alert sent to provider {provider.id}")
-                        else:
-                            logger.warning(f"Failed to send SMS to provider {provider.id}: {result.get('error')}")
-                    else:
-                        logger.warning(f"No phone number found for provider {provider.id}")
-                        
-                except Exception as provider_err:
-                    logger.error(f"Error sending SMS to provider {provider.id}: {str(provider_err)}")
-                    
-        except Exception as e:
-            logger.error(f"Error sending SMS lead alerts: {str(e)}")
+        """Reserved for future use. Lead-match SMS is intentionally off (cost)."""
+        return
     
     def _create_persistent_notifications(self, lead, assignments):
         """Create persistent database notifications for assigned providers"""
