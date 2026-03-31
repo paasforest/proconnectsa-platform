@@ -20,6 +20,8 @@ type ProviderRow = {
     verification_status?: string | null;
     subscription_tier?: string | null;
     credit_balance?: string | null;
+    business_phone?: string | null;
+    business_email?: string | null;
   };
 };
 
@@ -37,11 +39,13 @@ export default function ProvidersManagement() {
     setError(null);
     try {
       apiClient.setToken(token);
-      const res: any = await apiClient.get("/api/auth/support/users/?user_type=provider");
+      // Uses ProviderProfile as source of truth (every signed-up pro has a profile row).
+      const res: any = await apiClient.get("/api/auth/admin/providers/");
       const list = Array.isArray(res?.users) ? res.users : Array.isArray(res) ? res : [];
       setProviders(list);
     } catch (e: any) {
-      setError(e?.message || "Failed to load providers");
+      const detail = e?.response?.data?.error || e?.response?.data?.detail;
+      setError(detail || e?.message || "Failed to load providers");
       setProviders([]);
     } finally {
       setLoading(false);
@@ -63,12 +67,16 @@ export default function ProvidersManagement() {
       const name = `${p.first_name || ""} ${p.last_name || ""}`.trim().toLowerCase();
       const phone = (p.phone || "").toLowerCase();
       const location = `${p.suburb || ""} ${p.city || ""}`.trim().toLowerCase();
+      const bizPhone = (p.provider_profile?.business_phone || "").toLowerCase();
+      const bizEmail = (p.provider_profile?.business_email || "").toLowerCase();
       return (
         business.includes(q) ||
         email.includes(q) ||
         name.includes(q) ||
         phone.includes(q) ||
-        location.includes(q)
+        location.includes(q) ||
+        bizPhone.includes(q) ||
+        bizEmail.includes(q)
       );
     });
   }, [providers, search]);
@@ -184,6 +192,14 @@ export default function ProvidersManagement() {
                           <Phone className="w-4 h-4 text-gray-400" />
                           <span>{p.phone || "—"}</span>
                         </div>
+                        {(p.provider_profile?.business_phone || p.provider_profile?.business_email) ? (
+                          <div className="text-xs text-gray-500 mt-1">
+                            <span className="font-medium text-gray-600">Business: </span>
+                            {p.provider_profile?.business_phone || "—"}
+                            <span className="mx-1">·</span>
+                            {p.provider_profile?.business_email || "—"}
+                          </div>
+                        ) : null}
                       </td>
                       <td className="px-6 py-4">
                         <div className="text-sm text-gray-900 flex items-center gap-2">

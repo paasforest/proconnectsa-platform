@@ -27,6 +27,98 @@ def _json_safe_user_row(data: dict) -> dict:
     return row
 
 
+def _float_json_safe(value):
+    if value is None:
+        return None
+    if isinstance(value, float) and (math.isnan(value) or math.isinf(value)):
+        return None
+    return value
+
+
+def _notification_methods_json_safe(nm):
+    if nm is None:
+        return []
+    if isinstance(nm, list):
+        return [str(x) for x in nm]
+    if isinstance(nm, dict):
+        return [str(k) for k in nm.keys()]
+    return [str(nm)]
+
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def admin_providers_directory(request):
+    """
+    Admin/support: list every signed-up pro (has a ProviderProfile row).
+    Built without UserSerializer to avoid rare serialization crashes (500s) in production.
+    """
+    if not (request.user.is_staff or request.user.user_type in ["admin", "support"]):
+        return Response(
+            {"error": "Access denied. Admin or support privileges required."},
+            status=status.HTTP_403_FORBIDDEN,
+        )
+
+    search = (request.query_params.get("search") or "").strip()
+
+    qs = ProviderProfile.objects.select_related("user").order_by("-created_at")
+    if search:
+        qs = qs.filter(
+            Q(business_name__icontains=search)
+            | Q(business_email__icontains=search)
+            | Q(business_phone__icontains=search)
+            | Q(user__email__icontains=search)
+            | Q(user__first_name__icontains=search)
+            | Q(user__last_name__icontains=search)
+            | Q(user__phone__icontains=search)
+            | Q(user__city__icontains=search)
+            | Q(user__suburb__icontains=search)
+        )
+
+    rows = []
+    for profile in qs:
+        try:
+            u = profile.user
+            rows.append(
+                {
+                    "id": str(u.id),
+                    "username": u.username or "",
+                    "email": u.email or "",
+                    "first_name": u.first_name or "",
+                    "last_name": u.last_name or "",
+                    "phone": u.phone or None,
+                    "city": u.city or None,
+                    "suburb": u.suburb or None,
+                    "latitude": _float_json_safe(u.latitude),
+                    "longitude": _float_json_safe(u.longitude),
+                    "user_type": u.user_type,
+                    "is_active": bool(u.is_active),
+                    "created_at": u.created_at.isoformat() if getattr(u, "created_at", None) else None,
+                    "provider_profile": {
+                        "business_name": profile.business_name,
+                        "verification_status": profile.verification_status,
+                        "subscription_tier": profile.subscription_tier,
+                        "credit_balance": str(profile.credit_balance),
+                        "business_phone": profile.business_phone or None,
+                        "business_email": profile.business_email or None,
+                        "receives_lead_notifications": bool(profile.receives_lead_notifications),
+                        "notification_methods": _notification_methods_json_safe(
+                            profile.notification_methods
+                        ),
+                    },
+                }
+            )
+        except Exception as exc:
+            logger.warning(
+                "admin_providers_directory: skipped profile pk=%s: %s",
+                getattr(profile, "pk", None),
+                exc,
+                exc_info=True,
+            )
+            continue
+
+    return Response({"success": True, "users": rows, "count": len(rows)})
+
+
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
 def support_users_list(request):
@@ -73,21 +165,34 @@ def support_users_list(request):
         # One row at a time: avoids DRF ReturnList/ReturnDict index bugs; easy to extend safely.
         serialized_users = []
         for u in users:
-            row = _json_safe_user_row(UserSerializer(u).data)
-            if u.user_type in ('provider', 'service_provider'):
-                try:
-                    p = u.provider_profile
-                    row['provider_profile'] = {
-                        'business_name': getattr(p, 'business_name', None),
-                        'verification_status': getattr(p, 'verification_status', None),
-                        'subscription_tier': getattr(p, 'subscription_tier', None),
-                        'credit_balance': str(getattr(p, 'credit_balance', '0')),
-                        'receives_lead_notifications': getattr(p, 'receives_lead_notifications', True),
-                        'notification_methods': list(getattr(p, 'notification_methods', []) or []),
-                    }
-                except ProviderProfile.DoesNotExist:
-                    row['provider_profile'] = None
-            serialized_users.append(row)
+            try:
+                row = _json_safe_user_row(UserSerializer(u).data)
+                if u.user_type in ("provider", "service_provider"):
+                    try:
+                        p = u.provider_profile
+                        row["provider_profile"] = {
+                            "business_name": getattr(p, "business_name", None),
+                            "verification_status": getattr(p, "verification_status", None),
+                            "subscription_tier": getattr(p, "subscription_tier", None),
+                            "credit_balance": str(getattr(p, "credit_balance", "0")),
+                            "receives_lead_notifications": getattr(
+                                p, "receives_lead_notifications", True
+                            ),
+                            "notification_methods": _notification_methods_json_safe(
+                                getattr(p, "notification_methods", []) or []
+                            ),
+                        }
+                    except ProviderProfile.DoesNotExist:
+                        row["provider_profile"] = None
+                serialized_users.append(row)
+            except Exception as row_err:
+                logger.warning(
+                    "support_users_list: skipped user pk=%s: %s",
+                    getattr(u, "pk", None),
+                    row_err,
+                    exc_info=True,
+                )
+                continue
 
         return Response({
             'success': True,

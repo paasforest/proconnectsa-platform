@@ -130,6 +130,7 @@ urlpatterns = [
     path('support/users/<str:user_id>/update/', admin_views.support_user_update, name='support_user_update'),
     path('support/users/<str:user_id>/provider-profile/', admin_views.support_user_provider_profile, name='support_user_provider_profile'),
     path('support/users/<str:user_id>/verify-provider/', admin_views.verify_provider, name='verify_provider'),
+    path('admin/providers/', admin_views.admin_providers_directory, name='admin-providers-directory'),
     path('admin/monitoring/dashboard/', admin_monitoring.admin_monitoring_dashboard, name='admin-monitoring-dashboard'),
     path('admin/monitoring/activity/', admin_monitoring.recent_activity_feed, name='admin-activity-feed'),
     path('admin/monitoring/problems/', admin_monitoring.problem_detection, name='admin-problem-detection'),
