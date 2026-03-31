@@ -16,7 +16,18 @@ from .serializers import UserSerializer
 
 logger = logging.getLogger(__name__)
 
-@api_view(['GET'])
+
+def _json_safe_user_row(data: dict) -> dict:
+    """Plain dict + strip NaN/inf floats (breaks JSON encoding with standard renderer)."""
+    row = dict(data)
+    for key in ("latitude", "longitude"):
+        v = row.get(key)
+        if isinstance(v, float) and (math.isnan(v) or math.isinf(v)):
+            row[key] = None
+    return row
+
+
+@api_view(["GET"])
 @permission_classes([IsAuthenticated])
 def support_users_list(request):
     """
