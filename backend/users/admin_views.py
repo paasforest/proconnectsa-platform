@@ -8,6 +8,7 @@ from rest_framework import status
 from django.shortcuts import get_object_or_404
 from django.db.models import Q
 import logging
+import math
 
 from .models import User, ProviderProfile
 from .service_category_utils import enforce_security_subservice_rule, normalize_service_category_slugs
@@ -38,7 +39,11 @@ def support_users_list(request):
         
         # Apply filters
         if user_type:
-            users = users.filter(user_type=user_type)
+            # Public UI and legacy data use both values
+            if user_type == 'provider':
+                users = users.filter(user_type__in=['provider', 'service_provider'])
+            else:
+                users = users.filter(user_type=user_type)
         
         if is_active is not None:
             users = users.filter(is_active=is_active.lower() == 'true')
@@ -51,37 +56,36 @@ def support_users_list(request):
                 Q(phone__icontains=search)
             )
         
-        # Providers: include basic provider profile fields for admin UI
         users = users.select_related('provider_profile')
+        total_count = users.count()
 
-        serializer = UserSerializer(users, many=True)
-        serialized = serializer.data
-
-        # Add provider profile fields inline (without breaking existing clients)
-        for i, u in enumerate(users):
-            try:
-                if getattr(u, 'user_type', None) == 'provider' and hasattr(u, 'provider_profile'):
+        # One row at a time: avoids DRF ReturnList/ReturnDict index bugs; easy to extend safely.
+        serialized_users = []
+        for u in users:
+            row = _json_safe_user_row(UserSerializer(u).data)
+            if u.user_type in ('provider', 'service_provider'):
+                try:
                     p = u.provider_profile
-                    serialized[i]['provider_profile'] = {
+                    row['provider_profile'] = {
                         'business_name': getattr(p, 'business_name', None),
                         'verification_status': getattr(p, 'verification_status', None),
                         'subscription_tier': getattr(p, 'subscription_tier', None),
                         'credit_balance': str(getattr(p, 'credit_balance', '0')),
                         'receives_lead_notifications': getattr(p, 'receives_lead_notifications', True),
-                        'notification_methods': getattr(p, 'notification_methods', []) or [],
+                        'notification_methods': list(getattr(p, 'notification_methods', []) or []),
                     }
-            except Exception:
-                # Never let profile issues break the list endpoint
-                pass
-        
+                except ProviderProfile.DoesNotExist:
+                    row['provider_profile'] = None
+            serialized_users.append(row)
+
         return Response({
             'success': True,
-            'users': serialized,
-            'count': users.count()
+            'users': serialized_users,
+            'count': total_count,
         })
         
     except Exception as e:
-        logger.error(f"Failed to fetch users list: {str(e)}")
+        logger.exception("Failed to fetch users list: %s", e)
         return Response(
             {'error': 'Failed to fetch users list'}, 
             status=status.HTTP_500_INTERNAL_SERVER_ERROR
