@@ -17,7 +17,8 @@ dist/
 downloads/
 eggs/
 .eggs/
-lib/
+# Only ignore a top-level lib/ (Python build); do not ignore frontend src/lib/
+/lib/
 lib64/
 parts/
 sdist/
