@@ -19,6 +19,28 @@ export interface ResourceGuide {
     answer: string
   }[] // minimum 5 FAQs per page
   relatedSlugs: string[] // 3–4 slugs of related resource pages
+  /** Overrides default H1 "{service} Cost in {city} — 2026 Pricing Guide" */
+  displayTitle?: string
+  /** Shown directly after the intro paragraph (conversion block) */
+  introConversion?: {
+    beforeLink: string
+    linkText: string
+    linkHref: string
+    afterLink: string
+  }
+  /** Custom H2 + lead paragraph placed immediately before the pricing table (featured snippet) */
+  featuredCostSnippet?: {
+    heading: string
+    leadParagraph: string
+  }
+  /** Primary hero CTA label (default: "Get Free {service} Quotes in {city} →") */
+  heroCtaLabel?: string
+  /** Footer CTA label (default: "Get Free Quotes Now →") */
+  footerCtaLabel?: string
+  /** First-occurrence inline internal links in guide body copy (document order) */
+  enableGuideInlineLinks?: boolean
+  /** Phrase order = match priority; first occurrence of each phrase only (when enabled) */
+  inlineLinkTargets?: { phrase: string; href: string }[]
 }
 
 export const resourceGuides: ResourceGuide[] = [
@@ -430,11 +452,33 @@ export const resourceGuides: ResourceGuide[] = [
     city: "South Africa",
     province: "National",
     ctaLink: "/services/solar-installation",
-    metaTitle: "Solar Installation Cost in South Africa | 2026 Pricing Guide | ProConnectSA",
+    metaTitle: "Solar Panel Installation Cost South Africa (2026 Prices + Quotes) | ProConnectSA",
+    displayTitle: "Solar Panel Installation Cost South Africa (2026 Prices + Quotes)",
     metaDescription:
       "Solar installation in South Africa costs about R45k–R180k+ in 2026. Compare quotes from verified installers — free, no obligation. See real prices.",
     intro:
       "Solar prices in South Africa depend mainly on system size, battery capacity, and inverter brand. This 2026 guide outlines realistic installed price ranges so you can compare quotes and plan your budget before you commit.",
+    introConversion: {
+      beforeLink: "💡 Want exact pricing for your home? ",
+      linkText: "Get up to 3 free quotes",
+      linkHref:
+        "https://www.proconnectsa.co.za/services/solar-installation?utm_source=guide&utm_medium=inline_cta&utm_campaign=solar_cost_guide",
+      afterLink: " from verified solar installers in your area — free and with no obligation.",
+    },
+    featuredCostSnippet: {
+      heading: "How much does solar installation cost in South Africa?",
+      leadParagraph:
+        "The cost of solar installation in South Africa ranges from R45,000 to R260,000+ depending on system size, battery capacity, and components.",
+    },
+    heroCtaLabel: "Get 3 Free Solar Quotes in 24 Hours",
+    footerCtaLabel: "Get 3 Free Solar Quotes in 24 Hours",
+    enableGuideInlineLinks: true,
+    inlineLinkTargets: [
+      { phrase: "solar installers", href: "/services/solar-installation" },
+      { phrase: "electricians", href: "/services/electrical" },
+      { phrase: "Cape Town", href: "/cape-town/solar-installation" },
+      { phrase: "Johannesburg", href: "/johannesburg/solar-installation" },
+    ],
     lastUpdated: "March 2026",
     pricing: [
       { label: "Small backup (3–5kW inverter, limited battery)", range: "R45,000 – R85,000" },
@@ -447,7 +491,7 @@ export const resourceGuides: ResourceGuide[] = [
       "System size (kW) and your household’s daily usage",
       "Battery capacity (kWh) and desired runtime during load-shedding",
       "Inverter brand/type (hybrid vs off-grid) and warranty",
-      "Roof type/angle and installation complexity (mounting + cabling runs)",
+      "Roof type/angle and installation complexity (mounting + cabling runs); regional labour and installer rates vary between metros such as Cape Town and Johannesburg.",
       "Compliance, COC, and any DB board upgrades required",
       "Monitoring, surge protection, and optional add-ons (EV charger, geyser control)",
     ],
@@ -455,7 +499,7 @@ export const resourceGuides: ResourceGuide[] = [
       "Compare 2–3 quotes with the same target spec (kW, kWh, panel count, warranties).",
       "Ask for performance assumptions (estimated kWh/day) and payback expectations.",
       "Prioritise reputable brands and clear warranty/support terms over the cheapest package.",
-      "Confirm compliance paperwork and whether any electrical upgrades are included.",
+      "Confirm compliance paperwork and whether licensed electricians are needed for DB board upgrades tied to solar.",
     ],
     faqs: [
       {
@@ -489,6 +533,451 @@ export const resourceGuides: ResourceGuide[] = [
       "electrician-cost-johannesburg",
       "roofing-cost-south-africa",
       "renovation-cost-cape-town",
+    ],
+  },
+  {
+    slug: "plumbing-cost-south-africa",
+    service: "Plumbing",
+    city: "South Africa",
+    province: "National",
+    ctaLink: "/services/plumbing",
+    metaTitle: "Plumber Cost South Africa (2026 Prices + Quotes) | ProConnectSA",
+    displayTitle: "Plumber Cost South Africa (2026 Prices + Quotes)",
+    metaDescription:
+      "Plumber costs in South Africa range from R500 to R5,000+ for typical jobs in 2026. Compare quotes from verified plumbers — free, no obligation.",
+    intro:
+      "Plumbing costs in South Africa vary with job type, parts, and urgency—from small repairs to burst pipes and geyser work. This 2026 guide outlines realistic price ranges so you can budget and compare plumbers across major metros.",
+    introConversion: {
+      beforeLink: "💡 Want exact pricing for your home? ",
+      linkText: "Get up to 3 free quotes from verified plumbers",
+      linkHref:
+        "https://www.proconnectsa.co.za/services/plumbing?utm_source=guide&utm_medium=inline_cta&utm_campaign=plumbing_cost_guide",
+      afterLink: " in your area — free and with no obligation.",
+    },
+    featuredCostSnippet: {
+      heading: "How much does a plumber cost in South Africa?",
+      leadParagraph:
+        "The cost of hiring a plumber in South Africa ranges from R500 to R5,000+ depending on the job complexity, parts required, and your location.",
+    },
+    heroCtaLabel: "Get 3 Free Plumbing Quotes in 24 Hours",
+    footerCtaLabel: "Get 3 Free Plumbing Quotes in 24 Hours",
+    enableGuideInlineLinks: true,
+    inlineLinkTargets: [
+      { phrase: "plumbers", href: "/services/plumbing" },
+      { phrase: "electricians", href: "/services/electrical" },
+      { phrase: "Johannesburg", href: "/johannesburg/plumbing" },
+      { phrase: "Cape Town", href: "/cape-town/plumbing" },
+    ],
+    lastUpdated: "March 2026",
+    pricing: [
+      { label: "Standard call-out fee", range: "R350 – R950" },
+      { label: "Hourly labour (typical)", range: "R450 – R1,050/hr" },
+      { label: "Minor repairs (leaks, taps, toilets)", range: "R500 – R2,500" },
+      { label: "Drain/blockage and jetting", range: "R850 – R2,800" },
+      { label: "Geyser repair/replace (labour + parts)", range: "R2,500 – R8,000+" },
+    ],
+    priceFactors: [
+      "Job complexity and whether parts are supplied or you buy them separately",
+      "Urgency (after-hours and weekend rates are higher)",
+      "Pipe accessibility and whether tiling or wall work is needed",
+      "Water damage and whether multiple visits are required",
+      "Compliance with local regulations and certificates required",
+      "Regional labour differences—compare quotes from plumbers in Cape Town versus Johannesburg",
+    ],
+    tips: [
+      "Get 2–3 itemised quotes with the same scope before you approve work.",
+      "Ask whether the call-out fee is offset if you proceed with the job.",
+      "Confirm guarantees on labour and parts, and what happens if the issue returns.",
+      "For electrical work tied to geysers, use licensed electricians where required.",
+    ],
+    faqs: [
+      {
+        question: "How much does a plumber charge per hour in South Africa?",
+        answer:
+          "Most plumbers charge roughly R450–R1,050 per hour in 2026, plus call-out and parts. Emergency or after-hours rates are often higher.",
+      },
+      {
+        question: "What is a typical plumbing call-out fee?",
+        answer:
+          "Call-out fees commonly range from R350–R950 depending on travel distance and time of day. Some plumbers deduct part of the call-out if you agree to the quoted work.",
+      },
+      {
+        question: "Why do plumbing quotes differ so much?",
+        answer:
+          "Quotes differ because of scope, part brands, warranty terms, and whether the job is fixed-price or time-and-materials. Always compare what is included line by line.",
+      },
+      {
+        question: "Should I fix a small leak immediately?",
+        answer:
+          "Yes. Small leaks can escalate into mould, ceiling damage, and higher bills. Early fixes are usually cheaper than emergency call-outs.",
+      },
+      {
+        question: "How do I choose a reliable plumber?",
+        answer:
+          "Compare quotes, check reviews for similar jobs, confirm availability, and ask for proof of compliance or guarantees where relevant.",
+      },
+    ],
+    relatedSlugs: [
+      "plumber-cost-cape-town",
+      "plumber-cost-johannesburg",
+      "solar-installation-cost-south-africa",
+      "electrician-cost-johannesburg",
+    ],
+  },
+  {
+    slug: "electrician-cost-south-africa",
+    service: "Electrical Installation",
+    city: "South Africa",
+    province: "National",
+    ctaLink: "/services/electrical",
+    metaTitle: "Electrician Cost South Africa (2026 Prices + Quotes) | ProConnectSA",
+    displayTitle: "Electrician Cost South Africa (2026 Prices + Quotes)",
+    metaDescription:
+      "Electrician costs in South Africa range from R600 to R8,000+ for typical jobs in 2026. Compare quotes from verified electricians — free, no obligation.",
+    intro:
+      "Electrician costs in South Africa depend on scope, materials, and whether a Certificate of Compliance (COC) is required. This 2026 guide compares electricians across common jobs and helps you budget for compliant work in major metros.",
+    introConversion: {
+      beforeLink: "💡 Want exact pricing for your home? ",
+      linkText: "Get up to 3 free quotes from verified electricians",
+      linkHref:
+        "https://www.proconnectsa.co.za/services/electrical?utm_source=guide&utm_medium=inline_cta&utm_campaign=electrician_cost_guide",
+      afterLink: " in your area — free and with no obligation.",
+    },
+    featuredCostSnippet: {
+      heading: "How much does an electrician cost in South Africa?",
+      leadParagraph:
+        "The cost of hiring an electrician in South Africa ranges from R600 to R8,000+ depending on the work required, materials, and whether a Certificate of Compliance is needed.",
+    },
+    heroCtaLabel: "Get 3 Free Electrician Quotes in 24 Hours",
+    footerCtaLabel: "Get 3 Free Electrician Quotes in 24 Hours",
+    enableGuideInlineLinks: true,
+    inlineLinkTargets: [
+      { phrase: "electricians", href: "/services/electrical" },
+      { phrase: "solar installers", href: "/services/solar-installation" },
+      { phrase: "Johannesburg", href: "/johannesburg/electrical" },
+      { phrase: "Cape Town", href: "/cape-town/electrical" },
+    ],
+    lastUpdated: "March 2026",
+    pricing: [
+      { label: "Call-out fee (weekday)", range: "R350 – R1,000" },
+      { label: "Hourly rate (standard)", range: "R450 – R1,050/hr" },
+      { label: "Minor repairs (plugs, lights, circuits)", range: "R600 – R3,500" },
+      { label: "DB board work / COC-related jobs", range: "R2,500 – R8,000+" },
+      { label: "Larger installations (scope-dependent)", range: "R8,000 – R45,000+" },
+    ],
+    priceFactors: [
+      "Type of work: fault-finding vs new circuits vs DB board upgrades",
+      "Compliance, testing, and whether a COC is required",
+      "Materials (breakers, cabling, fittings) and brand choices",
+      "Access and complexity (ceiling work, chasing, height)",
+      "After-hours or emergency call-outs",
+      "Regional labour rates—compare electricians in Cape Town versus Johannesburg",
+    ],
+    tips: [
+      "Ask for an itemised quote that separates labour, materials, and call-out fees.",
+      "When adding backup power, coordinate solar installers and your electrician on inverter and DB compatibility.",
+      "Confirm warranty on workmanship and parts before you approve the job.",
+      "Avoid cutting corners on safety—cheap quotes that skip testing can cost more later.",
+    ],
+    faqs: [
+      {
+        question: "How much do electricians charge per hour in South Africa?",
+        answer:
+          "Typical hourly rates are around R450–R1,050 in 2026, depending on experience and job type. Fault-finding and DB work can take longer than simple installations.",
+      },
+      {
+        question: "What is a COC and when do I need one?",
+        answer:
+          "A Certificate of Compliance confirms electrical work meets safety standards. It is often required for property sales and certain alterations—ask your electrician whether your job needs one.",
+      },
+      {
+        question: "Why does fault-finding cost more than installing a plug?",
+        answer:
+          "Fault-finding can require time to test circuits and isolate the issue before repairs begin, so labour hours may be higher even if the fix looks small.",
+      },
+      {
+        question: "Should I hire the cheapest electrician?",
+        answer:
+          "Not always. Prioritise clear scope, qualifications, and proper testing—electrical mistakes can be dangerous and expensive to fix.",
+      },
+      {
+        question: "How do I compare electrician quotes fairly?",
+        answer:
+          "Compare the same scope, materials, warranties, and whether compliance testing is included—not only the headline total.",
+      },
+    ],
+    relatedSlugs: [
+      "electrician-cost-cape-town",
+      "electrician-cost-johannesburg",
+      "solar-installation-cost-south-africa",
+      "plumbing-cost-south-africa",
+    ],
+  },
+  {
+    slug: "house-painting-cost-south-africa",
+    service: "House Painting",
+    city: "South Africa",
+    province: "National",
+    ctaLink: "/services/painting",
+    metaTitle: "House Painting Cost South Africa (2026 Prices + Quotes) | ProConnectSA",
+    displayTitle: "House Painting Cost South Africa (2026 Prices + Quotes)",
+    metaDescription:
+      "House painting in South Africa costs R15–R45/m² or more in 2026. Compare quotes from verified painters — free, no obligation.",
+    intro:
+      "House painting prices depend on preparation, paint quality, and access. This 2026 guide compares painters in major metros and helps you align timelines with builders when painting is part of a renovation.",
+    introConversion: {
+      beforeLink: "💡 Want exact pricing for your home? ",
+      linkText: "Get up to 3 free quotes from verified painters",
+      linkHref:
+        "https://www.proconnectsa.co.za/services/painting?utm_source=guide&utm_medium=inline_cta&utm_campaign=painting_cost_guide",
+      afterLink: " in your area — free and with no obligation.",
+    },
+    featuredCostSnippet: {
+      heading: "How much does house painting cost in South Africa?",
+      leadParagraph:
+        "House painting in South Africa costs between R15 per square metre and R45 per square metre depending on paint quality, surface preparation, and the size of the job.",
+    },
+    heroCtaLabel: "Get 3 Free Painting Quotes in 24 Hours",
+    footerCtaLabel: "Get 3 Free Painting Quotes in 24 Hours",
+    enableGuideInlineLinks: true,
+    inlineLinkTargets: [
+      { phrase: "painters", href: "/services/painting" },
+      { phrase: "builders", href: "/services/renovations" },
+      { phrase: "Johannesburg", href: "/johannesburg/painting" },
+      { phrase: "Cape Town", href: "/cape-town/painting" },
+    ],
+    lastUpdated: "March 2026",
+    pricing: [
+      { label: "Interior painting (per m²)", range: "R15 – R45/m²" },
+      { label: "Exterior painting (per m²)", range: "R25 – R65/m²" },
+      { label: "Single room (standard prep)", range: "R2,500 – R9,000" },
+      { label: "Ceilings (per m²)", range: "R35 – R90/m²" },
+      { label: "Full home interior (scope-dependent)", range: "R25,000 – R120,000+" },
+    ],
+    priceFactors: [
+      "Surface preparation (filling, sanding, damp treatment)",
+      "Paint system quality (premium vs contractor grade)",
+      "Height access, scaffolding, and safety requirements",
+      "Number of coats and colour changes",
+      "Weather windows for exterior work",
+      "Regional labour rates—compare painters in Cape Town versus Johannesburg",
+    ],
+    tips: [
+      "Get 2–3 quotes with the same m² count and paint specification.",
+      "Ask what preparation is included before the first coat goes on.",
+      "Confirm who supplies paint and how touch-ups are handled after completion.",
+      "If walls are being moved or plastered, sequence the work with builders before final coats.",
+    ],
+    faqs: [
+      {
+        question: "How much does interior painting cost per square metre?",
+        answer:
+          "In 2026, many interior jobs fall between about R15–R45/m² depending on prep, paint quality, and access. Complex surfaces or high ceilings can cost more.",
+      },
+      {
+        question: "Is labour or paint the bigger cost?",
+        answer:
+          "It depends on the specification. Premium paint and heavy preparation can rival labour on some jobs—compare quotes with a clear materials list.",
+      },
+      {
+        question: "How long does house painting take?",
+        answer:
+          "A few rooms may take a couple of days; full interiors can take a week or more depending on drying time, prep, and occupancy.",
+      },
+      {
+        question: "Do painters charge extra for high walls?",
+        answer:
+          "Often yes. Scaffolding, ladders, and slower production on high areas usually add cost compared with standard room heights.",
+      },
+      {
+        question: "How do I choose a reliable painter?",
+        answer:
+          "Compare references, review photos of similar work, and confirm warranty terms and payment milestones in writing.",
+      },
+    ],
+    relatedSlugs: [
+      "painting-cost-cape-town",
+      "painting-cost-durban",
+      "painting-cost-pretoria",
+      "renovation-cost-johannesburg",
+    ],
+  },
+  {
+    slug: "pest-control-cost-south-africa",
+    service: "Pest Control",
+    city: "South Africa",
+    province: "National",
+    ctaLink: "/services/pest-control",
+    metaTitle: "Pest Control Cost South Africa (2026 Prices + Quotes) | ProConnectSA",
+    displayTitle: "Pest Control Cost South Africa (2026 Prices + Quotes)",
+    metaDescription:
+      "Pest control in South Africa costs R500–R3,500+ per treatment in 2026. Compare quotes from verified specialists — free, no obligation.",
+    intro:
+      "Pest control pricing depends on pest type, property size, and whether follow-up visits are needed. This 2026 guide outlines typical treatment ranges and how to compare pest control with cleaning services when you want a full home refresh.",
+    introConversion: {
+      beforeLink: "💡 Want exact pricing for your home? ",
+      linkText: "Get up to 3 free quotes from verified pest control specialists",
+      linkHref:
+        "https://www.proconnectsa.co.za/services/pest-control?utm_source=guide&utm_medium=inline_cta&utm_campaign=pest_control_cost_guide",
+      afterLink: " in your area — free and with no obligation.",
+    },
+    featuredCostSnippet: {
+      heading: "How much does pest control cost in South Africa?",
+      leadParagraph:
+        "Pest control in South Africa costs between R500 and R3,500+ depending on the type of pest, property size, and number of treatments required.",
+    },
+    heroCtaLabel: "Get 3 Free Pest Control Quotes in 24 Hours",
+    footerCtaLabel: "Get 3 Free Pest Control Quotes in 24 Hours",
+    enableGuideInlineLinks: true,
+    inlineLinkTargets: [
+      { phrase: "pest control", href: "/services/pest-control" },
+      { phrase: "cleaning services", href: "/services/cleaning" },
+      { phrase: "Johannesburg", href: "/johannesburg/pest-control" },
+      { phrase: "Cape Town", href: "/cape-town/pest-control" },
+    ],
+    lastUpdated: "March 2026",
+    pricing: [
+      { label: "General insect treatment (per visit)", range: "R500 – R2,000" },
+      { label: "Rodent treatment (baiting + follow-up)", range: "R1,200 – R3,500" },
+      { label: "Termite inspection", range: "R450 – R1,500" },
+      { label: "Termite treatment (scope-dependent)", range: "R3,000 – R18,000+" },
+      { label: "Commercial / large premises (estimate)", range: "R2,500 – R12,000+" },
+    ],
+    priceFactors: [
+      "Pest type and severity (ants vs termites vs rodents)",
+      "Property size and number of treatment zones",
+      "Number of follow-up visits included in the plan",
+      "Whether proofing or exclusion work is required",
+      "Indoor vs outdoor treatment areas",
+      "Regional pricing—compare providers in Cape Town versus Johannesburg",
+    ],
+    tips: [
+      "Describe signs clearly (droppings, damage, entry points) when requesting quotes.",
+      "Ask what follow-up visits cover and whether guarantees apply if pests return.",
+      "Combine pest control with cleaning services after treatment if you need a deep reset.",
+      "Confirm whether products are safe for pets and children where relevant.",
+    ],
+    faqs: [
+      {
+        question: "How much does a pest control visit cost?",
+        answer:
+          "Many residential visits fall between R500–R3,500+ in 2026 depending on pest type, property size, and whether follow-ups are included.",
+      },
+      {
+        question: "Do I need more than one treatment?",
+        answer:
+          "Often yes for rodents and some insects. Ask your provider what the plan covers and what happens if activity continues.",
+      },
+      {
+        question: "Are termite treatments more expensive?",
+        answer:
+          "Termite work can be higher because it may require inspections, targeted treatment, and sometimes ongoing monitoring depending on risk.",
+      },
+      {
+        question: "Is pest control safe for pets?",
+        answer:
+          "Many treatments can be pet-safe when applied correctly. Tell your provider about pets and follow any preparation advice they give.",
+      },
+      {
+        question: "How do I choose a pest control provider?",
+        answer:
+          "Compare scope, guarantees, follow-ups, and reviews for similar pest issues—not only the lowest headline price.",
+      },
+    ],
+    relatedSlugs: [
+      "cleaning-cost-cape-town",
+      "cleaning-cost-johannesburg",
+      "house-painting-cost-south-africa",
+      "electrician-cost-south-africa",
+    ],
+  },
+  {
+    slug: "cleaning-services-cost-south-africa",
+    service: "Cleaning Services",
+    city: "South Africa",
+    province: "National",
+    ctaLink: "/services/cleaning",
+    metaTitle: "Cleaning Services Cost South Africa (2026 Prices + Quotes) | ProConnectSA",
+    displayTitle: "Cleaning Services Cost South Africa (2026 Prices + Quotes)",
+    metaDescription:
+      "Cleaning services in South Africa cost R200–R2,500+ per session in 2026. Compare quotes from verified cleaners — free, no obligation.",
+    intro:
+      "Cleaning service rates in South Africa vary with home size, frequency, and deep-clean vs standard scope. This guide compares cleaning services across typical 2026 pricing and explains when to add pest control for a full hygiene reset. Compare quotes in Cape Town, Johannesburg, and beyond.",
+    introConversion: {
+      beforeLink: "💡 Want exact pricing for your home? ",
+      linkText: "Get up to 3 free quotes from verified cleaning services",
+      linkHref:
+        "https://www.proconnectsa.co.za/services/cleaning?utm_source=guide&utm_medium=inline_cta&utm_campaign=cleaning_cost_guide",
+      afterLink: " in your area — free and with no obligation.",
+    },
+    featuredCostSnippet: {
+      heading: "How much do cleaning services cost in South Africa?",
+      leadParagraph:
+        "Cleaning services in South Africa cost between R200 and R2,500+ per session depending on property size, type of clean, and frequency of service.",
+    },
+    heroCtaLabel: "Get 3 Free Cleaning Quotes in 24 Hours",
+    footerCtaLabel: "Get 3 Free Cleaning Quotes in 24 Hours",
+    enableGuideInlineLinks: true,
+    inlineLinkTargets: [
+      { phrase: "cleaning services", href: "/services/cleaning" },
+      { phrase: "pest control", href: "/services/pest-control" },
+      { phrase: "Johannesburg", href: "/johannesburg/cleaning" },
+      { phrase: "Cape Town", href: "/cape-town/cleaning" },
+    ],
+    lastUpdated: "March 2026",
+    pricing: [
+      { label: "Hourly rate (1 cleaner)", range: "R80 – R220/hr" },
+      { label: "Apartment (1–2 bed) standard clean", range: "R600 – R1,500" },
+      { label: "House (3–4 bed) standard clean", range: "R1,200 – R2,500" },
+      { label: "Deep clean (detail work)", range: "R1,500 – R4,000" },
+      { label: "Move-in / move-out cleaning", range: "R1,800 – R6,000+" },
+    ],
+    priceFactors: [
+      "Property size and number of bathrooms",
+      "Standard vs deep clean vs move-in/move-out scope",
+      "Frequency (weekly cleans often cost less per visit)",
+      "Extras (ovens, windows, fridges, balconies)",
+      "Travel and parking in dense metros",
+      "Regional rates—compare cleaning services in Cape Town versus Johannesburg",
+    ],
+    tips: [
+      "Share photos and a task list so quotes reflect the same scope.",
+      "Book recurring cleans if you want lower per-visit pricing.",
+      "Add pest control first if you are dealing with insects or rodents—then schedule a deep clean if needed.",
+      "Confirm whether supplies are included or supplied by you.",
+    ],
+    faqs: [
+      {
+        question: "How much do cleaning services cost per hour?",
+        answer:
+          "Hourly rates often fall between R80–R220 per cleaner in 2026 depending on city, frequency, and whether it is a company or independent cleaner.",
+      },
+      {
+        question: "Is a deep clean worth the extra cost?",
+        answer:
+          "Deep cleans can be worthwhile for move-ins, post-renovation dust, or seasonal resets—compare what is included versus a standard clean.",
+      },
+      {
+        question: "Do cleaners bring their own supplies?",
+        answer:
+          "Some do and some do not. Confirm upfront because it affects the quote and the results you can expect.",
+      },
+      {
+        question: "How do I compare cleaning quotes fairly?",
+        answer:
+          "Compare the same room list, hours estimate, products, and guarantees—not only the cheapest total.",
+      },
+      {
+        question: "How often should I schedule cleaning?",
+        answer:
+          "Weekly or fortnightly is common for busy households; monthly or ad hoc works for smaller homes or tight budgets.",
+      },
+    ],
+    relatedSlugs: [
+      "cleaning-cost-cape-town",
+      "cleaning-cost-johannesburg",
+      "pest-control-cost-south-africa",
+      "plumbing-cost-south-africa",
     ],
   },
   {

@@ -4,7 +4,63 @@ import type { ResourceGuide } from '@/lib/resourceGuides'
 import { resourceGuides } from '@/lib/resourceGuides'
 import Link from 'next/link'
 import Script from 'next/script'
+import type { ReactNode } from 'react'
 import { useMemo, useState } from 'react'
+
+type InlineLinkRule = { key: string; pattern: RegExp; href: string }
+
+function phraseToPattern(phrase: string): RegExp {
+  const escaped = phrase.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+  return new RegExp(`\\b(${escaped})\\b`, 'i')
+}
+
+function linkifyFirstOccurrences(
+  text: string,
+  state: { used: Set<string> },
+  rules: InlineLinkRule[],
+): ReactNode {
+  if (!text) return null
+  if (!rules.length) return text
+  let best: { key: string; index: number; match: RegExpMatchArray; href: string } | null = null
+  for (const { key, pattern, href } of rules) {
+    if (state.used.has(key)) continue
+    const m = text.match(pattern)
+    if (m && m.index !== undefined) {
+      if (!best || m.index < best.index) {
+        best = { key, index: m.index, match: m, href }
+      }
+    }
+  }
+  if (!best) return text
+  state.used.add(best.key)
+  const before = text.slice(0, best.index)
+  const matched = best.match[0]!
+  const after = text.slice(best.index + matched.length)
+  return (
+    <>
+      {before}
+      <Link href={best.href} className="text-amber-700 hover:text-amber-800 hover:underline font-medium">
+        {matched}
+      </Link>
+      {linkifyFirstOccurrences(after, state, rules)}
+    </>
+  )
+}
+
+function GuideInlineText({
+  text,
+  state,
+  enabled,
+  rules,
+}: {
+  text: string
+  state: { used: Set<string> }
+  enabled: boolean
+  rules: InlineLinkRule[]
+}) {
+  if (!enabled || !rules.length) return <>{text}</>
+  return <>{linkifyFirstOccurrences(text, state, rules)}</>
+}
 
 function truncate(text: string, maxChars: number) {
   if (text.length <= maxChars) return text
@@ -33,6 +89,19 @@ function Chevron({ open }: { open: boolean }) {
 
 export function ResourcePageTemplate({ guide }: { guide: ResourceGuide }) {
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(0)
+
+  const inlineLinkState = useMemo(() => ({ used: new Set<string>() }), [guide.slug])
+
+  const inlineLinkRules = useMemo((): InlineLinkRule[] => {
+    if (!guide.inlineLinkTargets?.length) return []
+    return guide.inlineLinkTargets.map(({ phrase, href }) => ({
+      key: phrase.toLowerCase(),
+      pattern: phraseToPattern(phrase),
+      href,
+    }))
+  }, [guide.inlineLinkTargets])
+
+  const inlineLinksEnabled = Boolean(guide.enableGuideInlineLinks && inlineLinkRules.length > 0)
 
   const faqSchema = useMemo(
     () => ({
@@ -74,7 +143,12 @@ export function ResourcePageTemplate({ guide }: { guide: ResourceGuide }) {
     [guide.relatedSlugs],
   )
 
-  const pageTitle = `${guide.service} Cost in ${guide.city} — 2026 Pricing Guide`
+  const pageTitle =
+    guide.displayTitle ?? `${guide.service} Cost in ${guide.city} — 2026 Pricing Guide`
+
+  const heroCta =
+    guide.heroCtaLabel ?? `Get Free ${guide.service} Quotes in ${guide.city}`
+  const footerCta = guide.footerCtaLabel ?? 'Get Free Quotes Now'
 
   return (
     <main className="flex-1">
@@ -126,14 +200,40 @@ export function ResourcePageTemplate({ guide }: { guide: ResourceGuide }) {
               </span>
             </div>
 
-            <p className="text-gray-700 text-base md:text-lg mb-6 max-w-3xl">{guide.intro}</p>
+            <p className="text-gray-700 text-base md:text-lg mb-6 max-w-3xl">
+              <GuideInlineText
+                text={guide.intro}
+                state={inlineLinkState}
+                enabled={inlineLinksEnabled}
+                rules={inlineLinkRules}
+              />
+            </p>
+
+            {guide.introConversion ? (
+              <p className="text-gray-700 text-base md:text-lg mb-6 max-w-3xl">
+                {guide.introConversion.beforeLink}
+                <a
+                  href={guide.introConversion.linkHref}
+                  className="text-amber-700 hover:text-amber-800 hover:underline font-semibold"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  {guide.introConversion.linkText}
+                </a>
+                <GuideInlineText
+                  text={guide.introConversion.afterLink}
+                  state={inlineLinkState}
+                  enabled={inlineLinksEnabled}
+                />
+              </p>
+            ) : null}
 
             <div className="flex flex-wrap gap-3">
               <Link
                 href={guide.ctaLink}
                 className="inline-flex items-center justify-center rounded-full bg-amber-500 hover:bg-amber-600 text-gray-900 font-bold px-6 py-3 shadow-sm transition-colors"
               >
-                Get Free {guide.service} Quotes in {guide.city} →
+                {heroCta} →
               </Link>
             </div>
           </div>
@@ -145,8 +245,19 @@ export function ResourcePageTemplate({ guide }: { guide: ResourceGuide }) {
         <div className="container mx-auto px-4">
           <div className="mx-auto max-w-5xl">
             <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-4">
-              How Much Does {guide.service} Cost in {guide.city}?
+              {guide.featuredCostSnippet?.heading ?? `How Much Does ${guide.service} Cost in ${guide.city}?`}
             </h2>
+
+            {guide.featuredCostSnippet ? (
+              <p className="text-gray-700 text-base md:text-lg mb-6 max-w-3xl">
+                <GuideInlineText
+                  text={guide.featuredCostSnippet.leadParagraph}
+                  state={inlineLinkState}
+                  enabled={inlineLinksEnabled}
+                  rules={inlineLinkRules}
+                />
+              </p>
+            ) : null}
 
             <div className="overflow-x-auto rounded-2xl border border-gray-200 bg-white">
               <table className="min-w-[640px] w-full text-left">
@@ -196,7 +307,14 @@ export function ResourcePageTemplate({ guide }: { guide: ResourceGuide }) {
                   <span className="mt-0.5 inline-flex h-6 w-6 items-center justify-center rounded-full bg-amber-100 text-amber-800 font-bold">
                     ✓
                   </span>
-                  <span className="text-gray-800">{factor}</span>
+                  <span className="text-gray-800">
+                    <GuideInlineText
+                      text={factor}
+                      state={inlineLinkState}
+                      enabled={inlineLinksEnabled}
+                      rules={inlineLinkRules}
+                    />
+                  </span>
                 </li>
               ))}
             </ul>
@@ -221,7 +339,14 @@ export function ResourcePageTemplate({ guide }: { guide: ResourceGuide }) {
                         {idx + 1}
                       </div>
                     </div>
-                    <p className="text-gray-800">{tip}</p>
+                    <p className="text-gray-800">
+                      <GuideInlineText
+                        text={tip}
+                        state={inlineLinkState}
+                        enabled={inlineLinksEnabled}
+                        rules={inlineLinkRules}
+                      />
+                    </p>
                   </div>
                 </div>
               ))}
@@ -247,7 +372,14 @@ export function ResourcePageTemplate({ guide }: { guide: ResourceGuide }) {
                       aria-expanded={isOpen}
                       onClick={() => setOpenFaqIndex((current) => (current === idx ? null : idx))}
                     >
-                      <span className="font-semibold text-gray-900">{faq.question}</span>
+                      <span className="font-semibold text-gray-900">
+                        <GuideInlineText
+                          text={faq.question}
+                          state={inlineLinkState}
+                          enabled={inlineLinksEnabled}
+                          rules={inlineLinkRules}
+                        />
+                      </span>
                       <Chevron open={isOpen} />
                     </button>
                     <div
@@ -256,7 +388,14 @@ export function ResourcePageTemplate({ guide }: { guide: ResourceGuide }) {
                         isOpen ? 'max-h-40 opacity-100 pb-4' : 'max-h-0 opacity-0',
                       ].join(' ')}
                     >
-                      <p className="text-gray-600">{faq.answer}</p>
+                      <p className="text-gray-600">
+                        <GuideInlineText
+                          text={faq.answer}
+                          state={inlineLinkState}
+                          enabled={inlineLinksEnabled}
+                          rules={inlineLinkRules}
+                        />
+                      </p>
                     </div>
                   </div>
                 )
@@ -280,7 +419,7 @@ export function ResourcePageTemplate({ guide }: { guide: ResourceGuide }) {
               href={guide.ctaLink}
               className="inline-flex items-center justify-center rounded-full bg-amber-500 hover:bg-amber-600 text-gray-900 font-bold px-7 py-4 shadow-sm transition-colors"
             >
-              Get Free Quotes Now →
+              {footerCta} →
             </Link>
           </div>
         </div>
