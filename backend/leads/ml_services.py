@@ -1406,11 +1406,10 @@ class LeadAccessControlMLService:
                     "ml_confidence": 1.0
                 }
             
-            # Check if provider is verified and has active subscription
-            if not provider.verification_status == "verified":
+            if provider.verification_status in ("rejected", "suspended"):
                 return {
                     "can_access": False,
-                    "reason": "Provider not verified",
+                    "reason": "Provider account is not eligible for leads",
                     "remaining_leads": 0,
                     "additional_cost": 0,
                     "ml_confidence": 1.0
@@ -1431,10 +1430,10 @@ class LeadAccessControlMLService:
             # Use ML to predict if this lead is worth showing to this provider
             ml_confidence = self._predict_lead_worth(lead, provider)
             
-            logger.info(f"Access granted: verified provider can view lead preview (unlock costs 1 credit)")
+            logger.info(f"Access granted: provider can view lead preview (unlock costs 1 credit)")
             return {
                 "can_access": True,
-                "reason": f"Verified provider - can view lead preview",
+                "reason": "Provider can view lead preview",
                 "remaining_leads": 999,  # Unlimited viewing
                 "additional_cost": 1,  # 1 credit to unlock contact details
                 "ml_confidence": ml_confidence

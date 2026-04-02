@@ -23,8 +23,8 @@ def match_providers(lead):
     """
     Find top matching active providers for a given le
     Matching criteria (in order of priority):
-    1. Provider must have can_receive_leads == True
-       (verification_status == 'verified' + active subscription)
+    1. Provider signed up and active (not rejected/suspended); paid access via
+       active subscription or premium listing (same as before; verification optional)
     2. Provider's service_categories (JSON list of slugs) must include
        the lead's service_category slug
     3. Provider's service_areas (JSON list of area strings) must include
@@ -45,9 +45,12 @@ def match_providers(lead):
     city = lead.location_city.strip().lower() if lead.location_city else ''
     suburb = lead.location_suburb.strip().lower() if lead.location_suburb else ''
 
-    # Step 1: Get all verified provider profiles
+    # Step 1: Signed-up providers (pending or verified); exclude rejected/suspended only
     eligible_profiles = ProviderProfile.objects.filter(
-        verification_status='verified',
+        user__user_type='provider',
+        user__is_active=True,
+    ).exclude(
+        verification_status__in=('rejected', 'suspended'),
     ).select_related('user')
 
     # Step 2: Filter in Python for JSON field matching
@@ -110,19 +113,20 @@ def match_providers(lead):
     return providers
 
 
-def notify_providers(lead, providers):
+def notify_providers(lead, providers, skip_in_app=False):
     """
     Notify matched providers about a new lead.
     Sends email, in-app notification, and push notification (if enabled).
 
     - Sends individual emails (not BCC) so each provider gets a personal notification
-    - Records a Notification object for each provider
+    - Records a Notification object for each provider (unless skip_in_app=True)
     - Sends push notification if provider has FCM subscription
     - Failures are caught per-provider so one bad notification doesn't block others
 
     Args:
         lead: Lead instance
         providers: list of User instances (providers)
+        skip_in_app: if True, only email + push (e.g. when LeadAssignment already created in-app notif)
     """
     if not providers:
         logger.info(f"[LeadRouter] No providers to notify for lead {lead.id}")
@@ -133,7 +137,8 @@ def notify_providers(lead, providers):
     for provider in providers:
         try:
             _send_lead_email(lead, provider, lead_url)
-            _create_notification(lead, provider)
+            if not skip_in_app:
+                _create_notification(lead, provider)
             _send_push_notification(lead, provider)
             logger.info(
                 f"[LeadRouter] Notified provider {provider.email} "
@@ -273,36 +278,74 @@ def _send_push_notification(lead, provider):
 
 def route_lead(lead):
     """
-    Main entry point: match providers and notify them.
-    Now includes quality gate to filter out spam/low-quality leads.
-    Called from signal. Fully exception-safe.
+    Full pipeline: quality gate, ML assignments, then email/push/in-app notifications.
+    Idempotent per lead via providers_routed_at (set after first successful run).
 
-    Args:
-        lead: Lead instance (should be status='verified')
+    Called from signal on verified leads. Fully exception-safe.
     """
     try:
-        # Quality gate: Check if lead passes quality thresholds
+        from django.utils import timezone
+        from backend.leads.models import Lead, LeadAssignment
+
+        lead_id = lead.id
+        lead_row = Lead.objects.filter(pk=lead_id).first()
+        if not lead_row:
+            return
+        if lead_row.providers_routed_at:
+            logger.info(f"[LeadRouter] Lead {lead_id} already routed — skipping")
+            return
+
+        if lead_row.status == 'assigned':
+            assignments = list(
+                LeadAssignment.objects.filter(lead_id=lead_id).select_related('provider')
+            )
+            if assignments:
+                notify_providers(lead_row, [a.provider for a in assignments], skip_in_app=True)
+            Lead.objects.filter(pk=lead_id).update(providers_routed_at=timezone.now())
+            return
+
+        if lead_row.status != 'verified':
+            return
+
         passed, reason = passes_quality_gate(lead)
         if not passed:
             logger.warning(
                 f"[LeadRouter] Lead {lead.id} blocked by quality gate: {reason}"
             )
-            # Flag it for admin review instead of routing
             _flag_for_review(lead, reason)
             return
 
-        # All quality checks passed - route to providers
-        providers = match_providers(lead)
-        if providers:
-            notify_providers(lead, providers)
+        from backend.leads.services import LeadAssignmentService
+
+        assignment_service = LeadAssignmentService()
+        assignments = assignment_service.assign_lead_to_providers(
+            str(lead_id),
+            skip_persistent_assignment_notifications=True,
+        )
+
+        lead_refresh = Lead.objects.filter(pk=lead_id).first()
+        if not lead_refresh:
+            return
+        if lead_refresh.providers_routed_at:
+            return
+
+        if assignments:
+            providers = [a.provider for a in assignments]
+            notify_providers(lead_refresh, providers, skip_in_app=True)
         else:
-            logger.warning(
-                f"[LeadRouter] No matching providers found for lead {lead.id} "
-                f"(category={lead.service_category.slug}, city={lead.location_city})"
-            )
+            providers = match_providers(lead_refresh)
+            if providers:
+                notify_providers(lead_refresh, providers, skip_in_app=False)
+            else:
+                logger.warning(
+                    f"[LeadRouter] No matching providers found for lead {lead_id} "
+                    f"(category={lead.service_category.slug}, city={lead.location_city})"
+                )
+
+        Lead.objects.filter(pk=lead_id).update(
+            providers_routed_at=timezone.now(),
+        )
     except Exception as e:
-        # This function is called from a post_save signal.
-        # We MUST NOT raise — it would silently break lead creation.
         logger.error(f"[LeadRouter] Routing failed for lead {lead.id}: {e}", exc_info=True)
 
 

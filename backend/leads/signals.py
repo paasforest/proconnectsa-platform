@@ -1,10 +1,27 @@
-from django.db.models.signals import post_save
+from django.db.models.signals import post_save, pre_save
 import logging
 
 logger = logging.getLogger(__name__)
 from django.dispatch import receiver
 from .models import Lead, LeadAssignment
 from backend.notifications.models import Notification
+
+
+@receiver(pre_save, sender=Lead)
+def clear_providers_routed_at_on_re_review(sender, instance, **kwargs):
+    """
+    Admin sent lead back to pending (re-review). Allow a fresh route when verified again.
+    """
+    if not instance.pk:
+        return
+    if instance.status != 'pending':
+        return
+    try:
+        previous = Lead.objects.only('status').get(pk=instance.pk)
+    except Lead.DoesNotExist:
+        return
+    if previous.status in ('verified', 'assigned'):
+        instance.providers_routed_at = None
 
 
 @receiver(post_save, sender=Lead)
@@ -39,37 +56,6 @@ def create_assignment_notification(sender, instance, created, **kwargs):
             lead_assignment=instance,
             priority='high'
         )
-
-
-@receiver(post_save, sender=Lead)
-def auto_assign_lead_to_providers(sender, instance, created, **kwargs):
-    """Automatically assign verified leads to matching providers using ML service"""
-    if created and instance.status == 'verified':
-        logger.info(f"🤖 AUTO-ASSIGNING LEAD: {instance.id} - {instance.title}")
-        
-        # Validate that the lead has a service category before attempting assignment
-        if not instance.service_category:
-            logger.error(f"❌ AUTO-ASSIGNMENT FAILED: Lead {instance.id} has no service category")
-            return
-        
-        if not instance.service_category.is_active:
-            logger.warning(f"⚠️  AUTO-ASSIGNMENT SKIPPED: Lead {instance.id} has inactive service category: {instance.service_category.name}")
-            return
-        
-        try:
-            from .services import LeadAssignmentService
-            assignment_service = LeadAssignmentService()
-            assignments = assignment_service.assign_lead_to_providers(instance.id)
-            
-            if assignments:
-                logger.info(f"✅ AUTO-ASSIGNED: {len(assignments)} providers for lead {instance.id}")
-                for assignment in assignments:
-                    logger.info(f"   - {assignment.provider.first_name} {assignment.provider.last_name} ({assignment.provider.email})")
-            else:
-                logger.warning(f"⚠️  NO MATCHING PROVIDERS: Lead {instance.id} not assigned")
-                
-        except Exception as e:
-            logger.error(f"❌ AUTO-ASSIGNMENT FAILED: Lead {instance.id} - {str(e)}")
 
 
 @receiver(post_save, sender=Lead)
@@ -114,13 +100,21 @@ def route_verified_lead(sender, instance, created, **kwargs):
     - New lead created with status='verified'
     - Existing lead updated to status='verified'
     """
-    # Only route if lead is verified
+    if getattr(instance, 'providers_routed_at', None):
+        return
+
+    # Assignment save(nested) can run before outer route_lead finishes; finish email/push here.
+    if instance.status == 'assigned':
+        try:
+            from backend.leads.services.lead_router import route_lead
+            route_lead(instance)
+        except Exception as e:
+            logger.error(f"[Signal] Error finishing routing for assigned lead {instance.id}: {e}", exc_info=True)
+        return
+
     if instance.status != 'verified':
         return
-    
-    # Avoid routing the same lead twice if signal fires multiple times
-    # We'll let the router handle idempotency through notification creation
-    
+
     logger.info(f"[Signal] Lead {instance.id} is verified — starting routing")
 
     try:

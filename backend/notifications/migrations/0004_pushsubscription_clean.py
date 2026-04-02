@@ -10,6 +10,78 @@ from django.conf import settings
 from django.db import migrations, models
 import django.db.models.deletion
 
+_PG_NOTIFICATIONSETTINGS_SQL = """
+DO $$
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema='public' AND table_name='notifications_notificationsettings' AND column_name='email_enabled') THEN
+        ALTER TABLE notifications_notificationsettings ADD COLUMN email_enabled BOOLEAN DEFAULT TRUE;
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema='public' AND table_name='notifications_notificationsettings' AND column_name='email_new_leads') THEN
+        ALTER TABLE notifications_notificationsettings ADD COLUMN email_new_leads BOOLEAN DEFAULT TRUE;
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema='public' AND table_name='notifications_notificationsettings' AND column_name='push_enabled') THEN
+        ALTER TABLE notifications_notificationsettings ADD COLUMN push_enabled BOOLEAN DEFAULT TRUE;
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema='public' AND table_name='notifications_notificationsettings' AND column_name='push_new_leads') THEN
+        ALTER TABLE notifications_notificationsettings ADD COLUMN push_new_leads BOOLEAN DEFAULT TRUE;
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema='public' AND table_name='notifications_notificationsettings' AND column_name='push_lead_assigned') THEN
+        ALTER TABLE notifications_notificationsettings ADD COLUMN push_lead_assigned BOOLEAN DEFAULT TRUE;
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema='public' AND table_name='notifications_notificationsettings' AND column_name='push_credits') THEN
+        ALTER TABLE notifications_notificationsettings ADD COLUMN push_credits BOOLEAN DEFAULT TRUE;
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema='public' AND table_name='notifications_notificationsettings' AND column_name='push_system') THEN
+        ALTER TABLE notifications_notificationsettings ADD COLUMN push_system BOOLEAN DEFAULT TRUE;
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema='public' AND table_name='notifications_notificationsettings' AND column_name='email_credits') THEN
+        ALTER TABLE notifications_notificationsettings ADD COLUMN email_credits BOOLEAN DEFAULT TRUE;
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema='public' AND table_name='notifications_notificationsettings' AND column_name='sms_enabled') THEN
+        ALTER TABLE notifications_notificationsettings ADD COLUMN sms_enabled BOOLEAN DEFAULT FALSE;
+    END IF;
+END $$;
+"""
+
+
+def _notificationsettings_extra_columns_forwards(apps, schema_editor):
+    """SQLite: add NotificationSettings columns if missing (PostgreSQL uses _pg block)."""
+    if schema_editor.connection.vendor != 'sqlite':
+        return
+    table = 'notifications_notificationsettings'
+    cursor = schema_editor.connection.cursor()
+    cursor.execute(f"PRAGMA table_info({table})")
+    existing = {row[1] for row in cursor.fetchall()}
+    alters = [
+        ('email_enabled', 'BOOLEAN DEFAULT 1'),
+        ('email_new_leads', 'BOOLEAN DEFAULT 1'),
+        ('push_enabled', 'BOOLEAN DEFAULT 1'),
+        ('push_new_leads', 'BOOLEAN DEFAULT 1'),
+        ('push_lead_assigned', 'BOOLEAN DEFAULT 1'),
+        ('push_credits', 'BOOLEAN DEFAULT 1'),
+        ('push_system', 'BOOLEAN DEFAULT 1'),
+        ('email_credits', 'BOOLEAN DEFAULT 1'),
+        ('sms_enabled', 'BOOLEAN DEFAULT 0'),
+    ]
+    for col, sql_type in alters:
+        if col not in existing:
+            cursor.execute(f'ALTER TABLE {table} ADD COLUMN {col} {sql_type}')
+
+
+def _notificationsettings_extra_columns_reverse(apps, schema_editor):
+    pass
+
+
+def _pg_notificationsettings_columns_forwards(apps, schema_editor):
+    if schema_editor.connection.vendor != 'postgresql':
+        return
+    with schema_editor.connection.cursor() as cursor:
+        cursor.execute(_PG_NOTIFICATIONSETTINGS_SQL)
+
+
+def _pg_notificationsettings_columns_reverse(apps, schema_editor):
+    pass
+
 
 class Migration(migrations.Migration):
 
@@ -20,7 +92,6 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        # 1. Create PushSubscription model (NEW TABLE - Safe)
         migrations.CreateModel(
             name='PushSubscription',
             fields=[
@@ -37,8 +108,6 @@ class Migration(migrations.Migration):
                 ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='push_subscriptions', to=settings.AUTH_USER_MODEL)),
             ],
         ),
-        
-        # 2. Add indexes to PushSubscription
         migrations.AddIndex(
             model_name='pushsubscription',
             index=models.Index(fields=['user', 'is_active'], name='notificatio_user_id_1159a5_idx'),
@@ -47,13 +116,9 @@ class Migration(migrations.Migration):
             name='pushsubscription',
             unique_together={('user', 'token')},
         ),
-        
-        # 3. Delete NotificationTemplate (Safe - not used in code)
         migrations.DeleteModel(
             name='NotificationTemplate',
         ),
-        
-        # 4. Remove old indexes from Notification (Safe - will recreate better ones)
         migrations.RemoveIndex(
             model_name='notification',
             name='notificatio_user_id_427e4b_idx',
@@ -66,8 +131,6 @@ class Migration(migrations.Migration):
             model_name='notification',
             name='notificatio_created_46ad24_idx',
         ),
-        
-        # 5. Add new indexes to Notification (Matches model Meta)
         migrations.AddIndex(
             model_name='notification',
             index=models.Index(fields=['user', 'is_read', '-created_at'], name='notificatio_user_id_f2ad08_idx'),
@@ -76,47 +139,14 @@ class Migration(migrations.Migration):
             model_name='notification',
             index=models.Index(fields=['user', 'notification_type'], name='notificatio_user_id_f77590_idx'),
         ),
-        
-        # 6. Update NotificationSettings - Add new fields (only if they don't exist)
-        # Using RunSQL to handle existing fields gracefully
-        migrations.RunSQL(
-            sql="""
-                DO $$
-                BEGIN
-                    -- Add fields that don't exist
-                    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='notifications_notificationsettings' AND column_name='email_enabled') THEN
-                        ALTER TABLE notifications_notificationsettings ADD COLUMN email_enabled BOOLEAN DEFAULT TRUE;
-                    END IF;
-                    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='notifications_notificationsettings' AND column_name='email_new_leads') THEN
-                        ALTER TABLE notifications_notificationsettings ADD COLUMN email_new_leads BOOLEAN DEFAULT TRUE;
-                    END IF;
-                    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='notifications_notificationsettings' AND column_name='push_enabled') THEN
-                        ALTER TABLE notifications_notificationsettings ADD COLUMN push_enabled BOOLEAN DEFAULT TRUE;
-                    END IF;
-                    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='notifications_notificationsettings' AND column_name='push_new_leads') THEN
-                        ALTER TABLE notifications_notificationsettings ADD COLUMN push_new_leads BOOLEAN DEFAULT TRUE;
-                    END IF;
-                    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='notifications_notificationsettings' AND column_name='push_lead_assigned') THEN
-                        ALTER TABLE notifications_notificationsettings ADD COLUMN push_lead_assigned BOOLEAN DEFAULT TRUE;
-                    END IF;
-                    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='notifications_notificationsettings' AND column_name='push_credits') THEN
-                        ALTER TABLE notifications_notificationsettings ADD COLUMN push_credits BOOLEAN DEFAULT TRUE;
-                    END IF;
-                    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='notifications_notificationsettings' AND column_name='push_system') THEN
-                        ALTER TABLE notifications_notificationsettings ADD COLUMN push_system BOOLEAN DEFAULT TRUE;
-                    END IF;
-                    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='notifications_notificationsettings' AND column_name='email_credits') THEN
-                        ALTER TABLE notifications_notificationsettings ADD COLUMN email_credits BOOLEAN DEFAULT TRUE;
-                    END IF;
-                    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='notifications_notificationsettings' AND column_name='sms_enabled') THEN
-                        ALTER TABLE notifications_notificationsettings ADD COLUMN sms_enabled BOOLEAN DEFAULT FALSE;
-                    END IF;
-                END $$;
-            """,
-            reverse_sql=migrations.RunSQL.noop,
+        migrations.RunPython(
+            _notificationsettings_extra_columns_forwards,
+            _notificationsettings_extra_columns_reverse,
         ),
-        
-        # 7. Update Notification.priority field max_length (10 instead of 20)
+        migrations.RunPython(
+            _pg_notificationsettings_columns_forwards,
+            _pg_notificationsettings_columns_reverse,
+        ),
         migrations.AlterField(
             model_name='notification',
             name='priority',
@@ -126,8 +156,6 @@ class Migration(migrations.Migration):
                 max_length=10,
             ),
         ),
-        
-        # 8. Ensure Notification.lead field matches model (should already be correct)
         migrations.AlterField(
             model_name='notification',
             name='lead',
@@ -139,9 +167,4 @@ class Migration(migrations.Migration):
                 to='leads.lead',
             ),
         ),
-        
-        # NOTE: We are NOT changing Notification.id from UUIDField to BigAutoField
-        # The model now explicitly defines id = UUIDField() to match the database
-        # NOTE: We are NOT removing old NotificationSettings fields to avoid breaking existing data
-        # The model will work with both old and new field names
     ]

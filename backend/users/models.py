@@ -302,13 +302,16 @@ class ProviderProfile(models.Model):
         
         return False
     
+    def is_eligible_for_lead_matching(self):
+        """Pros who signed up may receive lead alerts without manual verification; only block rejected/suspended."""
+        return self.verification_status not in ('rejected', 'suspended')
+
     @property
     def can_receive_leads(self):
-        """Check if provider can receive new leads"""
-        return (
-            self.verification_status == 'verified' and
-            (self.credit_balance > 0 or self.is_premium_listing_active)  # Premium providers don't need credits
-        )
+        """Check if provider can receive new leads (credits or premium; not rejected/suspended)."""
+        if not self.is_eligible_for_lead_matching():
+            return False
+        return self.credit_balance > 0 or self.is_premium_listing_active
     
     @property
     def is_premium_listing_active(self):

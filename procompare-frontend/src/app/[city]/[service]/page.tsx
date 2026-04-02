@@ -5,7 +5,7 @@ import BarkLeadForm from "@/components/leads/BarkLeadForm"
 import { ClientHeader } from "@/components/layout/ClientHeader"
 import { Footer } from "@/components/layout/Footer"
 import { fetchServiceCategories } from "@/lib/service-categories"
-import { getCityBySlug, SERVICE_SLUG_TO_NAME } from "@/lib/seo-cities"
+import { getCityBySlug, MAJOR_CITIES, SERVICE_SLUG_TO_NAME, type City } from "@/lib/seo-cities"
 import { getProvinceBySlug } from "@/lib/seo-locations"
 
 export const dynamic = "force-dynamic"
@@ -37,6 +37,45 @@ async function fetchProvidersForCityService(cityName: string, categorySlug: stri
   } catch {
     return []
   }
+}
+
+/** Same province first (per MAJOR_CITIES order), then other major SA cities — excludes current city. */
+function buildCandidateCitiesForMoreServiceNearYou(currentSlug: string): City[] {
+  const current = getCityBySlug(currentSlug)
+  if (!current) return []
+  const sameProvince = MAJOR_CITIES.filter(
+    (c) => c.provinceSlug === current.provinceSlug && c.slug !== currentSlug
+  )
+  const otherProvinces = MAJOR_CITIES.filter(
+    (c) => c.provinceSlug !== current.provinceSlug && c.slug !== currentSlug
+  )
+  return [...sameProvince, ...otherProvinces]
+}
+
+/**
+ * Up to 6 other cities where the public API returns at least one verified provider for this category.
+ * Checks candidates in priority order; uses batched parallel API calls for performance.
+ */
+async function fetchCitiesWithProvidersForCategory(
+  categorySlug: string,
+  currentCitySlug: string
+): Promise<City[]> {
+  const candidates = buildCandidateCitiesForMoreServiceNearYou(currentCitySlug)
+  const picked: City[] = []
+  const chunkSize = 8
+  for (let i = 0; i < candidates.length && picked.length < 6; i += chunkSize) {
+    const chunk = candidates.slice(i, i + chunkSize)
+    const results = await Promise.all(
+      chunk.map(async (c) => {
+        const provs = await fetchProvidersForCityService(c.name, categorySlug, 1)
+        return provs.length > 0 ? c : null
+      })
+    )
+    for (const r of results) {
+      if (r && picked.length < 6) picked.push(r)
+    }
+  }
+  return picked
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -277,6 +316,9 @@ export default async function CityServicePage({ params }: Props) {
     .filter(c => c.slug !== categorySlug)
     .slice(0, 6)
 
+  // Phase 3 Task 2: other cities with verified providers for this service (same province first)
+  const moreServiceCities = await fetchCitiesWithProvidersForCategory(categorySlug, city)
+
   // Structured data for SEO
   const localBusinessSchema = {
     "@context": "https://schema.org",
@@ -493,12 +535,14 @@ export default async function CityServicePage({ params }: Props) {
                   </div>
                 )}
 
-                {/* Related Services Section */}
+                {/* Phase 3 Task 1: Related services (other categories) in this city */}
                 {relatedServices.length > 0 && (
                   <div className="border rounded-2xl p-6 bg-white">
-                    <div className="text-lg font-semibold text-gray-900 mb-2">Other Services in {cityName}</div>
+                    <div className="text-lg font-semibold text-gray-900 mb-2">
+                      Related Services in {cityName}
+                    </div>
                     <p className="text-gray-600 text-sm mb-4">
-                      Looking for other services in {cityName}? Browse related services:
+                      Browse other service categories in {cityName} — same city, different trades:
                     </p>
                     <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                       {relatedServices.map((relatedService) => (
@@ -518,6 +562,29 @@ export default async function CityServicePage({ params }: Props) {
                       >
                         View All Services in {cityName} →
                       </Link>
+                    </div>
+                  </div>
+                )}
+
+                {/* Phase 3 Task 2: More {service} in other cities (verified providers on public API) */}
+                {moreServiceCities.length > 0 && (
+                  <div className="border rounded-2xl p-6 bg-white">
+                    <div className="text-lg font-semibold text-gray-900 mb-2">
+                      More {serviceName} Near You
+                    </div>
+                    <p className="text-gray-600 text-sm mb-4">
+                      Same service in other cities — verified professionals on ProConnectSA:
+                    </p>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                      {moreServiceCities.map((c) => (
+                        <Link
+                          key={c.slug}
+                          href={`/${c.slug}/${service}`}
+                          className="text-sm text-emerald-700 hover:text-emerald-800 hover:underline font-medium"
+                        >
+                          {c.name}
+                        </Link>
+                      ))}
                     </div>
                   </div>
                 )}

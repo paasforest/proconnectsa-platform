@@ -218,6 +218,11 @@ class Lead(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     verified_at = models.DateTimeField(null=True, blank=True)
+    providers_routed_at = models.DateTimeField(
+        null=True,
+        blank=True,
+        help_text='When this lead was first routed to providers (assignment + notifications); prevents duplicate sends.',
+    )
     expires_at = models.DateTimeField(null=True, blank=True)
     
     class Meta:

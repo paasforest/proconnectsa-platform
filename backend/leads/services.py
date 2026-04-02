@@ -44,7 +44,7 @@ class LeadAssignmentService:
         else:
             return "Anonymous Client"
     
-    def assign_lead_to_providers(self, lead_id):
+    def assign_lead_to_providers(self, lead_id, skip_persistent_assignment_notifications=False):
         """
         Assign a verified lead to relevant providers based on:
         - Service category matching
@@ -95,7 +95,8 @@ class LeadAssignmentService:
                 
                 # 🚀 SEND REAL-TIME LEAD ALERTS AND CREATE PERSISTENT NOTIFICATIONS
                 self._send_real_time_lead_alerts(lead, provider_ids, compatibility_scores)
-                self._create_persistent_notifications(lead, assignments)
+                if not skip_persistent_assignment_notifications:
+                    self._create_persistent_notifications(lead, assignments)
             
             return assignments
             
@@ -183,17 +184,20 @@ class LeadAssignmentService:
         Find providers that match the lead criteria:
         1. Service category match (exact match required)
         2. Geographical service area match
-        3. Provider is active and verified
+        3. Provider is active and eligible (signed up; rejected/suspended excluded)
         4. Provider has credits or within monthly limit
         5. Provider is available for new leads
         """
         logger.info(f"Finding matching providers for lead: {lead.title} (Category: {lead.service_category.slug})")
         
-        # Base query for active providers
+        # Active providers who may receive leads (signed up; not rejected/suspended)
         providers = User.objects.filter(
             user_type='provider',
-            provider_profile__verification_status='verified',
-            is_active=True
+            is_active=True,
+        ).exclude(
+            provider_profile__isnull=True,
+        ).exclude(
+            provider_profile__verification_status__in=('rejected', 'suspended'),
         ).select_related('provider_profile')
         
         # Enhanced service category matching
