@@ -27,10 +27,6 @@ export const metadata: Metadata = {
   },
   metadataBase: new URL("https://www.proconnectsa.co.za"),
   manifest: "/manifest.json",
-  themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#2563eb" },
-    { media: "(prefers-color-scheme: dark)", color: "#1e40af" },
-  ],
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",

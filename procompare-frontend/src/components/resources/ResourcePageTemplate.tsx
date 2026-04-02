@@ -17,12 +17,13 @@ function phraseToPattern(phrase: string): RegExp {
 function linkifyFirstOccurrences(
   text: string,
   state: { used: Set<string> },
-  rules: InlineLinkRule[],
+  rules: InlineLinkRule[] | undefined,
 ): ReactNode {
   if (!text) return null
-  if (!rules.length) return text
+  const safeRules = rules ?? []
+  if (!safeRules.length) return text
   let best: { key: string; index: number; match: RegExpMatchArray; href: string } | null = null
-  for (const { key, pattern, href } of rules) {
+  for (const { key, pattern, href } of safeRules) {
     if (state.used.has(key)) continue
     const m = text.match(pattern)
     if (m && m.index !== undefined) {
@@ -42,7 +43,7 @@ function linkifyFirstOccurrences(
       <Link href={best.href} className="text-amber-700 hover:text-amber-800 hover:underline font-medium">
         {matched}
       </Link>
-      {linkifyFirstOccurrences(after, state, rules)}
+      {linkifyFirstOccurrences(after, state, safeRules)}
     </>
   )
 }
@@ -51,18 +52,20 @@ function GuideInlineText({
   text,
   state,
   enabled,
-  rules,
+  rules = [],
 }: {
   text: string
   state: { used: Set<string> }
   enabled: boolean
-  rules: InlineLinkRule[]
+  rules?: InlineLinkRule[]
 }) {
-  if (!enabled || !rules.length) return <>{text}</>
-  return <>{linkifyFirstOccurrences(text, state, rules)}</>
+  const safeRules = rules ?? []
+  if (!enabled || !safeRules.length) return <>{text}</>
+  return <>{linkifyFirstOccurrences(text, state, safeRules)}</>
 }
 
-function truncate(text: string, maxChars: number) {
+function truncate(text: string | undefined, maxChars: number) {
+  if (text == null || text.length === 0) return ''
   if (text.length <= maxChars) return text
   const trimmed = text.slice(0, maxChars)
   const lastSpace = trimmed.lastIndexOf(' ')
@@ -137,7 +140,7 @@ export function ResourcePageTemplate({ guide }: { guide: ResourceGuide }) {
 
   const relatedGuides = useMemo(
     () =>
-      guide.relatedSlugs
+      (guide.relatedSlugs ?? [])
         .map((slug) => resourceGuides.find((g) => g.slug === slug))
         .filter((g): g is ResourceGuide => Boolean(g)),
     [guide.relatedSlugs],
@@ -224,6 +227,7 @@ export function ResourcePageTemplate({ guide }: { guide: ResourceGuide }) {
                   text={guide.introConversion.afterLink}
                   state={inlineLinkState}
                   enabled={inlineLinksEnabled}
+                  rules={inlineLinkRules}
                 />
               </p>
             ) : null}
