@@ -411,6 +411,32 @@ export default async function CityServicePage({ params }: Props) {
               <p className="text-gray-700 text-lg md:text-xl max-w-3xl mb-6 font-medium">
                 Find trusted {serviceName.toLowerCase()} {categorySlug === "electrical" ? "and electrical contractors" : categorySlug === "plumbing" ? "and plumbing contractors" : categorySlug === "carpentry" ? "and carpentry services" : ""} near you in {cityName}, {provinceName}. Get free quotes in 60 seconds. Compare pricing, reviews, and availability from verified local professionals. No obligation to hire.
               </p>
+              {categorySlug === "solar-installation" ? (
+                <p className="text-gray-600 text-sm max-w-3xl">
+                  National benchmarks:{" "}
+                  <Link
+                    href="/resources/solar-installation-cost-south-africa"
+                    className="text-emerald-700 font-semibold hover:text-emerald-800 hover:underline"
+                  >
+                    solar installation cost
+                  </Link>
+                  ,{" "}
+                  <Link
+                    href="/resources/solar-installation-cost-south-africa"
+                    className="text-emerald-700 font-semibold hover:text-emerald-800 hover:underline"
+                  >
+                    cost of solar panels in South Africa
+                  </Link>
+                  , and{" "}
+                  <Link
+                    href="/resources/solar-installation-cost-south-africa"
+                    className="text-emerald-700 font-semibold hover:text-emerald-800 hover:underline"
+                  >
+                    solar prices
+                  </Link>
+                  {" "}(2026 guide).
+                </p>
+              ) : null}
             </div>
           </div>
         </section>

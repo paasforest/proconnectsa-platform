@@ -117,6 +117,42 @@ export default async function ServiceCategoryPage({ params }: Props) {
                   </div>
                 </div>
 
+                {category === "solar-installation" ? (
+                  <div className="border rounded-2xl p-6 bg-amber-50 border-amber-200">
+                    <div className="text-lg font-semibold text-gray-900 mb-2">2026 solar pricing guide</div>
+                    <p className="text-sm text-gray-700 mb-3">
+                      Before you compare installers, see national{" "}
+                      <Link
+                        href="/resources/solar-installation-cost-south-africa"
+                        className="text-emerald-800 font-semibold hover:underline"
+                      >
+                        solar installation cost
+                      </Link>
+                      ,{" "}
+                      <Link
+                        href="/resources/solar-installation-cost-south-africa"
+                        className="text-emerald-800 font-semibold hover:underline"
+                      >
+                        cost of solar panels in South Africa
+                      </Link>
+                      , and typical{" "}
+                      <Link
+                        href="/resources/solar-installation-cost-south-africa"
+                        className="text-emerald-800 font-semibold hover:underline"
+                      >
+                        solar prices
+                      </Link>
+                      .
+                    </p>
+                    <Link
+                      href="/resources/solar-installation-cost-south-africa"
+                      className="text-sm font-semibold text-emerald-800 hover:underline"
+                    >
+                      Read the full guide →
+                    </Link>
+                  </div>
+                ) : null}
+
                 <div className="border rounded-2xl p-6 bg-white">
                   <div className="text-lg font-semibold text-gray-900 mb-2">Why Choose ProConnectSA?</div>
                   <ul className="text-sm text-gray-700 space-y-2">

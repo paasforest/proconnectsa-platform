@@ -159,6 +159,14 @@ export default async function Homepage() {
                       solar installation cost
                     </Link>
                     ,{" "}
+                    <Link href="/resources/solar-installation-cost-south-africa" className="text-emerald-700 font-medium hover:text-emerald-800 hover:underline">
+                      cost of solar panels in South Africa
+                    </Link>
+                    ,{" "}
+                    <Link href="/resources/solar-installation-cost-south-africa" className="text-emerald-700 font-medium hover:text-emerald-800 hover:underline">
+                      solar prices
+                    </Link>
+                    ,{" "}
                     <Link href="/resources/plumbing-cost-south-africa" className="text-emerald-700 font-medium hover:text-emerald-800 hover:underline">
                       plumber pricing
                     </Link>

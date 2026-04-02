@@ -2,6 +2,7 @@
 
 import type { ResourceGuide } from '@/lib/resourceGuides'
 import { resourceGuides } from '@/lib/resourceGuides'
+import { trackResourceGuideCta } from '@/utils/resource-analytics'
 import Link from 'next/link'
 import Script from 'next/script'
 import type { ReactNode } from 'react'
@@ -201,6 +202,14 @@ export function ResourcePageTemplate({ guide }: { guide: ResourceGuide }) {
               <span className="inline-flex items-center rounded-full bg-white/80 border border-amber-200 px-3 py-1 text-sm text-gray-800">
                 🗓 Updated {guide.lastUpdated}
               </span>
+              {guide.heroTrustSignals?.map((line) => (
+                <span
+                  key={line}
+                  className="inline-flex items-center rounded-full bg-emerald-50/90 border border-emerald-200 px-3 py-1 text-sm text-gray-800"
+                >
+                  ✓ {line}
+                </span>
+              ))}
             </div>
 
             <p className="text-gray-700 text-base md:text-lg mb-6 max-w-3xl">
@@ -220,6 +229,13 @@ export function ResourcePageTemplate({ guide }: { guide: ResourceGuide }) {
                   className="text-amber-700 hover:text-amber-800 hover:underline font-semibold"
                   target="_blank"
                   rel="noopener noreferrer"
+                  onClick={() =>
+                    trackResourceGuideCta({
+                      guideSlug: guide.slug,
+                      ctaKind: 'intro_inline',
+                      href: guide.introConversion!.linkHref,
+                    })
+                  }
                 >
                   {guide.introConversion.linkText}
                 </a>
@@ -236,6 +252,9 @@ export function ResourcePageTemplate({ guide }: { guide: ResourceGuide }) {
               <Link
                 href={guide.ctaLink}
                 className="inline-flex items-center justify-center rounded-full bg-amber-500 hover:bg-amber-600 text-gray-900 font-bold px-6 py-3 shadow-sm transition-colors"
+                onClick={() =>
+                  trackResourceGuideCta({ guideSlug: guide.slug, ctaKind: 'hero', href: guide.ctaLink })
+                }
               >
                 {heroCta} →
               </Link>
@@ -290,7 +309,17 @@ export function ResourcePageTemplate({ guide }: { guide: ResourceGuide }) {
               Prices reflect 2026 South African market rates. Actual quotes may vary by provider, location, and job complexity.
             </p>
             <p className="text-sm text-gray-700 mt-2">
-              <Link href={guide.ctaLink} className="text-amber-700 hover:text-amber-800 hover:underline font-semibold">
+              <Link
+                href={guide.ctaLink}
+                className="text-amber-700 hover:text-amber-800 hover:underline font-semibold"
+                onClick={() =>
+                  trackResourceGuideCta({
+                    guideSlug: guide.slug,
+                    ctaKind: 'quick_price',
+                    href: guide.ctaLink,
+                  })
+                }
+              >
                 {guide.quickPriceCtaLabel ?? 'Compare real quotes'} →
               </Link>
             </p>
@@ -306,6 +335,58 @@ export function ResourcePageTemplate({ guide }: { guide: ResourceGuide }) {
               <div className="mt-6 rounded-2xl border border-amber-200 bg-amber-50/50 p-6">
                 <h3 className="text-lg font-bold text-gray-900 mb-2">{guide.roiSection.heading}</h3>
                 <p className="text-gray-700 text-sm md:text-base leading-relaxed">{guide.roiSection.body}</p>
+              </div>
+            ) : null}
+
+            {guide.quoteComparisonBlock ? (
+              <div className="mt-10 rounded-2xl border-2 border-amber-400/80 bg-gradient-to-br from-amber-50 via-white to-orange-50/50 p-6 md:p-8 shadow-md">
+                <h3 className="text-xl md:text-2xl font-bold text-gray-900 mb-4">
+                  {guide.quoteComparisonBlock.heading}
+                </h3>
+                <ul className="mb-6 space-y-3">
+                  {guide.quoteComparisonBlock.bullets.map((b) => (
+                    <li key={b} className="flex items-start gap-3 text-gray-800 text-base">
+                      <span className="mt-0.5 inline-flex h-6 w-6 flex-none items-center justify-center rounded-full bg-amber-500 text-white text-sm font-bold">
+                        ✓
+                      </span>
+                      <span>{b}</span>
+                    </li>
+                  ))}
+                </ul>
+                <Link
+                  href={guide.quoteComparisonBlock.buttonHref ?? guide.ctaLink}
+                  className="inline-flex items-center justify-center rounded-full bg-amber-500 hover:bg-amber-600 text-gray-900 font-bold px-8 py-3.5 shadow-md transition-colors"
+                  onClick={() =>
+                    trackResourceGuideCta({
+                      guideSlug: guide.slug,
+                      ctaKind: 'quote_block',
+                      href: guide.quoteComparisonBlock!.buttonHref ?? guide.ctaLink,
+                    })
+                  }
+                >
+                  {guide.quoteComparisonBlock.buttonLabel} →
+                </Link>
+              </div>
+            ) : null}
+
+            {guide.localCostQuickLinks ? (
+              <div className="mt-8 rounded-2xl border border-gray-200 bg-white p-5 md:p-6">
+                <h3 className="text-lg font-bold text-gray-900 mb-3">{guide.localCostQuickLinks.heading}</h3>
+                <p className="text-sm text-gray-600 mb-4">
+                  National averages above — tap your city or request quotes across South Africa.
+                </p>
+                <ul className="flex flex-wrap gap-x-4 gap-y-2">
+                  {guide.localCostQuickLinks.links.map((l) => (
+                    <li key={l.href}>
+                      <Link
+                        href={l.href}
+                        className="text-sm font-semibold text-amber-800 hover:text-amber-900 hover:underline"
+                      >
+                        {l.label}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
               </div>
             ) : null}
           </div>
@@ -441,6 +522,9 @@ export function ResourcePageTemplate({ guide }: { guide: ResourceGuide }) {
             <Link
               href={guide.ctaLink}
               className="inline-flex items-center justify-center rounded-full bg-amber-500 hover:bg-amber-600 text-gray-900 font-bold px-7 py-4 shadow-sm transition-colors"
+              onClick={() =>
+                trackResourceGuideCta({ guideSlug: guide.slug, ctaKind: 'footer', href: guide.ctaLink })
+              }
             >
               {footerCta} →
             </Link>

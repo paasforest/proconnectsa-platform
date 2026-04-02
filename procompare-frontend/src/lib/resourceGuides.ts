@@ -53,6 +53,20 @@ export interface ResourceGuide {
   footerCtaSupportingText?: string
   /** Link text under the pricing table (default: Compare real quotes →) */
   quickPriceCtaLabel?: string
+  /** Short trust lines under hero chips (e.g. verified installers) */
+  heroTrustSignals?: string[]
+  /** Comparison-advantage promo (headline, bullets, CTA) */
+  quoteComparisonBlock?: {
+    heading: string
+    bullets: string[]
+    buttonLabel: string
+    buttonHref?: string
+  }
+  /** Local / city hub links for national guides */
+  localCostQuickLinks?: {
+    heading: string
+    links: { label: string; href: string }[]
+  }
 }
 
 export const resourceGuides: ResourceGuide[] = [
@@ -464,12 +478,35 @@ export const resourceGuides: ResourceGuide[] = [
     city: "South Africa",
     province: "National",
     ctaLink: "/services/solar-installation",
-    metaTitle: "Solar Installation Cost South Africa (2026) – Full Price Guide + Savings | ProConnectSA",
-    displayTitle: "Solar Installation Cost South Africa (2026) – Full Price Guide + Savings",
+    metaTitle: "Solar Installation Cost South Africa (2026) – Prices + Save R20,000+ | ProConnectSA",
+    displayTitle: "Solar Installation Cost South Africa (2026) – Prices + Save R20,000+",
     metaDescription:
       "See the real cost to install solar panels in South Africa. Prices, system sizes, savings, and how to get quotes fast.",
     intro:
       "Solar prices in South Africa depend mainly on system size, battery capacity, and inverter brand. This 2026 guide shows typical installed costs for small, medium, and large systems—plus monthly savings examples and payback so you can decide with confidence.",
+    heroTrustSignals: [
+      "Trusted by homeowners across South Africa",
+      "Compare verified installers — free, no obligation",
+    ],
+    quoteComparisonBlock: {
+      heading: "Compare 3 solar quotes in your area",
+      bullets: [
+        "See real installer prices for your roof",
+        "Compare system sizes, batteries, and warranties side by side",
+        "Choose the best deal — no obligation to hire",
+      ],
+      buttonLabel: "Get 3 free quotes",
+      buttonHref: "/services/solar-installation",
+    },
+    localCostQuickLinks: {
+      heading: "Solar installation cost by city",
+      links: [
+        { label: "Solar quotes — South Africa (all areas)", href: "/services/solar-installation" },
+        { label: "Solar cost in Cape Town", href: "/cape-town/solar-installation" },
+        { label: "Solar cost in Johannesburg", href: "/johannesburg/solar-installation" },
+        { label: "Solar cost in Durban", href: "/durban/solar-installation" },
+      ],
+    },
     introConversion: {
       beforeLink: "💡 Want exact pricing for your home? ",
       linkText: "Get 3 free solar quotes in your area",
@@ -576,7 +613,7 @@ export const resourceGuides: ResourceGuide[] = [
     metaDescription:
       "Plumber costs in South Africa range from R500 to R5,000+ for typical jobs in 2026. Compare quotes from verified plumbers — free, no obligation.",
     intro:
-      "Plumbing costs in South Africa vary with job type, parts, and urgency—from small repairs to burst pipes and geyser work. This 2026 guide outlines realistic price ranges so you can budget and compare plumbers across major metros.",
+      "Plumbing costs in South Africa vary with job type, parts, and urgency—from small repairs to burst pipes and geyser work. This 2026 guide outlines realistic price ranges so you can budget and compare plumbers across major metros. If you are also planning solar or backup water, see the cost of solar panels in South Africa in our dedicated guide.",
     introConversion: {
       beforeLink: "💡 Want exact pricing for your home? ",
       linkText: "Get up to 3 free quotes from verified plumbers",
@@ -589,10 +626,48 @@ export const resourceGuides: ResourceGuide[] = [
       leadParagraph:
         "The cost of hiring a plumber in South Africa ranges from R500 to R5,000+ depending on the job complexity, parts required, and your location.",
     },
+    heroTrustSignals: [
+      "Trusted by homeowners across South Africa",
+      "Compare verified plumbers — free, no obligation",
+    ],
+    quoteComparisonBlock: {
+      heading: "Compare 3 plumbing quotes in your area",
+      bullets: [
+        "See real call-out and labour rates for your job",
+        "Compare itemised scopes, parts, and warranties",
+        "Choose the best deal — no obligation to hire",
+      ],
+      buttonLabel: "Get 3 free quotes",
+      buttonHref: "/services/plumbing",
+    },
+    localCostQuickLinks: {
+      heading: "Plumber cost by city",
+      links: [
+        { label: "Plumbing quotes — South Africa (all areas)", href: "/services/plumbing" },
+        { label: "Plumber cost in Cape Town", href: "/cape-town/plumbing" },
+        { label: "Plumber cost in Johannesburg", href: "/johannesburg/plumbing" },
+        { label: "Plumber cost in Durban", href: "/durban/plumbing" },
+      ],
+    },
+    footerCtaHeading: "Ready to compare quotes from verified plumbers?",
+    footerCtaSupportingText:
+      "Compare up to 3 quotes for your job—no obligation. See who offers the best value on labour, parts, and call-outs.",
+    quickPriceCtaLabel: "Get 3 free quotes in your area",
+    monthlySavingsSection: {
+      heading: "How fixing leaks early saves money",
+      body:
+        "Small leaks and worn washers can escalate into ceiling damage, mould, and emergency call-outs that cost far more than a routine repair. Fixing issues early often keeps total spend in the hundreds instead of thousands—and cuts wasted water on your municipal bill.",
+    },
+    roiSection: {
+      heading: "Value of comparing quotes",
+      body:
+        "The same repair can be quoted differently depending on scope, parts, and whether the job is fixed-price or time-and-materials. Comparing 2–3 written quotes helps you spot hidden extras and choose fair pricing—not just the lowest number on a phone call.",
+    },
     heroCtaLabel: "Get 3 Free Plumbing Quotes in 24 Hours",
     footerCtaLabel: "Get 3 Free Plumbing Quotes in 24 Hours",
     enableGuideInlineLinks: true,
     inlineLinkTargets: [
+      { phrase: "cost of solar panels in South Africa", href: "/resources/solar-installation-cost-south-africa" },
       { phrase: "plumbers", href: "/services/plumbing" },
       { phrase: "electricians", href: "/services/electrical" },
       { phrase: "Johannesburg", href: "/johannesburg/plumbing" },
@@ -665,7 +740,7 @@ export const resourceGuides: ResourceGuide[] = [
     metaDescription:
       "Electrician costs in South Africa range from R600 to R8,000+ for typical jobs in 2026. Compare quotes from verified electricians — free, no obligation.",
     intro:
-      "Electrician costs in South Africa depend on scope, materials, and whether a Certificate of Compliance (COC) is required. This 2026 guide compares electricians across common jobs and helps you budget for compliant work in major metros.",
+      "Electrician costs in South Africa depend on scope, materials, and whether a Certificate of Compliance (COC) is required. This 2026 guide compares electricians across common jobs and helps you budget for compliant work in major metros. For solar and backup power, read our solar installation cost guide with national pricing benchmarks.",
     introConversion: {
       beforeLink: "💡 Want exact pricing for your home? ",
       linkText: "Get up to 3 free quotes from verified electricians",
@@ -678,10 +753,48 @@ export const resourceGuides: ResourceGuide[] = [
       leadParagraph:
         "The cost of hiring an electrician in South Africa ranges from R600 to R8,000+ depending on the work required, materials, and whether a Certificate of Compliance is needed.",
     },
+    heroTrustSignals: [
+      "Trusted by homeowners across South Africa",
+      "Compare verified electricians — free, no obligation",
+    ],
+    quoteComparisonBlock: {
+      heading: "Compare 3 electrical quotes in your area",
+      bullets: [
+        "See real hourly rates, call-outs, and COC-related pricing",
+        "Compare itemised scopes for DB work, circuits, and compliance",
+        "Choose the best deal — no obligation to hire",
+      ],
+      buttonLabel: "Get 3 free quotes",
+      buttonHref: "/services/electrical",
+    },
+    localCostQuickLinks: {
+      heading: "Electrician cost by city",
+      links: [
+        { label: "Electrical quotes — South Africa (all areas)", href: "/services/electrical" },
+        { label: "Electrician cost in Cape Town", href: "/cape-town/electrical" },
+        { label: "Electrician cost in Johannesburg", href: "/johannesburg/electrical" },
+        { label: "Electrician cost in Durban", href: "/durban/electrical" },
+      ],
+    },
+    footerCtaHeading: "Ready to compare quotes from verified electricians?",
+    footerCtaSupportingText:
+      "Compare up to 3 quotes for compliant work—no obligation. See clear scope on labour, materials, testing, and COCs.",
+    quickPriceCtaLabel: "Get 3 free quotes in your area",
+    monthlySavingsSection: {
+      heading: "How compliant work avoids costly rework",
+      body:
+        "Faulty circuits and skipped testing can lead to insurance issues, failed inspections, and expensive call-backs. Paying for proper diagnostics and compliance up front often costs less than fixing damage or repeating work later.",
+    },
+    roiSection: {
+      heading: "ROI of comparing electrical quotes",
+      body:
+        "Electrical quotes differ when scope, materials, and warranty differ. Comparing itemised quotes helps you see where money goes—labour vs parts vs compliance—and pick the best long-term value, not only the cheapest headline.",
+    },
     heroCtaLabel: "Get 3 Free Electrician Quotes in 24 Hours",
     footerCtaLabel: "Get 3 Free Electrician Quotes in 24 Hours",
     enableGuideInlineLinks: true,
     inlineLinkTargets: [
+      { phrase: "solar installation cost", href: "/resources/solar-installation-cost-south-africa" },
       { phrase: "electricians", href: "/services/electrical" },
       { phrase: "solar installers", href: "/services/solar-installation" },
       { phrase: "Johannesburg", href: "/johannesburg/electrical" },
@@ -754,7 +867,7 @@ export const resourceGuides: ResourceGuide[] = [
     metaDescription:
       "House painting in South Africa costs R15–R45/m² or more in 2026. Compare quotes from verified painters — free, no obligation.",
     intro:
-      "House painting prices depend on preparation, paint quality, and access. This 2026 guide compares painters in major metros and helps you align timelines with builders when painting is part of a renovation.",
+      "House painting prices depend on preparation, paint quality, and access. This 2026 guide compares painters in major metros and helps you align timelines with builders when painting is part of a renovation. Planning broader home upgrades? Check current solar prices in our national solar installation guide.",
     introConversion: {
       beforeLink: "💡 Want exact pricing for your home? ",
       linkText: "Get up to 3 free quotes from verified painters",
@@ -767,10 +880,48 @@ export const resourceGuides: ResourceGuide[] = [
       leadParagraph:
         "House painting in South Africa costs between R15 per square metre and R45 per square metre depending on paint quality, surface preparation, and the size of the job.",
     },
+    heroTrustSignals: [
+      "Trusted by homeowners across South Africa",
+      "Compare verified painters — free, no obligation",
+    ],
+    quoteComparisonBlock: {
+      heading: "Compare 3 painting quotes in your area",
+      bullets: [
+        "See real per-m² rates and what prep is included",
+        "Compare paint systems, coats, and timelines side by side",
+        "Choose the best deal — no obligation to hire",
+      ],
+      buttonLabel: "Get 3 free quotes",
+      buttonHref: "/services/painting",
+    },
+    localCostQuickLinks: {
+      heading: "House painting cost by city",
+      links: [
+        { label: "Painting quotes — South Africa (all areas)", href: "/services/painting" },
+        { label: "Painter cost in Cape Town", href: "/cape-town/painting" },
+        { label: "Painter cost in Johannesburg", href: "/johannesburg/painting" },
+        { label: "Painter cost in Durban", href: "/durban/painting" },
+      ],
+    },
+    footerCtaHeading: "Ready to compare quotes from verified painters?",
+    footerCtaSupportingText:
+      "Compare up to 3 quotes with the same m² and spec—no obligation. See who delivers the best prep and finish for your budget.",
+    quickPriceCtaLabel: "Get 3 free quotes in your area",
+    monthlySavingsSection: {
+      heading: "How good prep saves money on paint jobs",
+      body:
+        "Skipping filling, sanding, or damp treatment often means paint fails early—then you pay twice. Quotes that include proper preparation usually last longer and look better, lowering lifetime cost per year.",
+    },
+    roiSection: {
+      heading: "ROI of comparing painter quotes",
+      body:
+        "Two quotes can look similar until you compare coats, product grades, and preparation. Itemised comparisons help you avoid cheap quotes that cut corners on prep or use thin paint coverage.",
+    },
     heroCtaLabel: "Get 3 Free Painting Quotes in 24 Hours",
     footerCtaLabel: "Get 3 Free Painting Quotes in 24 Hours",
     enableGuideInlineLinks: true,
     inlineLinkTargets: [
+      { phrase: "solar prices", href: "/resources/solar-installation-cost-south-africa" },
       { phrase: "painters", href: "/services/painting" },
       { phrase: "builders", href: "/services/renovations" },
       { phrase: "Johannesburg", href: "/johannesburg/painting" },
@@ -826,10 +977,10 @@ export const resourceGuides: ResourceGuide[] = [
       },
     ],
     relatedSlugs: [
+      "solar-installation-cost-south-africa",
       "painting-cost-cape-town",
       "painting-cost-durban",
       "painting-cost-pretoria",
-      "renovation-cost-johannesburg",
     ],
   },
   {
@@ -843,7 +994,7 @@ export const resourceGuides: ResourceGuide[] = [
     metaDescription:
       "Pest control in South Africa costs R500–R3,500+ per treatment in 2026. Compare quotes from verified specialists — free, no obligation.",
     intro:
-      "Pest control pricing depends on pest type, property size, and whether follow-up visits are needed. This 2026 guide outlines typical treatment ranges and how to compare pest control with cleaning services when you want a full home refresh.",
+      "Pest control pricing depends on pest type, property size, and whether follow-up visits are needed. This 2026 guide outlines typical treatment ranges and how to compare pest control with cleaning services when you want a full home refresh. For energy upgrades alongside home maintenance, see solar installation cost ranges in our national solar guide.",
     introConversion: {
       beforeLink: "💡 Want exact pricing for your home? ",
       linkText: "Get up to 3 free quotes from verified pest control specialists",
@@ -856,10 +1007,48 @@ export const resourceGuides: ResourceGuide[] = [
       leadParagraph:
         "Pest control in South Africa costs between R500 and R3,500+ depending on the type of pest, property size, and number of treatments required.",
     },
+    heroTrustSignals: [
+      "Trusted by homeowners across South Africa",
+      "Compare verified pest specialists — free, no obligation",
+    ],
+    quoteComparisonBlock: {
+      heading: "Compare 3 pest control quotes in your area",
+      bullets: [
+        "See real per-visit and programme pricing for your pest type",
+        "Compare follow-ups, guarantees, and treatment plans",
+        "Choose the best deal — no obligation to hire",
+      ],
+      buttonLabel: "Get 3 free quotes",
+      buttonHref: "/services/pest-control",
+    },
+    localCostQuickLinks: {
+      heading: "Pest control cost by city",
+      links: [
+        { label: "Pest control quotes — South Africa (all areas)", href: "/services/pest-control" },
+        { label: "Pest control cost in Cape Town", href: "/cape-town/pest-control" },
+        { label: "Pest control cost in Johannesburg", href: "/johannesburg/pest-control" },
+        { label: "Pest control cost in Durban", href: "/durban/pest-control" },
+      ],
+    },
+    footerCtaHeading: "Ready to compare quotes from verified pest specialists?",
+    footerCtaSupportingText:
+      "Compare up to 3 quotes for your property—no obligation. See clear scope on treatments, follow-ups, and guarantees.",
+    quickPriceCtaLabel: "Get 3 free quotes in your area",
+    monthlySavingsSection: {
+      heading: "How early treatment saves money",
+      body:
+        "Letting rodents or termites spread usually increases repair bills and repeat treatments. Acting when signs are mild often keeps costs lower than full-blown infestations or structural damage.",
+    },
+    roiSection: {
+      heading: "ROI of comparing pest control plans",
+      body:
+        "Programme pricing can look higher until you compare follow-ups and guarantees. A plan that covers return visits if pests reappear can be cheaper than cheap single visits that don’t solve the root cause.",
+    },
     heroCtaLabel: "Get 3 Free Pest Control Quotes in 24 Hours",
     footerCtaLabel: "Get 3 Free Pest Control Quotes in 24 Hours",
     enableGuideInlineLinks: true,
     inlineLinkTargets: [
+      { phrase: "solar installation cost", href: "/resources/solar-installation-cost-south-africa" },
       { phrase: "pest control", href: "/services/pest-control" },
       { phrase: "cleaning services", href: "/services/cleaning" },
       { phrase: "Johannesburg", href: "/johannesburg/pest-control" },
@@ -915,10 +1104,10 @@ export const resourceGuides: ResourceGuide[] = [
       },
     ],
     relatedSlugs: [
+      "solar-installation-cost-south-africa",
       "cleaning-cost-cape-town",
       "cleaning-cost-johannesburg",
       "house-painting-cost-south-africa",
-      "electrician-cost-south-africa",
     ],
   },
   {
@@ -1686,7 +1875,7 @@ export const resourceGuides: ResourceGuide[] = [
       },
     ],
     relatedSlugs: [
-      "renovation-cost-cape-town",
+      "solar-installation-cost-south-africa",
       "renovation-cost-johannesburg",
       "painting-cost-cape-town",
     ],
@@ -1806,6 +1995,7 @@ export const resourceGuides: ResourceGuide[] = [
       },
     ],
     relatedSlugs: [
+      "solar-installation-cost-south-africa",
       "hvac-cost-cape-town",
       "hvac-cost-johannesburg",
       "electrician-cost-cape-town",
@@ -2106,6 +2296,7 @@ export const resourceGuides: ResourceGuide[] = [
       },
     ],
     relatedSlugs: [
+      "solar-installation-cost-south-africa",
       "roofing-cost-cape-town",
       "roofing-cost-johannesburg",
       "renovation-cost-cape-town",

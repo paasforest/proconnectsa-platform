@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useEffect, useMemo, useState } from 'react'
+import { trackPublicLeadSubmit } from '@/utils/resource-analytics'
 
 type ServiceCategory = { id: number; name: string; slug: string }
 
@@ -259,6 +260,7 @@ export default function BarkLeadForm({ onComplete, onCancel, preselectedCategory
       }
       
       setSubmitted(true)
+      trackPublicLeadSubmit({ serviceSlug: selectedCategory.slug })
       onComplete?.(data)
     } catch (e: any) {
       console.error('❌ Submission exception:', e)

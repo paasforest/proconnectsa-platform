@@ -53,9 +53,9 @@ const guides = [
   },
   {
     slug: "solar-installation-cost-south-africa",
-    title: "Solar Installation Cost South Africa (2026) – Full Price Guide + Savings",
+    title: "Solar Installation Cost South Africa (2026) – Prices + Save R20,000+",
     description:
-      "See the real cost to install solar panels in South Africa. Prices, system sizes, savings, and how to get quotes fast.",
+      "2026 solar panel installation prices, system sizes, savings, and payback — plus compare free quotes from verified installers.",
     category: "Cost Guides",
     icon: DollarSign,
   },
@@ -336,11 +336,23 @@ export default function ResourcesPage() {
                 Resources & Guides
               </h1>
               <p className="text-gray-600 text-lg max-w-3xl">
-                Expert guides and resources to help you find and hire the right service providers in South Africa. 
-                Whether you need a <Link href="/services/plumbing" className="text-emerald-700 hover:text-emerald-800 hover:underline font-medium">plumber</Link>, 
-                <Link href="/services/electrical" className="text-emerald-700 hover:text-emerald-800 hover:underline font-medium"> electrician</Link>, or 
-                <Link href="/services/cleaning" className="text-emerald-700 hover:text-emerald-800 hover:underline font-medium"> cleaning service</Link>, 
-                our guides will help you make informed decisions.
+                Expert guides and resources to help you find and hire the right service providers in South Africa.
+                Start with{" "}
+                <Link href="/resources/solar-installation-cost-south-africa" className="text-emerald-700 hover:text-emerald-800 hover:underline font-medium">
+                  solar installation cost
+                </Link>
+                ,{" "}
+                <Link href="/resources/solar-installation-cost-south-africa" className="text-emerald-700 hover:text-emerald-800 hover:underline font-medium">
+                  cost of solar panels in South Africa
+                </Link>
+                , or{" "}
+                <Link href="/resources/solar-installation-cost-south-africa" className="text-emerald-700 hover:text-emerald-800 hover:underline font-medium">
+                  solar prices
+                </Link>
+                {" "}— then browse plumbers, electricians, and more. Whether you need a{" "}
+                <Link href="/services/plumbing" className="text-emerald-700 hover:text-emerald-800 hover:underline font-medium">plumber</Link>,{" "}
+                <Link href="/services/electrical" className="text-emerald-700 hover:text-emerald-800 hover:underline font-medium">electrician</Link>, or{" "}
+                <Link href="/services/cleaning" className="text-emerald-700 hover:text-emerald-800 hover:underline font-medium">cleaning service</Link>, our guides help you make informed decisions.
               </p>
             </div>
           </div>
