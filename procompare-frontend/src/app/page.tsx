@@ -151,6 +151,29 @@ export default async function Homepage() {
                   </Link>
                 </div>
 
+                <div className="border rounded-2xl bg-white p-6">
+                  <div className="text-lg font-semibold text-gray-900 mb-2">Cost guides &amp; relocation</div>
+                  <p className="text-gray-600 text-sm mb-4">
+                    See{" "}
+                    <Link href="/resources/solar-installation-cost-south-africa" className="text-emerald-700 font-medium hover:text-emerald-800 hover:underline">
+                      solar installation cost
+                    </Link>
+                    ,{" "}
+                    <Link href="/resources/plumbing-cost-south-africa" className="text-emerald-700 font-medium hover:text-emerald-800 hover:underline">
+                      plumber pricing
+                    </Link>
+                    , and more in our{" "}
+                    <Link href="/resources" className="text-emerald-700 font-medium hover:text-emerald-800 hover:underline">
+                      resources hub
+                    </Link>
+                    . Planning a move abroad? Read{" "}
+                    <Link href="/immigration" className="text-emerald-700 font-medium hover:text-emerald-800 hover:underline">
+                      immigration &amp; visa planning
+                    </Link>
+                    .
+                  </p>
+                </div>
+
                 <div className="border rounded-2xl bg-emerald-50 border-emerald-200 p-6">
                   <div className="text-lg font-semibold text-gray-900 mb-2">Trust & Safety</div>
                   <div className="space-y-3 text-sm text-gray-700">

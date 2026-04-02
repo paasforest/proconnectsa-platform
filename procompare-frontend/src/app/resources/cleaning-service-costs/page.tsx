@@ -8,12 +8,12 @@ export const metadata = {
   title: guide?.metaTitle,
   description: guide?.metaDescription,
   alternates: {
-    canonical: 'https://www.proconnectsa.co.za/resources/cleaning-service-costs',
+    canonical: 'https://www.proconnectsa.co.za/resources/cleaning-services-cost-south-africa',
   },
   openGraph: {
     title: guide?.metaTitle,
     description: guide?.metaDescription,
-    url: 'https://www.proconnectsa.co.za/resources/cleaning-service-costs',
+    url: 'https://www.proconnectsa.co.za/resources/cleaning-services-cost-south-africa',
     siteName: 'ProConnectSA',
     type: 'article',
   },

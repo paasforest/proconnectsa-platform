@@ -106,6 +106,11 @@ export function Footer() {
                   Press & Media
                 </Link>
               </li>
+              <li>
+                <Link href="/immigration" className="text-muted-foreground hover:text-foreground transition-colors">
+                  Immigration &amp; visas
+                </Link>
+              </li>
             </ul>
           </div>
 
