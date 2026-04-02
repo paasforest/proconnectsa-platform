@@ -41,6 +41,18 @@ export interface ResourceGuide {
   enableGuideInlineLinks?: boolean
   /** Phrase order = match priority; first occurrence of each phrase only (when enabled) */
   inlineLinkTargets?: { phrase: string; href: string }[]
+  /** Override pricing table column titles (default: Job Type / Estimated Cost) */
+  pricingTableHeaders?: { labelColumn: string; valueColumn: string }
+  /** Optional block after the pricing table (e.g. monthly savings example) */
+  monthlySavingsSection?: { heading: string; body: string }
+  /** Optional ROI / payback block */
+  roiSection?: { heading: string; body: string }
+  /** Override footer CTA dark section heading */
+  footerCtaHeading?: string
+  /** Override footer CTA supporting paragraph */
+  footerCtaSupportingText?: string
+  /** Link text under the pricing table (default: Compare real quotes →) */
+  quickPriceCtaLabel?: string
 }
 
 export const resourceGuides: ResourceGuide[] = [
@@ -452,26 +464,44 @@ export const resourceGuides: ResourceGuide[] = [
     city: "South Africa",
     province: "National",
     ctaLink: "/services/solar-installation",
-    metaTitle: "Solar Panel Installation Cost South Africa (2026 Prices + Quotes) | ProConnectSA",
-    displayTitle: "Solar Panel Installation Cost South Africa (2026 Prices + Quotes)",
+    metaTitle: "Solar Installation Cost South Africa (2026) – Full Price Guide + Savings | ProConnectSA",
+    displayTitle: "Solar Installation Cost South Africa (2026) – Full Price Guide + Savings",
     metaDescription:
-      "Solar installation in South Africa costs about R45k–R180k+ in 2026. Compare quotes from verified installers — free, no obligation. See real prices.",
+      "See the real cost to install solar panels in South Africa. Prices, system sizes, savings, and how to get quotes fast.",
     intro:
-      "Solar prices in South Africa depend mainly on system size, battery capacity, and inverter brand. This 2026 guide outlines realistic installed price ranges so you can compare quotes and plan your budget before you commit.",
+      "Solar prices in South Africa depend mainly on system size, battery capacity, and inverter brand. This 2026 guide shows typical installed costs for small, medium, and large systems—plus monthly savings examples and payback so you can decide with confidence.",
     introConversion: {
       beforeLink: "💡 Want exact pricing for your home? ",
-      linkText: "Get up to 3 free quotes",
+      linkText: "Get 3 free solar quotes in your area",
       linkHref:
         "https://www.proconnectsa.co.za/services/solar-installation?utm_source=guide&utm_medium=inline_cta&utm_campaign=solar_cost_guide",
-      afterLink: " from verified solar installers in your area — free and with no obligation.",
+      afterLink: " — fast, free, and no obligation.",
     },
     featuredCostSnippet: {
       heading: "How much does solar installation cost in South Africa?",
       leadParagraph:
         "The cost of solar installation in South Africa ranges from R45,000 to R260,000+ depending on system size, battery capacity, and components.",
     },
-    heroCtaLabel: "Get 3 Free Solar Quotes in 24 Hours",
-    footerCtaLabel: "Get 3 Free Solar Quotes in 24 Hours",
+    heroCtaLabel: "Get 3 free solar quotes in your area",
+    footerCtaLabel: "Get 3 free solar quotes in your area",
+    footerCtaHeading: "Ready to lock in pricing from verified installers?",
+    footerCtaSupportingText:
+      "Compare up to 3 quotes for your roof and usage—no obligation. See who offers the best value on panels, inverter, and batteries.",
+    quickPriceCtaLabel: "Get 3 free solar quotes in your area",
+    pricingTableHeaders: {
+      labelColumn: "System size",
+      valueColumn: "Typical installed price (2026)",
+    },
+    monthlySavingsSection: {
+      heading: "Monthly savings example (illustrative)",
+      body:
+        "A mid-size hybrid system that offsets a large share of grid use can reduce your municipal bill by roughly R1,500–R4,000+ per month depending on tariffs, self-consumption, and how much you rely on batteries during load-shedding. Savings are not guaranteed—ask installers to model kWh offset using your actual usage.",
+    },
+    roiSection: {
+      heading: "ROI and payback",
+      body:
+        "Many homeowners see simple payback in the range of about 4–7 years when electricity tariffs rise and the system is sized to match real usage—not just the cheapest sticker price. ROI improves when you factor in fewer spoils from outages, predictable energy costs, and possible property appeal. Get itemised quotes that show estimated annual kWh production and projected savings so you can compare apples to apples.",
+    },
     enableGuideInlineLinks: true,
     inlineLinkTargets: [
       { phrase: "solar installers", href: "/services/solar-installation" },
@@ -481,11 +511,11 @@ export const resourceGuides: ResourceGuide[] = [
     ],
     lastUpdated: "March 2026",
     pricing: [
-      { label: "Small backup (3–5kW inverter, limited battery)", range: "R45,000 – R85,000" },
-      { label: "Mid-range hybrid (5kW + battery + panels)", range: "R85,000 – R140,000" },
-      { label: "Larger home system (8–12kW + batteries)", range: "R140,000 – R260,000+" },
-      { label: "Solar panels (installed per panel)", range: "R2,200 – R4,500" },
-      { label: "Battery (installed per kWh)", range: "R6,500 – R12,500/kWh" },
+      { label: "Small system — 3–5kW inverter, starter battery / limited backup", range: "R45,000 – R85,000" },
+      { label: "Medium system — 5–8kW hybrid, battery + panels for most homes", range: "R85,000 – R140,000" },
+      { label: "Large system — 8–12kW+ with larger battery bank", range: "R140,000 – R260,000+" },
+      { label: "Add-on: panels (supply + install, per panel, indicative)", range: "R2,200 – R4,500" },
+      { label: "Add-on: battery storage (per kWh installed, indicative)", range: "R6,500 – R12,500/kWh" },
     ],
     priceFactors: [
       "System size (kW) and your household’s daily usage",
@@ -503,24 +533,24 @@ export const resourceGuides: ResourceGuide[] = [
     ],
     faqs: [
       {
-        question: "How much does it cost to install solar in South Africa in 2026?",
+        question: "How much does solar cost in South Africa?",
         answer:
-          "Most homeowners spend roughly R45,000–R180,000+ depending on inverter size, battery capacity, and panel count. Larger systems can exceed R200,000.",
+          "Installed systems commonly fall between about R45,000 and R260,000+ depending on whether you need a small backup setup, a mid-size hybrid, or a large home system with more battery storage. Exact pricing needs a site assessment.",
+      },
+      {
+        question: "Is solar worth it?",
+        answer:
+          "For many households, yes—especially with rising tariffs and load-shedding. Value depends on your usage, tariff structure, system size, and how long you plan to stay in the home. Compare projected savings and payback on written quotes.",
+      },
+      {
+        question: "How long does solar installation take?",
+        answer:
+          "Most residential jobs take about 1–3 days on site once equipment is on hand. Complex roofs, long cable runs, or DB upgrades can add time. Your installer should give a written schedule.",
       },
       {
         question: "Do I need a battery for solar to work during load-shedding?",
         answer:
           "Yes. Panels alone won’t keep your power on during outages. A hybrid inverter with batteries (and correct wiring) is typically needed for backup power.",
-      },
-      {
-        question: "What size solar system do I need for my home?",
-        answer:
-          "It depends on your daily usage and which appliances you want powered during outages. Installers usually assess your bills and usage patterns to recommend a size.",
-      },
-      {
-        question: "How long does solar installation take?",
-        answer:
-          "A typical residential installation often takes 1–3 days, depending on roof complexity, wiring runs, and whether DB board upgrades are required.",
       },
       {
         question: "How do I choose a good solar installer?",

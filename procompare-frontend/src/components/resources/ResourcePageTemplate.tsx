@@ -267,8 +267,12 @@ export function ResourcePageTemplate({ guide }: { guide: ResourceGuide }) {
               <table className="min-w-[640px] w-full text-left">
                 <thead className="bg-gray-50">
                   <tr>
-                    <th className="px-4 py-3 text-sm font-semibold text-gray-900">Job Type</th>
-                    <th className="px-4 py-3 text-sm font-semibold text-gray-900">Estimated Cost</th>
+                    <th className="px-4 py-3 text-sm font-semibold text-gray-900">
+                      {guide.pricingTableHeaders?.labelColumn ?? 'Job Type'}
+                    </th>
+                    <th className="px-4 py-3 text-sm font-semibold text-gray-900">
+                      {guide.pricingTableHeaders?.valueColumn ?? 'Estimated Cost'}
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
@@ -287,9 +291,23 @@ export function ResourcePageTemplate({ guide }: { guide: ResourceGuide }) {
             </p>
             <p className="text-sm text-gray-700 mt-2">
               <Link href={guide.ctaLink} className="text-amber-700 hover:text-amber-800 hover:underline font-semibold">
-                Compare real quotes →
+                {guide.quickPriceCtaLabel ?? 'Compare real quotes'} →
               </Link>
             </p>
+
+            {guide.monthlySavingsSection ? (
+              <div className="mt-8 rounded-2xl border border-emerald-200 bg-emerald-50/60 p-6">
+                <h3 className="text-lg font-bold text-gray-900 mb-2">{guide.monthlySavingsSection.heading}</h3>
+                <p className="text-gray-700 text-sm md:text-base leading-relaxed">{guide.monthlySavingsSection.body}</p>
+              </div>
+            ) : null}
+
+            {guide.roiSection ? (
+              <div className="mt-6 rounded-2xl border border-amber-200 bg-amber-50/50 p-6">
+                <h3 className="text-lg font-bold text-gray-900 mb-2">{guide.roiSection.heading}</h3>
+                <p className="text-gray-700 text-sm md:text-base leading-relaxed">{guide.roiSection.body}</p>
+              </div>
+            ) : null}
           </div>
         </div>
       </section>
@@ -389,7 +407,7 @@ export function ResourcePageTemplate({ guide }: { guide: ResourceGuide }) {
                     <div
                       className={[
                         'px-5 overflow-hidden transition-[max-height,opacity] duration-300 ease-in-out',
-                        isOpen ? 'max-h-40 opacity-100 pb-4' : 'max-h-0 opacity-0',
+                        isOpen ? 'max-h-[min(80vh,48rem)] opacity-100 pb-4' : 'max-h-0 opacity-0',
                       ].join(' ')}
                     >
                       <p className="text-gray-600">
@@ -414,10 +432,11 @@ export function ResourcePageTemplate({ guide }: { guide: ResourceGuide }) {
         <div className="container mx-auto px-4">
           <div className="mx-auto max-w-5xl rounded-3xl border border-amber-500/30 bg-gradient-to-br from-gray-950 to-gray-900 p-8 md:p-10">
             <h2 className="text-2xl md:text-3xl font-bold text-white mb-3">
-              Ready to Get Quotes from Verified {guide.service} Providers in {guide.city}?
+              {guide.footerCtaHeading ?? `Ready to Get Quotes from Verified ${guide.service} Providers in ${guide.city}?`}
             </h2>
             <p className="text-gray-200 mb-6">
-              Free, no obligation. Compare up to 3 verified quotes and choose the best fit for your budget.
+              {guide.footerCtaSupportingText ??
+                'Free, no obligation. Compare up to 3 verified quotes and choose the best fit for your budget.'}
             </p>
             <Link
               href={guide.ctaLink}

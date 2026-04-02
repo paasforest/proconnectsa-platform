@@ -53,8 +53,9 @@ const guides = [
   },
   {
     slug: "solar-installation-cost-south-africa",
-    title: "Solar Panel Installation Cost South Africa (2026 Prices + Quotes)",
-    description: "Complete guide to solar installation costs in South Africa. Average prices, system sizes, ROI, and how to save money. Get free quotes from verified solar installers.",
+    title: "Solar Installation Cost South Africa (2026) – Full Price Guide + Savings",
+    description:
+      "See the real cost to install solar panels in South Africa. Prices, system sizes, savings, and how to get quotes fast.",
     category: "Cost Guides",
     icon: DollarSign,
   },
