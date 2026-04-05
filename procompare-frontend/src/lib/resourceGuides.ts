@@ -1,9 +1,11 @@
+import { VULA24_GUIDE_CTA_URL, VULA24_GUIDE_INLINE_CTA_URL } from "./vula24-locksmith"
+
 export interface ResourceGuide {
   slug: string
   service: string // e.g. "Cleaning Services"
   city: string // e.g. "Cape Town"
   province: string // e.g. "Western Cape"
-  ctaLink: string // e.g. "/cape-town/cleaning"
+  ctaLink: string // internal path (e.g. "/cape-town/cleaning") or absolute https URL for partner CTAs
   metaTitle: string // e.g. "Cleaning Service Cost in Cape Town | 2026 Pricing Guide | ProConnectSA"
   metaDescription: string // max 155 chars
   intro: string // 2–3 sentence intro paragraph
@@ -2601,6 +2603,118 @@ export const resourceGuides: ResourceGuide[] = [
       "roofing-cost-south-africa",
       "renovation-cost-johannesburg",
     ],
+  },
+
+  {
+    slug: "locksmith-cost-south-africa",
+    service: "Locksmith",
+    city: "South Africa",
+    province: "National",
+    ctaLink: VULA24_GUIDE_CTA_URL,
+    metaTitle: "Locksmith Cost South Africa (2026 Prices + Quotes) | ProConnectSA",
+    displayTitle: "Locksmith Cost South Africa (2026 Prices + Quotes)",
+    metaDescription:
+      "Locksmith costs in South Africa: R350–R2,500+ for lockouts, keys & replacements in 2026. Typical rates by job type and after-hours fees. Partner: Vula24 emergency.",
+    intro:
+      "Locksmith rates in South Africa depend on the job type, urgency, and whether you need a locksmith after hours. Car lockouts and home lockouts are priced differently than lock replacement or key programming. Demand in Johannesburg and Cape Town is typically higher than smaller towns, and prices in Gauteng and the Western Cape can vary by suburb and travel time.",
+    introConversion: {
+      beforeLink: "💡 ",
+      linkText: "Get a verified locksmith in your area now",
+      linkHref: VULA24_GUIDE_INLINE_CTA_URL,
+      afterLink: " — or compare broader quotes below for non-emergency work.",
+    },
+    featuredCostSnippet: {
+      heading: "How much does a locksmith cost in South Africa?",
+      leadParagraph:
+        "Locksmith services in South Africa cost between R350 and R2,500+ depending on the type of job, time of day, and your location.",
+    },
+    heroTrustSignals: [
+      "Emergency lockouts in Gauteng & Western Cape",
+      "Partner: Vula24 verified locksmiths",
+    ],
+    heroCtaLabel: "Get a Locksmith in 15 Minutes",
+    footerCtaLabel: "Get a Locksmith in 15 Minutes",
+    quickPriceCtaLabel: "Get a Locksmith in 15 Minutes",
+    footerCtaHeading: "Ready for fast emergency locksmith help?",
+    footerCtaSupportingText:
+      "Our partner Vula24 operates verified locksmiths in Gauteng and Western Cape with average 15-minute response times for urgent work.",
+    quoteComparisonBlock: {
+      heading: "Need a locksmith on-site fast?",
+      bullets: [
+        "Verified locksmiths in Gauteng and Western Cape",
+        "Typical 15-minute average response for emergencies",
+        "Ask for upfront pricing before work begins",
+      ],
+      buttonLabel: "Get a Locksmith in 15 Minutes",
+      buttonHref: VULA24_GUIDE_CTA_URL,
+    },
+    localCostQuickLinks: {
+      heading: "Locksmith services by area (Vula24)",
+      links: [
+        { label: "Johannesburg", href: "https://www.vula24.co.za/locksmith-johannesburg" },
+        { label: "Cape Town", href: "https://www.vula24.co.za/locksmith-cape-town" },
+        { label: "Gauteng", href: "https://www.vula24.co.za/locksmith-gauteng" },
+        { label: "Western Cape", href: "https://www.vula24.co.za/locksmith-western-cape" },
+      ],
+    },
+    enableGuideInlineLinks: true,
+    inlineLinkTargets: [
+      { phrase: "locksmith", href: "https://www.vula24.co.za" },
+      { phrase: "Johannesburg", href: "https://www.vula24.co.za/locksmith-johannesburg" },
+      { phrase: "Cape Town", href: "https://www.vula24.co.za/locksmith-cape-town" },
+      { phrase: "Gauteng", href: "https://www.vula24.co.za/locksmith-gauteng" },
+      { phrase: "Western Cape", href: "https://www.vula24.co.za/locksmith-western-cape" },
+    ],
+    lastUpdated: "April 2026",
+    pricing: [
+      { label: "Car lockout", range: "R350 – R800" },
+      { label: "House lockout", range: "R400 – R900" },
+      { label: "Lock replacement", range: "R600 – R1,500" },
+      { label: "Car key replacement", range: "R800 – R2,500" },
+      { label: "After hours surcharge (typical extra)", range: "R200 – R500" },
+    ],
+    priceFactors: [
+      "Time of day (business hours vs evenings/weekends/public holidays)",
+      "Job type: lockout vs re-key vs full lock replacement vs transponder keys",
+      "Travel distance and traffic in major metros",
+      "Brand and security grade of replacement hardware",
+      "Vehicle make/model complexity for car keys and immobiliser coding",
+      "Whether drilling or non-destructive entry is required",
+    ],
+    tips: [
+      "Confirm call-out, labour rate, and parts before approving work—especially after hours.",
+      "Ask whether VAT is included and whether the quote is fixed or estimate-based.",
+      "For non-urgent work, schedule normal hours to avoid after-hours surcharges.",
+      "Keep a spare key or digital backup plan to reduce emergency call-out frequency.",
+    ],
+    faqs: [
+      {
+        question: "How much does a locksmith cost in South Africa in 2026?",
+        answer:
+          "Typical jobs range from about R350 for simple car lockouts up to R2,500+ for complex car key replacement. House lockouts and lock changes usually fall between roughly R400 and R1,500 depending on hardware and time of day.",
+      },
+      {
+        question: "Do locksmiths charge more after hours?",
+        answer:
+          "Yes—most locksmiths add an after-hours, weekend, or public holiday surcharge. Expect roughly R200–R500 extra on top of normal rates, but always confirm the total before work starts.",
+      },
+      {
+        question: "Is a car lockout cheaper than a house lockout?",
+        answer:
+          "Often similar, but pricing depends on vehicle security, key type, and whether non-destructive entry is possible. Car key replacement with programming is usually the most expensive category.",
+      },
+      {
+        question: "How do I avoid locksmith scams?",
+        answer:
+          "Ask for a business name, upfront pricing structure, and ID on arrival. Be cautious of unusually low ads that balloon on-site—prefer verified partners with clear rates.",
+      },
+      {
+        question: "When should I use an emergency locksmith partner vs requesting quotes?",
+        answer:
+          "For urgent lockouts and security risks, speed matters—use a verified emergency partner. For planned upgrades or multiple locks, comparing written quotes is usually better value.",
+      },
+    ],
+    relatedSlugs: ["plumbing-cost-south-africa", "electrician-cost-south-africa", "handyman-costs"],
   },
 
   {

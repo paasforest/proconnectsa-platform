@@ -4,6 +4,7 @@ import Link from "next/link"
 import { Facebook, Twitter, Instagram, Linkedin, Mail, Phone, MapPin } from "lucide-react"
 import { PROVINCES } from "@/lib/seo-locations"
 import { MAJOR_CITIES } from "@/lib/seo-cities"
+import { VULA24_FOOTER_URL } from "@/lib/vula24-locksmith"
 
 const TOP_SERVICES = [
   { slug: "plumbing", name: "Plumbing" },
@@ -112,6 +113,19 @@ export function Footer() {
                 </Link>
               </li>
             </ul>
+            <div className="pt-4 border-t border-border/60">
+              <h4 className="font-semibold text-sm mb-2">Partner services</h4>
+              <ul className="space-y-2 text-sm">
+                <li>
+                  <a
+                    href={VULA24_FOOTER_URL}
+                    className="text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    Emergency Locksmith — Vula24
+                  </a>
+                </li>
+              </ul>
+            </div>
           </div>
 
           {/* Locations */}

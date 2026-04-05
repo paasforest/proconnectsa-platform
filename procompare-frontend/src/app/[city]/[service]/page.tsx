@@ -7,6 +7,8 @@ import { Footer } from "@/components/layout/Footer"
 import { fetchServiceCategories } from "@/lib/service-categories"
 import { getCityBySlug, MAJOR_CITIES, SERVICE_SLUG_TO_NAME, type City } from "@/lib/seo-cities"
 import { getProvinceBySlug } from "@/lib/seo-locations"
+import { EmergencyLocksmithBanner } from "@/components/emergency/EmergencyLocksmithBanner"
+import { isLocksmithServiceSlug, isVula24EmergencyBannerProvince } from "@/lib/vula24-locksmith"
 
 export const dynamic = "force-dynamic"
 
@@ -378,8 +380,13 @@ export default async function CityServicePage({ params }: Props) {
     ],
   }
 
+  const showVulaLocksmithBanner =
+    isLocksmithServiceSlug(service) &&
+    isVula24EmergencyBannerProvince(cityData.provinceSlug)
+
   return (
     <div className="min-h-screen flex flex-col">
+      {showVulaLocksmithBanner ? <EmergencyLocksmithBanner /> : null}
       <ClientHeader />
       <main className="flex-1">
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(localBusinessSchema) }} />

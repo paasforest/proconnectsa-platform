@@ -67,6 +67,14 @@ const guides = [
     icon: DollarSign,
   },
   {
+    slug: "locksmith-cost-south-africa",
+    title: "Locksmith Cost South Africa (2026 Prices + Quotes)",
+    description:
+      "2026 locksmith pricing: car and house lockouts, lock replacement, car keys, and after-hours surcharges. Emergency partner: Vula24 in Gauteng & Western Cape.",
+    category: "Cost Guides",
+    icon: DollarSign,
+  },
+  {
     slug: "electrician-cost-south-africa",
     title: "Electrician Cost South Africa (2026 Prices + Quotes)",
     description: "2026 electrician pricing: hourly rates, COC work, DB boards, and installations. Compare free quotes from verified electricians.",

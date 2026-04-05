@@ -8,6 +8,8 @@ import { fetchServiceCategories } from "@/lib/service-categories"
 import { getProvinceBySlug } from "@/lib/seo-locations"
 import { getCitiesByProvince } from "@/lib/seo-cities"
 import { SEO_SERVICE_PROVINCE_PAGES } from "@/lib/seo-service-pages"
+import { EmergencyLocksmithBanner } from "@/components/emergency/EmergencyLocksmithBanner"
+import { isLocksmithServiceSlug, isVula24EmergencyBannerProvince } from "@/lib/vula24-locksmith"
 
 export const dynamic = "force-dynamic"
 
@@ -182,6 +184,9 @@ export default async function ServiceProvincePage({ params }: Props) {
     },
   ]
 
+  const showVulaLocksmithBanner =
+    isLocksmithServiceSlug(category) && isVula24EmergencyBannerProvince(province)
+
   const faqJsonLd = {
     "@context": "https://schema.org",
     "@type": "FAQPage",
@@ -204,6 +209,7 @@ export default async function ServiceProvincePage({ params }: Props) {
 
   return (
     <div className="min-h-screen flex flex-col">
+      {showVulaLocksmithBanner ? <EmergencyLocksmithBanner /> : null}
       <ClientHeader />
       <main className="flex-1">
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }} />

@@ -7,6 +7,8 @@ import { fetchServiceCategories } from "@/lib/service-categories"
 import { getCityBySlug, getCitiesByProvince } from "@/lib/seo-cities"
 import { getProvinceBySlug, PROVINCES } from "@/lib/seo-locations"
 import BarkLeadForm from "@/components/leads/BarkLeadForm"
+import { EmergencyLocksmithBanner } from "@/components/emergency/EmergencyLocksmithBanner"
+import { isVula24EmergencyBannerProvince } from "@/lib/vula24-locksmith"
 
 export const dynamic = "force-dynamic"
 
@@ -90,6 +92,7 @@ export default async function CityServicesPage({ params }: Props) {
 
   return (
     <div className="min-h-screen flex flex-col">
+      {isVula24EmergencyBannerProvince(cityData.provinceSlug) ? <EmergencyLocksmithBanner /> : null}
       <ClientHeader />
       <main className="flex-1">
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(localBusinessSchema) }} />

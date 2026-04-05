@@ -5,6 +5,7 @@ import { Footer } from "@/components/layout/Footer"
 import { fetchServiceCategories } from "@/lib/service-categories"
 import { PROVINCES } from "@/lib/seo-locations"
 import { Button } from "@/components/ui/button"
+import { EmergencyLocksmithBanner } from "@/components/emergency/EmergencyLocksmithBanner"
 
 export const dynamic = "force-dynamic"
 
@@ -22,6 +23,7 @@ export default async function ServicesPage() {
 
   return (
     <div className="min-h-screen flex flex-col">
+      <EmergencyLocksmithBanner />
       <ClientHeader />
       <main className="flex-1">
         <section className="bg-gradient-to-br from-emerald-50 to-blue-50 py-16">

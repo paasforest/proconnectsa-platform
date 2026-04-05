@@ -22,6 +22,7 @@ import {
   Trees, 
   Shield, 
   Sparkles,
+  Key,
   ArrowRight,
   Clock,
   Users,
@@ -66,6 +67,8 @@ export default function RequestQuotePage() {
         gardening: 'landscaping',
         security: 'security',
         automotive: 'automotive',
+        locksmith: 'locksmith',
+        'emergency-locksmith': 'emergency-locksmith',
       }
 
       const normalized = serviceMap[serviceParam] || serviceParam
@@ -225,6 +228,13 @@ export default function RequestQuotePage() {
       name: "Security", 
       icon: Shield, 
       description: "Alarms, cameras, access control",
+      popular: false
+    },
+    { 
+      slug: "locksmith",
+      name: "Locksmith / Emergency Locksmith", 
+      icon: Key, 
+      description: "Lockouts, repairs, re-keying",
       popular: false
     },
     { 

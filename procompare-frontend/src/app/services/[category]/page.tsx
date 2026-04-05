@@ -6,6 +6,8 @@ import { Footer } from "@/components/layout/Footer"
 import BarkLeadForm from "@/components/leads/BarkLeadForm"
 import { fetchServiceCategories } from "@/lib/service-categories"
 import { PROVINCES } from "@/lib/seo-locations"
+import { EmergencyLocksmithBanner } from "@/components/emergency/EmergencyLocksmithBanner"
+import { isLocksmithServiceSlug } from "@/lib/vula24-locksmith"
 
 export const dynamic = "force-dynamic"
 
@@ -39,6 +41,7 @@ export default async function ServiceCategoryPage({ params }: Props) {
 
   return (
     <div className="min-h-screen flex flex-col">
+      {isLocksmithServiceSlug(category) ? <EmergencyLocksmithBanner /> : null}
       <ClientHeader />
       <main className="flex-1">
         <section className="bg-gradient-to-br from-emerald-50 to-blue-50 py-12">

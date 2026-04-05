@@ -1,7 +1,8 @@
 'use client'
 
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { trackPublicLeadSubmit } from '@/utils/resource-analytics'
+import { isLocksmithCategoryMatch, VULA24_SERVICE_REDIRECT_URL } from '@/lib/vula24-locksmith'
 
 type ServiceCategory = { id: number; name: string; slug: string }
 
@@ -66,6 +67,9 @@ export default function BarkLeadForm({ onComplete, onCancel, preselectedCategory
   const [contactName, setContactName] = useState('')
   const [contactPhone, setContactPhone] = useState('')
   const [contactEmail, setContactEmail] = useState('')
+  /** User chose to continue with ProConnectSA quote flow instead of Vula24. */
+  const [locksmithSkipped, setLocksmithSkipped] = useState(false)
+  const prevServiceSlugRef = useRef<string | null>(null)
 
   useEffect(() => {
     let cancelled = false
@@ -97,10 +101,29 @@ export default function BarkLeadForm({ onComplete, onCancel, preselectedCategory
     setServiceSlug(preselectedCategory)
   }, [preselectedCategory])
 
+  // Show Vula24 interstitial again when user switches back to a locksmith category from another service
+  useEffect(() => {
+    const prev = prevServiceSlugRef.current
+    prevServiceSlugRef.current = serviceSlug
+    const prevCat = categories.find((c) => c.slug === prev)
+    const currCat = categories.find((c) => c.slug === serviceSlug)
+    const prevMatch = prevCat ? isLocksmithCategoryMatch(prevCat) : false
+    const currMatch = currCat ? isLocksmithCategoryMatch(currCat) : false
+    if (currMatch && !prevMatch) {
+      setLocksmithSkipped(false)
+    }
+  }, [serviceSlug, categories])
+
   const selectedCategory = useMemo(
     () => categories.find((c) => c.slug === serviceSlug) || null,
     [categories, serviceSlug]
   )
+
+  const showLocksmithVulaInterstitial =
+    !loadingCategories &&
+    Boolean(selectedCategory) &&
+    isLocksmithCategoryMatch(selectedCategory) &&
+    !locksmithSkipped
 
   const canGoNext = useMemo(() => {
     if (step === 1) return Boolean(selectedCategory)
@@ -287,11 +310,13 @@ export default function BarkLeadForm({ onComplete, onCancel, preselectedCategory
   return (
     <div className="min-h-screen bg-white py-10 px-4">
       <div className="mx-auto max-w-2xl">
+        {!showLocksmithVulaInterstitial ? (
         <div className="mb-6">
           <div className="text-sm text-gray-500">Step {step} of 3</div>
           <h1 className="text-2xl font-bold text-gray-900">Get your free quotes</h1>
           <p className="text-gray-600">Tell us what you need — we’ll connect you with verified professionals.</p>
         </div>
+        ) : null}
 
         {error ? (
           <div className="mb-4 rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-800">
@@ -312,7 +337,43 @@ export default function BarkLeadForm({ onComplete, onCancel, preselectedCategory
         )}
 
         <div className="rounded-xl border border-gray-200 p-5 shadow-sm">
-          {step === 1 ? (
+          {showLocksmithVulaInterstitial ? (
+            <div className="space-y-5 py-1">
+              <h2 className="text-xl font-bold text-gray-900 md:text-2xl">Need a locksmith urgently?</h2>
+              <p className="text-sm leading-relaxed text-gray-700 md:text-base">
+                We partner with Vula24 for all emergency locksmith services in Gauteng and Western Cape. They have
+                verified locksmiths available right now with an average 15-minute response time.
+              </p>
+              <div className="flex flex-col gap-3 pt-2">
+                <a
+                  href={VULA24_SERVICE_REDIRECT_URL}
+                  className="inline-flex w-full items-center justify-center rounded-lg bg-emerald-600 px-5 py-3 text-center text-sm font-semibold text-white shadow-sm transition hover:bg-emerald-700"
+                >
+                  Get a Locksmith Now →
+                </a>
+                <button
+                  type="button"
+                  className="text-center text-sm font-medium text-emerald-700 underline decoration-emerald-600/40 underline-offset-2 hover:text-emerald-800"
+                  onClick={() => setLocksmithSkipped(true)}
+                >
+                  Not urgent? Browse locksmith profiles instead →
+                </button>
+              </div>
+              <button
+                type="button"
+                className="text-sm text-gray-500 hover:text-gray-800"
+                onClick={() => {
+                  setServiceSlug('')
+                  setLocksmithSkipped(false)
+                  onCancel?.()
+                }}
+              >
+                Choose a different service
+              </button>
+            </div>
+          ) : null}
+
+          {!showLocksmithVulaInterstitial && step === 1 ? (
             <div className="space-y-4">
               <div>
                 <label htmlFor="service-category" className="block text-sm font-medium text-gray-900">Service</label>
@@ -335,7 +396,7 @@ export default function BarkLeadForm({ onComplete, onCancel, preselectedCategory
             </div>
           ) : null}
 
-          {step === 2 ? (
+          {!showLocksmithVulaInterstitial && step === 2 ? (
             <div className="space-y-4">
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 <div className="sm:col-span-2">
@@ -477,7 +538,7 @@ export default function BarkLeadForm({ onComplete, onCancel, preselectedCategory
             </div>
           ) : null}
 
-          {step === 3 ? (
+          {!showLocksmithVulaInterstitial && step === 3 ? (
             <div className="space-y-4">
               <div>
                 <label htmlFor="contact-name" className="block text-sm font-medium text-gray-900">Full name</label>
@@ -525,6 +586,7 @@ export default function BarkLeadForm({ onComplete, onCancel, preselectedCategory
           ) : null}
         </div>
 
+        {!showLocksmithVulaInterstitial ? (
         <div className="mt-5 flex items-center justify-between gap-3">
           <button
             type="button"
@@ -587,6 +649,7 @@ export default function BarkLeadForm({ onComplete, onCancel, preselectedCategory
             </button>
           )}
         </div>
+        ) : null}
       </div>
     </div>
   )

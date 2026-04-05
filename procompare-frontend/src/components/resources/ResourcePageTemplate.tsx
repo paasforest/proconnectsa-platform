@@ -65,6 +65,35 @@ function GuideInlineText({
   return <>{linkifyFirstOccurrences(text, state, safeRules)}</>
 }
 
+function isExternalHref(href: string) {
+  return /^https?:\/\//i.test(href)
+}
+
+function CtaLink({
+  href,
+  className,
+  children,
+  onClick,
+}: {
+  href: string
+  className: string
+  children: ReactNode
+  onClick?: () => void
+}) {
+  if (isExternalHref(href)) {
+    return (
+      <a href={href} className={className} onClick={onClick}>
+        {children}
+      </a>
+    )
+  }
+  return (
+    <Link href={href} className={className} onClick={onClick}>
+      {children}
+    </Link>
+  )
+}
+
 function truncate(text: string | undefined, maxChars: number) {
   if (text == null || text.length === 0) return ''
   if (text.length <= maxChars) return text
@@ -249,7 +278,7 @@ export function ResourcePageTemplate({ guide }: { guide: ResourceGuide }) {
             ) : null}
 
             <div className="flex flex-wrap gap-3">
-              <Link
+              <CtaLink
                 href={guide.ctaLink}
                 className="inline-flex items-center justify-center rounded-full bg-amber-500 hover:bg-amber-600 text-gray-900 font-bold px-6 py-3 shadow-sm transition-colors"
                 onClick={() =>
@@ -257,7 +286,7 @@ export function ResourcePageTemplate({ guide }: { guide: ResourceGuide }) {
                 }
               >
                 {heroCta} →
-              </Link>
+              </CtaLink>
             </div>
           </div>
         </div>
@@ -309,7 +338,7 @@ export function ResourcePageTemplate({ guide }: { guide: ResourceGuide }) {
               Prices reflect 2026 South African market rates. Actual quotes may vary by provider, location, and job complexity.
             </p>
             <p className="text-sm text-gray-700 mt-2">
-              <Link
+              <CtaLink
                 href={guide.ctaLink}
                 className="text-amber-700 hover:text-amber-800 hover:underline font-semibold"
                 onClick={() =>
@@ -321,7 +350,7 @@ export function ResourcePageTemplate({ guide }: { guide: ResourceGuide }) {
                 }
               >
                 {guide.quickPriceCtaLabel ?? 'Compare real quotes'} →
-              </Link>
+              </CtaLink>
             </p>
 
             {guide.monthlySavingsSection ? (
@@ -353,7 +382,7 @@ export function ResourcePageTemplate({ guide }: { guide: ResourceGuide }) {
                     </li>
                   ))}
                 </ul>
-                <Link
+                <CtaLink
                   href={guide.quoteComparisonBlock.buttonHref ?? guide.ctaLink}
                   className="inline-flex items-center justify-center rounded-full bg-amber-500 hover:bg-amber-600 text-gray-900 font-bold px-8 py-3.5 shadow-md transition-colors"
                   onClick={() =>
@@ -365,7 +394,7 @@ export function ResourcePageTemplate({ guide }: { guide: ResourceGuide }) {
                   }
                 >
                   {guide.quoteComparisonBlock.buttonLabel} →
-                </Link>
+                </CtaLink>
               </div>
             ) : null}
 
@@ -378,12 +407,21 @@ export function ResourcePageTemplate({ guide }: { guide: ResourceGuide }) {
                 <ul className="flex flex-wrap gap-x-4 gap-y-2">
                   {guide.localCostQuickLinks.links.map((l) => (
                     <li key={l.href}>
-                      <Link
-                        href={l.href}
-                        className="text-sm font-semibold text-amber-800 hover:text-amber-900 hover:underline"
-                      >
-                        {l.label}
-                      </Link>
+                      {isExternalHref(l.href) ? (
+                        <a
+                          href={l.href}
+                          className="text-sm font-semibold text-amber-800 hover:text-amber-900 hover:underline"
+                        >
+                          {l.label}
+                        </a>
+                      ) : (
+                        <Link
+                          href={l.href}
+                          className="text-sm font-semibold text-amber-800 hover:text-amber-900 hover:underline"
+                        >
+                          {l.label}
+                        </Link>
+                      )}
                     </li>
                   ))}
                 </ul>
@@ -519,7 +557,7 @@ export function ResourcePageTemplate({ guide }: { guide: ResourceGuide }) {
               {guide.footerCtaSupportingText ??
                 'Free, no obligation. Compare up to 3 verified quotes and choose the best fit for your budget.'}
             </p>
-            <Link
+            <CtaLink
               href={guide.ctaLink}
               className="inline-flex items-center justify-center rounded-full bg-amber-500 hover:bg-amber-600 text-gray-900 font-bold px-7 py-4 shadow-sm transition-colors"
               onClick={() =>
@@ -527,7 +565,7 @@ export function ResourcePageTemplate({ guide }: { guide: ResourceGuide }) {
               }
             >
               {footerCta} →
-            </Link>
+            </CtaLink>
           </div>
         </div>
       </section>
