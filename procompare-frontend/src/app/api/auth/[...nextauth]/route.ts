@@ -15,6 +15,7 @@ const handler = NextAuth({
         }
 
         try {
+          const emailNorm = credentials.email.trim().toLowerCase()
           // Use our secure proxy route instead of calling backend directly
           const response = await fetch(`${process.env.NEXTAUTH_URL}/api/backend-login`, {
             method: 'POST',
@@ -22,7 +23,7 @@ const handler = NextAuth({
               'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-              email: credentials.email,
+              email: emailNorm,
               password: credentials.password,
             }),
           })

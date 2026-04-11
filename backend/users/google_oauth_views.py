@@ -47,20 +47,23 @@ def google_oauth_callback(request):
                 {'error': 'Email is required'}, 
                 status=status.HTTP_400_BAD_REQUEST
             )
+
+        email = email.strip().lower()
         
-        # Check if user already exists
-        try:
-            user = User.objects.get(email=email)
+        # Check if user already exists (case-insensitive)
+        user = User.objects.filter(email__iexact=email).first()
+        if user:
             logger.info(f"Existing user found: {email}")
-        except User.DoesNotExist:
-            # Create new user
+        else:
+            # Create new user (password unusable until user sets one via Forgot password)
             user = User.objects.create_user(
                 username=email,
                 email=email,
+                password=None,
                 first_name=first_name,
                 last_name=last_name,
                 user_type='client',  # Default to client for Google OAuth
-                phone='',  # Will be filled later
+                phone=None,
                 is_email_verified=True,  # Google emails are pre-verified
             )
             logger.info(f"New Google OAuth user created: {email}")

@@ -1,6 +1,6 @@
 from rest_framework import serializers
-from django.contrib.auth import authenticate
 from django.contrib.auth.password_validation import validate_password
+from django.db.models import Q
 from .models import User, ProviderProfile, JobCategory, LeadClaim, MLPricingFactor
 from backend.leads.models import Lead
 from .input_validation import InputValidator
@@ -131,7 +131,24 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
     def validate(self, attrs):
         if attrs['password'] != attrs['password_confirm']:
             raise serializers.ValidationError("Passwords don't match")
-        
+
+        # Keep username aligned with email (both are the login identity) and lowercase
+        email = (attrs.get('email') or '').strip().lower()
+        if email:
+            attrs['email'] = email
+            if attrs.get('username'):
+                attrs['username'] = str(attrs['username']).strip().lower()
+            else:
+                attrs['username'] = email
+
+        # Case-insensitive duplicate check (username is typically the email)
+        if email and User.objects.filter(Q(email__iexact=email) | Q(username__iexact=attrs.get('username', email))).exists():
+            raise serializers.ValidationError({
+                'email': [
+                    'An account with this email already exists. Try logging in, or use Forgot password if you forgot your password.'
+                ]
+            })
+
         # Validate location data
         if 'city' in attrs or 'suburb' in attrs:
             try:
@@ -341,24 +358,33 @@ class UserLoginSerializer(serializers.Serializer):
     password = serializers.CharField()
     
     def validate(self, attrs):
-        email = attrs.get('email')
+        email_raw = attrs.get('email') or ''
         password = attrs.get('password')
-        
-        if email and password:
-            # Try to authenticate with email
-            try:
-                user = User.objects.get(email=email)
-                if user.check_password(password):
-                    if not user.is_active:
-                        raise serializers.ValidationError('User account is disabled')
-                    attrs['user'] = user
-                    return attrs
-                else:
-                    raise serializers.ValidationError('Invalid credentials')
-            except User.DoesNotExist:
-                raise serializers.ValidationError('Invalid credentials')
-        else:
-            raise serializers.ValidationError('Must include username and password')
+        email = email_raw.strip().lower()
+
+        if not email or not password:
+            raise serializers.ValidationError('Must include email and password')
+
+        # Case-insensitive lookup — registration stores lowercased email; login must match reliably
+        user = User.objects.filter(email__iexact=email).first()
+        if not user:
+            raise serializers.ValidationError('Invalid credentials')
+
+        if not user.is_active:
+            raise serializers.ValidationError('User account is disabled')
+
+        # OAuth / legacy accounts may have no password set — password login will always fail
+        if not user.has_usable_password():
+            raise serializers.ValidationError(
+                'This account has no password set yet. Use Forgot password to create one, '
+                'or sign in with Google if you used that before.'
+            )
+
+        if not user.check_password(password):
+            raise serializers.ValidationError('Invalid credentials')
+
+        attrs['user'] = user
+        return attrs
 
 
 class ProviderProfileSerializer(serializers.ModelSerializer):

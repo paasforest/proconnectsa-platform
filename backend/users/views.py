@@ -74,11 +74,17 @@ class UserLoginView(generics.GenericAPIView):
         serializer = self.get_serializer(data=request.data)
         
         if not serializer.is_valid():
-            # Return error in expected format for NextAuth
+            errors = serializer.errors
+            detail = None
+            if errors.get('non_field_errors'):
+                detail = errors['non_field_errors'][0]
+            elif isinstance(errors.get('email'), list) and errors['email']:
+                detail = errors['email'][0]
+            message = detail or 'Invalid email or password'
             return Response({
                 'success': False,
-                'message': 'Invalid email or password',
-                'errors': serializer.errors
+                'message': message,
+                'errors': errors
             }, status=status.HTTP_401_UNAUTHORIZED)
         
         user = serializer.validated_data['user']

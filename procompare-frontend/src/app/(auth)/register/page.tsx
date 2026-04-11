@@ -223,13 +223,14 @@ export default function RegisterPage() {
         return;
       }
 
+      const emailNorm = formData.email.trim().toLowerCase()
       const loginResponse = await fetch('https://api.proconnectsa.co.za/api/login/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          email: formData.email,
+          email: emailNorm,
           password: formData.password
         })
       });
@@ -292,10 +293,11 @@ export default function RegisterPage() {
     setLoading(true);
 
     try {
+      const emailNorm = formData.email.trim().toLowerCase()
       // Prepare data for API
       const apiData = {
-        username: formData.email,
-        email: formData.email,
+        username: emailNorm,
+        email: emailNorm,
         password: formData.password,
         password_confirm: formData.password_confirm,
         first_name: formData.first_name,

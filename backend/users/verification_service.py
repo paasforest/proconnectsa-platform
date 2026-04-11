@@ -294,10 +294,10 @@ class VerificationService:
     def initiate_password_reset(self, email: str, method: str = 'email') -> Dict:
         """Initiate password reset via email or SMS"""
         try:
-            # Find user by email
-            try:
-                user = User.objects.get(email=email, is_active=True)
-            except User.DoesNotExist:
+            # Find user by email (case-insensitive — must match login behaviour)
+            email_norm = (email or '').strip().lower()
+            user = User.objects.filter(email__iexact=email_norm, is_active=True).first()
+            if not user:
                 # Don't reveal if email exists for security
                 return {
                     'success': True,
@@ -373,7 +373,14 @@ class VerificationService:
     def verify_password_reset_code(self, email: str, code: str, token: str) -> Dict:
         """Verify password reset code"""
         try:
-            cache_key = self._get_cache_key('password_reset', email)
+            email_norm = (email or '').strip().lower()
+            user = User.objects.filter(email__iexact=email_norm).first()
+            if not user:
+                return {
+                    'success': False,
+                    'error': 'Reset code expired or invalid'
+                }
+            cache_key = self._get_cache_key('password_reset', user.email)
             reset_data = self._get_verification_data(cache_key)
             
             if not reset_data:
@@ -421,7 +428,14 @@ class VerificationService:
     def reset_password(self, email: str, new_password: str, token: str) -> Dict:
         """Reset user password after verification"""
         try:
-            cache_key = self._get_cache_key('password_reset', email)
+            email_norm = (email or '').strip().lower()
+            user_lookup = User.objects.filter(email__iexact=email_norm).first()
+            if not user_lookup:
+                return {
+                    'success': False,
+                    'error': 'Password reset not verified or expired'
+                }
+            cache_key = self._get_cache_key('password_reset', user_lookup.email)
             reset_data = self._get_verification_data(cache_key)
             
             if not reset_data or not reset_data.get('verified'):
