@@ -69,7 +69,7 @@ export default function ResetPasswordPage() {
       
       // Redirect to login after 3 seconds
       setTimeout(() => {
-        router.push('/login')
+        router.push('/register')
       }, 3000)
       
     } catch (error) {
@@ -81,18 +81,18 @@ export default function ResetPasswordPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+      <div className="w-full flex flex-col items-center justify-center py-16">
+        <div className="animate-spin rounded-full h-8 w-8 border-2 border-primary border-t-transparent" aria-hidden />
       </div>
     )
   }
 
   if (!token) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
-        <Card className="w-full max-w-md">
+      <div className="w-full max-w-md mx-auto px-4 py-4">
+        <Card className="w-full border-border shadow-sm">
           <CardHeader>
-            <CardTitle className="text-center text-red-600">Invalid Reset Link</CardTitle>
+            <CardTitle className="text-center text-destructive">Invalid reset link</CardTitle>
             <CardDescription className="text-center">
               This password reset link is invalid or has expired.
             </CardDescription>
@@ -101,11 +101,11 @@ export default function ResetPasswordPage() {
             <Alert>
               <AlertCircle className="h-4 w-4" />
               <AlertDescription>
-                Please request a new password reset link from the login page.
+                Please request a new password reset link from the sign-in page.
               </AlertDescription>
             </Alert>
             <Button asChild className="w-full">
-              <Link href="/login">Back to Login</Link>
+              <Link href="/register">Back to sign in</Link>
             </Button>
           </CardContent>
         </Card>
@@ -115,20 +115,20 @@ export default function ResetPasswordPage() {
 
   if (isSuccess) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
-        <Card className="w-full max-w-md">
+      <div className="w-full max-w-md mx-auto px-4 py-4">
+        <Card className="w-full border-border shadow-sm">
           <CardHeader>
-            <CardTitle className="text-center text-green-600 flex items-center justify-center gap-2">
+            <CardTitle className="text-center text-primary flex items-center justify-center gap-2">
               <CheckCircle className="h-6 w-6" />
-              Password Reset Successful
+              Password reset successful
             </CardTitle>
             <CardDescription className="text-center">
-              Your password has been reset successfully. You will be redirected to the login page.
+              Your password has been reset. You will be redirected to sign in.
             </CardDescription>
           </CardHeader>
           <CardContent>
             <Button asChild className="w-full">
-              <Link href="/login">Continue to Login</Link>
+              <Link href="/register">Continue to sign in</Link>
             </Button>
           </CardContent>
         </Card>
@@ -137,10 +137,21 @@ export default function ResetPasswordPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
-      <Card className="w-full max-w-md">
+    <div className="w-full max-w-md mx-auto px-4 py-4 space-y-6">
+      <div className="text-center">
+        <Link
+          href="/"
+          className="inline-flex items-center justify-center gap-2 mb-2 rounded-lg outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+        >
+          <div className="h-10 w-10 rounded-lg bg-primary flex items-center justify-center">
+            <span className="text-primary-foreground font-bold text-xl">P</span>
+          </div>
+          <span className="font-bold text-2xl text-foreground">ProConnectSA</span>
+        </Link>
+      </div>
+      <Card className="w-full border-border shadow-sm">
         <CardHeader>
-          <CardTitle className="text-2xl text-center">Reset Your Password</CardTitle>
+          <CardTitle className="text-2xl text-center">Reset your password</CardTitle>
           <CardDescription className="text-center">
             Enter your new password below
           </CardDescription>
@@ -156,7 +167,7 @@ export default function ResetPasswordPage() {
                 disabled={isSubmitting}
               />
               {errors.password && (
-                <p className="text-sm text-red-600">{errors.password.message}</p>
+                <p className="text-sm text-destructive">{errors.password.message}</p>
               )}
             </div>
             
@@ -169,7 +180,7 @@ export default function ResetPasswordPage() {
                 disabled={isSubmitting}
               />
               {errors.confirmPassword && (
-                <p className="text-sm text-red-600">{errors.confirmPassword.message}</p>
+                <p className="text-sm text-destructive">{errors.confirmPassword.message}</p>
               )}
             </div>
             
@@ -187,7 +198,7 @@ export default function ResetPasswordPage() {
           
           <div className="mt-4 text-center">
             <Button variant="link" asChild>
-              <Link href="/login">Back to Login</Link>
+              <Link href="/register">Back to sign in</Link>
             </Button>
           </div>
         </CardContent>

@@ -12,10 +12,10 @@ export default function LoginRedirect() {
   }, [router]);
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+    <div className="w-full flex flex-col items-center justify-center py-16 px-4">
       <div className="text-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-600 mx-auto"></div>
-        <p className="mt-4 text-gray-600">Redirecting to login...</p>
+        <div className="animate-spin rounded-full h-8 w-8 border-2 border-primary border-t-transparent mx-auto" aria-hidden />
+        <p className="mt-4 text-muted-foreground">Redirecting to sign in…</p>
       </div>
     </div>
   );

@@ -423,7 +423,7 @@ export default function RegisterPage() {
       <div className="text-center mb-8">
         <h2 className="text-3xl font-bold text-gray-900 mb-2">
           Join{' '}
-          <span className="bg-gradient-to-r from-emerald-600 to-blue-600 bg-clip-text text-transparent">
+          <span className="bg-gradient-to-r from-primary to-blue-600 bg-clip-text text-transparent">
             ProConnectSA
           </span>
         </h2>
@@ -441,7 +441,7 @@ export default function RegisterPage() {
             name="first_name"
             type="text"
             required
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 focus:bg-white focus:text-gray-900 transition-colors bg-white text-gray-900 placeholder-gray-500 focus:outline-none"
+            className="w-full px-4 py-3 border border-input rounded-lg focus:ring-2 focus:ring-ring focus:border-primary transition-colors bg-background text-foreground placeholder:text-muted-foreground focus:outline-none"
             placeholder="First Name"
             value={formData.first_name}
             onChange={handleChange}
@@ -456,7 +456,7 @@ export default function RegisterPage() {
             name="last_name"
             type="text"
             required
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 focus:bg-white focus:text-gray-900 transition-colors bg-white text-gray-900 placeholder-gray-500 focus:outline-none"
+            className="w-full px-4 py-3 border border-input rounded-lg focus:ring-2 focus:ring-ring focus:border-primary transition-colors bg-background text-foreground placeholder:text-muted-foreground focus:outline-none"
             placeholder="Last Name"
             value={formData.last_name}
             onChange={handleChange}
@@ -473,7 +473,7 @@ export default function RegisterPage() {
           type="email"
           required
           autoComplete="email"
-          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 focus:bg-white focus:text-gray-900 transition-colors bg-white text-gray-900 placeholder-gray-500 focus:outline-none"
+          className="w-full px-4 py-3 border border-input rounded-lg focus:ring-2 focus:ring-ring focus:border-primary transition-colors bg-background text-foreground placeholder:text-muted-foreground focus:outline-none"
           placeholder="your@email.com"
           value={formData.email}
           onChange={handleChange}
@@ -491,7 +491,7 @@ export default function RegisterPage() {
             type={showPassword ? "text" : "password"}
             required
             autoComplete="new-password"
-            className="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 focus:bg-white focus:text-gray-900 transition-colors bg-white text-gray-900 placeholder-gray-500 focus:outline-none"
+            className="w-full px-4 py-3 pr-12 border border-input rounded-lg focus:ring-2 focus:ring-ring focus:border-primary transition-colors bg-background text-foreground placeholder:text-muted-foreground focus:outline-none"
             placeholder="Password (min 6 characters)"
             value={formData.password}
             onChange={handleChange}
@@ -526,7 +526,7 @@ export default function RegisterPage() {
             type={showPasswordConfirm ? "text" : "password"}
             required
             autoComplete="new-password"
-            className="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 focus:bg-white focus:text-gray-900 transition-colors bg-white text-gray-900 placeholder-gray-500 focus:outline-none"
+            className="w-full px-4 py-3 pr-12 border border-input rounded-lg focus:ring-2 focus:ring-ring focus:border-primary transition-colors bg-background text-foreground placeholder:text-muted-foreground focus:outline-none"
             placeholder="Confirm Password"
             value={formData.password_confirm}
             onChange={handleChange}
@@ -562,8 +562,8 @@ export default function RegisterPage() {
             onClick={() => setFormData({...formData, user_type: 'client'})}
             className={`p-4 border-2 rounded-lg text-center transition-colors ${
               formData.user_type === 'client'
-                ? 'border-emerald-500 bg-emerald-50 text-emerald-700'
-                : 'border-gray-300 hover:border-gray-400'
+                ? 'border-primary bg-primary/5 text-primary'
+                : 'border-input hover:border-primary/40'
             }`}
           >
             <div className="text-2xl mb-2">👤</div>
@@ -576,8 +576,8 @@ export default function RegisterPage() {
             onClick={() => setFormData({...formData, user_type: 'provider'})}
             className={`p-4 border-2 rounded-lg text-center transition-colors ${
               formData.user_type === 'provider'
-                ? 'border-emerald-500 bg-emerald-50 text-emerald-700'
-                : 'border-gray-300 hover:border-gray-400'
+                ? 'border-primary bg-primary/5 text-primary'
+                : 'border-input hover:border-primary/40'
             }`}
           >
             <div className="text-2xl mb-2">🔧</div>
@@ -594,7 +594,7 @@ export default function RegisterPage() {
             <input
               name="phone_number"
               type="tel"
-          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 focus:bg-white focus:text-gray-900 transition-colors bg-white text-gray-900 placeholder-gray-500 focus:outline-none"
+          className="w-full px-4 py-3 border border-input rounded-lg focus:ring-2 focus:ring-ring focus:border-primary transition-colors bg-background text-foreground placeholder:text-muted-foreground focus:outline-none"
           placeholder="e.g., 0812345678 or +27812345678"
               value={formData.phone_number}
           onChange={handlePhoneChange}
@@ -602,7 +602,7 @@ export default function RegisterPage() {
             />
         <p className="text-xs text-gray-500 mt-1">
           Format: +27XXXXXXXXX (South African mobile number)
-          {formData.phone_number && <span className="ml-2 font-medium text-emerald-600">✓ {formData.phone_number}</span>}
+          {formData.phone_number && <span className="ml-2 font-medium text-primary">✓ {formData.phone_number}</span>}
         </p>
       </div>
 
@@ -615,7 +615,7 @@ export default function RegisterPage() {
           name="city"
           type="text"
             required
-          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 focus:bg-white focus:text-gray-900 transition-colors bg-white text-gray-900 placeholder-gray-500 focus:outline-none"
+          className="w-full px-4 py-3 border border-input rounded-lg focus:ring-2 focus:ring-ring focus:border-primary transition-colors bg-background text-foreground placeholder:text-muted-foreground focus:outline-none"
           placeholder="City"
           value={formData.city}
           onChange={handleChange}
@@ -630,7 +630,7 @@ export default function RegisterPage() {
             name="suburb"
             type="text"
             required
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 focus:bg-white focus:text-gray-900 transition-colors bg-white text-gray-900 placeholder-gray-500 focus:outline-none"
+            className="w-full px-4 py-3 border border-input rounded-lg focus:ring-2 focus:ring-ring focus:border-primary transition-colors bg-background text-foreground placeholder:text-muted-foreground focus:outline-none"
             placeholder="Suburb"
             value={formData.suburb}
             onChange={handleChange}
@@ -645,7 +645,7 @@ export default function RegisterPage() {
         <select
           name="province"
           required
-          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 focus:bg-white focus:text-gray-900 transition-colors bg-white text-gray-900 placeholder-gray-500 focus:outline-none"
+          className="w-full px-4 py-3 border border-input rounded-lg focus:ring-2 focus:ring-ring focus:border-primary transition-colors bg-background text-foreground placeholder:text-muted-foreground focus:outline-none"
           value={formData.province}
           onChange={handleChange}
         >
@@ -667,10 +667,10 @@ export default function RegisterPage() {
               required
               checked={formData.terms_accepted}
               onChange={handleChange}
-              className="mt-1 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500"
+              className="mt-1 rounded border-input text-primary focus:ring-ring"
             />
             <span className="text-sm text-gray-700">
-              I have read and agree to the <a href="/how-it-works" target="_blank" className="text-emerald-600 hover:underline">Terms of Service</a> *
+              I have read and agree to the <a href="/how-it-works" target="_blank" className="text-primary hover:underline">Terms of Service</a> *
             </span>
           </label>
           
@@ -681,10 +681,10 @@ export default function RegisterPage() {
               required
               checked={formData.privacy_accepted}
               onChange={handleChange}
-              className="mt-1 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500"
+              className="mt-1 rounded border-input text-primary focus:ring-ring"
             />
             <span className="text-sm text-gray-700">
-              I have read and agree to the <a href="/how-it-works" target="_blank" className="text-emerald-600 hover:underline">Privacy Policy</a> *
+              I have read and agree to the <a href="/how-it-works" target="_blank" className="text-primary hover:underline">Privacy Policy</a> *
             </span>
           </label>
         </div>
@@ -698,7 +698,7 @@ export default function RegisterPage() {
       <div className="text-center mb-8">
         <h2 className="text-3xl font-bold text-gray-900 mb-2">
           Welcome back to{' '}
-          <span className="bg-gradient-to-r from-emerald-600 to-blue-600 bg-clip-text text-transparent">
+          <span className="bg-gradient-to-r from-primary to-blue-600 bg-clip-text text-transparent">
             ProConnectSA
           </span>
         </h2>
@@ -716,7 +716,7 @@ export default function RegisterPage() {
           type="email"
           required
           autoComplete="username"
-          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 focus:bg-white focus:text-gray-900 transition-colors bg-white text-gray-900 placeholder-gray-500 focus:outline-none"
+          className="w-full px-4 py-3 border border-input rounded-lg focus:ring-2 focus:ring-ring focus:border-primary transition-colors bg-background text-foreground placeholder:text-muted-foreground focus:outline-none"
           placeholder="your@email.com"
           value={formData.email}
           onChange={handleChange}
@@ -733,7 +733,7 @@ export default function RegisterPage() {
             type={showLoginPassword ? "text" : "password"}
             required
             autoComplete="current-password"
-            className="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 focus:bg-white focus:text-gray-900 transition-colors bg-white text-gray-900 placeholder-gray-500 focus:outline-none"
+            className="w-full px-4 py-3 pr-12 border border-input rounded-lg focus:ring-2 focus:ring-ring focus:border-primary transition-colors bg-background text-foreground placeholder:text-muted-foreground focus:outline-none"
             placeholder="Your password"
             value={formData.password}
             onChange={handleChange}
@@ -764,7 +764,7 @@ export default function RegisterPage() {
             id="remember-me"
             name="remember-me"
             type="checkbox"
-            className="h-4 w-4 text-emerald-600 focus:ring-emerald-500 border-gray-300 rounded"
+            className="h-4 w-4 text-primary focus:ring-ring border-input rounded"
           />
           <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-700">
             Remember me
@@ -775,7 +775,7 @@ export default function RegisterPage() {
           <button
             type="button"
             onClick={() => setShowForgotPassword(true)}
-            className="font-medium text-emerald-600 hover:text-emerald-700 transition-colors"
+            className="font-medium text-primary hover:text-primary/90 transition-colors"
           >
             Forgot your password?
           </button>
@@ -789,7 +789,7 @@ export default function RegisterPage() {
       <div className="text-center mb-8">
         <h2 className="text-3xl font-bold text-gray-900 mb-2">
           Complete Your{' '}
-          <span className="bg-gradient-to-r from-emerald-600 to-blue-600 bg-clip-text text-transparent">
+          <span className="bg-gradient-to-r from-primary to-blue-600 bg-clip-text text-transparent">
             Professional Profile
           </span>
         </h2>
@@ -799,9 +799,9 @@ export default function RegisterPage() {
       </div>
 
       {/* Business Information */}
-      <div className="bg-gradient-to-br from-emerald-50 to-blue-50 p-6 rounded-xl border border-emerald-200">
+      <div className="bg-muted/40 p-6 rounded-xl border border-border">
         <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
-          <span className="w-2 h-2 bg-emerald-500 rounded-full mr-2"></span>
+          <span className="w-2 h-2 bg-primary rounded-full mr-2"></span>
           Business Information
         </h3>
 
@@ -813,7 +813,7 @@ export default function RegisterPage() {
           name="business_name"
           type="text"
           required
-          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 focus:bg-white focus:text-gray-900 transition-colors bg-white text-gray-900 placeholder-gray-500 focus:outline-none"
+          className="w-full px-4 py-3 border border-input rounded-lg focus:ring-2 focus:ring-ring focus:border-primary transition-colors bg-background text-foreground placeholder:text-muted-foreground focus:outline-none"
           placeholder="Your business name"
           value={formData.business_name}
           onChange={handleChange}
@@ -828,7 +828,7 @@ export default function RegisterPage() {
             name="business_address"
             rows={2}
           required
-          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 focus:bg-white focus:text-gray-900 transition-colors bg-white text-gray-900 placeholder-gray-500 focus:outline-none"
+          className="w-full px-4 py-3 border border-input rounded-lg focus:ring-2 focus:ring-ring focus:border-primary transition-colors bg-background text-foreground placeholder:text-muted-foreground focus:outline-none"
             placeholder="Full business address"
             value={formData.business_address}
           onChange={handleChange}
@@ -843,7 +843,7 @@ export default function RegisterPage() {
             <input
               name="business_phone"
               type="tel"
-          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 focus:bg-white focus:text-gray-900 transition-colors bg-white text-gray-900 placeholder-gray-500 focus:outline-none"
+          className="w-full px-4 py-3 border border-input rounded-lg focus:ring-2 focus:ring-ring focus:border-primary transition-colors bg-background text-foreground placeholder:text-muted-foreground focus:outline-none"
               placeholder="Business phone number"
               value={formData.business_phone}
           onChange={handleChange}
@@ -857,7 +857,7 @@ export default function RegisterPage() {
             <input
               name="business_email"
               type="email"
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 focus:bg-white focus:text-gray-900 transition-colors bg-white text-gray-900 placeholder-gray-500 focus:outline-none"
+              className="w-full px-4 py-3 border border-input rounded-lg focus:ring-2 focus:ring-ring focus:border-primary transition-colors bg-background text-foreground placeholder:text-muted-foreground focus:outline-none"
               placeholder="Business email"
               value={formData.business_email}
               onChange={handleChange}
@@ -867,7 +867,7 @@ export default function RegisterPage() {
       </div>
 
       {/* Service Information */}
-      <div className="bg-blue-50 p-4 rounded-lg">
+      <div className="bg-muted/40 p-4 rounded-lg border border-border">
         <h3 className="text-lg font-semibold text-gray-800 mb-4">Service Information</h3>
         
         <div>
@@ -877,7 +877,7 @@ export default function RegisterPage() {
             <select
             name="primary_service"
             required
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 focus:bg-white focus:text-gray-900 transition-colors bg-white text-gray-900 placeholder-gray-500 focus:outline-none"
+            className="w-full px-4 py-3 border border-input rounded-lg focus:ring-2 focus:ring-ring focus:border-primary transition-colors bg-background text-foreground placeholder:text-muted-foreground focus:outline-none"
             value={formData.primary_service}
               onChange={handleChange}
             >
@@ -894,7 +894,7 @@ export default function RegisterPage() {
           </label>
           <div className="grid grid-cols-2 gap-2">
             {serviceCategories.map((category) => (
-              <label key={category} className="flex items-center p-2 rounded hover:bg-gray-50 cursor-pointer">
+              <label key={category} className="flex items-center p-2 rounded hover:bg-muted/50 cursor-pointer">
             <input
                   type="checkbox"
                   value={category}
@@ -924,7 +924,7 @@ export default function RegisterPage() {
                       });
                     }
                   }}
-                  className="mr-3 w-4 h-4 text-emerald-600 bg-gray-100 border-gray-300 rounded focus:ring-emerald-500 focus:ring-2"
+                  className="mr-3 w-4 h-4 text-primary bg-muted border-input rounded focus:ring-ring focus:ring-2"
                 />
                 <span className="text-sm text-gray-700 font-medium">{category}</span>
               </label>
@@ -972,7 +972,7 @@ export default function RegisterPage() {
           <select
             name="max_travel_distance"
             required
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 focus:bg-white focus:text-gray-900 transition-colors bg-white text-gray-900 placeholder-gray-500 focus:outline-none"
+            className="w-full px-4 py-3 border border-input rounded-lg focus:ring-2 focus:ring-ring focus:border-primary transition-colors bg-background text-foreground placeholder:text-muted-foreground focus:outline-none"
             value={formData.max_travel_distance}
             onChange={handleChange}
           >
@@ -992,7 +992,7 @@ export default function RegisterPage() {
           <select
             name="years_experience"
             required
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 focus:bg-white focus:text-gray-900 transition-colors bg-white text-gray-900 placeholder-gray-500 focus:outline-none"
+            className="w-full px-4 py-3 border border-input rounded-lg focus:ring-2 focus:ring-ring focus:border-primary transition-colors bg-background text-foreground placeholder:text-muted-foreground focus:outline-none"
             value={formData.years_experience}
             onChange={handleChange}
           >
@@ -1011,7 +1011,7 @@ export default function RegisterPage() {
           name="service_description"
           rows={3}
             required
-          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 focus:bg-white focus:text-gray-900 transition-colors bg-white text-gray-900 placeholder-gray-500 focus:outline-none"
+          className="w-full px-4 py-3 border border-input rounded-lg focus:ring-2 focus:ring-ring focus:border-primary transition-colors bg-background text-foreground placeholder:text-muted-foreground focus:outline-none"
             placeholder="Describe your services and expertise"
           value={formData.service_description}
           onChange={handleChange}
@@ -1032,7 +1032,7 @@ export default function RegisterPage() {
               name="hourly_rate_min"
               type="number"
               step="0.01"
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 focus:bg-white focus:text-gray-900 transition-colors bg-white text-gray-900 placeholder-gray-500 focus:outline-none"
+            className="w-full px-4 py-3 border border-input rounded-lg focus:ring-2 focus:ring-ring focus:border-primary transition-colors bg-background text-foreground placeholder:text-muted-foreground focus:outline-none"
               placeholder="150.00"
               value={formData.hourly_rate_min}
             onChange={handleChange}
@@ -1047,7 +1047,7 @@ export default function RegisterPage() {
               name="hourly_rate_max"
               type="number"
               step="0.01"
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 focus:bg-white focus:text-gray-900 transition-colors bg-white text-gray-900 placeholder-gray-500 focus:outline-none"
+            className="w-full px-4 py-3 border border-input rounded-lg focus:ring-2 focus:ring-ring focus:border-primary transition-colors bg-background text-foreground placeholder:text-muted-foreground focus:outline-none"
               placeholder="300.00"
               value={formData.hourly_rate_max}
             onChange={handleChange}
@@ -1063,7 +1063,7 @@ export default function RegisterPage() {
             name="minimum_job_value"
             type="number"
             step="0.01"
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 focus:bg-white focus:text-gray-900 transition-colors bg-white text-gray-900 placeholder-gray-500 focus:outline-none"
+            className="w-full px-4 py-3 border border-input rounded-lg focus:ring-2 focus:ring-ring focus:border-primary transition-colors bg-background text-foreground placeholder:text-muted-foreground focus:outline-none"
             placeholder="500.00"
             value={formData.minimum_job_value}
             onChange={handleChange}
@@ -1072,14 +1072,14 @@ export default function RegisterPage() {
       </div>
 
       {/* Note: Terms & Conditions already accepted in Step 1 */}
-      <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-4 mt-6">
+      <div className="bg-primary/5 border border-primary/20 rounded-lg p-4 mt-6">
         <div className="flex items-start">
-          <svg className="w-5 h-5 text-emerald-600 mt-0.5 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+          <svg className="w-5 h-5 text-primary mt-0.5 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
             <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
           </svg>
           <div>
-            <p className="text-sm font-medium text-emerald-800">Terms & Conditions Accepted</p>
-            <p className="text-xs text-emerald-700 mt-1">You accepted the Terms of Service and Privacy Policy in Step 1.</p>
+            <p className="text-sm font-medium text-foreground">Terms & Conditions Accepted</p>
+            <p className="text-xs text-muted-foreground mt-1">You accepted the Terms of Service and Privacy Policy in Step 1.</p>
           </div>
         </div>
       </div>
@@ -1087,24 +1087,29 @@ export default function RegisterPage() {
   );
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-blue-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+    <div className="w-full flex flex-col justify-center py-4 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <div className="text-center">
-          <h1 className="text-4xl font-bold text-gray-900 mb-2">
-            <span className="text-emerald-600">ProConnect</span>
-            <span className="text-gray-900">SA</span>
-              </h1>
-          <p className="text-lg text-gray-600">
-            South Africa's Premium Service Marketplace
+          <Link
+            href="/"
+            className="inline-flex items-center justify-center gap-2 mb-3 rounded-lg outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+          >
+            <div className="h-10 w-10 rounded-lg bg-primary flex items-center justify-center">
+              <span className="text-primary-foreground font-bold text-xl">P</span>
+            </div>
+            <span className="font-bold text-2xl text-foreground">ProConnectSA</span>
+          </Link>
+          <p className="text-lg text-muted-foreground">
+            South Africa&apos;s trusted service marketplace
           </p>
-          </div>
         </div>
+      </div>
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="bg-white py-8 px-4 shadow-2xl border border-gray-200 sm:rounded-2xl sm:px-10">
+        <div className="bg-white py-8 px-4 shadow-sm border border-border sm:rounded-2xl sm:px-10">
           {/* Auth Mode Tabs */}
           <div className="mb-8">
-            <div className="flex bg-gradient-to-r from-emerald-50 to-blue-50 rounded-xl p-1 border border-emerald-200">
+            <div className="flex rounded-xl p-1 border border-border bg-muted/40">
               <button
                 type="button"
                 onClick={() => {
@@ -1119,8 +1124,8 @@ export default function RegisterPage() {
                 }}
                 className={`flex-1 py-3 px-6 text-sm font-semibold rounded-lg transition-all duration-200 ${
                   authMode === 'login'
-                    ? 'bg-white text-emerald-700 shadow-lg border border-emerald-200'
-                    : 'text-gray-600 hover:text-emerald-700 hover:bg-white/50'
+                    ? 'bg-background text-primary shadow-sm border border-border'
+                    : 'text-muted-foreground hover:text-foreground hover:bg-background/60'
                 }`}
               >
                 Sign In
@@ -1136,8 +1141,8 @@ export default function RegisterPage() {
                 }}
                 className={`flex-1 py-3 px-6 text-sm font-semibold rounded-lg transition-all duration-200 ${
                   authMode === 'signup'
-                    ? 'bg-white text-emerald-700 shadow-lg border border-emerald-200'
-                    : 'text-gray-600 hover:text-emerald-700 hover:bg-white/50'
+                    ? 'bg-background text-primary shadow-sm border border-border'
+                    : 'text-muted-foreground hover:text-foreground hover:bg-background/60'
                 }`}
               >
                 Sign Up
@@ -1149,23 +1154,23 @@ export default function RegisterPage() {
           {authMode === 'signup' && (
                 <div className="mb-8">
               <div className="flex items-center justify-center space-x-4">
-                <div className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold shadow-lg ${
+                <div className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold shadow-sm ${
                   currentStep >= 1 
-                    ? 'bg-gradient-to-r from-emerald-500 to-emerald-600 text-white' 
-                    : 'bg-gray-200 text-gray-500'
+                    ? 'bg-primary text-primary-foreground' 
+                    : 'bg-muted text-muted-foreground'
                 }`}>
                   1
                   </div>
-                <div className={`w-20 h-2 rounded-full ${currentStep >= 2 ? 'bg-gradient-to-r from-emerald-500 to-emerald-600' : 'bg-gray-200'}`}></div>
-                <div className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold shadow-lg ${
+                <div className={`w-20 h-2 rounded-full ${currentStep >= 2 ? 'bg-primary' : 'bg-muted'}`}></div>
+                <div className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold shadow-sm ${
                   currentStep >= 2 
-                    ? 'bg-gradient-to-r from-emerald-500 to-emerald-600 text-white' 
-                    : 'bg-gray-200 text-gray-500'
+                    ? 'bg-primary text-primary-foreground' 
+                    : 'bg-muted text-muted-foreground'
                 }`}>
                   2
                 </div>
               </div>
-              <div className="flex justify-between mt-3 text-sm font-medium text-gray-600">
+              <div className="flex justify-between mt-3 text-sm font-medium text-muted-foreground">
                 <span>Basic Info</span>
                 <span>{formData.user_type === 'provider' ? 'Provider Details' : 'Complete'}</span>
                   </div>
@@ -1195,15 +1200,15 @@ export default function RegisterPage() {
               )}
 
               {message && (
-            <div className="mb-6 p-6 bg-blue-50 border-2 border-blue-200 rounded-lg shadow-md">
+            <div className="mb-6 p-6 bg-muted/50 border border-border rounded-lg">
               <div className="flex items-center">
                 <div className="flex-shrink-0">
-                  <svg className="h-6 w-6 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <svg className="h-6 w-6 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                 </div>
                 <div className="ml-3">
-                  <p className="text-sm font-medium text-blue-800">{message}</p>
+                  <p className="text-sm font-medium text-foreground">{message}</p>
                 </div>
               </div>
                 </div>
@@ -1225,7 +1230,7 @@ export default function RegisterPage() {
                     <button
                       type="button"
                   onClick={() => setCurrentStep(currentStep - 1)}
-                  className="px-6 py-3 text-sm font-semibold text-gray-700 bg-white border border-gray-300 rounded-xl hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-emerald-500 shadow-sm transition-all duration-200"
+                  className="px-6 py-3 text-sm font-semibold text-foreground bg-background border border-border rounded-xl hover:bg-muted focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 shadow-sm transition-all duration-200"
                     >
                       Previous
                     </button>
@@ -1236,10 +1241,10 @@ export default function RegisterPage() {
                   <button
                     type="submit"
                     disabled={loading}
-                    className="px-8 py-3 text-sm font-semibold text-white bg-gradient-to-r from-emerald-600 to-emerald-700 rounded-xl hover:from-emerald-700 hover:to-emerald-800 focus:outline-none focus:ring-2 focus:ring-emerald-500 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center shadow-lg transition-all duration-200"
+                    className="px-8 py-3 text-sm font-semibold text-primary-foreground bg-primary rounded-xl hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center shadow-sm transition-all duration-200"
                   >
                     {loading && (
-                      <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+                      <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-primary-foreground" fill="none" viewBox="0 0 24 24">
                         <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                         <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                       </svg>
@@ -1254,7 +1259,7 @@ export default function RegisterPage() {
                         setCurrentStep(2);
                       }
                     }}
-                    className="px-8 py-3 text-sm font-semibold text-white bg-gradient-to-r from-emerald-600 to-emerald-700 rounded-xl hover:from-emerald-700 hover:to-emerald-800 focus:outline-none focus:ring-2 focus:ring-emerald-500 shadow-lg transition-all duration-200"
+                    className="px-8 py-3 text-sm font-semibold text-primary-foreground bg-primary rounded-xl hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 shadow-sm transition-all duration-200"
                   >
                     Next
                   </button>
@@ -1262,10 +1267,10 @@ export default function RegisterPage() {
                   <button
                     type="submit"
                     disabled={loading}
-                    className="px-8 py-3 text-sm font-semibold text-white bg-gradient-to-r from-emerald-600 to-emerald-700 rounded-xl hover:from-emerald-700 hover:to-emerald-800 focus:outline-none focus:ring-2 focus:ring-emerald-500 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center shadow-lg transition-all duration-200"
+                    className="px-8 py-3 text-sm font-semibold text-primary-foreground bg-primary rounded-xl hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center shadow-sm transition-all duration-200"
                   >
                     {loading && (
-                      <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+                      <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-primary-foreground" fill="none" viewBox="0 0 24 24">
                         <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                         <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                       </svg>
@@ -1290,7 +1295,7 @@ export default function RegisterPage() {
                     setSuccess('');
                     setMessage('');
                   }}
-                  className="font-semibold text-emerald-600 hover:text-emerald-700 transition-colors"
+                  className="font-semibold text-primary hover:text-primary/90 transition-colors"
                 >
                   Sign up here
                 </button>
@@ -1310,7 +1315,7 @@ export default function RegisterPage() {
                     }
                     setMessage('');
                   }}
-                  className="font-semibold text-emerald-600 hover:text-emerald-700 transition-colors"
+                  className="font-semibold text-primary hover:text-primary/90 transition-colors"
                 >
                     Sign in here
                 </button>

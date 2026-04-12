@@ -63,24 +63,23 @@ export default function ForgotPasswordPage() {
 
   if (success) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 py-12 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-md w-full space-y-8">
+      <div className="w-full max-w-md mx-auto px-4 sm:px-6 py-4 space-y-8">
           <div className="text-center">
-            <div className="flex items-center justify-center space-x-2 mb-4">
-              <div className="h-8 w-8 rounded-lg bg-emerald-600 flex items-center justify-center">
-                <span className="text-white font-bold text-lg">P</span>
+            <Link
+              href="/"
+              className="inline-flex items-center justify-center gap-2 mb-4 rounded-lg outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+            >
+              <div className="h-10 w-10 rounded-lg bg-primary flex items-center justify-center">
+                <span className="text-primary-foreground font-bold text-xl">P</span>
               </div>
-              <span className="font-bold text-2xl">
-                <span className="text-emerald-600">ProConnect</span>
-                <span className="text-gray-900">SA</span>
-              </span>
-            </div>
+              <span className="font-bold text-2xl text-foreground">ProConnectSA</span>
+            </Link>
           </div>
 
-          <Card>
+          <Card className="border-border shadow-sm">
             <CardHeader className="text-center">
-              <div className="mx-auto w-12 h-12 bg-emerald-100 dark:bg-emerald-900 rounded-full flex items-center justify-center mb-4">
-                <Mail className="h-6 w-6 text-emerald-600" />
+              <div className="mx-auto w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mb-4">
+                <Mail className="h-6 w-6 text-primary" />
               </div>
               <CardTitle>Check your email</CardTitle>
               <CardDescription>
@@ -96,42 +95,40 @@ export default function ForgotPasswordPage() {
               </Alert>
               
               <div className="text-center space-y-2">
-                <Link href="/login">
+                <Link href="/register">
                   <Button variant="outline" className="w-full">
                     <ArrowLeft className="mr-2 h-4 w-4" />
-                    Back to login
+                    Back to sign in
                   </Button>
                 </Link>
               </div>
             </CardContent>
           </Card>
-        </div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
+    <div className="w-full max-w-md mx-auto px-4 sm:px-6 py-4 space-y-8">
         <div className="text-center">
-          <div className="flex items-center justify-center space-x-2 mb-4">
-            <div className="h-8 w-8 rounded-lg bg-emerald-600 flex items-center justify-center">
-              <span className="text-white font-bold text-lg">P</span>
+          <Link
+            href="/"
+            className="inline-flex items-center justify-center gap-2 mb-4 rounded-lg outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+          >
+            <div className="h-10 w-10 rounded-lg bg-primary flex items-center justify-center">
+              <span className="text-primary-foreground font-bold text-xl">P</span>
             </div>
-            <span className="font-bold text-2xl">
-              <span className="text-emerald-600">ProConnect</span>
-              <span className="text-gray-900">SA</span>
-            </span>
-          </div>
-          <h2 className="text-3xl font-bold text-gray-900 dark:text-white">
+            <span className="font-bold text-2xl text-foreground">ProConnectSA</span>
+          </Link>
+          <h2 className="text-3xl font-bold text-foreground">
             Forgot your password?
           </h2>
-          <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
-            No worries, we'll send you reset instructions
+          <p className="mt-2 text-sm text-muted-foreground">
+            No worries, we&apos;ll send you reset instructions
           </p>
         </div>
 
-        <Card>
+        <Card className="border-border shadow-sm">
           <CardHeader>
             <CardTitle>Reset your password</CardTitle>
             <CardDescription>
@@ -156,13 +153,13 @@ export default function ForgotPasswordPage() {
                   disabled={isLoading}
                 />
                 {errors.email && (
-                  <p className="text-sm text-red-600 dark:text-red-400">
+                  <p className="text-sm text-destructive">
                     {errors.email.message}
                   </p>
                 )}
               </div>
 
-              <Button type="submit" className="w-full bg-emerald-600 hover:bg-emerald-700 text-white" disabled={isLoading}>
+              <Button type="submit" className="w-full" disabled={isLoading}>
                 {isLoading ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -177,17 +174,16 @@ export default function ForgotPasswordPage() {
         </Card>
 
         <div className="text-center">
-          <p className="text-sm text-gray-600 dark:text-gray-400">
+          <p className="text-sm text-muted-foreground">
             Remember your password?{" "}
             <Link
-              href="/login"
-              className="font-medium text-emerald-600 hover:text-emerald-500 dark:text-emerald-400"
+              href="/register"
+              className="font-medium text-primary hover:text-primary/90"
             >
               Sign in here
             </Link>
           </p>
         </div>
-      </div>
     </div>
   )
 }
