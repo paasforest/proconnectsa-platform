@@ -1,14 +1,21 @@
 import Link from "next/link"
+import type { Metadata } from "next"
 import BarkLeadForm from "@/components/leads/BarkLeadForm"
 import { ClientHeader } from "@/components/layout/ClientHeader"
 import { Footer } from "@/components/layout/Footer"
 import { PROVINCES } from "@/lib/seo-locations"
-import { fetchServiceCategories } from "@/lib/service-categories"
+import { getServiceCategoriesCached } from "@/lib/service-categories"
+import { SITE_ORIGIN, siteUrl } from "@/lib/seo-site"
 
 export const dynamic = "force-dynamic"
 
+export const metadata: Metadata = {
+  alternates: { canonical: siteUrl("/") },
+  openGraph: { url: siteUrl("/") },
+}
+
 export default async function Homepage() {
-  const categories = await fetchServiceCategories()
+  const categories = await getServiceCategoriesCached()
 
   // Structured data for SEO - Local Services Marketplace
   const structuredData = {
@@ -16,7 +23,7 @@ export default async function Homepage() {
     "@type": "LocalBusiness",
     "name": "ProConnectSA",
     "description": "Find trusted local service providers in South Africa. Compare free quotes from verified professionals.",
-    "url": "https://www.proconnectsa.co.za",
+    "url": SITE_ORIGIN,
     "email": "support@proconnectsa.co.za",
     "areaServed": {
       "@type": "Country",

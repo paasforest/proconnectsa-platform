@@ -2,7 +2,8 @@ import type { Metadata } from "next"
 import Link from "next/link"
 import { ClientHeader } from "@/components/layout/ClientHeader"
 import { Footer } from "@/components/layout/Footer"
-import { fetchServiceCategories } from "@/lib/service-categories"
+import { getServiceCategoriesCached } from "@/lib/service-categories"
+import { siteUrl } from "@/lib/seo-site"
 import { PROVINCES } from "@/lib/seo-locations"
 import { Button } from "@/components/ui/button"
 import { EmergencyLocksmithBanner } from "@/components/emergency/EmergencyLocksmithBanner"
@@ -11,15 +12,15 @@ export const dynamic = "force-dynamic"
 
 export const metadata: Metadata = {
   alternates: {
-    canonical: "https://www.proconnectsa.co.za/services",
+    canonical: siteUrl("/services"),
   },
   openGraph: {
-    url: "https://www.proconnectsa.co.za/services",
+    url: siteUrl("/services"),
   },
 }
 
 export default async function ServicesPage() {
-  const categories = await fetchServiceCategories()
+  const categories = await getServiceCategoriesCached()
 
   return (
     <div className="min-h-screen flex flex-col">

@@ -1,16 +1,17 @@
 import type { MetadataRoute } from "next"
-import { fetchServiceCategories } from "@/lib/service-categories"
+import { getServiceCategoriesCached } from "@/lib/service-categories"
 import { PROVINCES } from "@/lib/seo-locations"
 import { MAJOR_CITIES } from "@/lib/seo-cities"
 import { resourceGuides } from "@/lib/resourceGuides"
+import { SITE_ORIGIN } from "@/lib/seo-site"
 
-const BASE_URL = "https://www.proconnectsa.co.za"
+const BASE_URL = SITE_ORIGIN
 
 /** Legacy resource URLs that canonical to a newer primary guide — omit from sitemap to consolidate signals. */
 const RESOURCE_SLUGS_EXCLUDED_FROM_SITEMAP = new Set(["cleaning-service-costs", "painting-costs"])
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const categories = await fetchServiceCategories()
+  const categories = await getServiceCategoriesCached()
 
   const cats =
     categories.length > 0

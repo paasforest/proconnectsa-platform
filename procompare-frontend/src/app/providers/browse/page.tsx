@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import type { Metadata } from "next";
+import { siteUrl } from "@/lib/seo-site";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "https://api.proconnectsa.co.za";
 
@@ -56,9 +57,14 @@ async function fetchProviders(searchParams: { category?: string; city?: string; 
   }
 }
 
+const BROWSE_CANONICAL = siteUrl("/providers/browse");
+
 export const metadata: Metadata = {
   title: "Find Verified Local Service Providers | Browse by City & Service | ProConnectSA",
   description: "Browse verified local service providers across South Africa. Filter by service category and city to find professionals near you.",
+  alternates: { canonical: BROWSE_CANONICAL },
+  openGraph: { url: BROWSE_CANONICAL },
+  robots: { index: true, follow: true },
 };
 
 export default async function ProvidersBrowsePage({

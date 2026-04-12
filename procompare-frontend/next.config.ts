@@ -1,6 +1,17 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  async redirects() {
+    return [
+      {
+        source: "/:path*",
+        has: [{ type: "host", value: "proconnectsa.co.za" }],
+        destination: "https://www.proconnectsa.co.za/:path*",
+        permanent: true,
+      },
+    ]
+  },
+
   // Production environment variables
   env: {
     NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL || 'https://api.proconnectsa.co.za',

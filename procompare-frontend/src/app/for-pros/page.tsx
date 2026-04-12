@@ -5,12 +5,18 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { CheckCircle, ArrowRight, Target, Clock, ShieldCheck } from "lucide-react"
 import type { Metadata } from "next"
+import { siteUrl } from "@/lib/seo-site"
 
 export const dynamic = "force-dynamic"
+
+const FOR_PROS = siteUrl("/for-pros");
 
 export const metadata: Metadata = {
   title: "For Professionals | ProConnectSA",
   description: "Get customers in your area — buy verified leads. Only see leads for the services and areas you select.",
+  alternates: { canonical: FOR_PROS },
+  openGraph: { url: FOR_PROS },
+  robots: { index: true, follow: true },
 }
 
 export default function ForProsPage() {

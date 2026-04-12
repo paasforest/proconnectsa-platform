@@ -1,6 +1,7 @@
 import type { Metadata } from "next"
+import { siteUrl } from "@/lib/seo-site"
 
-const canonical = "https://www.proconnectsa.co.za/immigration"
+const canonical = siteUrl("/immigration")
 
 export const metadata: Metadata = {
   title: "Immigration Services South Africa | Visa Help & Applications | ProConnectSA",

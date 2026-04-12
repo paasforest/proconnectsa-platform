@@ -1,10 +1,10 @@
 import type { Metadata } from "next"
 import Link from "next/link"
-import { notFound } from "next/navigation"
 import { ClientHeader } from "@/components/layout/ClientHeader"
 import { Footer } from "@/components/layout/Footer"
 import BarkLeadForm from "@/components/leads/BarkLeadForm"
-import { fetchServiceCategories } from "@/lib/service-categories"
+import { siteUrl } from "@/lib/seo-site"
+import { requireServiceCategorySlug } from "@/lib/seo-public-routes"
 import { PROVINCES } from "@/lib/seo-locations"
 import { EmergencyLocksmithBanner } from "@/components/emergency/EmergencyLocksmithBanner"
 import { isLocksmithServiceSlug } from "@/lib/vula24-locksmith"
@@ -14,11 +14,11 @@ export const dynamic = "force-dynamic"
 type Props = { params: Promise<{ category: string }> }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const { category } = await params
-  const categories = await fetchServiceCategories()
-  const c = categories.find((x) => x.slug === category)
-  const name = c?.name || category
-  const canonicalUrl = `https://www.proconnectsa.co.za/services/${category}`
+  const { category: categorySlug } = await params
+  const { category: c } = await requireServiceCategorySlug(categorySlug)
+
+  const name = c?.name || categorySlug
+  const canonicalUrl = siteUrl(`/services/${categorySlug}`)
   return {
     title: `${name} Quotes Near You | ProConnectSA`,
     description: `Compare free quotes from verified ${name.toLowerCase()} professionals near you. Fast matching and no obligation.`,
@@ -32,16 +32,14 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 export default async function ServiceCategoryPage({ params }: Props) {
-  const { category } = await params
-  const categories = await fetchServiceCategories()
-  const c = categories.find((x) => x.slug === category)
-  if (!c && categories.length) return notFound()
+  const { category: categorySlug } = await params
+  const { category: c } = await requireServiceCategorySlug(categorySlug)
 
-  const displayName = c?.name || category
+  const displayName = c?.name || categorySlug
 
   return (
     <div className="min-h-screen flex flex-col">
-      {isLocksmithServiceSlug(category) ? <EmergencyLocksmithBanner /> : null}
+      {isLocksmithServiceSlug(categorySlug) ? <EmergencyLocksmithBanner /> : null}
       <ClientHeader />
       <main className="flex-1">
         <section className="bg-gradient-to-br from-emerald-50 to-blue-50 py-12">
@@ -62,7 +60,7 @@ export default async function ServiceCategoryPage({ params }: Props) {
                 Get free quotes for {displayName}
               </h1>
               <p className="text-gray-600 text-lg max-w-3xl">
-                Tell us what you need and we'll connect you with verified professionals in your area. Find {displayName.toLowerCase()} in <Link href={`/johannesburg/${category}`} className="text-emerald-700 hover:text-emerald-800 hover:underline font-medium">Johannesburg</Link>, <Link href={`/cape-town/${category}`} className="text-emerald-700 hover:text-emerald-800 hover:underline font-medium">Cape Town</Link>, <Link href={`/durban/${category}`} className="text-emerald-700 hover:text-emerald-800 hover:underline font-medium">Durban</Link>, <Link href={`/pretoria/${category}`} className="text-emerald-700 hover:text-emerald-800 hover:underline font-medium">Pretoria</Link>, or browse by province: <Link href={`/services/${category}/gauteng`} className="text-emerald-700 hover:text-emerald-800 hover:underline font-medium">Gauteng</Link>, <Link href={`/services/${category}/western-cape`} className="text-emerald-700 hover:text-emerald-800 hover:underline font-medium">Western Cape</Link>, <Link href={`/services/${category}/kwazulu-natal`} className="text-emerald-700 hover:text-emerald-800 hover:underline font-medium">KwaZulu-Natal</Link>. No obligation.
+                Tell us what you need and we'll connect you with verified professionals in your area. Find {displayName.toLowerCase()} in <Link href={`/johannesburg/${categorySlug}`} className="text-emerald-700 hover:text-emerald-800 hover:underline font-medium">Johannesburg</Link>, <Link href={`/cape-town/${categorySlug}`} className="text-emerald-700 hover:text-emerald-800 hover:underline font-medium">Cape Town</Link>, <Link href={`/durban/${categorySlug}`} className="text-emerald-700 hover:text-emerald-800 hover:underline font-medium">Durban</Link>, <Link href={`/pretoria/${categorySlug}`} className="text-emerald-700 hover:text-emerald-800 hover:underline font-medium">Pretoria</Link>, or browse by province: <Link href={`/services/${categorySlug}/gauteng`} className="text-emerald-700 hover:text-emerald-800 hover:underline font-medium">Gauteng</Link>, <Link href={`/services/${categorySlug}/western-cape`} className="text-emerald-700 hover:text-emerald-800 hover:underline font-medium">Western Cape</Link>, <Link href={`/services/${categorySlug}/kwazulu-natal`} className="text-emerald-700 hover:text-emerald-800 hover:underline font-medium">KwaZulu-Natal</Link>. No obligation.
               </p>
             </div>
           </div>
@@ -79,7 +77,7 @@ export default async function ServiceCategoryPage({ params }: Props) {
                   <span className="text-gray-300">•</span>
                   <span className="text-emerald-700 font-semibold">✓ Compare Quotes</span>
                 </div>
-                <BarkLeadForm preselectedCategory={category} />
+                <BarkLeadForm preselectedCategory={categorySlug} />
               </div>
               <div className="space-y-6">
                 <div className="border rounded-2xl p-6 bg-white">
@@ -91,7 +89,7 @@ export default async function ServiceCategoryPage({ params }: Props) {
                     {PROVINCES.map((p) => (
                       <Link
                         key={p.slug}
-                        href={`/services/${category}/${p.slug}`}
+                        href={`/services/${categorySlug}/${p.slug}`}
                         className="inline-flex items-center rounded-full border px-4 py-2 text-sm text-gray-700 hover:border-emerald-300 hover:bg-emerald-50 font-medium"
                       >
                         {p.name}
@@ -109,7 +107,7 @@ export default async function ServiceCategoryPage({ params }: Props) {
                         return (
                           <Link
                             key={city}
-                            href={`/${citySlug}/${category}`}
+                            href={`/${citySlug}/${categorySlug}`}
                             className="text-xs text-emerald-700 hover:text-emerald-800 hover:underline"
                           >
                             {city}
@@ -120,7 +118,7 @@ export default async function ServiceCategoryPage({ params }: Props) {
                   </div>
                 </div>
 
-                {category === "solar-installation" ? (
+                {categorySlug === "solar-installation" ? (
                   <div className="border rounded-2xl p-6 bg-amber-50 border-amber-200">
                     <div className="text-lg font-semibold text-gray-900 mb-2">2026 solar pricing guide</div>
                     <p className="text-sm text-gray-700 mb-3">

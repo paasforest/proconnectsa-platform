@@ -5,12 +5,18 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { CheckCircle } from "lucide-react"
 import type { Metadata } from "next"
+import { siteUrl } from "@/lib/seo-site"
 
 export const dynamic = "force-dynamic"
+
+const PRICING = siteUrl("/pricing");
 
 export const metadata: Metadata = {
   title: "Pricing | ProConnectSA - Simple Pay-As-You-Go Lead Pricing",
   description: "Simple, transparent pricing for service professionals. Pay-as-you-go credits to unlock verified leads. No subscriptions required.",
+  alternates: { canonical: PRICING },
+  openGraph: { url: PRICING },
+  robots: { index: true, follow: true },
 }
 
 const CREDIT_PRICE_RANDS = 50

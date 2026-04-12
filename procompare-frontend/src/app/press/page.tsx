@@ -1,4 +1,5 @@
 import type { Metadata } from "next"
+import { SITE_ORIGIN, siteUrl } from "@/lib/seo-site"
 import Link from "next/link"
 import { ClientHeader } from "@/components/layout/ClientHeader"
 import { Footer } from "@/components/layout/Footer"
@@ -7,9 +8,13 @@ import { Button } from "@/components/ui/button"
 
 export const dynamic = "force-dynamic"
 
+const PRESS = "https://www.proconnectsa.co.za/press";
+
 export const metadata: Metadata = {
   title: "Press & Media | ProConnectSA - Media Kit & Contact Information",
   description: "Media resources, press kit, and contact information for journalists and media professionals covering ProConnectSA.",
+  alternates: { canonical: PRESS },
+  openGraph: { url: PRESS },
   robots: {
     index: true,
     follow: true,
@@ -21,8 +26,8 @@ export default function PressPage() {
     "@context": "https://schema.org",
     "@type": "Organization",
     name: "ProConnectSA",
-    url: "https://www.proconnectsa.co.za",
-    logo: "https://www.proconnectsa.co.za/logo.png",
+    url: SITE_ORIGIN,
+    logo: `${SITE_ORIGIN}/logo.png`,
     contactPoint: {
       "@type": "ContactPoint",
       telephone: "+27-67-951-8124",

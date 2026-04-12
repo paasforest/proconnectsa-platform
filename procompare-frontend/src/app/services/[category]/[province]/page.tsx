@@ -1,11 +1,10 @@
 import type { Metadata } from "next"
 import Link from "next/link"
-import { notFound } from "next/navigation"
 import BarkLeadForm from "@/components/leads/BarkLeadForm"
 import { ClientHeader } from "@/components/layout/ClientHeader"
 import { Footer } from "@/components/layout/Footer"
-import { fetchServiceCategories } from "@/lib/service-categories"
-import { getProvinceBySlug } from "@/lib/seo-locations"
+import { siteUrl } from "@/lib/seo-site"
+import { requireServiceProvinceSlugs } from "@/lib/seo-public-routes"
 import { getCitiesByProvince } from "@/lib/seo-cities"
 import { SEO_SERVICE_PROVINCE_PAGES } from "@/lib/seo-service-pages"
 import { EmergencyLocksmithBanner } from "@/components/emergency/EmergencyLocksmithBanner"
@@ -69,12 +68,11 @@ async function fetchTopVerifiedProvidersForProvinceService(args: {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { category, province } = await params
-  const categories = await fetchServiceCategories()
-  const c = categories.find((x) => x.slug === category)
-  const p = getProvinceBySlug(province)
+  const { category: c, province: p } = await requireServiceProvinceSlugs(category, province)
+
   const name = c?.name || category
-  const provinceName = p?.name || province
-  const canonicalUrl = `https://www.proconnectsa.co.za/services/${category}/${province}`
+  const provinceName = p.name
+  const canonicalUrl = siteUrl(`/services/${category}/${province}`)
 
   const key = `${category}/${province}`
   const custom = SEO_SERVICE_PROVINCE_PAGES[key]
@@ -135,12 +133,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function ServiceProvincePage({ params }: Props) {
   const { category, province } = await params
-  const categories = await fetchServiceCategories()
-  const c = categories.find((x) => x.slug === category)
-  const p = getProvinceBySlug(province)
-
-  if (!p) return notFound()
-  if (!c && categories.length) return notFound()
+  const { categories, category: c, province: p } = await requireServiceProvinceSlugs(category, province)
 
   const serviceName = c?.name || category
   const key = `${category}/${province}`
@@ -201,9 +194,9 @@ export default async function ServiceProvincePage({ params }: Props) {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
     itemListElement: [
-      { "@type": "ListItem", position: 1, name: "Services", item: "https://www.proconnectsa.co.za/services" },
-      { "@type": "ListItem", position: 2, name: serviceName, item: `https://www.proconnectsa.co.za/services/${category}` },
-      { "@type": "ListItem", position: 3, name: p.name, item: `https://www.proconnectsa.co.za/services/${category}/${province}` },
+      { "@type": "ListItem", position: 1, name: "Services", item: siteUrl("/services") },
+      { "@type": "ListItem", position: 2, name: serviceName, item: siteUrl(`/services/${category}`) },
+      { "@type": "ListItem", position: 3, name: p.name, item: siteUrl(`/services/${category}/${province}`) },
     ],
   }
 

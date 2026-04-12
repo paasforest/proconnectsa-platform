@@ -1,3 +1,5 @@
+import { cache } from "react"
+
 export type ServiceCategory = { id: number; name: string; slug: string }
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "https://api.proconnectsa.co.za"
@@ -19,4 +21,7 @@ export async function fetchServiceCategories(): Promise<ServiceCategory[]> {
     return []
   }
 }
+
+/** One categories fetch per request (metadata + page + layout share the same result). */
+export const getServiceCategoriesCached = cache(fetchServiceCategories)
 

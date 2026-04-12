@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import type { Metadata } from "next";
+import { siteUrl } from "@/lib/seo-site";
 import { getFindProListingUrl } from "@/lib/findpro";
 import { 
   Star, 
@@ -103,9 +104,13 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
     const categoryNames = provider.service_category_names && provider.service_category_names.length > 0 
       ? provider.service_category_names.join(', ') 
       : 'service';
+    const canonicalUrl = siteUrl(`/providers/${id}`);
     return {
       title: `${provider.business_name} | Provider Profile`,
       description: provider.bio || `Verified ${categoryNames} provider in ${[provider.suburb, provider.city].filter(Boolean).join(", ") || "South Africa"}.`,
+      alternates: { canonical: canonicalUrl },
+      openGraph: { url: canonicalUrl, type: "website" },
+      robots: { index: true, follow: true },
     };
   } catch {
     return { title: "Provider | ProConnectSA" };

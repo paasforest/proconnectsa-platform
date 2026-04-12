@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import { SITE_ORIGIN } from "@/lib/seo-site";
 import { Providers } from "@/components/providers/Providers";
 import { Toaster } from "@/components/ui/sonner";
 import ErrorBoundary from "@/components/ErrorBoundary";
@@ -39,7 +40,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Local Service Providers in South Africa | Get Free Quotes | ProConnectSA",
     description: "Find trusted local service providers in South Africa. Compare free quotes from verified professionals. No obligation to hire.",
-    url: "https://www.proconnectsa.co.za",
+    url: SITE_ORIGIN,
     siteName: "ProConnectSA",
     locale: "en_ZA",
     type: "website",

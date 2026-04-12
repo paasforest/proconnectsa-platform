@@ -1,10 +1,11 @@
 import type { Metadata } from "next"
 import Link from "next/link"
-import { notFound } from "next/navigation"
 import { ClientHeader } from "@/components/layout/ClientHeader"
 import { Footer } from "@/components/layout/Footer"
-import { fetchServiceCategories } from "@/lib/service-categories"
-import { getCityBySlug, getCitiesByProvince } from "@/lib/seo-cities"
+import { siteUrl } from "@/lib/seo-site"
+import { requireCitySlug } from "@/lib/seo-public-routes"
+import { getServiceCategoriesCached } from "@/lib/service-categories"
+import { getCitiesByProvince } from "@/lib/seo-cities"
 import { getProvinceBySlug, PROVINCES } from "@/lib/seo-locations"
 import BarkLeadForm from "@/components/leads/BarkLeadForm"
 import { EmergencyLocksmithBanner } from "@/components/emergency/EmergencyLocksmithBanner"
@@ -16,21 +17,8 @@ type Props = { params: Promise<{ city: string }> }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { city } = await params
-  const cityData = getCityBySlug(city)
-  const canonicalUrl = `https://www.proconnectsa.co.za/${city}/services`
-  
-  if (!cityData) {
-    return {
-      title: "Services | ProConnectSA",
-      description: "Find service providers near you.",
-      alternates: {
-        canonical: canonicalUrl,
-      },
-      openGraph: {
-        url: canonicalUrl,
-      },
-    }
-  }
+  const cityData = requireCitySlug(city)
+  const canonicalUrl = siteUrl(`/${city}/services`)
 
   return {
     title: `All Services in ${cityData.name} | Get Free Quotes | ProConnectSA`,
@@ -53,11 +41,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function CityServicesPage({ params }: Props) {
   const { city } = await params
-  const cityData = getCityBySlug(city)
-  
-  if (!cityData) return notFound()
+  const cityData = requireCitySlug(city)
 
-  const categories = await fetchServiceCategories()
+  const categories = await getServiceCategoriesCached()
   const province = getProvinceBySlug(cityData.provinceSlug)
   const otherCitiesInProvince = getCitiesByProvince(cityData.provinceSlug).filter(
     c => c.slug !== city
@@ -84,9 +70,9 @@ export default async function CityServicesPage({ params }: Props) {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
     itemListElement: [
-      { "@type": "ListItem", position: 1, name: "Home", item: "https://www.proconnectsa.co.za" },
-      { "@type": "ListItem", position: 2, name: cityData.provinceName, item: `https://www.proconnectsa.co.za/${cityData.provinceSlug}/local-services` },
-      { "@type": "ListItem", position: 3, name: `${cityData.name} Services`, item: `https://www.proconnectsa.co.za/${city}/services` },
+      { "@type": "ListItem", position: 1, name: "Home", item: siteUrl("/") },
+      { "@type": "ListItem", position: 2, name: cityData.provinceName, item: siteUrl(`/${cityData.provinceSlug}/local-services`) },
+      { "@type": "ListItem", position: 3, name: `${cityData.name} Services`, item: siteUrl(`/${city}/services`) },
     ],
   }
 

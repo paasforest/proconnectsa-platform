@@ -3,6 +3,8 @@ import { Footer } from "@/components/layout/Footer"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
+import type { Metadata } from "next"
+import { siteUrl } from "@/lib/seo-site"
 import Link from "next/link"
 import { 
   Star, 
@@ -17,6 +19,17 @@ import {
   Clock,
   CreditCard
 } from "lucide-react"
+
+const PROVIDERS = siteUrl("/providers");
+
+export const metadata: Metadata = {
+  title: "Find Local Service Providers | ProConnectSA",
+  description:
+    "Discover trusted service providers across South Africa. Compare ratings, services, and connect with verified professionals.",
+  alternates: { canonical: PROVIDERS },
+  openGraph: { url: PROVIDERS },
+  robots: { index: true, follow: true },
+};
 
 export default function ProvidersPage() {
   const featuredProviders = [

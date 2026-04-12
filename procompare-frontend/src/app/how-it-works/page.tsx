@@ -1,3 +1,5 @@
+import type { Metadata } from "next"
+import { siteUrl } from "@/lib/seo-site"
 import { ClientHeader } from "@/components/layout/ClientHeader"
 import { Footer } from "@/components/layout/Footer"
 import { Button } from "@/components/ui/button"
@@ -13,6 +15,17 @@ import {
   CheckCircle,
   ArrowRight
 } from "lucide-react"
+
+const HOW = siteUrl("/how-it-works");
+
+export const metadata: Metadata = {
+  title: "How ProConnectSA Works | Get Free Quotes from Verified Pros",
+  description:
+    "Find trusted local service providers in your area. Simple steps to get free quotes and compare verified professionals across South Africa.",
+  alternates: { canonical: HOW },
+  openGraph: { url: HOW },
+  robots: { index: true, follow: true },
+};
 
 export default function HowItWorksPage() {
   return (

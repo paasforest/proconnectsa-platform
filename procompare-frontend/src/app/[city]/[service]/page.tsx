@@ -1,10 +1,11 @@
 import type { Metadata } from "next"
 import Link from "next/link"
-import { notFound } from "next/navigation"
 import BarkLeadForm from "@/components/leads/BarkLeadForm"
 import { ClientHeader } from "@/components/layout/ClientHeader"
 import { Footer } from "@/components/layout/Footer"
-import { fetchServiceCategories } from "@/lib/service-categories"
+import { getServiceCategoriesCached } from "@/lib/service-categories"
+import { siteUrl } from "@/lib/seo-site"
+import { requireCitySlug } from "@/lib/seo-public-routes"
 import { getCityBySlug, MAJOR_CITIES, SERVICE_SLUG_TO_NAME, type City } from "@/lib/seo-cities"
 import { getProvinceBySlug } from "@/lib/seo-locations"
 import { EmergencyLocksmithBanner } from "@/components/emergency/EmergencyLocksmithBanner"
@@ -82,22 +83,10 @@ async function fetchCitiesWithProvidersForCategory(
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { city, service } = await params
-  const cityData = getCityBySlug(city)
+  const cityData = requireCitySlug(city)
+
   const serviceName = SERVICE_SLUG_TO_NAME[service] || service.charAt(0).toUpperCase() + service.slice(1).replace(/-/g, " ")
-  const canonicalUrl = `https://www.proconnectsa.co.za/${city}/${service}`
-  
-  if (!cityData) {
-    return {
-      title: `${serviceName} Services | ProConnectSA`,
-      description: `Find ${serviceName.toLowerCase()} professionals near you.`,
-      alternates: {
-        canonical: canonicalUrl,
-      },
-      openGraph: {
-        url: canonicalUrl,
-      },
-    }
-  }
+  const canonicalUrl = siteUrl(`/${city}/${service}`)
 
   const cityName = cityData.name
   const provinceName = cityData.provinceName
@@ -297,14 +286,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function CityServicePage({ params }: Props) {
   const { city, service } = await params
-  const cityData = getCityBySlug(city)
-  const categories = await fetchServiceCategories()
-  
+  const cityData = requireCitySlug(city)
+  const categories = await getServiceCategoriesCached()
+
   // Normalize service slug - try to match with category slugs
   const categorySlug = categories.find(c => c.slug === service)?.slug || service
   const serviceName = SERVICE_SLUG_TO_NAME[service] || categories.find(c => c.slug === categorySlug)?.name || service.charAt(0).toUpperCase() + service.slice(1).replace(/-/g, " ")
-
-  if (!cityData) return notFound()
 
   const cityName = cityData.name
   const provinceName = cityData.provinceName
@@ -342,10 +329,10 @@ export default async function CityServicePage({ params }: Props) {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
     itemListElement: [
-      { "@type": "ListItem", position: 1, name: "Home", item: "https://www.proconnectsa.co.za" },
-      { "@type": "ListItem", position: 2, name: provinceName, item: `https://www.proconnectsa.co.za/${cityData.provinceSlug}/local-services` },
-      { "@type": "ListItem", position: 3, name: `${cityName} Services`, item: `https://www.proconnectsa.co.za/${city}/services` },
-      { "@type": "ListItem", position: 4, name: `${serviceName} in ${cityName}`, item: `https://www.proconnectsa.co.za/${city}/${service}` },
+      { "@type": "ListItem", position: 1, name: "Home", item: siteUrl("/") },
+      { "@type": "ListItem", position: 2, name: provinceName, item: siteUrl(`/${cityData.provinceSlug}/local-services`) },
+      { "@type": "ListItem", position: 3, name: `${cityName} Services`, item: siteUrl(`/${city}/services`) },
+      { "@type": "ListItem", position: 4, name: `${serviceName} in ${cityName}`, item: siteUrl(`/${city}/${service}`) },
     ],
   }
 
