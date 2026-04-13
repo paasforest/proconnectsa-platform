@@ -19,9 +19,22 @@ logger = logging.getLogger(__name__)
 RESEND_PRIMARY_EMAIL = True
 
 
+def _format_lead_location(lead):
+    """Single line for emails/push; avoids 'None' or stray commas when suburb/city missing."""
+    suburb = (getattr(lead, "location_suburb", None) or "").strip()
+    city = (getattr(lead, "location_city", None) or "").strip()
+    if suburb and city:
+        return f"{suburb}, {city}"
+    if city:
+        return city
+    if suburb:
+        return suburb
+    return "South Africa"
+
+
 def match_providers(lead):
     """
-    Find top matching active providers for a given le
+    Find top matching active providers for a given lead.
     Matching criteria (in order of priority):
     1. Provider signed up and active (not rejected/suspended); paid access via
        active subscription or premium listing (same as before; verification optional)
@@ -163,7 +176,8 @@ def _send_lead_email(lead, provider, lead_url):
         except Exception as e:
             logger.warning(f"[LeadRouter] Resend lead email failed for {provider.email}: {e}, falling back to Django email")
     # Fallback: Django send_mail (SMTP or console)
-    subject = f"New Lead Available: {lead.title} in {lead.location_suburb}"
+    loc = _format_lead_location(lead)
+    subject = f"New Lead Available: {lead.title} — {loc}"
     first_name = getattr(provider, 'first_name', '') or 'there'
     message = f"""Hi {first_name},
 
@@ -173,7 +187,7 @@ JOB DETAILS
 -----------
 Service:   {lead.service_category.name}
 Title:     {lead.title}
-Location:  {lead.location_suburb}, {lead.location_city}
+Location:  {loc}
 Urgency:   {lead.get_urgency_display()}
 Budget:    {lead.get_budget_display_range()}
 
@@ -208,7 +222,7 @@ def _create_notification(lead, provider):
             title=f"New Lead: {lead.title}",
             message=(
                 f"A new {lead.service_category.name} lead is available "
-                f"in {lead.location_suburb}, {lead.location_city}. "
+                f"in {_format_lead_location(lead)}. "
                 f"Be one of the first {lead.max_providers} providers to claim it."
             ),
             priority='high' if lead.urgency == 'urgent' else 'medium',
@@ -255,8 +269,12 @@ def _send_push_notification(lead, provider):
         
         # Send push notification
         title = f"New {lead.service_category.name} Lead"
-        location = f"{lead.location_suburb}, {lead.location_city}" if lead.location_suburb else lead.location_city
-        budget = getattr(lead, 'budget_range', 'Budget available')
+        location = _format_lead_location(lead)
+        budget = (
+            lead.get_budget_display_range()
+            if hasattr(lead, "get_budget_display_range")
+            else getattr(lead, "budget_range", "Budget TBD")
+        )
         body = f"{location} • {budget}"
         
         FCMService.send_lead_notification(
