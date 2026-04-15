@@ -504,11 +504,19 @@ def available_leads(request):
             except Exception as fallback_error:
                 logger.error(f"Fallback processing also failed for lead {lead.id}: {str(fallback_error)}")
                 continue
-    
-    return Response({
+
+    payload = {
         'leads': leads_data,
         'wallet': wallet_payload,
-    })
+    }
+    if not leads_data:
+        payload['message'] = (
+            'No open leads match your profile right now. Common reasons: (1) there are no '
+            'new verified requests in your service categories yet, (2) posted leads expired, '
+            '(3) your service categories or areas need updating under Settings → Services. '
+            'Assigned leads you have not unlocked may still appear if routing reached you.'
+        )
+    return Response(payload)
 
 
 @api_view(['GET'])

@@ -16,6 +16,7 @@ const WalletLeadDashboard = () => {
   const [notification, setNotification] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
   const [reserveInfo, setReserveInfo] = useState<any | null>(null);
   const [listMessage, setListMessage] = useState<string | null>(null);
+  const [fetchError, setFetchError] = useState<string | null>(null);
   
   // Cache key for localStorage
   const CACHE_KEY = `proconnectsa_leads_${user?.id || 'guest'}`;
@@ -287,7 +288,8 @@ const WalletLeadDashboard = () => {
     
     try {
       apiClient.setToken(token);
-      
+      setFetchError(null);
+
       // Add timeout to prevent infinite loading (reduced to 15s for faster feedback)
       const timeoutPromise = new Promise((_, reject) => 
         setTimeout(() => reject(new Error('Request timeout')), 15000)
@@ -342,6 +344,23 @@ const WalletLeadDashboard = () => {
       }
     } catch (error: any) {
       console.error('❌ Error fetching leads:', error);
+      const d = error?.response?.data;
+      const apiText =
+        (typeof d?.message === 'string' && d.message) ||
+        (typeof d?.detail === 'string' && d.detail) ||
+        (Array.isArray(d?.detail) && d.detail.map((x: any) => x?.message || x).join(' ')) ||
+        '';
+      const status = error?.response?.status;
+      if (status === 401) {
+        setFetchError('Session expired or not authorized. Please log out and log in again.');
+      } else if (apiText) {
+        setFetchError(apiText);
+      } else if (error?.message === 'Request timeout') {
+        setFetchError('Request timed out. Check your connection and try Refresh.');
+      } else {
+        setFetchError('Could not load leads. Check connection or try again later.');
+      }
+      setListMessage(null);
       // On error, only clear if it's not a background refresh (keep cached data)
       if (!isBackgroundRefresh) {
         setLeads([]);
@@ -615,14 +634,6 @@ const WalletLeadDashboard = () => {
           
           {/* LEFT PANEL: Leads List */}
           <div className="lg:col-span-4 space-y-4 order-1 lg:order-1">
-            {listMessage ? (
-              <div
-                className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-950"
-                role="status"
-              >
-                {listMessage}
-              </div>
-            ) : null}
             <div className="bg-white rounded-lg shadow-sm">
               <div className="p-3 sm:p-4 border-b border-gray-200">
                 <div className="flex items-center justify-between">
@@ -651,20 +662,38 @@ const WalletLeadDashboard = () => {
                       ))}
                     </div>
                   ) : leads.length === 0 ? (
-                    <div className="p-8 text-center text-gray-500">
+                    <div className="p-6 sm:p-8 text-center text-gray-500">
                       <Users className="h-12 w-12 mx-auto mb-4 text-gray-400" />
+                      {(listMessage || fetchError) && (
+                        <div
+                          className={`mb-4 rounded-lg border p-4 text-left text-sm max-w-lg mx-auto ${
+                            fetchError
+                              ? 'border-red-200 bg-red-50 text-red-900'
+                              : 'border-amber-200 bg-amber-50 text-amber-950'
+                          }`}
+                          role="status"
+                        >
+                          {fetchError || listMessage}
+                        </div>
+                      )}
                       <h3 className="text-lg font-medium text-gray-900 mb-2">No Leads Available</h3>
                       <p className="text-sm text-gray-500 mb-4">
-                        There are currently no leads available in your service categories.
-                        <br />
-                        Check back later or contact support if you need assistance.
+                        {!listMessage && !fetchError
+                          ? 'There are currently no leads that match your services and filters.'
+                          : 'See the note above for the most likely reason.'}
                       </p>
                       <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 text-left max-w-md mx-auto">
-                        <p className="text-sm font-medium text-blue-900 mb-2">💡 Quick Tips:</p>
+                        <p className="text-sm font-medium text-blue-900 mb-2">What to check</p>
                         <ul className="text-xs text-blue-800 space-y-1 list-disc list-inside">
-                          <li>Make sure you've added service categories in Settings → Services</li>
-                          <li>Check that your service areas match where leads are located</li>
-                          <li>Try clicking the Refresh button above to reload</li>
+                          <li>
+                            <a href="/dashboard/services" className="underline font-medium">
+                              Settings → Services
+                            </a>{' '}
+                            — add the trades you offer (e.g. Plumbing, Electrical)
+                          </li>
+                          <li>Set service areas/cities you cover</li>
+                          <li>New client requests only show after verification and while the lead is still open</li>
+                          <li>Use Refresh on this page after updating your profile</li>
                         </ul>
                       </div>
                     </div>
