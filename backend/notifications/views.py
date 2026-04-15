@@ -3,6 +3,7 @@ Notification API views
 """
 from rest_framework import generics, status, permissions
 from rest_framework.decorators import api_view, permission_classes
+from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from django.db.models import Q
@@ -17,10 +18,19 @@ logger = logging.getLogger(__name__)
 User = get_user_model()
 
 
+class NotificationPagination(PageNumberPagination):
+    """Dashboard needs many rows; clients can pass ?page_size= up to max_page_size."""
+
+    page_size = 100
+    page_size_query_param = "page_size"
+    max_page_size = 500
+
+
 class NotificationListView(generics.ListAPIView):
     """List notifications for authenticated user"""
     serializer_class = NotificationSerializer
     permission_classes = [permissions.IsAuthenticated]
+    pagination_class = NotificationPagination
     
     def get_queryset(self):
         user = self.request.user

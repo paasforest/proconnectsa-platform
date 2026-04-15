@@ -4,6 +4,7 @@ from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from django.utils.text import slugify
+from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Q
 from datetime import timedelta
 import random
@@ -85,7 +86,12 @@ def available_leads(request):
     
     # Get user's wallet
     wallet, created = Wallet.objects.get_or_create(user=request.user)
-    
+    wallet_payload = {
+        'credits': wallet.credits,
+        'balance': float(wallet.balance),
+        'customer_code': wallet.customer_code,
+    }
+
     try:
         # Use ML-based filtering instead of hardcoded queries
         # This provides intelligent lead-provider matching based on:
@@ -94,8 +100,22 @@ def available_leads(request):
         # - Lead quality preferences
         # - Provider availability and preferences
         # Direct lead filtering (replacing broken LeadFilteringService)
-        profile = request.user.provider_profile
-        
+        try:
+            profile = request.user.provider_profile
+        except ObjectDoesNotExist:
+            logger.warning(
+                'available_leads: user %s has no provider_profile',
+                request.user.id,
+            )
+            return Response({
+                'leads': [],
+                'wallet': wallet_payload,
+                'message': (
+                    'Your provider profile is incomplete. Add services and service areas in '
+                    'Settings so we can match you to leads.'
+                ),
+            })
+
         # Convert provider categories (slugs/ids/names) -> category IDs
         # IMPORTANT: Check BOTH Service objects AND service_categories JSON field
         from backend.leads.models import ServiceCategory
@@ -126,13 +146,13 @@ def available_leads(request):
 
         from backend.leads.models import LeadAssignment as LeadAssignmentModel
 
-        # Leads explicitly routed to this provider (assigned/viewed) must stay visible even if
-        # categories are misconfigured, the marketplace window expired, or filters would hide them.
+        # Any lead ever assigned to this provider must stay visible even if categories drift,
+        # the marketplace window expired, or assignment status changed (contacted, quoted, etc.).
+        # Unlocked/purchased rows are removed later via LeadAccess exclude.
         routed_to_me = list(
-            LeadAssignmentModel.objects.filter(
-                provider=request.user,
-                status__in=['assigned', 'viewed'],
-            ).values_list('lead_id', flat=True)
+            LeadAssignmentModel.objects.filter(provider=request.user)
+            .values_list('lead_id', flat=True)
+            .distinct()
         )
 
         if not category_ids:
@@ -146,11 +166,7 @@ def available_leads(request):
                 )
                 return Response({
                     'leads': [],
-                    'wallet': {
-                        'credits': wallet.credits,
-                        'balance': float(wallet.balance),
-                        'customer_code': wallet.customer_code
-                    },
+                    'wallet': wallet_payload,
                     'message': 'Please add service categories in your profile to see matching leads. Go to Settings > Services to add your services.'
                 })
             # Still show leads already assigned to this provider
@@ -171,8 +187,7 @@ def available_leads(request):
         # Base query
         # Note: many leads move to `assigned` after distribution, but are still
         # purchasable/unlockable in the wallet marketplace.
-        # IMPORTANT: Exclude test leads - providers should NEVER see test leads
-        from backend.leads.test_lead_utils import exclude_test_leads
+        # Test leads excluded once below (shared path).
 
         if category_ids:
             open_market = (
@@ -189,9 +204,6 @@ def available_leads(request):
                 leads = Lead.objects.filter(open_market).select_related('service_category', 'client')
         else:
             leads = Lead.objects.filter(id__in=routed_to_me).select_related('service_category', 'client')
-        
-        # Filter out test leads
-        leads = exclude_test_leads(leads)
         
         # Apply geographical filter (case-insensitive, trimmed)
         # Smart filtering: If no leads match exact area, show leads from all cities
@@ -224,8 +236,8 @@ def available_leads(request):
         ).values_list('lead_id', flat=True)
         leads = leads.exclude(id__in=unlocked_lead_ids)
         
-        # Order by priority and apply limit
-        leads = leads.order_by('-verification_score', '-created_at')[:20]
+        # Order by priority and apply limit (was 20 — too few for providers to see older + new)
+        leads = leads.order_by('-verification_score', '-created_at')[:100]
         
         logger.info(f"ML filtering returned {leads.count()} leads for provider {request.user.id}")
         
@@ -271,10 +283,9 @@ def available_leads(request):
         from backend.leads.models import LeadAssignment as LeadAssignmentModel
 
         routed_to_me = list(
-            LeadAssignmentModel.objects.filter(
-                provider=request.user,
-                status__in=['assigned', 'viewed'],
-            ).values_list('lead_id', flat=True)
+            LeadAssignmentModel.objects.filter(provider=request.user)
+            .values_list('lead_id', flat=True)
+            .distinct()
         )
 
         if category_ids:
@@ -287,15 +298,15 @@ def available_leads(request):
             if routed_to_me:
                 leads = Lead.objects.filter(open_market | Q(id__in=routed_to_me)).select_related(
                     'client', 'service_category'
-                ).order_by('-created_at')[:20]
+                ).order_by('-created_at')[:100]
             else:
                 leads = Lead.objects.filter(open_market).select_related(
                     'client', 'service_category'
-                ).order_by('-created_at')[:20]
+                ).order_by('-created_at')[:100]
         elif routed_to_me:
             leads = Lead.objects.filter(id__in=routed_to_me).select_related(
                 'client', 'service_category'
-            ).order_by('-created_at')[:20]
+            ).order_by('-created_at')[:100]
         else:
             leads = Lead.objects.none()
         
@@ -312,7 +323,19 @@ def available_leads(request):
                     Q(location_address__icontains=area_lower)
                 )
             leads = leads.filter(geographical_filter)
-    
+
+        from backend.leads.models import LeadAccess as LeadAccessFB
+
+        _unlocked_fb = LeadAccessFB.objects.filter(
+            provider=request.user,
+            is_active=True,
+        ).values_list('lead_id', flat=True)
+        leads = leads.exclude(id__in=_unlocked_fb)
+
+    from backend.leads.test_lead_utils import exclude_test_leads
+
+    leads = exclude_test_leads(leads)
+
     # Convert leads to frontend format using integrated ML services
     # OPTIMIZATION: Batch fetch all LeadAccess data to avoid N+1 queries
     from .models import LeadAccess
@@ -484,11 +507,7 @@ def available_leads(request):
     
     return Response({
         'leads': leads_data,
-        'wallet': {
-            'credits': wallet.credits,
-            'balance': float(wallet.balance),
-            'customer_code': wallet.customer_code
-        }
+        'wallet': wallet_payload,
     })
 
 
