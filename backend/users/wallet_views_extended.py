@@ -25,11 +25,13 @@ def wallet_details(request):
     """
     try:
         user = request.user
-        wallet = get_object_or_404(Wallet, user=user)
+        wallet, _ = Wallet.objects.get_or_create(user=user)
         
         return Response({
             'balance': float(wallet.balance),
             'credits': wallet.credits,
+            'currency': 'ZAR',
+            'topup_url': '/dashboard/wallet',
             'customer_code': wallet.customer_code,
             'account_details': {
                 'bank_name': 'Nedbank',

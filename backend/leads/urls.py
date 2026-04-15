@@ -1,5 +1,7 @@
 from django.urls import path
 from . import views
+from . import for_me_views
+from . import assignment_unlock
 from . import ml_views
 # REMOVED: subscription-based access views
 from . import bark_views
@@ -18,6 +20,12 @@ urlpatterns = [
     path('categories/', views.ServiceCategoryListView.as_view(), name='service-categories'),
     
     # Leads
+    path('for-me/', for_me_views.leads_for_me, name='leads-for-me'),
+    path(
+        '<uuid:assignment_id>/unlock/',
+        assignment_unlock.unlock_lead_by_assignment,
+        name='lead-assignment-unlock',
+    ),
     path('', views.LeadListView.as_view(), name='lead-list'),
     path('create/', views.LeadCreateView.as_view(), name='lead-create'),
     path('create-public/', views.create_public_lead, name='lead-create-public'),

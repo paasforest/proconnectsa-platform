@@ -42,6 +42,8 @@ def wallet_balance(request):
     return Response({
         'balance': float(wallet.balance),
         'credits': wallet.credits,
+        'currency': 'ZAR',
+        'topup_url': '/dashboard/wallet',
         'customer_code': wallet.customer_code,
         'transactions': transaction_data
     })

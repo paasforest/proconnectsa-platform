@@ -6,7 +6,7 @@ import { useRouter, usePathname } from 'next/navigation';
 import {
   LayoutDashboard, Users, ShoppingCart, Wallet, Settings, 
   HelpCircle, LogOut, Bell, Menu, X, ChevronDown, User,
-  Home, Target, CreditCard, Wrench, MessageSquare, BarChart3, Crown
+  Home, Target, CreditCard, Wrench, MessageSquare, BarChart3, Crown, Compass
 } from 'lucide-react';
 import { apiClient } from '@/lib/api-simple';
 import PersonalizedHeader from './PersonalizedHeader';
@@ -57,19 +57,68 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
   const [notificationCount, setNotificationCount] = useState(0);
   const [showNotifications, setShowNotifications] = useState(false);
   const [showProfileDropdown, setShowProfileDropdown] = useState(false);
+  const [moreNavOpen, setMoreNavOpen] = useState(false);
+  const [walletCredits, setWalletCredits] = useState<number | null>(null);
 
-  // Navigation items
-  const navigationItems = [
-    { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard, current: pathname === '/dashboard' },
-    { name: 'Lead Marketplace', href: '/dashboard/leads-dashboard', icon: Target, current: pathname === '/dashboard/leads-dashboard' },
-    { name: 'My Purchased Leads', href: '/dashboard/my-leads', icon: ShoppingCart, current: pathname === '/dashboard/my-leads' },
-    { name: 'Chat', href: '/dashboard/chat', icon: MessageSquare, current: pathname === '/dashboard/chat' },
-    { name: 'Credits & Wallet', href: '/dashboard/wallet', icon: Wallet, current: pathname === '/dashboard/wallet' },
-    { name: 'Upgrade plan', href: '/dashboard/upgrade', icon: Crown, current: pathname === '/dashboard/upgrade' },
-    { name: 'Services', href: '/dashboard/services', icon: Wrench, current: pathname === '/dashboard/services' },
-    { name: 'Settings', href: '/dashboard/settings', icon: Settings, current: pathname === '/dashboard/settings' },
-    { name: 'Support', href: '/dashboard/support', icon: HelpCircle, current: pathname === '/dashboard/support' },
+  const matchExact = (href: string) => pathname === href;
+  const matchPrefix = (href: string) =>
+    pathname === href || pathname.startsWith(`${href}/`);
+
+  const primaryNavItems = [
+    { name: 'Leads', href: '/dashboard/leads', icon: Target, current: matchExact('/dashboard/leads') },
+    { name: 'Wallet', href: '/dashboard/wallet', icon: Wallet, current: matchExact('/dashboard/wallet') },
+    { name: 'Profile', href: '/dashboard/settings', icon: User, current: matchPrefix('/dashboard/settings') },
   ];
+
+  const moreNavItems = [
+    { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard, current: matchExact('/dashboard') },
+    { name: 'Lead Marketplace', href: '/dashboard/leads-dashboard', icon: Compass, current: matchExact('/dashboard/leads-dashboard') },
+    { name: 'My Purchased Leads', href: '/dashboard/my-leads', icon: ShoppingCart, current: matchExact('/dashboard/my-leads') },
+    { name: 'Chat', href: '/dashboard/chat', icon: MessageSquare, current: matchExact('/dashboard/chat') },
+    { name: 'Upgrade plan', href: '/dashboard/upgrade', icon: Crown, current: matchExact('/dashboard/upgrade') },
+    { name: 'Services', href: '/dashboard/services', icon: Wrench, current: matchPrefix('/dashboard/services') },
+    { name: 'Support', href: '/dashboard/support', icon: HelpCircle, current: matchExact('/dashboard/support') },
+  ];
+
+  const currentPageTitle =
+    primaryNavItems.find((item) => item.current)?.name ??
+    moreNavItems.find((item) => item.current)?.name ??
+    'Dashboard';
+
+  useEffect(() => {
+    const inMoreSection =
+      pathname === '/dashboard' ||
+      pathname === '/dashboard/leads-dashboard' ||
+      pathname === '/dashboard/my-leads' ||
+      pathname === '/dashboard/chat' ||
+      pathname === '/dashboard/upgrade' ||
+      pathname.startsWith('/dashboard/services') ||
+      pathname === '/dashboard/support';
+    if (inMoreSection) setMoreNavOpen(true);
+  }, [pathname]);
+
+  const fetchWalletCredits = useCallback(async () => {
+    if (!token) return;
+    try {
+      apiClient.setToken(token);
+      const r = (await apiClient.getCreditBalance()) as { credits?: number };
+      setWalletCredits(typeof r.credits === 'number' ? r.credits : null);
+    } catch {
+      setWalletCredits(null);
+    }
+  }, [token]);
+
+  useEffect(() => {
+    fetchWalletCredits();
+  }, [fetchWalletCredits]);
+
+  useEffect(() => {
+    const onRefresh = () => {
+      fetchWalletCredits();
+    };
+    window.addEventListener('proconnect-wallet-refresh', onRefresh);
+    return () => window.removeEventListener('proconnect-wallet-refresh', onRefresh);
+  }, [fetchWalletCredits]);
 
   // Fetch user stats
   useEffect(() => {
@@ -285,8 +334,22 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
 
         <nav className="mt-6 px-3">
           <div className="space-y-1">
-            {navigationItems.map((item) => {
+            {primaryNavItems.map((item) => {
               const Icon = item.icon;
+              const walletExtra =
+                item.href === '/dashboard/wallet' && walletCredits !== null ? (
+                  <span
+                    className={`ml-1 text-xs font-normal ${
+                      walletCredits === 0
+                        ? 'text-red-600'
+                        : walletCredits < 10
+                          ? 'text-amber-600'
+                          : 'text-gray-500'
+                    }`}
+                  >
+                    • {walletCredits} credits
+                  </span>
+                ) : null;
               return (
                 <a
                   key={item.name}
@@ -298,10 +361,49 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
                   }`}
                 >
                   <Icon className="mr-3 h-5 w-5 flex-shrink-0" />
-                  {item.name}
+                  <span className="flex flex-wrap items-baseline gap-x-1">
+                    {item.name}
+                    {walletExtra}
+                  </span>
                 </a>
               );
             })}
+          </div>
+
+          <div className="mt-2">
+            <button
+              type="button"
+              onClick={() => setMoreNavOpen((open) => !open)}
+              className="group flex items-center w-full px-3 py-2 text-sm font-medium rounded-md text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+            >
+              <ChevronDown
+                className={`mr-3 h-5 w-5 flex-shrink-0 transition-transform ${
+                  moreNavOpen ? 'rotate-180' : ''
+                }`}
+              />
+              More
+            </button>
+            {moreNavOpen && (
+              <div className="space-y-1 mt-1 ml-2 pl-3 border-l-2 border-gray-100">
+                {moreNavItems.map((item) => {
+                  const Icon = item.icon;
+                  return (
+                    <a
+                      key={item.name}
+                      href={item.href}
+                      className={`group flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors ${
+                        item.current
+                          ? 'bg-blue-100 text-blue-700'
+                          : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                      }`}
+                    >
+                      <Icon className="mr-3 h-5 w-5 flex-shrink-0" />
+                      {item.name}
+                    </a>
+                  );
+                })}
+              </div>
+            )}
           </div>
 
           {/* Logout button */}
@@ -333,7 +435,7 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
             {/* Page title */}
             <div className="flex-1 lg:hidden">
               <h1 className="text-lg font-semibold text-gray-900">
-                {navigationItems.find(item => item.current)?.name || 'Dashboard'}
+                {currentPageTitle}
               </h1>
             </div>
 

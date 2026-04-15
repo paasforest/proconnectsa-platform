@@ -175,6 +175,7 @@ class LeadAssignmentSerializer(serializers.ModelSerializer):
     is_active = serializers.BooleanField(read_only=True)
     
     match_explanation = serializers.SerializerMethodField()
+    display_status = serializers.SerializerMethodField()
 
     class Meta:
         model = LeadAssignment
@@ -184,12 +185,14 @@ class LeadAssignmentSerializer(serializers.ModelSerializer):
             'quote_amount', 'estimated_duration', 'status', 'won_job',
             'client_feedback', 'provider_rating', 'credit_cost',
             'credit_refunded', 'refund_reason', 'updated_at',
-            'response_time_hours', 'is_active', 'match_explanation'
+            'response_time_hours', 'is_active', 'match_explanation',
+            'display_status',
         ]
         read_only_fields = [
             'id', 'lead', 'provider', 'assigned_at', 'viewed_at',
             'contacted_at', 'quote_provided_at', 'updated_at',
-            'response_time_hours', 'is_active', 'match_explanation'
+            'response_time_hours', 'is_active', 'match_explanation',
+            'display_status',
         ]
 
     def get_match_explanation(self, obj):
@@ -215,6 +218,95 @@ class LeadAssignmentSerializer(serializers.ModelSerializer):
             return ", ".join([p for p in parts if p]) or None
         except Exception:
             return None
+
+    def get_display_status(self, obj):
+        from .provider_inbox import compute_display_status
+        return compute_display_status(obj, obj.provider)
+
+
+class ProviderForMeAssignmentSerializer(serializers.ModelSerializer):
+    """Slim assignment row for /api/leads/for-me/ (inbox tabs)."""
+
+    assignment_id = serializers.UUIDField(source="id", read_only=True)
+    lead_id = serializers.UUIDField(source="lead.id", read_only=True)
+    title = serializers.CharField(source="lead.title", read_only=True)
+    category_name = serializers.SerializerMethodField()
+    city = serializers.CharField(source="lead.location_city", read_only=True, allow_null=True)
+    distance_km = serializers.SerializerMethodField()
+    credits_required = serializers.SerializerMethodField()
+    display_status = serializers.SerializerMethodField()
+    created_at = serializers.DateTimeField(source="lead.created_at", read_only=True)
+    unlocked = serializers.SerializerMethodField()
+    cta_hint = serializers.SerializerMethodField()
+
+    class Meta:
+        model = LeadAssignment
+        fields = [
+            "assignment_id",
+            "lead_id",
+            "title",
+            "category_name",
+            "city",
+            "distance_km",
+            "credits_required",
+            "display_status",
+            "created_at",
+            "unlocked",
+            "cta_hint",
+        ]
+
+    def get_category_name(self, obj):
+        sc = obj.lead.service_category
+        return sc.name if sc else None
+
+    def get_distance_km(self, obj):
+        from .provider_inbox import distance_km_for_provider
+        request = self.context.get("request")
+        if not request or not request.user.is_authenticated:
+            return None
+        return distance_km_for_provider(request.user, obj.lead)
+
+    def get_credits_required(self, obj):
+        request = self.context.get("request")
+        if request and request.user.is_authenticated:
+            from backend.users.wallet_views import get_lead_credits_cost
+
+            n = get_lead_credits_cost(str(obj.lead.id), request.user)
+            return max(1, int(round(float(n))))
+        c = obj.credit_cost
+        if c:
+            return max(1, int(round(c / 50)))
+        return 4
+
+    def get_display_status(self, obj):
+        from .provider_inbox import compute_display_status
+        request = self.context.get("request")
+        if not request or not request.user.is_authenticated:
+            return "active"
+        return compute_display_status(obj, request.user)
+
+    def get_unlocked(self, obj):
+        from .models import LeadAccess
+        request = self.context.get("request")
+        if not request or not request.user.is_authenticated:
+            return False
+        return LeadAccess.objects.filter(
+            provider=request.user, lead=obj.lead, is_active=True
+        ).exists()
+
+    def get_cta_hint(self, obj):
+        from .provider_inbox import compute_display_status
+        request = self.context.get("request")
+        if not request or not request.user.is_authenticated:
+            return None
+        status = compute_display_status(obj, request.user)
+        if status == "expired":
+            return "This lead has expired"
+        if status == "done":
+            return "Closed"
+        if status == "new":
+            return "Unlock to see contact details"
+        return "Continue with this lead"
 
 
 class LeadAssignmentUpdateSerializer(serializers.ModelSerializer):
