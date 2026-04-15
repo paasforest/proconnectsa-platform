@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/components/AuthProvider';
 import { useRouter, usePathname } from 'next/navigation';
 import {
@@ -143,111 +143,84 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
     }
   }, [user, token]);
 
-  // Fetch notifications from API
-  useEffect(() => {
+  const loadNotifications = useCallback(async () => {
     if (!token) return;
-    
-    let intervalId: NodeJS.Timeout | null = null;
-    let shouldStop = false;
-    
-    const fetchNotifications = async () => {
-      if (!token || shouldStop) return;
-      
-      try {
-        apiClient.setToken(token);
-        const response = await apiClient.get('/api/notifications/');
-        setNotifications(response.results || response);
-      } catch (error: any) {
-        // Stop polling on 401 Unauthorized
-        if (error?.response?.status === 401 || error?.message?.includes('401')) {
-          console.log('[Notifications] Token expired, stopping polling');
-          shouldStop = true;
-          if (intervalId) {
-            clearInterval(intervalId);
-            intervalId = null;
-          }
-          setNotifications([]);
-          return;
-        }
+    try {
+      apiClient.setToken(token);
+      const response = await apiClient.getNotifications({ page_size: 500 });
+      const r = response as { results?: Notification[] } | Notification[];
+      const list = Array.isArray(r) ? r : (r?.results ?? []);
+      setNotifications(list);
+    } catch (error: any) {
+      if (error?.response?.status === 401 || error?.message?.includes('401')) {
         setNotifications([]);
+        return;
       }
-    };
-
-    // Initial fetch
-    fetchNotifications();
-    
-    // Only start polling if token is valid
-    if (token) {
-      intervalId = setInterval(() => {
-        if (!shouldStop && token) {
-          fetchNotifications();
-        } else if (intervalId) {
-          clearInterval(intervalId);
-          intervalId = null;
-        }
-      }, 30000);
+      setNotifications([]);
     }
-    
-    return () => {
-      shouldStop = true;
-      if (intervalId) {
-        clearInterval(intervalId);
-      }
-    };
   }, [token]);
 
-  // Fetch notification count
+  const loadNotificationCount = useCallback(async () => {
+    if (!token) return;
+    try {
+      apiClient.setToken(token);
+      const response = (await apiClient.getNotificationCount()) as {
+        unread_count?: number;
+      };
+      setNotificationCount(response.unread_count ?? 0);
+    } catch (error: any) {
+      if (error?.response?.status === 401 || error?.message?.includes('401')) {
+        setNotificationCount(0);
+        return;
+      }
+      setNotificationCount(0);
+    }
+  }, [token]);
+
+  // Poll notifications + unread count (bell badge uses count endpoint, not list)
   useEffect(() => {
-    if (!token || !user) return;
-    
-    let intervalId: NodeJS.Timeout | null = null;
-    let shouldStop = false;
-    
-    const fetchNotificationCount = async () => {
-      if (!token || !user || shouldStop) return;
-      
+    if (!token) return;
+    let cancelled = false;
+    let listTimer: ReturnType<typeof setInterval> | null = null;
+    let countTimer: ReturnType<typeof setInterval> | null = null;
+
+    const tick = async () => {
+      if (cancelled) return;
+      await loadNotifications();
+      await loadNotificationCount();
+    };
+    tick();
+
+    listTimer = setInterval(() => {
+      if (!cancelled && token) loadNotifications();
+    }, 45000);
+    countTimer = setInterval(() => {
+      if (!cancelled && token) loadNotificationCount();
+    }, 15000);
+
+    return () => {
+      cancelled = true;
+      if (listTimer) clearInterval(listTimer);
+      if (countTimer) clearInterval(countTimer);
+    };
+  }, [token, loadNotifications, loadNotificationCount]);
+
+  const markNotificationRead = useCallback(
+    async (n: Notification) => {
+      if (!token || n.is_read) return;
       try {
         apiClient.setToken(token);
-        const response = await apiClient.getNotificationCount();
-        setNotificationCount((response as any).unread_count || 0);
-      } catch (error: any) {
-        // Stop polling on 401 Unauthorized
-        if (error?.response?.status === 401 || error?.message?.includes('401')) {
-          console.log('[Notification Count] Token expired, stopping polling');
-          shouldStop = true;
-          if (intervalId) {
-            clearInterval(intervalId);
-            intervalId = null;
-          }
-          setNotificationCount(0);
-          return;
-        }
-        setNotificationCount(0);
+        await apiClient.markNotificationRead(String(n.id));
+        setNotifications((prev) =>
+          prev.map((x) => (x.id === n.id ? { ...x, is_read: true } : x))
+        );
+        setNotificationCount((c) => Math.max(0, c - 1));
+      } catch (e) {
+        console.error('[Notifications] mark read failed', e);
       }
-    };
-
-    // Initial fetch
-    fetchNotificationCount();
-    
-    // Only start polling if user and token are valid
-    if (user && token) {
-      intervalId = setInterval(() => {
-        if (!shouldStop && token && user) {
-          fetchNotificationCount();
-        } else if (intervalId) {
-          clearInterval(intervalId);
-          intervalId = null;
-        }
-      }, 10000);
-    }
-    
-    return () => {
-      shouldStop = true;
-      if (intervalId) {
-        clearInterval(intervalId);
-      }
-    };
-  }, [user, token]);
+    },
+    [token]
+  );
 
   const handleLogout = async () => {
     try {
@@ -369,7 +342,15 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
               {/* Notifications */}
               <div className="relative">
                 <button
-                  onClick={() => setShowNotifications(!showNotifications)}
+                  type="button"
+                  onClick={() => {
+                    const next = !showNotifications;
+                    setShowNotifications(next);
+                    if (next && token) {
+                      loadNotifications();
+                      loadNotificationCount();
+                    }
+                  }}
                   className="p-2 text-gray-400 hover:text-gray-600 relative"
                 >
                   <Bell className="w-6 h-6" />
@@ -387,10 +368,22 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
                       <h3 className="text-lg font-semibold text-gray-900">Notifications</h3>
                     </div>
                     <div className="max-h-96 overflow-y-auto">
+                      {notifications.length === 0 ? (
+                        <div className="p-6 text-sm text-gray-500 text-center">
+                          No notifications yet
+                        </div>
+                      ) : null}
                       {notifications.map((notification) => (
                         <div
                           key={notification.id}
-                          className={`p-4 border-b border-gray-100 hover:bg-gray-50 ${
+                          role="button"
+                          tabIndex={0}
+                          onClick={() => markNotificationRead(notification)}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter' || e.key === ' ')
+                              markNotificationRead(notification);
+                          }}
+                          className={`p-4 border-b border-gray-100 hover:bg-gray-50 cursor-pointer ${
                             !notification.is_read ? 'bg-blue-50' : ''
                           }`}
                         >
@@ -478,13 +471,17 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
         {/* Personalized Header for Providers */}
         {user?.user_type === 'provider' && (
           <PersonalizedHeader
-            onRefresh={() => {
-              // Refresh user stats and profile
-              if (token) {
-                apiClient.setToken(token);
-                // Trigger a refresh of the data
-                window.location.reload();
+            onRefresh={async () => {
+              if (!token) return;
+              apiClient.setToken(token);
+              try {
+                const response = await apiClient.get('/api/auth/stats/');
+                setUserStats(response as UserStats);
+              } catch {
+                // ignore
               }
+              await loadNotifications();
+              await loadNotificationCount();
             }}
             refreshing={false}
             onSettings={() => router.push('/dashboard/settings')}

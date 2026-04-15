@@ -323,12 +323,17 @@ export class SimpleApiClient {
   }
 
   // Notification endpoints
-  async getNotifications() {
-    return this.request('/api/notifications/')
+  async getNotifications(params?: { page_size?: number }) {
+    const q =
+      params?.page_size != null
+        ? `?page_size=${encodeURIComponent(String(params.page_size))}`
+        : ''
+    return this.request(`/api/notifications/${q}`)
   }
 
+  /** Dedicated count endpoint — do not use the paginated list response for badges. */
   async getNotificationCount() {
-    return this.request('/api/notifications/')
+    return this.request('/api/notifications/count/')
   }
 
   async markNotificationRead(id: string) {

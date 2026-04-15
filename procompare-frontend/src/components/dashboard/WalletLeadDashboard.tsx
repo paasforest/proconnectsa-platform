@@ -15,11 +15,12 @@ const WalletLeadDashboard = () => {
   const [purchasedLeads, setPurchasedLeads] = useState(new Set());
   const [notification, setNotification] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
   const [reserveInfo, setReserveInfo] = useState<any | null>(null);
+  const [listMessage, setListMessage] = useState<string | null>(null);
   
   // Cache key for localStorage
   const CACHE_KEY = `proconnectsa_leads_${user?.id || 'guest'}`;
   const CACHE_TIMESTAMP_KEY = `proconnectsa_leads_timestamp_${user?.id || 'guest'}`;
-  const CACHE_MAX_AGE = 5 * 60 * 1000; // 5 minutes
+  const CACHE_MAX_AGE = 60 * 1000; // 1 minute — stale cache hid fresh leads
   
   // Clear cache function (for debugging)
   const clearCache = useCallback(() => {
@@ -300,7 +301,12 @@ const WalletLeadDashboard = () => {
       // Handle different response structures
       const leadsData = response.leads || response.data?.leads || [];
       const walletData = response.wallet || response.data?.wallet || {};
-      
+      const msg =
+        (response as { message?: string }).message ||
+        (response as { data?: { message?: string } }).data?.message ||
+        null;
+      setListMessage(msg);
+
       if (leadsData.length > 0) {
         const transformedLeads = transformLeads(leadsData);
         
@@ -321,12 +327,13 @@ const WalletLeadDashboard = () => {
           console.warn('Failed to cache leads:', cacheError);
         }
       } else {
-        // For new providers, show empty state
-        setLeads([]);
-        setSelectedLead(null);
-        // Clear cache if no leads
-        localStorage.removeItem(CACHE_KEY);
-        localStorage.removeItem(CACHE_TIMESTAMP_KEY);
+        // Empty response: do not wipe the list on background refresh (avoids flash of "no leads")
+        if (!isBackgroundRefresh) {
+          setLeads([]);
+          setSelectedLead(null);
+          localStorage.removeItem(CACHE_KEY);
+          localStorage.removeItem(CACHE_TIMESTAMP_KEY);
+        }
       }
       
       // Set credits from wallet data
@@ -608,6 +615,14 @@ const WalletLeadDashboard = () => {
           
           {/* LEFT PANEL: Leads List */}
           <div className="lg:col-span-4 space-y-4 order-1 lg:order-1">
+            {listMessage ? (
+              <div
+                className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-950"
+                role="status"
+              >
+                {listMessage}
+              </div>
+            ) : null}
             <div className="bg-white rounded-lg shadow-sm">
               <div className="p-3 sm:p-4 border-b border-gray-200">
                 <div className="flex items-center justify-between">
