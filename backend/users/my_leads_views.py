@@ -12,25 +12,57 @@ from datetime import timedelta
 import logging
 
 from .models import User, Wallet
-from backend.leads.models import Lead, LeadAssignment
+from backend.leads.models import Lead, LeadAssignment, LeadAccess
 
 logger = logging.getLogger(__name__)
+
+# All assignment rows providers should see (routing creates status='assigned' before unlock).
+_MY_LEADS_ASSIGNMENT_STATUSES = [
+    'assigned',
+    'viewed',
+    'purchased',
+    'contacted',
+    'quoted',
+    'won',
+    'lost',
+    'no_response',
+]
+
+
+def _contact_revealed(assignment, user, lead):
+    """Full contact only after credit unlock (LeadAccess) or post-purchase pipeline."""
+    if assignment.status in ('purchased', 'contacted', 'quoted', 'won', 'lost'):
+        return True
+    return LeadAccess.objects.filter(
+        provider=user, lead=lead, is_active=True
+    ).exists()
+
+
+def _mask_email(email):
+    if not email or '@' not in email:
+        return '***@***.***'
+    local, _, domain = email.partition('@')
+    if len(local) <= 1:
+        return '***@***.***'
+    return f"{local[0]}***@{domain}"
+
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def my_leads(request):
     """
-    Get all purchased leads for the authenticated user
+    Lead assignments for this provider: assigned/routed leads and purchased pipeline.
+    Contact details stay masked until the lead is unlocked with credits (LeadAccess).
     """
     try:
         user = request.user
         
-        # Get only PURCHASED lead assignments for this user (provider)
-        # Only show leads that have been manually unlocked with credits
         assignments = LeadAssignment.objects.filter(
             provider=user,
-            status__in=['purchased', 'contacted', 'quoted', 'won', 'lost']
-        ).select_related('lead', 'lead__client', 'lead__service_category').order_by('-purchased_at', '-assigned_at')
+            status__in=_MY_LEADS_ASSIGNMENT_STATUSES,
+        ).select_related('lead', 'lead__client', 'lead__service_category').order_by(
+            '-assigned_at'
+        )
         
         leads_data = []
         for assignment in assignments:
@@ -38,6 +70,16 @@ def my_leads(request):
             
             # Use assignment status directly
             status = assignment.status
+            revealed = _contact_revealed(assignment, user, lead)
+            phone = getattr(lead.client, 'phone', 'Not provided') if lead.client else 'Not provided'
+            email = lead.client.email if lead.client else ''
+            if revealed:
+                description = lead.description
+            else:
+                phone = 'Unlock with credits to view'
+                email = _mask_email(email)
+                d = lead.description or ''
+                description = (d[:200] + '…') if len(d) > 200 else d
             
             leads_data.append({
                 'id': str(lead.id),
@@ -49,9 +91,10 @@ def my_leads(request):
                 'credits_spent': getattr(assignment, 'credit_cost', 1) or 1,
                 'unlocked_at': (assignment.purchased_at or assignment.assigned_at).isoformat(),
                 'status': status,
-                'phone': getattr(lead.client, 'phone', 'Not provided'),
-                'email': lead.client.email,
-                'description': lead.description,
+                'is_unlocked': revealed,
+                'phone': phone,
+                'email': email,
+                'description': description,
                 'urgency': lead.urgency,
                 'timeline': lead.hiring_timeline,
                 'notes': assignment.provider_notes or '',
@@ -177,7 +220,7 @@ def lead_stats(request):
         
         assignments = LeadAssignment.objects.filter(
             provider=user,
-            status__in=['purchased', 'contacted', 'quoted', 'won', 'lost']
+            status__in=_MY_LEADS_ASSIGNMENT_STATUSES,
         )
         
         total_leads = assignments.count()
@@ -185,7 +228,12 @@ def lead_stats(request):
         in_progress = assignments.filter(
             status__in=['contacted', 'quoted']
         ).count()
-        total_credits_spent = sum(getattr(a, 'credit_cost', 1) or 1 for a in assignments)
+        purchased_for_credits = assignments.filter(
+            status__in=['purchased', 'contacted', 'quoted', 'won', 'lost']
+        )
+        total_credits_spent = sum(
+            getattr(a, 'credit_cost', 1) or 1 for a in purchased_for_credits
+        )
         
         return Response({
             'total_leads': total_leads,

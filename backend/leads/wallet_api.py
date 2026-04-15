@@ -124,23 +124,41 @@ def available_leads(request):
             ).values_list('id', flat=True)
         )
 
+        from backend.leads.models import LeadAssignment as LeadAssignmentModel
+
+        # Leads explicitly routed to this provider (assigned/viewed) must stay visible even if
+        # categories are misconfigured, the marketplace window expired, or filters would hide them.
+        routed_to_me = list(
+            LeadAssignmentModel.objects.filter(
+                provider=request.user,
+                status__in=['assigned', 'viewed'],
+            ).values_list('lead_id', flat=True)
+        )
+
         if not category_ids:
+            if not routed_to_me:
+                logger.warning(
+                    "Provider %s has no resolvable service categories. "
+                    "Service objects: %s, JSON field: %s. Returning 0 available leads",
+                    request.user.id,
+                    list(service_category_slugs_from_objects),
+                    raw_categories,
+                )
+                return Response({
+                    'leads': [],
+                    'wallet': {
+                        'credits': wallet.credits,
+                        'balance': float(wallet.balance),
+                        'customer_code': wallet.customer_code
+                    },
+                    'message': 'Please add service categories in your profile to see matching leads. Go to Settings > Services to add your services.'
+                })
+            # Still show leads already assigned to this provider
             logger.warning(
-                "Provider %s has no resolvable service categories. "
-                "Service objects: %s, JSON field: %s. Returning 0 available leads",
+                "Provider %s has no category filter but has %s routed lead(s); showing those only",
                 request.user.id,
-                list(service_category_slugs_from_objects),
-                raw_categories,
+                len(routed_to_me),
             )
-            return Response({
-                'leads': [],
-                'wallet': {
-                    'credits': wallet.credits,
-                    'balance': float(wallet.balance),
-                    'customer_code': wallet.customer_code
-                },
-                'message': 'Please add service categories in your profile to see matching leads. Go to Settings > Services to add your services.'
-            })
         
         logger.info(
             "Provider %s service categories resolved: %s category IDs from %s Service objects and %s JSON entries",
@@ -149,19 +167,28 @@ def available_leads(request):
             len(service_category_ids_from_objects),
             len(raw_categories)
         )
-        
+
         # Base query
         # Note: many leads move to `assigned` after distribution, but are still
         # purchasable/unlockable in the wallet marketplace.
         # IMPORTANT: Exclude test leads - providers should NEVER see test leads
         from backend.leads.test_lead_utils import exclude_test_leads
-        
-        leads = Lead.objects.filter(
-            status__in=['verified', 'assigned'],
-            service_category__id__in=category_ids,
-            is_available=True,
-            expires_at__gt=timezone.now()
-        ).select_related('service_category', 'client')
+
+        if category_ids:
+            open_market = (
+                Q(status__in=['verified', 'assigned'])
+                & Q(service_category__id__in=category_ids)
+                & Q(is_available=True)
+                & Q(expires_at__gt=timezone.now())
+            )
+            if routed_to_me:
+                leads = Lead.objects.filter(open_market | Q(id__in=routed_to_me)).select_related(
+                    'service_category', 'client'
+                )
+            else:
+                leads = Lead.objects.filter(open_market).select_related('service_category', 'client')
+        else:
+            leads = Lead.objects.filter(id__in=routed_to_me).select_related('service_category', 'client')
         
         # Filter out test leads
         leads = exclude_test_leads(leads)
@@ -241,12 +268,36 @@ def available_leads(request):
             ).values_list('id', flat=True)
         )
 
-        leads = Lead.objects.filter(
-            status__in=['verified', 'assigned'],
-            is_available=True,
-            expires_at__gt=timezone.now(),
-            service_category__id__in=category_ids
-        ).select_related('client', 'service_category').order_by('-created_at')[:20]
+        from backend.leads.models import LeadAssignment as LeadAssignmentModel
+
+        routed_to_me = list(
+            LeadAssignmentModel.objects.filter(
+                provider=request.user,
+                status__in=['assigned', 'viewed'],
+            ).values_list('lead_id', flat=True)
+        )
+
+        if category_ids:
+            open_market = (
+                Q(status__in=['verified', 'assigned'])
+                & Q(is_available=True)
+                & Q(expires_at__gt=timezone.now())
+                & Q(service_category__id__in=category_ids)
+            )
+            if routed_to_me:
+                leads = Lead.objects.filter(open_market | Q(id__in=routed_to_me)).select_related(
+                    'client', 'service_category'
+                ).order_by('-created_at')[:20]
+            else:
+                leads = Lead.objects.filter(open_market).select_related(
+                    'client', 'service_category'
+                ).order_by('-created_at')[:20]
+        elif routed_to_me:
+            leads = Lead.objects.filter(id__in=routed_to_me).select_related(
+                'client', 'service_category'
+            ).order_by('-created_at')[:20]
+        else:
+            leads = Lead.objects.none()
         
         # Basic geographical filtering
         if provider_service_areas:
