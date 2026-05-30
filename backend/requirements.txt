@@ -21,7 +21,7 @@ resend>=2.0.0
 requests==2.31.0
 
 # File handling
-Pillow==10.1.0
+Pillow==11.2.1
 whitenoise==6.6.0
 
 # Production server
