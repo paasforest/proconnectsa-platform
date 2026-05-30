@@ -22,6 +22,12 @@ ALLOWED_HOSTS = config(
     cast=lambda v: [s.strip() for s in v.split(',')]
 )
 
+# Always allow Railway internal domains and health checks
+ALLOWED_HOSTS += [
+    '.railway.app',
+    '.up.railway.app',
+]
+
 # ============================================================
 # APPS
 # ============================================================
