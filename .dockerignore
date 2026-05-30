@@ -1,0 +1,61 @@
+# Frontend - not needed in backend container
+procompare-frontend/
+immigrationai_landing_page/
+
+# Python
+**/__pycache__/
+**/*.pyc
+**/*.pyo
+*.egg-info/
+venv/
+.venv/
+
+# ML models - not needed (removed from stack)
+ml_models/
+ml_data/
+backend/ml_models/
+backend/ml_data/
+
+# Logs
+*.log
+logs/
+django.log
+nextjs.log
+
+# Database
+db.sqlite3
+backend/db.sqlite3
+
+# Docs and scripts - not needed in container
+*.md
+*.sh
+*.txt.bak
+docs/
+scripts/
+backlinks/
+support/
+
+# Test files
+test_*.py
+*_test.py
+tests/
+
+# Git
+.git/
+.gitignore
+
+# Environment files
+.env
+.env.*
+!.env.example
+secure_production_env.txt
+
+# IDE
+.cursor/
+.vscode/
+.pytools/
+
+# Temporary files
+*.tmp
+cookies.txt
+proconnectsa-deployment.tar.gz
