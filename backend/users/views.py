@@ -6,7 +6,7 @@ from django.contrib.auth import login
 from django.db import transaction, models
 from django.utils import timezone
 from django_ratelimit.decorators import ratelimit
-from channels.layers import get_channel_layer
+# channels removed — WebSockets not used at current scale
 from asgiref.sync import async_to_sync
 from .models import User, ProviderProfile, JobCategory, LeadClaim, Wallet
 from backend.leads.models import Lead
@@ -523,16 +523,7 @@ class LeadViewSet(generics.ListCreateAPIView):
         serializer.is_valid(raise_exception=True)
         lead = serializer.save()
         
-        # Send WebSocket notification for new lead
-        channel_layer = get_channel_layer()
-        if channel_layer:
-            async_to_sync(channel_layer.group_send)(
-                "lead_updates",
-                {
-                    'type': 'lead_created',
-                    'lead_data': LeadSerializer(lead).data
-                }
-            )
+        # WebSocket notifications removed — using polling instead
         
         return Response(
             LeadSerializer(lead).data, 
