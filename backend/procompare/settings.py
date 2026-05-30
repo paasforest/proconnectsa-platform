@@ -79,6 +79,7 @@ MIDDLEWARE = [
     'allauth.account.middleware.AccountMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    # django-ratelimit middleware removed — using view-level rate limiting only
 ]
 
 ROOT_URLCONF = 'backend.procompare.urls'
@@ -124,13 +125,13 @@ else:
 AUTH_USER_MODEL = 'users.User'
 
 # ============================================================
-# CACHE — simple DB cache, no Redis needed
+# CACHE — in-memory, zero setup required
 # ============================================================
 
 CACHES = {
     'default': {
-        'BACKEND': 'django.core.cache.backends.db.DatabaseCache',
-        'LOCATION': 'cache_table',
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'LOCATION': 'proconnectsa-cache',
     }
 }
 
