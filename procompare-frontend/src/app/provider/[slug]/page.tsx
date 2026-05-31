@@ -76,7 +76,7 @@ export default async function ProviderPage({ params }: { params: Promise<{ slug:
       {/* Stats strip */}
       {provider.stats && (
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="bg-white rounded-xl border border-mist shadow-sm -mt-8 relative z-20 p-6">
+          <div className="bg-white rounded-xl border border-mist shadow-sm -mt-8 relative z-20 p-6 max-w-2xl mx-auto">
             <div className="flex flex-wrap justify-center divide-x divide-mist">
               {provider.stats.map((stat, i) => (
                 <div key={i} className="flex flex-col items-center px-8 py-2">

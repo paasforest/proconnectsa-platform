@@ -8,7 +8,7 @@ export type Category = {
 }
 
 export const categories: Category[] = [
-  { slug: 'locksmith', name: 'Locksmith', description: '24/7 emergency lockout and key services', icon: 'KeyRound', bannerImage: 'https://images.unsplash.com/photo-1568633329995-e54aef85044d?w=1600&auto=format&fit=crop&q=80', status: 'live' },
+  { slug: 'locksmith', name: 'Locksmith', description: '24/7 emergency lockout and key services', icon: 'KeyRound', bannerImage: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=1600&auto=format&fit=crop&q=80', status: 'live' },
   { slug: 'parcel-delivery', name: 'Parcel Delivery', description: 'Same-day local and intercity parcel delivery', icon: 'Package', bannerImage: 'https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?w=1600&auto=format&fit=crop&q=80', status: 'live' },
   { slug: 'home-renovation', name: 'Home Renovation', description: 'Kitchens, bathrooms, extensions and full renovations', icon: 'Hammer', bannerImage: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=1600&auto=format&fit=crop&q=80', status: 'live' },
   { slug: 'immigration', name: 'Immigration & Visa', description: 'Work abroad placements and visa assistance', icon: 'Plane', bannerImage: 'https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=1600&auto=format&fit=crop&q=80', status: 'live' },

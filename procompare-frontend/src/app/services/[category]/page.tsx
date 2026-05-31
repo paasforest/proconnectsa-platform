@@ -110,7 +110,13 @@ export default async function CategoryPage({ params }: { params: Promise<{ categ
               </h2>
               <p className="text-slate">These are established specialists with a real track record.</p>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-14">
+            <div className={`mb-14 ${
+                matchedProviders.length === 1
+                  ? 'max-w-lg mx-auto w-full'
+                  : matchedProviders.length === 2
+                  ? 'grid grid-cols-1 sm:grid-cols-2 gap-6'
+                  : 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6'
+              }`}>
               {matchedProviders.map(p => (
                 <ProviderCard key={p.slug} provider={p} />
               ))}

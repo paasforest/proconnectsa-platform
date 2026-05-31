@@ -30,7 +30,7 @@ Whether you are locked out of your car, your house, or your office, Vula24 match
 Built specifically for South African emergencies, with operators available even at 2am on a Sunday.`,
     website: 'https://www.vula24.co.za',
     logoText: 'V24',
-    heroImage: 'https://images.unsplash.com/photo-1568633329995-e54aef85044d?w=1600&auto=format&fit=crop&q=80',
+    heroImage: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=1600&auto=format&fit=crop&q=80',
     primaryCategory: 'locksmith',
     categories: ['locksmith', 'emergency-locksmith', 'car-lockout', 'house-lockout', 'lock-repair', 'key-replacement'],
     areasServed: [
