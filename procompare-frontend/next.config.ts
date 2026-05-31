@@ -24,8 +24,9 @@ const nextConfig: NextConfig = {
       { source: '/register-business', destination: '/contact', permanent: true },
       { source: '/dashboard/:path*', destination: '/', permanent: false },
       { source: '/login', destination: '/', permanent: false },
-      // Old provider ID routes → new slug routes (handled in page)
-      { source: '/providers/browse', destination: '/providers/browse', permanent: false },
+      // Old numeric provider ID routes redirect to browse
+      { source: '/providers/:id(\\d+)', destination: '/providers/browse', permanent: true },
+      { source: '/providers/:id(\\d+)/:path*', destination: '/providers/browse', permanent: true },
     ]
   },
 
