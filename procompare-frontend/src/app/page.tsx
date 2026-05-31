@@ -1,245 +1,210 @@
-import Link from "next/link"
-import type { Metadata } from "next"
-import BarkLeadForm from "@/components/leads/BarkLeadForm"
-import { ClientHeader } from "@/components/layout/ClientHeader"
-import { Footer } from "@/components/layout/Footer"
-import { PROVINCES } from "@/lib/seo-locations"
-import { getServiceCategoriesCached } from "@/lib/service-categories"
-import { SITE_ORIGIN, siteUrl } from "@/lib/seo-site"
-
-export const dynamic = "force-dynamic"
+import type { Metadata } from 'next'
+import Image from 'next/image'
+import Link from 'next/link'
+import { Shield, BookOpen, ArrowRight, CheckCircle } from 'lucide-react'
+import CategoryCard from '@/components/ui/CategoryCard'
+import ProviderCard from '@/components/ui/ProviderCard'
+import ProvinceCard from '@/components/ui/ProvinceCard'
+import { categories, provinces, getLiveCategories } from '@/lib/categories'
+import { providers } from '@/lib/providers'
 
 export const metadata: Metadata = {
-  alternates: { canonical: siteUrl("/") },
-  openGraph: { url: siteUrl("/") },
+  title: 'ProConnectSA — Find Trusted Service Providers Across South Africa',
+  description:
+    'Verified locksmiths, couriers, home renovation specialists, and immigration consultants. One directory, multiple specialists across South Africa.',
 }
 
-export default async function Homepage() {
-  const categories = await getServiceCategoriesCached()
+const liveCategories = getLiveCategories()
 
-  // Structured data for SEO - Local Services Marketplace
-  const structuredData = {
-    "@context": "https://schema.org",
-    "@type": "LocalBusiness",
-    "name": "ProConnectSA",
-    "description": "Find trusted local service providers in South Africa. Compare free quotes from verified professionals.",
-    "url": SITE_ORIGIN,
-    "email": "support@proconnectsa.co.za",
-    "areaServed": {
-      "@type": "Country",
-      "name": "South Africa"
-    },
-    "serviceType": [
-      "Plumbing",
-      "Electrical",
-      "Cleaning",
-      "Painting",
-      "Handyman Services",
-      "HVAC",
-      "Landscaping",
-      "Carpentry"
-    ]
-  }
+const featuredCards = [
+  {
+    category: liveCategories[0],
+    thumb: 'https://images.unsplash.com/photo-1633113216237-2bfe92ce4dba?w=600&auto=format&fit=crop&q=80',
+    alt: 'Locksmith working on a door lock',
+  },
+  {
+    category: liveCategories[1],
+    thumb: 'https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?w=600&auto=format&fit=crop&q=80',
+    alt: 'Delivery driver handing over a parcel',
+  },
+  {
+    category: liveCategories[2],
+    thumb: 'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=600&auto=format&fit=crop&q=80',
+    alt: 'Modern renovated kitchen',
+  },
+  {
+    category: liveCategories[3],
+    thumb: 'https://images.unsplash.com/photo-1569154941061-e231b4725ef1?w=600&auto=format&fit=crop&q=80',
+    alt: 'Passport and travel documents',
+  },
+]
 
-  // Prioritize local services that match Snupit/Bark positioning
-  const servicePriority = [
-    { slug: "plumbing", name: "Plumbers" },
-    { slug: "electrical", name: "Electricians" },
-    { slug: "cleaning", name: "Cleaning Services" },
-    { slug: "painting", name: "Painters" },
-    { slug: "handyman", name: "Handyman Services" },
-    { slug: "hvac", name: "HVAC Installers" },
-    { slug: "landscaping", name: "Landscaping" },
-    { slug: "carpentry", name: "Carpentry" },
-  ]
-
-  const popular = categories.length 
-    ? servicePriority
-        .map(priority => {
-          const found = categories.find(c => c.slug === priority.slug)
-          return found ? { ...found, name: priority.name } : { id: 0, slug: priority.slug, name: priority.name }
-        })
-        .slice(0, 8)
-    : servicePriority.slice(0, 8)
-
+export default function HomePage() {
   return (
-    <div className="min-h-screen flex flex-col">
-      <ClientHeader />
-      <main className="flex-1">
-        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }} />
-
-        <section className="bg-gradient-to-br from-emerald-50 to-blue-50 py-14">
-          <div className="container mx-auto px-4">
-            <div className="max-w-6xl mx-auto grid lg:grid-cols-2 gap-10 items-start">
-              <div>
-                <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-4">
-                  Find Trusted Local Service Providers in South Africa
-                </h1>
-                <p className="text-lg text-gray-600 mb-6">
-                  Compare quotes from verified professionals near you — fast & free. Whether you're in <Link href="/johannesburg/services" className="text-emerald-700 hover:text-emerald-800 hover:underline font-medium">Johannesburg</Link>, <Link href="/cape-town/services" className="text-emerald-700 hover:text-emerald-800 hover:underline font-medium">Cape Town</Link>, <Link href="/durban/services" className="text-emerald-700 hover:text-emerald-800 hover:underline font-medium">Durban</Link>, or <Link href="/pretoria/services" className="text-emerald-700 hover:text-emerald-800 hover:underline font-medium">Pretoria</Link>, find trusted <Link href="/services/plumbing" className="text-emerald-700 hover:text-emerald-800 hover:underline font-medium">plumbers</Link>, <Link href="/services/electrical" className="text-emerald-700 hover:text-emerald-800 hover:underline font-medium">electricians</Link>, <Link href="/services/cleaning" className="text-emerald-700 hover:text-emerald-800 hover:underline font-medium">cleaning services</Link>, and more. No obligation to hire.
-                </p>
-                <div className="flex flex-wrap gap-3 text-sm text-gray-700 mb-8">
-                  <span className="inline-flex items-center rounded-full bg-white border px-3 py-1">✓ Verified professionals</span>
-                  <span className="inline-flex items-center rounded-full bg-white border px-3 py-1">✓ Local & trusted</span>
-                  <span className="inline-flex items-center rounded-full bg-white border px-3 py-1">✓ No obligation</span>
-                </div>
-
-                <div className="border rounded-2xl bg-white p-6">
-                  <BarkLeadForm />
-                </div>
-              </div>
-
-              <div className="space-y-8">
-                <div className="border rounded-2xl bg-white p-6">
-                  <div className="text-lg font-semibold text-gray-900 mb-3">Popular Local Services</div>
-                  <p className="text-sm text-gray-600 mb-4">
-                    Find trusted professionals for all your home and business needs
-                  </p>
-                  <div className="flex flex-wrap gap-2">
-                    {popular.map((c) => (
-                      <Link
-                        key={c.slug}
-                        href={`/services/${c.slug}`}
-                        className="inline-flex items-center rounded-full border px-4 py-2 text-sm text-gray-700 hover:border-emerald-300 hover:bg-emerald-50"
-                      >
-                        {c.name}
-                      </Link>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="border rounded-2xl bg-white p-6">
-                  <div className="text-lg font-semibold text-gray-900 mb-3">Find Services by Province</div>
-                  <p className="text-sm text-gray-600 mb-4">
-                    Browse verified professionals in your province. Get quotes from local service providers near you.
-                  </p>
-                  <div className="flex flex-wrap gap-2 mb-4">
-                    {PROVINCES.map((p) => (
-                      <Link
-                        key={p.slug}
-                        href={p.slug === "gauteng" ? `/${p.slug}/local-services` : `/services/plumbing/${p.slug}`}
-                        className="inline-flex items-center rounded-full border px-4 py-2 text-sm text-gray-700 hover:border-emerald-300 hover:bg-emerald-50 font-medium"
-                      >
-                        {p.name}
-                      </Link>
-                    ))}
-                  </div>
-                  <div className="pt-4 border-t">
-                    <div className="text-sm font-semibold text-gray-900 mb-2">Popular Cities</div>
-                    <p className="text-xs text-gray-600 mb-3">
-                      Find services in major cities: <Link href="/johannesburg/services" className="text-emerald-700 hover:text-emerald-800 hover:underline font-medium">Johannesburg</Link>, <Link href="/cape-town/services" className="text-emerald-700 hover:text-emerald-800 hover:underline font-medium">Cape Town</Link>, <Link href="/durban/services" className="text-emerald-700 hover:text-emerald-800 hover:underline font-medium">Durban</Link>, <Link href="/pretoria/services" className="text-emerald-700 hover:text-emerald-800 hover:underline font-medium">Pretoria</Link>, <Link href="/sandton/services" className="text-emerald-700 hover:text-emerald-800 hover:underline font-medium">Sandton</Link>, and more.
-                    </p>
-                    <div className="flex flex-wrap gap-2">
-                      {["Johannesburg", "Cape Town", "Durban", "Pretoria", "Sandton", "Centurion", "Midrand", "Stellenbosch"].map((city) => {
-                        const citySlug = city.toLowerCase().replace(/\s+/g, "-")
-                        return (
-                          <Link key={city} href={`/${citySlug}/services`} className="text-xs text-emerald-700 hover:text-emerald-800 hover:underline font-medium">
-                            {city}
-                          </Link>
-                        )
-                      })}
-                    </div>
-                  </div>
-                  <div className="mt-4 text-sm text-gray-600">
-                    Are you a professional?{" "}
-                    <Link href="/for-pros" className="font-semibold text-emerald-700 hover:text-emerald-800">
-                      Join as a provider →
-                    </Link>
-                  </div>
-                </div>
-
-                <div className="border rounded-2xl bg-white p-6">
-                  <div className="text-lg font-semibold text-gray-900 mb-2">Browse Local Providers</div>
-                  <p className="text-gray-600 text-sm mb-4">
-                    Search verified professionals by service and location. Read reviews and compare profiles.
-                  </p>
-                  <Link href="/providers/browse" className="text-emerald-700 font-semibold hover:text-emerald-800">
-                    Browse Providers →
-                  </Link>
-                </div>
-
-                <div className="border rounded-2xl bg-white p-6">
-                  <div className="text-lg font-semibold text-gray-900 mb-2">Cost guides &amp; relocation</div>
-                  <p className="text-gray-600 text-sm mb-4">
-                    See{" "}
-                    <Link href="/resources/solar-installation-cost-south-africa" className="text-emerald-700 font-medium hover:text-emerald-800 hover:underline">
-                      solar installation cost
-                    </Link>
-                    ,{" "}
-                    <Link href="/resources/solar-installation-cost-south-africa" className="text-emerald-700 font-medium hover:text-emerald-800 hover:underline">
-                      cost of solar panels in South Africa
-                    </Link>
-                    ,{" "}
-                    <Link href="/resources/solar-installation-cost-south-africa" className="text-emerald-700 font-medium hover:text-emerald-800 hover:underline">
-                      solar prices
-                    </Link>
-                    ,{" "}
-                    <Link href="/resources/plumbing-cost-south-africa" className="text-emerald-700 font-medium hover:text-emerald-800 hover:underline">
-                      plumber pricing
-                    </Link>
-                    , and more in our{" "}
-                    <Link href="/resources" className="text-emerald-700 font-medium hover:text-emerald-800 hover:underline">
-                      resources hub
-                    </Link>
-                    . Planning a move abroad? Read{" "}
-                    <Link href="/immigration" className="text-emerald-700 font-medium hover:text-emerald-800 hover:underline">
-                      immigration &amp; visa planning
-                    </Link>
-                    .
-                  </p>
-                </div>
-
-                <div className="border rounded-2xl bg-emerald-50 border-emerald-200 p-6">
-                  <div className="text-lg font-semibold text-gray-900 mb-2">Trust & Safety</div>
-                  <div className="space-y-3 text-sm text-gray-700">
-                    <p>
-                      <span className="text-emerald-600 font-bold">✓</span> <strong>Verified professionals:</strong> All providers are background checked. Whether you're in <Link href="/johannesburg/services" className="text-emerald-700 hover:text-emerald-800 hover:underline font-medium">Johannesburg</Link> or <Link href="/cape-town/services" className="text-emerald-700 hover:text-emerald-800 hover:underline font-medium">Cape Town</Link>, every professional is verified.
-                    </p>
-                    <p>
-                      <span className="text-emerald-600 font-bold">✓</span> <strong>No obligation:</strong> Free to request quotes, no commitment to hire. Compare <Link href="/services/plumbing" className="text-emerald-700 hover:text-emerald-800 hover:underline font-medium">plumbing</Link>, <Link href="/services/electrical" className="text-emerald-700 hover:text-emerald-800 hover:underline font-medium">electrical</Link>, and <Link href="/services/cleaning" className="text-emerald-700 hover:text-emerald-800 hover:underline font-medium">cleaning</Link> quotes with zero pressure.
-                    </p>
-                    <p>
-                      <span className="text-emerald-600 font-bold">✓</span> <strong>Compare quotes:</strong> Get multiple quotes to find the best price. Request quotes from providers in <Link href="/gauteng/local-services" className="text-emerald-700 hover:text-emerald-800 hover:underline font-medium">Gauteng</Link>, <Link href="/services/plumbing/western-cape" className="text-emerald-700 hover:text-emerald-800 hover:underline font-medium">Western Cape</Link>, and all provinces.
-                    </p>
-                    <p>
-                      <span className="text-emerald-600 font-bold">✓</span> <strong>Local & trusted:</strong> Connect with professionals in your area. Serving 50+ cities nationwide including <Link href="/durban/services" className="text-emerald-700 hover:text-emerald-800 hover:underline font-medium">Durban</Link>, <Link href="/pretoria/services" className="text-emerald-700 hover:text-emerald-800 hover:underline font-medium">Pretoria</Link>, and <Link href="/sandton/services" className="text-emerald-700 hover:text-emerald-800 hover:underline font-medium">Sandton</Link>.
-                    </p>
-                  </div>
-                </div>
-
-                <div className="border rounded-2xl bg-blue-50 border-blue-200 p-6">
-                  <div className="text-lg font-semibold text-gray-900 mb-2">Get Quotes by Province</div>
-                  <p className="text-gray-600 text-sm mb-4">
-                    Find trusted service providers in major provinces across South Africa. Compare quotes from verified professionals near you.
-                  </p>
-                  <div className="grid grid-cols-2 gap-3 mb-4">
-                    <Link href="/gauteng/local-services" className="block px-4 py-3 bg-white border rounded-lg hover:border-emerald-300 hover:bg-emerald-50 transition">
-                      <div className="font-semibold text-gray-900 text-sm">Gauteng</div>
-                      <div className="text-xs text-gray-600 mt-1">Johannesburg, Pretoria, Sandton</div>
-                    </Link>
-                    <Link href="/services/plumbing/western-cape" className="block px-4 py-3 bg-white border rounded-lg hover:border-emerald-300 hover:bg-emerald-50 transition">
-                      <div className="font-semibold text-gray-900 text-sm">Western Cape</div>
-                      <div className="text-xs text-gray-600 mt-1">Cape Town, Stellenbosch, Bellville</div>
-                    </Link>
-                    <Link href="/services/electrical/kwazulu-natal" className="block px-4 py-3 bg-white border rounded-lg hover:border-emerald-300 hover:bg-emerald-50 transition">
-                      <div className="font-semibold text-gray-900 text-sm">KwaZulu-Natal</div>
-                      <div className="text-xs text-gray-600 mt-1">Durban, Umhlanga, Pietermaritzburg</div>
-                    </Link>
-                    <Link href="/services/handyman/eastern-cape" className="block px-4 py-3 bg-white border rounded-lg hover:border-emerald-300 hover:bg-emerald-50 transition">
-                      <div className="font-semibold text-gray-900 text-sm">Eastern Cape</div>
-                      <div className="text-xs text-gray-600 mt-1">Gqeberha, East London</div>
-                    </Link>
-                  </div>
-                  <p className="text-xs text-gray-600">
-                    Serving all 9 provinces: <Link href="/gauteng/local-services" className="text-emerald-700 hover:text-emerald-800 hover:underline">Gauteng</Link>, <Link href="/services/plumbing/western-cape" className="text-emerald-700 hover:text-emerald-800 hover:underline">Western Cape</Link>, <Link href="/services/electrical/kwazulu-natal" className="text-emerald-700 hover:text-emerald-800 hover:underline">KwaZulu-Natal</Link>, <Link href="/services/handyman/eastern-cape" className="text-emerald-700 hover:text-emerald-800 hover:underline">Eastern Cape</Link>, and more.
-                  </p>
-                </div>
-              </div>
-            </div>
+    <>
+      {/* ── HERO ─────────────────────────────────────── */}
+      <section className="relative min-h-[70vh] md:min-h-[70vh] flex items-center overflow-hidden">
+        <Image
+          src="https://images.unsplash.com/photo-1581094794329-c8112a89af12?w=1920&auto=format&fit=crop&q=80"
+          alt="South African professionals working"
+          fill
+          priority
+          className="object-cover object-center"
+          sizes="100vw"
+        />
+        <div className="absolute inset-0 bg-teal/60" />
+        <div className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
+          <h1 className="font-heading font-bold text-5xl md:text-6xl text-white leading-tight tracking-tight max-w-3xl mb-4">
+            Find trusted service providers across South Africa
+          </h1>
+          <p className="text-white/85 text-lg md:text-xl max-w-2xl mb-8 leading-relaxed">
+            Verified locksmiths, couriers, renovation experts, and immigration consultants. One directory, multiple specialists.
+          </p>
+          <div className="flex flex-wrap gap-4 mb-6">
+            <Link
+              href="/services"
+              className="inline-flex items-center gap-2 bg-amber hover:bg-amber-dark text-white font-semibold px-6 py-3 rounded-md transition-colors text-base"
+            >
+              Browse Services <ArrowRight className="h-4 w-4" />
+            </Link>
+            <Link
+              href="/how-it-works"
+              className="inline-flex items-center gap-2 border border-white/60 text-white hover:bg-white/10 font-semibold px-6 py-3 rounded-md transition-colors text-base"
+            >
+              How It Works
+            </Link>
           </div>
-        </section>
-      </main>
-      <Footer />
-    </div>
+          <p className="text-white/60 text-sm">Serving Gauteng, Western Cape and beyond</p>
+        </div>
+      </section>
+
+      {/* ── FEATURED SERVICES ─────────────────────────── */}
+      <section className="bg-white py-16 md:py-20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="mb-10">
+            <h2 className="font-heading font-bold text-3xl md:text-4xl text-teal mb-2">
+              Services on ProConnectSA
+            </h2>
+            <p className="text-slate">Verified specialists for the things you actually need.</p>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {featuredCards.map(({ category, thumb, alt }) => (
+              <Link
+                key={category.slug}
+                href={`/services/${category.slug}`}
+                className="group bg-white rounded-lg border border-mist overflow-hidden hover:shadow-md transition-shadow duration-200"
+              >
+                <div className="relative aspect-video w-full overflow-hidden">
+                  <Image
+                    src={thumb}
+                    alt={alt}
+                    fill
+                    className="object-cover object-center group-hover:scale-105 transition-transform duration-300"
+                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+                  />
+                </div>
+                <div className="p-4">
+                  <h3 className="font-heading font-medium text-lg text-gray-900 mb-1">{category.name}</h3>
+                  <p className="text-sm text-slate leading-snug mb-3">{category.description}</p>
+                  <span className="text-sm font-medium text-amber group-hover:text-amber-dark transition-colors">
+                    View providers →
+                  </span>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── WHY PROCONNECTSA ──────────────────────────── */}
+      <section className="bg-cream py-16 md:py-20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <h2 className="font-heading font-bold text-3xl md:text-4xl text-teal mb-10">
+            Why ProConnectSA?
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {[
+              {
+                icon: <CheckCircle className="h-8 w-8 text-teal" />,
+                title: 'Verified specialists',
+                body: 'Every provider is an established business with a track record. No random handymen — only specialists who own their category.',
+              },
+              {
+                icon: <BookOpen className="h-8 w-8 text-teal" />,
+                title: 'One destination, multiple categories',
+                body: 'Need a locksmith today and an immigration consultant next month? ProConnectSA is your one trusted starting point.',
+              },
+              {
+                icon: <Shield className="h-8 w-8 text-teal" />,
+                title: 'Honest referrals',
+                body: 'No quote forms, no upsells, no spam. We connect you directly to the specialist\'s own website.',
+              },
+            ].map(item => (
+              <div key={item.title} className="flex flex-col gap-4">
+                <div className="w-14 h-14 bg-teal-light rounded-xl flex items-center justify-center flex-shrink-0">
+                  {item.icon}
+                </div>
+                <div>
+                  <h3 className="font-heading font-semibold text-lg text-gray-900 mb-2">{item.title}</h3>
+                  <p className="text-slate text-sm leading-relaxed">{item.body}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── ALL CATEGORIES ────────────────────────────── */}
+      <section className="bg-white py-16 md:py-20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="mb-10">
+            <h2 className="font-heading font-bold text-3xl md:text-4xl text-teal mb-2">
+              All service categories
+            </h2>
+            <p className="text-slate">Live now and coming soon.</p>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
+            {categories.map(cat => (
+              <CategoryCard key={cat.slug} category={cat} />
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── COVERAGE ──────────────────────────────────── */}
+      <section className="bg-cream py-16 md:py-20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="mb-10">
+            <h2 className="font-heading font-bold text-3xl md:text-4xl text-teal mb-2">
+              Coverage across South Africa
+            </h2>
+            <p className="text-slate">Verified providers across the country.</p>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+            {provinces.map(p => (
+              <ProvinceCard key={p.slug} name={p.name} slug={p.slug} liveCategories={p.liveCategories} />
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── FINAL CTA ─────────────────────────────────── */}
+      <section className="bg-teal py-16 md:py-20">
+        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <h2 className="font-heading font-bold text-3xl md:text-4xl text-white mb-3">
+            Need to find a specialist?
+          </h2>
+          <p className="text-white/80 text-lg mb-8">
+            Start with the right category. We will route you to a verified provider.
+          </p>
+          <Link
+            href="/services"
+            className="inline-flex items-center gap-2 bg-amber hover:bg-amber-dark text-white font-semibold px-8 py-4 rounded-md transition-colors text-base"
+          >
+            Browse all services <ArrowRight className="h-4 w-4" />
+          </Link>
+        </div>
+      </section>
+    </>
   )
 }

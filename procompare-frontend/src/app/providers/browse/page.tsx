@@ -1,209 +1,44 @@
-import { ClientHeader } from "@/components/layout/ClientHeader";
-import { Footer } from "@/components/layout/Footer";
-import Link from "next/link";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent } from "@/components/ui/card";
-import type { Metadata } from "next";
-import { siteUrl } from "@/lib/seo-site";
-
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || "https://api.proconnectsa.co.za";
-
-type PublicProvider = {
-  id: string;
-  business_name: string;
-  city: string | null;
-  suburb: string | null;
-  service_categories: string[] | null;
-  average_rating: number;
-  total_reviews: number;
-  verification_status: string;
-  is_premium_listing?: boolean;
-  is_premium_listing_active?: boolean;
-  slug: string;
-};
-
-function formatVerificationStatus(s?: string | null) {
-  const status = (s || "").toLowerCase();
-  if (status === "verified") return "Verified";
-  if (status === "pending") return "Verification pending";
-  if (status === "rejected") return "Rejected";
-  if (status === "suspended") return "Suspended";
-  return status ? status.replace(/_/g, " ") : "Unknown";
-}
-
-async function fetchProviders(searchParams: { category?: string; city?: string; page?: string; page_size?: string }) {
-  try {
-    const params = new URLSearchParams();
-    if (searchParams.category) params.set("category", searchParams.category);
-    if (searchParams.city) params.set("city", searchParams.city);
-    if (searchParams.page) params.set("page", searchParams.page);
-    if (searchParams.page_size) params.set("page_size", searchParams.page_size);
-    const queryString = params.toString();
-    const baseUrl = `${API_BASE}/api/public/providers/`;
-    const url = queryString ? `${baseUrl}?${queryString}` : baseUrl;
-    const res = await fetch(url, { next: { revalidate: 300 } });
-    if (!res.ok) {
-      console.error(`Failed to load providers: ${res.status}`);
-      return { results: [], pagination: { page: 1, pages: 1, total: 0, page_size: 20 } };
-    }
-    const data = await res.json();
-    return {
-      results: data.results || [],
-      pagination: data.pagination || { page: 1, pages: 1, total: 0, page_size: 20 }
-    };
-  } catch (error) {
-    console.error("Error fetching providers:", error);
-    return { results: [], pagination: { page: 1, pages: 1, total: 0, page_size: 20 } };
-  }
-}
-
-const BROWSE_CANONICAL = siteUrl("/providers/browse");
+import type { Metadata } from 'next'
+import Image from 'next/image'
+import ProviderCard from '@/components/ui/ProviderCard'
+import { providers } from '@/lib/providers'
 
 export const metadata: Metadata = {
-  title: "Find Verified Local Service Providers | Browse by City & Service | ProConnectSA",
-  description: "Browse verified local service providers across South Africa. Filter by service category and city to find professionals near you.",
-  alternates: { canonical: BROWSE_CANONICAL },
-  openGraph: { url: BROWSE_CANONICAL },
-  robots: { index: true, follow: true },
-};
+  title: 'Browse All Verified Providers',
+  description: 'All verified service providers on ProConnectSA — locksmiths, couriers, home renovation specialists, and immigration consultants across South Africa.',
+}
 
-export default async function ProvidersBrowsePage({
-  searchParams,
-}: {
-  searchParams: Promise<{ category?: string; city?: string; page?: string; page_size?: string }>;
-}) {
-  try {
-    const params = await searchParams;
-    const data = await fetchProviders(params);
-    const providers = Array.isArray(data.results) ? data.results : [];
-
-    return (
-      <div className="min-h-screen flex flex-col">
-        <ClientHeader />
-        <main className="flex-1">
-          <section className="py-10 bg-white border-b">
-            <div className="container mx-auto px-4">
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">Find Verified Local Service Providers</h1>
-              <p className="text-gray-600">
-                Browse verified professionals in your area. Search by service category and city to find trusted local providers.
-              </p>
-              <form method="get" action="/providers/browse" className="mt-6 grid grid-cols-1 md:grid-cols-4 gap-3">
-                <input
-                  name="category"
-                  placeholder="Category slug (e.g. plumbing)"
-                  defaultValue={params.category || ""}
-                  className="border rounded px-3 py-2"
-                />
-                <input
-                  name="city"
-                  placeholder="City (e.g. Johannesburg)"
-                  defaultValue={params.city || ""}
-                  className="border rounded px-3 py-2"
-                />
-                <input type="hidden" name="page" value="1" />
-                <button type="submit" className="bg-blue-600 text-white rounded px-4 py-2 hover:bg-blue-700">Search</button>
-                <Link
-                  href="/providers/browse"
-                  className="text-sm text-gray-600 underline underline-offset-4 self-center"
-                >
-                  Reset
-                </Link>
-              </form>
-            </div>
-          </section>
-
-          <section className="py-8">
-            <div className="container mx-auto px-4 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              {providers.length === 0 && (
-                <div className="col-span-full text-gray-600">No providers found for your filters.</div>
-              )}
-              {providers.map((p) => (
-                <Card key={p.id} className="hover:shadow-md transition-shadow">
-                  <CardContent className="p-5">
-                    <div className="flex items-start justify-between gap-3">
-                      <div>
-                        <h3 className="text-lg font-semibold text-gray-900">{p.business_name}</h3>
-                        <p className="text-sm text-gray-600">{[p.suburb, p.city].filter(Boolean).join(", ")}</p>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        {p.is_premium_listing_active && (
-                          <Badge className="bg-[#FFD700] text-[#4a3500] border border-[#D4AF37] hover:bg-[#FFD700]">
-                            Premium
-                          </Badge>
-                        )}
-                        <Badge
-                          className={
-                            p.verification_status === "verified"
-                              ? "bg-green-100 text-green-800 border border-green-300 hover:bg-green-100"
-                              : p.verification_status === "pending"
-                                ? "bg-yellow-50 text-yellow-900 border border-yellow-300 hover:bg-yellow-50"
-                                : "bg-gray-100 text-gray-800 border border-gray-300 hover:bg-gray-100"
-                          }
-                        >
-                          {formatVerificationStatus(p.verification_status)}
-                        </Badge>
-                      </div>
-                    </div>
-                    <div className="mt-3 flex flex-wrap gap-1">
-                      {(p.service_categories || []).slice(0, 4).map((c) => (
-                        <span key={c} className="text-xs bg-gray-100 text-gray-800 px-2 py-1 rounded">
-                          {c}
-                        </span>
-                      ))}
-                    </div>
-                    <div className="mt-3 text-sm text-gray-700">
-                      <span className="font-medium">{p.average_rating?.toFixed(1) ?? "0.0"}</span> / 5.0 ·{" "}
-                      <span>{p.total_reviews} reviews</span>
-                    </div>
-                    <div className="mt-4">
-                      <div className="flex items-center gap-4">
-                        <Link
-                          href={`/providers/${p.id}`}
-                          className="inline-flex items-center text-blue-700 hover:text-blue-900 font-medium"
-                        >
-                          View profile →
-                        </Link>
-                        <Link
-                          href={`/providers/${p.id}/reviews`}
-                          className="inline-flex items-center text-gray-700 hover:text-gray-900 font-medium"
-                        >
-                          Reviews →
-                        </Link>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </section>
-        </main>
-        <Footer />
+export default function BrowseProvidersPage() {
+  return (
+    <>
+      <div className="relative h-[240px] md:h-[300px] flex items-end overflow-hidden">
+        <Image
+          src="https://images.unsplash.com/photo-1521737604893-d14cc237f11d?w=1920&auto=format&fit=crop&q=80"
+          alt="Verified service providers"
+          fill
+          priority
+          className="object-cover object-center"
+          sizes="100vw"
+        />
+        <div className="absolute inset-0 bg-teal/65" />
+        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full pb-10">
+          <nav className="text-white/70 text-sm mb-3">
+            <a href="/" className="hover:text-white">Home</a> › <span className="text-white">Browse Providers</span>
+          </nav>
+          <h1 className="font-heading font-bold text-4xl md:text-5xl text-white">All verified providers</h1>
+        </div>
       </div>
-    );
-  } catch (error) {
-    console.error("Error rendering browse page:", error);
-    return (
-      <div className="min-h-screen flex flex-col">
-        <ClientHeader />
-        <main className="flex-1">
-          <section className="py-10 bg-white border-b">
-            <div className="container mx-auto px-4">
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">Find Verified Providers</h1>
-              <p className="text-gray-600">
-                Browse public profiles of verified professionals. Filter by category and city.
-              </p>
-            </div>
-          </section>
-          <section className="py-8">
-            <div className="container mx-auto px-4">
-              <div className="text-center text-gray-600">
-                <p>Unable to load providers at this time. Please try again later.</p>
-              </div>
-            </div>
-          </section>
-        </main>
-        <Footer />
-      </div>
-    );
-  }
+
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
+        <p className="text-slate leading-relaxed mb-10 max-w-2xl">
+          Every provider listed here is an established business with a real track record. Click through to read their full profile and visit their website directly.
+        </p>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {providers.map(p => (
+            <ProviderCard key={p.slug} provider={p} />
+          ))}
+        </div>
+      </section>
+    </>
+  )
 }

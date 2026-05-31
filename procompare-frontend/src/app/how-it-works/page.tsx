@@ -1,246 +1,99 @@
-import type { Metadata } from "next"
-import { siteUrl } from "@/lib/seo-site"
-import { ClientHeader } from "@/components/layout/ClientHeader"
-import { Footer } from "@/components/layout/Footer"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
-import Link from "next/link"
-import { 
-  FileText, 
-  Users, 
-  MessageSquare, 
-  Star, 
-  Shield, 
-  Clock,
-  CheckCircle,
-  ArrowRight
-} from "lucide-react"
-
-const HOW = siteUrl("/how-it-works");
+import type { Metadata } from 'next'
+import Image from 'next/image'
+import Link from 'next/link'
+import { Search, UserCheck, ExternalLink } from 'lucide-react'
 
 export const metadata: Metadata = {
-  title: "How ProConnectSA Works | Get Free Quotes from Verified Pros",
-  description:
-    "Find trusted local service providers in your area. Simple steps to get free quotes and compare verified professionals across South Africa.",
-  alternates: { canonical: HOW },
-  openGraph: { url: HOW },
-  robots: { index: true, follow: true },
-};
+  title: 'How It Works',
+  description: 'Three simple steps to find a verified service provider on ProConnectSA. No forms, no spam, no middlemen.',
+}
+
+const steps = [
+  {
+    number: '1',
+    icon: <Search className="h-7 w-7 text-teal" />,
+    title: 'Choose a category',
+    body: 'Browse our service categories or search for what you need. Whether it is a locksmith at 2am or a renovation quote, start here.',
+  },
+  {
+    number: '2',
+    icon: <UserCheck className="h-7 w-7 text-teal" />,
+    title: 'View verified providers',
+    body: 'Read provider profiles to understand who they are, where they serve, and what they specialise in. No guessing.',
+  },
+  {
+    number: '3',
+    icon: <ExternalLink className="h-7 w-7 text-teal" />,
+    title: 'Get in touch directly',
+    body: 'Click through to the provider\'s own website to request a quote or book a service. You deal directly with them — no middlemen.',
+  },
+]
 
 export default function HowItWorksPage() {
   return (
-    <div className="min-h-screen flex flex-col">
-      <ClientHeader />
-      
-      <main className="flex-1">
-        {/* Hero Section */}
-        <section className="bg-gradient-to-br from-blue-50 to-indigo-100 py-20">
-          <div className="container mx-auto px-4 text-center">
-            <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-6">
-              How ProConnectSA Works
-            </h1>
-            <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto">
-              Find trusted local service providers in your area. Follow our simple 3-step process to get free quotes and compare professionals.
-            </p>
-          </div>
-        </section>
+    <>
+      <div className="relative h-[260px] md:h-[340px] flex items-end overflow-hidden">
+        <Image
+          src="https://images.unsplash.com/photo-1559136555-9303baea8ebd?w=1600&auto=format&fit=crop&q=80"
+          alt="Customer browsing services on a phone"
+          fill
+          priority
+          className="object-cover object-center"
+          sizes="100vw"
+        />
+        <div className="absolute inset-0 bg-teal/65" />
+        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full pb-10">
+          <h1 className="font-heading font-bold text-4xl md:text-5xl text-white">How it works</h1>
+        </div>
+      </div>
 
-        {/* Main Steps */}
-        <section className="py-20">
-          <div className="container mx-auto px-4">
-            <div className="grid lg:grid-cols-3 gap-12">
-              {/* Step 1 */}
-              <div className="text-center">
-                <div className="relative mb-8">
-                  <div className="w-20 h-20 bg-blue-600 text-white rounded-full flex items-center justify-center text-3xl font-bold mx-auto mb-4">
-                    1
-                  </div>
-                  <FileText className="w-8 h-8 text-blue-600 mx-auto" />
-                </div>
-                <h3 className="text-2xl font-bold text-gray-900 mb-4">
-                  Describe Your Job
-                </h3>
-                <p className="text-gray-600 mb-6">
-                  Tell us what you need done, when you need it, your budget range, and any specific requirements. 
-                  The more details you provide, the better we can match you with the right professionals.
-                </p>
-                <div className="space-y-2 text-sm text-gray-500">
-                  <div className="flex items-center justify-center">
-                    <CheckCircle className="w-4 h-4 text-green-500 mr-2" />
-                    Choose from 15+ service categories
-                  </div>
-                  <div className="flex items-center justify-center">
-                    <CheckCircle className="w-4 h-4 text-green-500 mr-2" />
-                    Set your budget range
-                  </div>
-                  <div className="flex items-center justify-center">
-                    <CheckCircle className="w-4 h-4 text-green-500 mr-2" />
-                    Specify urgency and timeline
-                  </div>
-                </div>
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
+        {/* Steps */}
+        <div className="space-y-10 mb-16">
+          {steps.map(step => (
+            <div key={step.number} className="flex gap-6 items-start">
+              <div className="flex-shrink-0 w-14 h-14 rounded-full bg-teal flex items-center justify-center">
+                <span className="font-heading font-bold text-2xl text-white">{step.number}</span>
               </div>
-
-              {/* Step 2 */}
-              <div className="text-center">
-                <div className="relative mb-8">
-                  <div className="w-20 h-20 bg-blue-600 text-white rounded-full flex items-center justify-center text-3xl font-bold mx-auto mb-4">
-                    2
-                  </div>
-                  <Users className="w-8 h-8 text-blue-600 mx-auto" />
+              <div className="pt-2">
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="bg-teal-light rounded-lg p-2">{step.icon}</div>
+                  <h2 className="font-heading font-bold text-xl text-gray-900">{step.title}</h2>
                 </div>
-                <h3 className="text-2xl font-bold text-gray-900 mb-4">
-                  Get Matched & Verified
-                </h3>
-                <p className="text-gray-600 mb-6">
-                  Our system finds up to 3 verified professionals in your area who match your requirements. 
-                  We verify your request via SMS to ensure quality and prevent spam.
-                </p>
-                <div className="space-y-2 text-sm text-gray-500">
-                  <div className="flex items-center justify-center">
-                    <CheckCircle className="w-4 h-4 text-green-500 mr-2" />
-                    SMS verification for quality
-                  </div>
-                  <div className="flex items-center justify-center">
-                    <CheckCircle className="w-4 h-4 text-green-500 mr-2" />
-                    Location-based matching
-                  </div>
-                  <div className="flex items-center justify-center">
-                    <CheckCircle className="w-4 h-4 text-green-500 mr-2" />
-                    Up to 3 qualified professionals
-                  </div>
-                </div>
-              </div>
-
-              {/* Step 3 */}
-              <div className="text-center">
-                <div className="relative mb-8">
-                  <div className="w-20 h-20 bg-blue-600 text-white rounded-full flex items-center justify-center text-3xl font-bold mx-auto mb-4">
-                    3
-                  </div>
-                  <MessageSquare className="w-8 h-8 text-blue-600 mx-auto" />
-                </div>
-                <h3 className="text-2xl font-bold text-gray-900 mb-4">
-                  Compare & Choose
-                </h3>
-                <p className="text-gray-600 mb-6">
-                  Professionals will contact you directly with quotes and questions. 
-                  Compare their profiles, reviews, and prices to choose the best fit for your project.
-                </p>
-                <div className="space-y-2 text-sm text-gray-500">
-                  <div className="flex items-center justify-center">
-                    <CheckCircle className="w-4 h-4 text-green-500 mr-2" />
-                    Direct contact from providers
-                  </div>
-                  <div className="flex items-center justify-center">
-                    <CheckCircle className="w-4 h-4 text-green-500 mr-2" />
-                    Compare quotes and reviews
-                  </div>
-                  <div className="flex items-center justify-center">
-                    <CheckCircle className="w-4 h-4 text-green-500 mr-2" />
-                    Choose the best professional
-                  </div>
-                </div>
+                <p className="text-slate leading-relaxed">{step.body}</p>
               </div>
             </div>
-          </div>
-        </section>
+          ))}
+        </div>
 
-        {/* Why Choose ProConnectSA */}
-        <section className="py-20 bg-gray-50 dark:bg-gray-800">
-          <div className="container mx-auto px-4">
-            <div className="text-center mb-16">
-              <h2 className="text-3xl font-bold text-gray-900 mb-4">
-                Why Choose ProConnectSA?
-              </h2>
-              <p className="text-gray-600 max-w-2xl mx-auto">
-                We make it easy, safe, and efficient to find the right service provider
-              </p>
-            </div>
-            
-            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
-              <Card className="text-center">
-                <CardContent className="p-6">
-                  <Shield className="w-12 h-12 text-blue-600 mx-auto mb-4" />
-                  <h3 className="font-semibold text-gray-900 mb-2">
-                    Verified Professionals
-                  </h3>
-                  <p className="text-sm text-gray-600">
-                    All providers are background checked and verified for your safety
-                  </p>
-                </CardContent>
-              </Card>
+        {/* What we do NOT do */}
+        <div className="bg-cream rounded-xl border border-mist p-8">
+          <h2 className="font-heading font-bold text-2xl text-teal mb-5">What we do NOT do</h2>
+          <ul className="space-y-3">
+            {[
+              'We do not sell your details to anyone.',
+              'We do not flood you with quotes from random providers.',
+              'We do not put 50 unverified handymen between you and the work.',
+              'We do not take a cut of any transaction.',
+              'We do not send you unsolicited marketing emails or calls.',
+            ].map(item => (
+              <li key={item} className="flex items-start gap-3 text-gray-700">
+                <span className="text-amber font-bold mt-0.5 flex-shrink-0">✕</span>
+                <span>{item}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
 
-              <Card className="text-center">
-                <CardContent className="p-6">
-                  <Clock className="w-12 h-12 text-blue-600 mx-auto mb-4" />
-                  <h3 className="font-semibold text-gray-900 mb-2">
-                    Fast Response
-                  </h3>
-                  <p className="text-sm text-gray-600">
-                    Get quotes within hours, not days. Most providers respond within 2 hours
-                  </p>
-                </CardContent>
-              </Card>
-
-              <Card className="text-center">
-                <CardContent className="p-6">
-                  <Star className="w-12 h-12 text-blue-600 mx-auto mb-4" />
-                  <h3 className="font-semibold text-gray-900 mb-2">
-                    Quality Reviews
-                  </h3>
-                  <p className="text-sm text-gray-600">
-                    Read real reviews from previous customers to make informed decisions
-                  </p>
-                </CardContent>
-              </Card>
-
-              <Card className="text-center">
-                <CardContent className="p-6">
-                  <Users className="w-12 h-12 text-blue-600 mx-auto mb-4" />
-                  <h3 className="font-semibold text-gray-900 mb-2">
-                    Local Experts
-                  </h3>
-                  <p className="text-sm text-gray-600">
-                    Connect with professionals in your area who know the local market
-                  </p>
-                </CardContent>
-              </Card>
-            </div>
-          </div>
-        </section>
-
-        {/* CTA Section */}
-        <section className="py-20 bg-blue-600 text-white">
-          <div className="container mx-auto px-4 text-center">
-            <h2 className="text-3xl font-bold mb-4">
-              Ready to Get Started?
-            </h2>
-            <p className="text-xl mb-8 max-w-2xl mx-auto opacity-90">
-              Join thousands of satisfied customers who have found their perfect service provider through ProConnectSA
-            </p>
-            <Button size="lg" variant="secondary" asChild>
-              <Link href="/services">
-                Request Your Free Quote
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Link>
-            </Button>
-          </div>
-        </section>
-      </main>
-      
-      <Footer />
-    </div>
+        <div className="mt-10 text-center">
+          <Link
+            href="/services"
+            className="inline-flex items-center gap-2 bg-amber hover:bg-amber-dark text-white font-semibold px-8 py-4 rounded-md transition-colors text-base"
+          >
+            Browse services →
+          </Link>
+        </div>
+      </div>
+    </>
   )
 }
-
-
-
-
-
-
-
-
-
-
-
-

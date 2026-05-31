@@ -1,239 +1,108 @@
-"use client"
+import Link from 'next/link'
+import { MessageCircle, Mail, Phone } from 'lucide-react'
+import { getLiveCategories } from '@/lib/categories'
 
-import Link from "next/link"
-import { Facebook, Twitter, Instagram, Linkedin, Mail, Phone, MapPin } from "lucide-react"
-import { PROVINCES } from "@/lib/seo-locations"
-import { MAJOR_CITIES } from "@/lib/seo-cities"
-import { VULA24_FOOTER_URL } from "@/lib/vula24-locksmith"
+const liveCategories = getLiveCategories()
 
-const TOP_SERVICES = [
-  { slug: "plumbing", name: "Plumbing" },
-  { slug: "electrical", name: "Electrical" },
-  { slug: "cleaning", name: "Cleaning" },
-  { slug: "painting", name: "Painting" },
-  { slug: "handyman", name: "Handyman" },
-  { slug: "hvac", name: "HVAC" },
-  { slug: "landscaping", name: "Landscaping" },
-  { slug: "solar-installation", name: "Solar Installation" },
+const provinces = [
+  { name: 'Gauteng', slug: 'gauteng' },
+  { name: 'Western Cape', slug: 'western-cape' },
+  { name: 'KwaZulu-Natal', slug: 'kwazulu-natal' },
+  { name: 'Eastern Cape', slug: 'eastern-cape' },
+  { name: 'Limpopo', slug: 'limpopo' },
+  { name: 'Mpumalanga', slug: 'mpumalanga' },
+  { name: 'North West', slug: 'north-west' },
+  { name: 'Free State', slug: 'free-state' },
+  { name: 'Northern Cape', slug: 'northern-cape' },
 ]
 
-const TOP_CITIES = MAJOR_CITIES.slice(0, 20)
-
-export function Footer() {
+export default function Footer() {
   return (
-    <footer className="bg-muted/50 border-t">
-      <div className="container py-12">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-          {/* Company Info */}
-          <div className="space-y-4">
-            <div className="flex items-center space-x-2">
-              <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center">
-                <span className="text-primary-foreground font-bold text-lg">P</span>
-              </div>
-              <span className="font-bold text-xl">ProConnectSA</span>
-            </div>
-            <p className="text-sm text-muted-foreground">
-              Connect with verified service providers across South Africa. Get quotes, read reviews, and hire the best professionals for your home and business needs.
+    <footer className="bg-teal-dark text-white">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10">
+          {/* Brand */}
+          <div>
+            <h3 className="font-heading font-bold text-xl mb-3">ProConnectSA</h3>
+            <p className="text-white/70 text-sm leading-relaxed mb-4">
+              South Africa's trusted directory for verified service providers. Find locksmiths, couriers, renovation specialists, and immigration consultants.
             </p>
-            <div className="flex space-x-4">
-              <Link href="#" className="text-muted-foreground hover:text-foreground transition-colors">
-                <Facebook className="h-5 w-5" />
-              </Link>
-              <Link href="#" className="text-muted-foreground hover:text-foreground transition-colors">
-                <Twitter className="h-5 w-5" />
-              </Link>
-              <Link href="#" className="text-muted-foreground hover:text-foreground transition-colors">
-                <Instagram className="h-5 w-5" />
-              </Link>
-              <Link href="#" className="text-muted-foreground hover:text-foreground transition-colors">
-                <Linkedin className="h-5 w-5" />
-              </Link>
+            <div className="space-y-2">
+              <a href="mailto:hello@proconnectsa.co.za" className="flex items-center gap-2 text-sm text-white/70 hover:text-white transition-colors">
+                <Mail className="h-4 w-4" /> hello@proconnectsa.co.za
+              </a>
+              <a href="tel:+27774388845" className="flex items-center gap-2 text-sm text-white/70 hover:text-white transition-colors">
+                <Phone className="h-4 w-4" /> 077 438 8845
+              </a>
+              <a href="https://wa.me/27774388845" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-sm text-white/70 hover:text-white transition-colors">
+                <MessageCircle className="h-4 w-4" /> WhatsApp us
+              </a>
             </div>
           </div>
 
           {/* Services */}
-          <div className="space-y-4">
-            <h3 className="font-semibold">Services</h3>
-            <ul className="space-y-2 text-sm">
-              {TOP_SERVICES.map((service) => (
-                <li key={service.slug}>
-                  <Link 
-                    href={`/services/${service.slug}`} 
-                    className="text-muted-foreground hover:text-foreground transition-colors"
-                  >
-                    {service.name}
+          <div>
+            <h4 className="font-heading font-semibold text-sm uppercase tracking-wider text-white/50 mb-3">Services</h4>
+            <ul className="space-y-2">
+              {liveCategories.map(cat => (
+                <li key={cat.slug}>
+                  <Link href={`/services/${cat.slug}`} className="text-sm text-white/70 hover:text-white transition-colors">
+                    {cat.name}
                   </Link>
                 </li>
               ))}
               <li>
-                <Link href="/services" className="text-muted-foreground hover:text-foreground transition-colors font-medium">
-                  All services →
+                <Link href="/services" className="text-sm text-white/50 hover:text-white transition-colors">
+                  All categories →
                 </Link>
               </li>
+            </ul>
+          </div>
+
+          {/* Provinces */}
+          <div>
+            <h4 className="font-heading font-semibold text-sm uppercase tracking-wider text-white/50 mb-3">Provinces</h4>
+            <ul className="space-y-2">
+              {provinces.map(p => (
+                <li key={p.slug}>
+                  <Link href={`/${p.slug}/local-services`} className="text-sm text-white/70 hover:text-white transition-colors">
+                    {p.name}
+                  </Link>
+                </li>
+              ))}
             </ul>
           </div>
 
           {/* Company */}
-          <div className="space-y-4">
-            <h3 className="font-semibold">Company</h3>
-            <ul className="space-y-2 text-sm">
-              <li>
-                <Link href="/how-it-works" className="text-muted-foreground hover:text-foreground transition-colors">
-                  How it Works
-                </Link>
-              </li>
-              <li>
-                <Link href="/providers/browse" className="text-muted-foreground hover:text-foreground transition-colors">
-                  Browse Providers
-                </Link>
-              </li>
-              <li>
-                <Link href="/for-pros" className="text-muted-foreground hover:text-foreground transition-colors">
-                  For Providers
-                </Link>
-              </li>
-              <li>
-                <Link href="/pricing" className="text-muted-foreground hover:text-foreground transition-colors">
-                  Pricing
-                </Link>
-              </li>
-              <li>
-                <Link href="/resources" className="text-muted-foreground hover:text-foreground transition-colors">
-                  Resources & Guides
-                </Link>
-              </li>
-              <li>
-                <Link href="/press" className="text-muted-foreground hover:text-foreground transition-colors">
-                  Press & Media
-                </Link>
-              </li>
-              <li>
-                <Link href="/immigration" className="text-muted-foreground hover:text-foreground transition-colors">
-                  Immigration &amp; visas
-                </Link>
-              </li>
-            </ul>
-            <div className="pt-4 border-t border-border/60">
-              <h4 className="font-semibold text-sm mb-2">Partner services</h4>
-              <ul className="space-y-2 text-sm">
-                <li>
-                  <a
-                    href={VULA24_FOOTER_URL}
-                    className="text-muted-foreground hover:text-foreground transition-colors"
-                  >
-                    Emergency Locksmith — Vula24
-                  </a>
-                </li>
-              </ul>
-            </div>
-          </div>
-
-          {/* Locations */}
-          <div className="space-y-4">
-            <h3 className="font-semibold">Find Services By Province</h3>
-            <ul className="space-y-2 text-sm">
-              {PROVINCES.map((province) => (
-                <li key={province.slug}>
-                  <Link 
-                    href={province.slug === "gauteng" 
-                      ? `/gauteng/local-services` 
-                      : `/services/plumbing/${province.slug}`
-                    } 
-                    className="text-muted-foreground hover:text-foreground transition-colors"
-                  >
-                    {province.name}
+          <div>
+            <h4 className="font-heading font-semibold text-sm uppercase tracking-wider text-white/50 mb-3">Company</h4>
+            <ul className="space-y-2">
+              {[
+                { label: 'About Us', href: '/about' },
+                { label: 'How It Works', href: '/how-it-works' },
+                { label: 'Browse Providers', href: '/providers/browse' },
+                { label: 'Contact', href: '/contact' },
+              ].map(link => (
+                <li key={link.href}>
+                  <Link href={link.href} className="text-sm text-white/70 hover:text-white transition-colors">
+                    {link.label}
                   </Link>
                 </li>
               ))}
             </ul>
-            <div className="pt-2 border-t">
-              <p className="text-xs text-muted-foreground mb-2">Popular Services by Province:</p>
-              <div className="flex flex-wrap gap-x-2 gap-y-1 text-xs">
-                <Link href="/services/electrical/gauteng" className="text-muted-foreground hover:text-foreground transition-colors">Electrical (Gauteng)</Link>
-                <span className="text-muted-foreground">•</span>
-                <Link href="/services/electrical/kwazulu-natal" className="text-muted-foreground hover:text-foreground transition-colors">Electrical (KZN)</Link>
-                <span className="text-muted-foreground">•</span>
-                <Link href="/services/handyman/western-cape" className="text-muted-foreground hover:text-foreground transition-colors">Handyman (WC)</Link>
-                <span className="text-muted-foreground">•</span>
-                <Link href="/services/painting/northern-cape" className="text-muted-foreground hover:text-foreground transition-colors">Painting (NC)</Link>
-              </div>
-            </div>
-            <div className="pt-3 border-t">
-              <h4 className="font-semibold text-xs mb-2">Popular Cities</h4>
-              <div className="flex flex-wrap gap-x-3 gap-y-1 text-xs">
-                {TOP_CITIES.map((city) => (
-                  <Link
-                    key={city.slug}
-                    href={`/${city.slug}/plumbing`}
-                    className="text-muted-foreground hover:text-foreground transition-colors"
-                  >
-                    {city.name}
-                  </Link>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          {/* Contact */}
-          <div className="space-y-4">
-            <h3 className="font-semibold">Contact</h3>
-            <div className="space-y-3 text-sm">
-              <div className="flex items-center space-x-2">
-                <MapPin className="h-4 w-4 text-muted-foreground" />
-                <span className="text-muted-foreground">
-                  South Africa
-                </span>
-              </div>
-              <div className="flex items-center space-x-2">
-                <Phone className="h-4 w-4 text-muted-foreground" />
-                <a href="tel:+27774388845" className="text-muted-foreground hover:text-foreground transition-colors">
-                  077 438 8845
-                </a>
-              </div>
-              <div className="flex items-center space-x-2">
-                <Mail className="h-4 w-4 text-muted-foreground" />
-                <span className="text-muted-foreground">
-                  support@proconnectsa.co.za
-                </span>
-              </div>
-            </div>
           </div>
         </div>
+      </div>
 
-        <div className="mt-8 pt-8 border-t">
-          <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
-            <div className="text-sm text-muted-foreground">
-              © 2025 ProConnectSA. All rights reserved. | Proudly South African 🇿🇦
-            </div>
-            <div className="flex flex-wrap items-center gap-4 text-sm">
-              <Link href="/how-it-works" className="text-muted-foreground hover:text-foreground transition-colors">How it Works</Link>
-              <span className="text-muted-foreground">|</span>
-              <Link href="/providers" className="text-muted-foreground hover:text-foreground transition-colors">For Providers</Link>
-              <span className="text-muted-foreground">|</span>
-              <span className="inline-flex items-center rounded-full bg-green-50 text-green-800 px-3 py-1 border border-green-200">
-                SARS Registered
-              </span>
-              <span className="inline-flex items-center rounded-full bg-blue-50 text-blue-800 px-3 py-1 border border-blue-200">
-                CIPC Compliant
-              </span>
-            </div>
-          </div>
+      {/* Bottom bar */}
+      <div className="border-t border-white/10">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-col sm:flex-row items-center justify-between gap-2">
+          <p className="text-white/50 text-xs">
+            © {new Date().getFullYear()} ProConnectSA. All rights reserved.
+          </p>
+          <p className="text-white/50 text-xs">Proudly South African 🇿🇦</p>
         </div>
       </div>
     </footer>
   )
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-

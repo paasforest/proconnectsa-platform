@@ -1,13 +1,8 @@
-import type { MetadataRoute } from "next"
-import { SITE_ORIGIN } from "@/lib/seo-site"
+import { MetadataRoute } from 'next'
 
 export default function robots(): MetadataRoute.Robots {
   return {
-    rules: {
-      userAgent: "*",
-      allow: "/",
-    },
-    sitemap: `${SITE_ORIGIN}/sitemap.xml`,
-    host: SITE_ORIGIN,
+    rules: [{ userAgent: '*', allow: '/' }],
+    sitemap: 'https://www.proconnectsa.co.za/sitemap.xml',
   }
 }

@@ -1,274 +1,92 @@
-import type { Metadata } from "next"
-import Link from "next/link"
-import { ClientHeader } from "@/components/layout/ClientHeader"
-import { Footer } from "@/components/layout/Footer"
-import { siteUrl } from "@/lib/seo-site"
-import { requireCitySlug } from "@/lib/seo-public-routes"
-import { getServiceCategoriesCached } from "@/lib/service-categories"
-import { getCitiesByProvince } from "@/lib/seo-cities"
-import { getProvinceBySlug, PROVINCES } from "@/lib/seo-locations"
-import BarkLeadForm from "@/components/leads/BarkLeadForm"
-import { EmergencyLocksmithBanner } from "@/components/emergency/EmergencyLocksmithBanner"
-import { isVula24EmergencyBannerProvince } from "@/lib/vula24-locksmith"
+import type { Metadata } from 'next'
+import Link from 'next/link'
+import CategoryCard from '@/components/ui/CategoryCard'
+import ProviderCard from '@/components/ui/ProviderCard'
+import { categories, getLiveCategories } from '@/lib/categories'
+import { providers } from '@/lib/providers'
 
-export const dynamic = "force-dynamic"
+const cityMap: Record<string, { name: string; province: string }> = {
+  'cape-town': { name: 'Cape Town', province: 'Western Cape' },
+  'johannesburg': { name: 'Johannesburg', province: 'Gauteng' },
+  'pretoria': { name: 'Pretoria', province: 'Gauteng' },
+  'durban': { name: 'Durban', province: 'KwaZulu-Natal' },
+  'sandton': { name: 'Sandton', province: 'Gauteng' },
+  'midrand': { name: 'Midrand', province: 'Gauteng' },
+  'stellenbosch': { name: 'Stellenbosch', province: 'Western Cape' },
+  'paarl': { name: 'Paarl', province: 'Western Cape' },
+  'george': { name: 'George', province: 'Western Cape' },
+  'soweto': { name: 'Soweto', province: 'Gauteng' },
+  'centurion': { name: 'Centurion', province: 'Gauteng' },
+  'randburg': { name: 'Randburg', province: 'Gauteng' },
+  'polokwane': { name: 'Polokwane', province: 'Limpopo' },
+  'bloemfontein': { name: 'Bloemfontein', province: 'Free State' },
+  'port-elizabeth': { name: 'Port Elizabeth', province: 'Eastern Cape' },
+  'east-london': { name: 'East London', province: 'Eastern Cape' },
+  'gauteng': { name: 'Gauteng', province: 'Gauteng' },
+  'western-cape': { name: 'Western Cape', province: 'Western Cape' },
+  'kwazulu-natal': { name: 'KwaZulu-Natal', province: 'KwaZulu-Natal' },
+  'eastern-cape': { name: 'Eastern Cape', province: 'Eastern Cape' },
+  'limpopo': { name: 'Limpopo', province: 'Limpopo' },
+  'mpumalanga': { name: 'Mpumalanga', province: 'Mpumalanga' },
+  'north-west': { name: 'North West', province: 'North West' },
+  'free-state': { name: 'Free State', province: 'Free State' },
+  'northern-cape': { name: 'Northern Cape', province: 'Northern Cape' },
+}
 
-type Props = { params: Promise<{ city: string }> }
+export async function generateStaticParams() {
+  return Object.keys(cityMap).map(city => ({ city }))
+}
 
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
+export async function generateMetadata({ params }: { params: Promise<{ city: string }> }): Promise<Metadata> {
   const { city } = await params
-  const cityData = requireCitySlug(city)
-  const canonicalUrl = siteUrl(`/${city}/services`)
-
+  const info = cityMap[city]
+  const cityName = info?.name ?? city.replace(/-/g, ' ')
   return {
-    title: `All Services in ${cityData.name} | Get Free Quotes | ProConnectSA`,
-    description: `Find trusted service providers in ${cityData.name}, ${cityData.provinceName}. Compare free quotes from verified professionals for plumbing, electrical, cleaning, painting, and more. No obligation to hire.`,
-    alternates: {
-      canonical: canonicalUrl,
-    },
-    openGraph: {
-      title: `All Services in ${cityData.name} | ProConnectSA`,
-      description: `Find verified service providers in ${cityData.name}. Compare free quotes from local professionals.`,
-      url: canonicalUrl,
-      type: "website",
-    },
-    robots: {
-      index: true,
-      follow: true,
-    },
+    title: `Services in ${cityName}`,
+    description: `Find verified service providers in ${cityName}, South Africa. Locksmiths, couriers, home renovation, and more on ProConnectSA.`,
   }
 }
 
-export default async function CityServicesPage({ params }: Props) {
+export default async function CityServicesPage({ params }: { params: Promise<{ city: string }> }) {
   const { city } = await params
-  const cityData = requireCitySlug(city)
+  const info = cityMap[city]
+  const cityName = info?.name ?? city.replace(/-/g, ' ')
 
-  const categories = await getServiceCategoriesCached()
-  const province = getProvinceBySlug(cityData.provinceSlug)
-  const otherCitiesInProvince = getCitiesByProvince(cityData.provinceSlug).filter(
-    c => c.slug !== city
+  const cityProviders = providers.filter(p =>
+    p.areasServed.some(a => a.toLowerCase().includes(cityName.toLowerCase()))
   )
 
-  // Structured data for SEO
-  const localBusinessSchema = {
-    "@context": "https://schema.org",
-    "@type": "LocalBusiness",
-    name: `ProConnectSA - Services in ${cityData.name}`,
-    description: `Find verified service providers in ${cityData.name}, ${cityData.provinceName}`,
-    areaServed: {
-      "@type": "City",
-      name: cityData.name,
-      containedIn: {
-        "@type": "State",
-        name: cityData.provinceName
-      }
-    },
-    serviceType: categories.map((cat) => cat.name),
-  }
-
-  const breadcrumbSchema = {
-    "@context": "https://schema.org",
-    "@type": "BreadcrumbList",
-    itemListElement: [
-      { "@type": "ListItem", position: 1, name: "Home", item: siteUrl("/") },
-      { "@type": "ListItem", position: 2, name: cityData.provinceName, item: siteUrl(`/${cityData.provinceSlug}/local-services`) },
-      { "@type": "ListItem", position: 3, name: `${cityData.name} Services`, item: siteUrl(`/${city}/services`) },
-    ],
-  }
-
   return (
-    <div className="min-h-screen flex flex-col">
-      {isVula24EmergencyBannerProvince(cityData.provinceSlug) ? <EmergencyLocksmithBanner /> : null}
-      <ClientHeader />
-      <main className="flex-1">
-        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(localBusinessSchema) }} />
-        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
+      <nav className="text-slate text-sm mb-6">
+        <Link href="/" className="hover:text-teal">Home</Link> ›{' '}
+        <span className="text-gray-900">{cityName}</span>
+      </nav>
 
-        <section className="bg-gradient-to-br from-emerald-50 to-blue-50 py-12">
-          <div className="container mx-auto px-4">
-            <div className="max-w-5xl mx-auto">
-              <nav className="text-sm text-gray-600 mb-4">
-                <Link href="/" className="hover:text-gray-900">
-                  Home
-                </Link>{" "}
-                <span className="mx-2">/</span>
-                {province && (
-                  <>
-                    <Link href={`/${cityData.provinceSlug}/local-services`} className="hover:text-gray-900">
-                      {cityData.provinceName}
-                    </Link>{" "}
-                    <span className="mx-2">/</span>
-                  </>
-                )}
-                <span className="text-gray-900 font-medium">{cityData.name} Services</span>
-              </nav>
+      <h1 className="font-heading font-bold text-4xl md:text-5xl text-teal mb-3">
+        Services in {cityName}
+      </h1>
+      <p className="text-slate text-lg mb-10 leading-relaxed">
+        Find verified service providers serving {cityName}{info?.province ? `, ${info.province}` : ''}.
+      </p>
 
-              <h1 className="text-3xl md:text-5xl font-bold text-gray-900 mb-3">
-                All Services in {cityData.name}
-              </h1>
-              <p className="text-gray-600 text-lg max-w-3xl">
-                Find trusted service providers in {cityData.name}, {cityData.provinceName}. 
-                Compare free quotes from verified professionals for all your home and business needs. 
-                Whether you need <Link href={`/${city}/plumbing`} className="text-emerald-700 hover:text-emerald-800 hover:underline font-medium">plumbing</Link>, <Link href={`/${city}/electrical`} className="text-emerald-700 hover:text-emerald-800 hover:underline font-medium">electrical work</Link>, <Link href={`/${city}/cleaning`} className="text-emerald-700 hover:text-emerald-800 hover:underline font-medium">cleaning services</Link>, <Link href={`/${city}/painting`} className="text-emerald-700 hover:text-emerald-800 hover:underline font-medium">painting</Link>, or <Link href={`/${city}/handyman`} className="text-emerald-700 hover:text-emerald-800 hover:underline font-medium">handyman services</Link> in {cityData.name}, we'll match you with local professionals. Fast matching with no obligation to hire.
-              </p>
-            </div>
+      {cityProviders.length > 0 && (
+        <div className="mb-14">
+          <h2 className="font-heading font-bold text-2xl text-teal mb-6">
+            Providers serving {cityName}
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {cityProviders.map(p => <ProviderCard key={p.slug} provider={p} />)}
           </div>
-        </section>
+        </div>
+      )}
 
-        <section className="py-10">
-          <div className="container mx-auto px-4">
-            <div className="max-w-5xl mx-auto">
-              {/* Lead Form */}
-              <div className="bg-white border rounded-2xl p-6 mb-8">
-                <div className="flex items-center gap-2 mb-4 text-sm flex-wrap">
-                  <span className="text-emerald-700 font-semibold">✓ Verified</span>
-                  <span className="text-gray-300">•</span>
-                  <span className="text-emerald-700 font-semibold">✓ No Obligation</span>
-                  <span className="text-gray-300">•</span>
-                  <span className="text-emerald-700 font-semibold">✓ Compare Quotes</span>
-                </div>
-                <h2 className="text-xl font-semibold text-gray-900 mb-4">Request Free Quotes in {cityData.name}</h2>
-                <p className="text-gray-600 text-sm mb-6">
-                  Tell us what service you need in {cityData.name}, and we'll connect you with verified local professionals.
-                </p>
-                <BarkLeadForm />
-              </div>
-
-              {/* All Services Grid */}
-              <div className="mb-8">
-                <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-6">
-                  Services Available in {cityData.name}
-                </h2>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {(categories.length ? categories : [
-                    { id: 0, slug: "plumbing", name: "Plumbing" },
-                    { id: 0, slug: "electrical", name: "Electrical" },
-                    { id: 0, slug: "cleaning", name: "Cleaning" },
-                    { id: 0, slug: "painting", name: "Painting" },
-                    { id: 0, slug: "handyman", name: "Handyman" },
-                    { id: 0, slug: "hvac", name: "HVAC" },
-                    { id: 0, slug: "landscaping", name: "Landscaping" },
-                    { id: 0, slug: "solar-installation", name: "Solar Installation" },
-                    { id: 0, slug: "carpentry", name: "Carpentry" },
-                    { id: 0, slug: "roofing", name: "Roofing" },
-                    { id: 0, slug: "flooring", name: "Flooring" },
-                    { id: 0, slug: "renovations", name: "Renovations" },
-                  ]).map((c) => (
-                    <Link
-                      key={c.slug}
-                      href={`/${city}/${c.slug}`}
-                      className="rounded-2xl border bg-white p-5 hover:shadow-sm hover:border-emerald-200 transition group"
-                    >
-                      <div className="font-semibold text-gray-900 group-hover:text-emerald-700">
-                        {c.name}
-                      </div>
-                      <div className="text-sm text-gray-600 mt-1">
-                        Find {c.name.toLowerCase()} in {cityData.name}
-                      </div>
-                      <div className="text-xs text-emerald-700 mt-2 font-medium">
-                        Get quotes →
-                      </div>
-                    </Link>
-                  ))}
-                </div>
-              </div>
-
-              {/* Other Cities in Province */}
-              {otherCitiesInProvince.length > 0 && (
-                <div className="bg-white border rounded-2xl p-6 mb-8">
-                  <h2 className="text-xl font-semibold text-gray-900 mb-2">
-                    Other Cities in {cityData.provinceName}
-                  </h2>
-                  <p className="text-gray-600 text-sm mb-4">
-                    Looking for services in nearby cities? Explore other areas in {cityData.provinceName}:
-                  </p>
-                  <div className="flex flex-wrap gap-2">
-                    {otherCitiesInProvince.slice(0, 8).map((otherCity) => (
-                      <Link
-                        key={otherCity.slug}
-                        href={`/${otherCity.slug}/services`}
-                        className="inline-flex items-center rounded-full border px-4 py-2 text-sm text-gray-700 hover:border-emerald-300 hover:bg-emerald-50 font-medium"
-                      >
-                        {otherCity.name}
-                      </Link>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Why Choose Section */}
-              <div className="bg-white border rounded-2xl p-6 mb-8">
-                <h2 className="text-xl font-semibold text-gray-900 mb-4">
-                  Why Choose ProConnectSA in {cityData.name}?
-                </h2>
-                <div className="text-sm text-gray-700 space-y-3">
-                  <p>
-                    <strong>Local professionals:</strong> All providers serve {cityData.name} and surrounding areas. From <Link href={`/${city}/plumbing`} className="text-emerald-700 hover:text-emerald-800 hover:underline font-medium">plumbers</Link> to <Link href={`/${city}/electrical`} className="text-emerald-700 hover:text-emerald-800 hover:underline font-medium">electricians</Link>, our network covers all major services in {cityData.name}.
-                  </p>
-                  <p>
-                    <strong>Verified & reviewed:</strong> Check credentials and read customer reviews. Every provider on our platform serving {cityData.name} is verified. Looking for services in other areas? Check out <Link href={`/${otherCitiesInProvince[0]?.slug}/services`} className="text-emerald-700 hover:text-emerald-800 hover:underline font-medium">{otherCitiesInProvince[0]?.name}</Link> or <Link href={`/${otherCitiesInProvince[1]?.slug}/services`} className="text-emerald-700 hover:text-emerald-800 hover:underline font-medium">{otherCitiesInProvince[1]?.name}</Link>.
-                  </p>
-                  <p>
-                    <strong>Compare quotes:</strong> Get multiple quotes to find the best price. Request quotes from different providers for <Link href={`/${city}/plumbing`} className="text-emerald-700 hover:text-emerald-800 hover:underline font-medium">plumbing</Link>, <Link href={`/${city}/electrical`} className="text-emerald-700 hover:text-emerald-800 hover:underline font-medium">electrical</Link>, <Link href={`/${city}/cleaning`} className="text-emerald-700 hover:text-emerald-800 hover:underline font-medium">cleaning</Link>, and more in {cityData.name}.
-                  </p>
-                  <p>
-                    <strong>No obligation:</strong> Free to request quotes, no commitment to hire. Explore all services available in {cityData.name} or browse <Link href={`/${cityData.provinceSlug}/local-services`} className="text-emerald-700 hover:text-emerald-800 hover:underline font-medium">all services across {cityData.provinceName}</Link>.
-                  </p>
-                </div>
-              </div>
-
-              {/* Back to Province */}
-              {province && (
-                <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-6 mb-8">
-                  <h2 className="text-xl font-semibold text-gray-900 mb-2">
-                    Explore All {province.name} Services
-                  </h2>
-                  <p className="text-gray-700 text-sm mb-4">
-                    Find service providers across all cities in {province.name}. Browse by province or city.
-                  </p>
-                  <div className="flex flex-wrap gap-3">
-                    <Link
-                      href={`/${cityData.provinceSlug}/local-services`}
-                      className="inline-flex items-center px-6 py-3 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 font-medium"
-                    >
-                      All {province.name} Services
-                    </Link>
-                    <Link
-                      href={`/services/plumbing/${cityData.provinceSlug}`}
-                      className="inline-flex items-center px-6 py-3 border border-emerald-600 text-emerald-700 rounded-lg hover:bg-emerald-50 font-medium"
-                    >
-                      Browse by Service
-                    </Link>
-                  </div>
-                </div>
-              )}
-
-              {/* Other Provinces Section */}
-              <div className="bg-white border rounded-2xl p-6">
-                <h2 className="text-xl font-semibold text-gray-900 mb-4">Other Provinces</h2>
-                <p className="text-gray-600 text-sm mb-4">
-                  Find service providers in other provinces across South Africa:
-                </p>
-                <div className="flex flex-wrap gap-2">
-                  {PROVINCES.filter(p => p.slug !== cityData.provinceSlug).map((otherProvince) => (
-                    <Link
-                      key={otherProvince.slug}
-                      href={otherProvince.slug === "gauteng" 
-                        ? `/gauteng/local-services` 
-                        : `/services/plumbing/${otherProvince.slug}`
-                      }
-                      className="inline-flex items-center rounded-full border px-4 py-2 text-sm text-gray-700 hover:border-emerald-300 hover:bg-emerald-50 font-medium"
-                    >
-                      {otherProvince.name}
-                    </Link>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-      </main>
-      <Footer />
+      <div>
+        <h2 className="font-heading font-bold text-2xl text-teal mb-6">All service categories</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
+          {categories.map(cat => <CategoryCard key={cat.slug} category={cat} />)}
+        </div>
+      </div>
     </div>
   )
 }

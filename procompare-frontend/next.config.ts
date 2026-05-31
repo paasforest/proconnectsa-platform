@@ -1,140 +1,59 @@
-import type { NextConfig } from "next";
+import type { NextConfig } from 'next'
 
 const nextConfig: NextConfig = {
   async redirects() {
     return [
+      // www redirect
       {
-        source: "/:path*",
-        has: [{ type: "host", value: "proconnectsa.co.za" }],
-        destination: "https://www.proconnectsa.co.za/:path*",
+        source: '/:path*',
+        has: [{ type: 'host', value: 'proconnectsa.co.za' }],
+        destination: 'https://www.proconnectsa.co.za/:path*',
         permanent: true,
       },
+      // Legacy pages
+      { source: '/pricing', destination: '/about', permanent: true },
+      { source: '/press', destination: '/about', permanent: true },
+      { source: '/for-pros', destination: '/contact', permanent: true },
+      { source: '/locksmith/login', destination: '/', permanent: true },
+      { source: '/locksmith/dashboard', destination: '/', permanent: true },
+      { source: '/locksmith/payment', destination: '/', permanent: true },
+      { source: '/providers/:slug/login', destination: '/', permanent: true },
+      // Old register/dashboard flows → contact
+      { source: '/register', destination: '/contact', permanent: true },
+      { source: '/register-provider', destination: '/contact', permanent: true },
+      { source: '/register-business', destination: '/contact', permanent: true },
+      { source: '/dashboard/:path*', destination: '/', permanent: false },
+      { source: '/login', destination: '/', permanent: false },
+      // Old provider ID routes → new slug routes (handled in page)
+      { source: '/providers/browse', destination: '/providers/browse', permanent: false },
     ]
   },
 
-  // Production environment variables
-  env: {
-    NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL || 'https://api.proconnectsa.co.za',
-    NEXT_PUBLIC_FRONTEND_URL: process.env.NEXT_PUBLIC_FRONTEND_URL || 'https://www.proconnectsa.co.za',
-    NEXT_PUBLIC_APP_NAME: 'ProConnectSA',
-  },
-  
-  // API routes configuration - using API routes instead of rewrites
-  // async rewrites() {
-  //   return [
-  //     {
-  //       source: '/api/auth/:path*',
-  //       destination: '/api/auth/:path*', // Keep NextAuth routes local
-  //     },
-  //     {
-  //       source: '/api/backend/:path*',
-  //       destination: `${process.env.NEXT_PUBLIC_API_URL || 'https://api.proconnectsa.co.za'}/api/:path*`,
-  //     },
-  //   ]
-  // },
-
-  // Headers for CORS and security
-  // Note: Next.js automatically excludes /_next/* paths from custom headers
   async headers() {
     return [
-      // Avoid caching dashboard/admin so UI updates show after deploy
-      {
-        source: '/dashboard/:path*',
-        headers: [{ key: 'Cache-Control', value: 'no-store, must-revalidate' }],
-      },
-      {
-        source: '/admin/:path*',
-        headers: [{ key: 'Cache-Control', value: 'no-store, must-revalidate' }],
-      },
       {
         source: '/:path*',
         headers: [
-          {
-            key: 'X-Frame-Options',
-            value: 'DENY',
-          },
-          {
-            key: 'X-Content-Type-Options',
-            value: 'nosniff',
-          },
-          {
-            key: 'Referrer-Policy',
-            value: 'strict-origin-when-cross-origin',
-          },
-          {
-            key: 'X-XSS-Protection',
-            value: '1; mode=block',
-          },
-          {
-            key: 'Permissions-Policy',
-            value: 'camera=(), microphone=(), geolocation=(self)',
-          },
-          {
-            key: 'Strict-Transport-Security',
-            value: 'max-age=31536000; includeSubDomains',
-          },
-          {
-            key: 'Content-Security-Policy',
-            value: [
-              "default-src 'self'",
-              "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://vercel.live https://va.vercel-scripts.com https://www.gstatic.com https://apis.google.com",
-              "style-src 'self' 'unsafe-inline'",
-              "img-src 'self' data: https: blob:",
-              "font-src 'self' data:",
-              "connect-src 'self' https://api.proconnectsa.co.za wss://api.proconnectsa.co.za https://vercel.live wss://ws.pusherapp.com https://sockjs.pusher.com https://firebaseinstallations.googleapis.com https://fcmregistrations.googleapis.com https://firebase.googleapis.com https://identitytoolkit.googleapis.com",
-              "frame-ancestors 'none'",
-              "base-uri 'self'",
-              "form-action 'self'",
-              "worker-src 'self' blob:",
-            ].join('; '),
-          },
+          { key: 'X-Frame-Options', value: 'DENY' },
+          { key: 'X-Content-Type-Options', value: 'nosniff' },
+          { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
+          { key: 'Strict-Transport-Security', value: 'max-age=31536000; includeSubDomains' },
         ],
       },
     ]
   },
 
-  // Image optimization
   images: {
-    domains: ['api.proconnectsa.co.za', 'proconnectsa.co.za'],
+    remotePatterns: [
+      { protocol: 'https', hostname: 'images.unsplash.com' },
+      { protocol: 'https', hostname: 'api.proconnectsa.co.za' },
+    ],
     formats: ['image/webp', 'image/avif'],
   },
 
-  // Experimental features
-  experimental: {
-    optimizeCss: false, // Disable CSS optimization to avoid critters issues
-    optimizePackageImports: ['lucide-react', '@radix-ui/react-icons'],
-  },
-
-  // Development optimizations
-  ...(process.env.NODE_ENV === 'development' && {
-    webpack: (config: any) => {
-      // Faster builds in development
-      config.watchOptions = {
-        poll: 1000,
-        aggregateTimeout: 300,
-      };
-      return config;
-    },
-  }),
-
-  // Output configuration for Vercel
-  // Vercel handles Next.js deployment automatically
-  // output: 'standalone', // Not needed for Vercel
-  
-  // Disable x-powered-by header
   poweredByHeader: false,
-  
-  // ESLint configuration for build
-  eslint: {
-    // Temporarily ignore during builds to allow deployment
-    ignoreDuringBuilds: true,
-  },
+  eslint: { ignoreDuringBuilds: true },
+  typescript: { ignoreBuildErrors: true },
+}
 
-  // TypeScript configuration for build
-  typescript: {
-    // Temporarily ignore build errors to allow deployment
-    ignoreBuildErrors: true,
-  },
-};
-
-export default nextConfig;
+export default nextConfig

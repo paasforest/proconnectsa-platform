@@ -1,119 +1,47 @@
-import type { Metadata } from "next"
-import Link from "next/link"
-import { ClientHeader } from "@/components/layout/ClientHeader"
-import { Footer } from "@/components/layout/Footer"
-import { getServiceCategoriesCached } from "@/lib/service-categories"
-import { siteUrl } from "@/lib/seo-site"
-import { PROVINCES } from "@/lib/seo-locations"
-import { Button } from "@/components/ui/button"
-import { EmergencyLocksmithBanner } from "@/components/emergency/EmergencyLocksmithBanner"
-
-export const dynamic = "force-dynamic"
+import type { Metadata } from 'next'
+import Image from 'next/image'
+import CategoryCard from '@/components/ui/CategoryCard'
+import { categories } from '@/lib/categories'
 
 export const metadata: Metadata = {
-  alternates: {
-    canonical: siteUrl("/services"),
-  },
-  openGraph: {
-    url: siteUrl("/services"),
-  },
+  title: 'All Service Categories',
+  description:
+    'Browse all service categories on ProConnectSA — verified locksmiths, couriers, home renovation, immigration services, and more across South Africa.',
 }
 
-export default async function ServicesPage() {
-  const categories = await getServiceCategoriesCached()
-
+export default function ServicesPage() {
   return (
-    <div className="min-h-screen flex flex-col">
-      <EmergencyLocksmithBanner />
-      <ClientHeader />
-      <main className="flex-1">
-        <section className="bg-gradient-to-br from-emerald-50 to-blue-50 py-16">
-          <div className="container mx-auto px-4 text-center">
-            <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-4">Services</h1>
-            <p className="text-lg md:text-xl text-gray-600 max-w-3xl mx-auto">
-              Choose a service to get free quotes from verified professionals. We’ll match you with providers in your area.
-            </p>
-            <div className="mt-8 flex flex-col sm:flex-row gap-3 justify-center">
-              <Button asChild className="bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl py-6 px-8">
-                <Link href="/services">Browse services</Link>
-              </Button>
-              <Button asChild variant="outline" className="rounded-xl py-6 px-8">
-                <Link href="/providers/browse">Browse pros</Link>
-              </Button>
-            </div>
-          </div>
-        </section>
+    <>
+      {/* Hero */}
+      <div className="relative h-[240px] md:h-[300px] flex items-center overflow-hidden">
+        <Image
+          src="https://images.unsplash.com/photo-1581094794329-c8112a89af12?w=1920&auto=format&fit=crop&q=80"
+          alt="South African service providers"
+          fill
+          priority
+          className="object-cover object-center"
+          sizes="100vw"
+        />
+        <div className="absolute inset-0 bg-teal/70" />
+        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
+          <nav className="text-white/70 text-sm mb-3">
+            <a href="/" className="hover:text-white">Home</a> › <span className="text-white">Services</span>
+          </nav>
+          <h1 className="font-heading font-bold text-4xl md:text-5xl text-white">All service categories</h1>
+        </div>
+      </div>
 
-        <section className="py-16">
-          <div className="container mx-auto px-4">
-            <div className="max-w-6xl mx-auto">
-              <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-6">Popular provinces</h2>
-              <div className="flex flex-wrap gap-3 mb-6">
-                {PROVINCES.slice(0, 3).map((p) => (
-                  <Link
-                    key={p.slug}
-                    href={`/services/plumbing/${p.slug}`}
-                    className="inline-flex items-center rounded-full border bg-white px-4 py-2 text-sm text-gray-700 hover:border-emerald-300 hover:bg-emerald-50"
-                  >
-                    {p.name}
-                  </Link>
-                ))}
-              </div>
-              {PROVINCES.find((p) => p.slug === "gauteng") && (
-                <div className="mb-10 p-4 bg-emerald-50 border border-emerald-200 rounded-lg">
-                  <p className="text-sm text-gray-700 mb-2">
-                    <strong>Looking for services in Gauteng?</strong> Explore our dedicated Gauteng pages:
-                  </p>
-                  <div className="flex flex-wrap gap-2">
-                    <Link
-                      href="/gauteng/local-services"
-                      className="text-sm text-emerald-700 font-semibold hover:text-emerald-800 hover:underline"
-                    >
-                      Local Services
-                    </Link>
-                    <span className="text-gray-400">•</span>
-                    <Link
-                      href="/gauteng/get-quotes"
-                      className="text-sm text-emerald-700 font-semibold hover:text-emerald-800 hover:underline"
-                    >
-                      Get Quotes
-                    </Link>
-                    <span className="text-gray-400">•</span>
-                    <Link
-                      href="/gauteng/find-service-providers"
-                      className="text-sm text-emerald-700 font-semibold hover:text-emerald-800 hover:underline"
-                    >
-                      Find Providers
-                    </Link>
-                  </div>
-                </div>
-              )}
-
-              <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-6">Service categories</h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {(categories.length ? categories : [
-                  { id: 0, slug: "plumbing", name: "Plumbing" },
-                  { id: 0, slug: "electrical", name: "Electrical" },
-                  { id: 0, slug: "cleaning", name: "Cleaning" },
-                  { id: 0, slug: "painting", name: "Painting" },
-                  { id: 0, slug: "handyman", name: "Handyman" },
-                  { id: 0, slug: "renovations", name: "Renovations" },
-                ]).map((c) => (
-                  <Link
-                    key={c.slug}
-                    href={`/services/${c.slug}`}
-                    className="rounded-2xl border bg-white p-5 hover:shadow-sm hover:border-emerald-200 transition"
-                  >
-                    <div className="font-semibold text-gray-900">{c.name}</div>
-                    <div className="text-sm text-gray-600 mt-1">Get free quotes in your area</div>
-                  </Link>
-                ))}
-              </div>
-            </div>
-          </div>
-        </section>
-      </main>
-      <Footer />
-    </div>
+      {/* Content */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
+        <p className="text-slate leading-relaxed mb-10 max-w-2xl">
+          ProConnectSA is a directory of verified service providers across South Africa. Below are all categories we cover — some live with verified providers, others coming soon as we onboard new specialists.
+        </p>
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
+          {categories.map(cat => (
+            <CategoryCard key={cat.slug} category={cat} />
+          ))}
+        </div>
+      </section>
+    </>
   )
 }

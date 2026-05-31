@@ -1,94 +1,74 @@
-import type { Metadata, Viewport } from "next";
-import { SITE_ORIGIN } from "@/lib/seo-site";
-import { Providers } from "@/components/providers/Providers";
-import { Toaster } from "@/components/ui/sonner";
-import ErrorBoundary from "@/components/ErrorBoundary";
-import { AuthProvider } from "@/components/AuthProvider";
-import { ServiceWorkerRegistration } from "@/components/pwa/ServiceWorkerRegistration";
-import { InstallPrompt } from "@/components/pwa/InstallPrompt";
-import "./globals.css";
+import type { Metadata } from 'next'
+import { Inter, Plus_Jakarta_Sans } from 'next/font/google'
+import './globals.css'
+import Navbar from '@/components/layout/Navbar'
+import Footer from '@/components/layout/Footer'
 
-// Use system fonts instead of Google Fonts to avoid network issues
-const inter = {
-  variable: "--font-inter",
-  className: "font-sans"
-};
+const inter = Inter({
+  subsets: ['latin'],
+  variable: '--font-inter',
+  display: 'swap',
+})
+
+const jakarta = Plus_Jakarta_Sans({
+  subsets: ['latin'],
+  variable: '--font-jakarta',
+  weight: ['500', '700'],
+  display: 'swap',
+})
 
 export const metadata: Metadata = {
-  title: "Local Service Providers in South Africa | Get Free Quotes | ProConnectSA",
-  description: "Find trusted local service providers in Johannesburg, Cape Town, Durban, Pretoria, and across South Africa. Compare free quotes from verified plumbers, electricians, cleaners, and more. No obligation to hire.",
-  keywords: "local service providers South Africa, get quotes, trusted professionals, compare services, plumbers, electricians, service providers near me",
-  authors: [{ name: "ProConnectSA Team" }],
-  creator: "ProConnectSA",
-  publisher: "ProConnectSA",
-  formatDetection: {
-    email: false,
-    address: false,
-    telephone: false,
+  title: {
+    default: 'ProConnectSA — Find Trusted Service Providers Across South Africa',
+    template: '%s | ProConnectSA',
   },
-  metadataBase: new URL("https://www.proconnectsa.co.za"),
-  manifest: "/manifest.json",
-  appleWebApp: {
-    capable: true,
-    statusBarStyle: "default",
-    title: "ProConnectSA",
-  },
-  icons: {
-    icon: "/favicon.ico",
-    apple: "/icon-192.png",
-  },
+  description:
+    'ProConnectSA is a directory of verified service providers across South Africa. Find verified locksmiths, couriers, home renovation specialists, and immigration consultants.',
+  keywords: [
+    'South Africa services', 'locksmith South Africa', 'parcel delivery SA',
+    'home renovation Cape Town', 'immigration services South Africa',
+    'ProConnectSA', 'verified service providers',
+  ],
+  authors: [{ name: 'ProConnectSA' }],
+  creator: 'ProConnectSA',
+  metadataBase: new URL('https://www.proconnectsa.co.za'),
   openGraph: {
-    title: "Local Service Providers in South Africa | Get Free Quotes | ProConnectSA",
-    description: "Find trusted local service providers in South Africa. Compare free quotes from verified professionals. No obligation to hire.",
-    url: SITE_ORIGIN,
-    siteName: "ProConnectSA",
-    locale: "en_ZA",
-    type: "website",
+    type: 'website',
+    locale: 'en_ZA',
+    url: 'https://www.proconnectsa.co.za',
+    siteName: 'ProConnectSA',
+    title: 'ProConnectSA — Find Trusted Service Providers Across South Africa',
+    description:
+      'Verified locksmiths, couriers, renovation specialists, and immigration consultants. One directory, multiple specialists.',
+    images: [
+      {
+        url: 'https://images.unsplash.com/photo-1581094794329-c8112a89af12?w=1200&auto=format&fit=crop&q=80',
+        width: 1200,
+        height: 630,
+        alt: 'ProConnectSA — South African service provider directory',
+      },
+    ],
   },
   twitter: {
-    card: "summary_large_image",
-    title: "Local Service Providers in South Africa | ProConnectSA",
-    description: "Find trusted local service providers. Compare free quotes from verified professionals across South Africa.",
+    card: 'summary_large_image',
+    title: 'ProConnectSA — Verified South African Service Providers',
+    description: 'Find verified locksmiths, couriers, home renovation specialists and immigration consultants.',
   },
   robots: {
     index: true,
     follow: true,
-    googleBot: {
-      index: true,
-      follow: true,
-      "max-video-preview": -1,
-      "max-image-preview": "large",
-      "max-snippet": -1,
-    },
+    googleBot: { index: true, follow: true },
   },
-};
+}
 
-export const viewport: Viewport = {
-  themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#2563eb" },
-    { media: "(prefers-color-scheme: dark)", color: "#1e40af" },
-  ],
-};
-
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={inter.variable}>
-      <body className="font-sans antialiased">
-        <ServiceWorkerRegistration />
-        <ErrorBoundary>
-          <AuthProvider>
-            <Providers>
-              {children}
-              <Toaster />
-              <InstallPrompt />
-            </Providers>
-          </AuthProvider>
-        </ErrorBoundary>
+    <html lang="en-ZA" className={`${inter.variable} ${jakarta.variable}`}>
+      <body className="min-h-screen flex flex-col bg-cream antialiased">
+        <Navbar />
+        <main className="flex-1">{children}</main>
+        <Footer />
       </body>
     </html>
-  );
+  )
 }
