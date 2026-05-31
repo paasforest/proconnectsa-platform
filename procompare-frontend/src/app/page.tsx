@@ -12,6 +12,25 @@ export const metadata: Metadata = {
   title: 'ProConnectSA — Find Trusted Service Providers Across South Africa',
   description:
     'Verified locksmiths, couriers, home renovation specialists, and immigration consultants. One directory, multiple specialists across South Africa.',
+  openGraph: {
+    title: 'ProConnectSA — Find Trusted Service Providers Across South Africa',
+    description:
+      'Verified locksmiths, couriers, renovation experts, and immigration consultants. One directory, multiple specialists.',
+    images: [
+      {
+        url: 'https://images.unsplash.com/photo-1580060839134-75a5edca2e99?w=1200&auto=format&fit=crop&q=80',
+        width: 1200,
+        height: 630,
+        alt: 'Aerial view of Cape Town, South Africa',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'ProConnectSA — Verified South African Service Providers',
+    description: 'Find verified locksmiths, couriers, home renovation specialists and immigration consultants.',
+    images: ['https://images.unsplash.com/photo-1580060839134-75a5edca2e99?w=1200&auto=format&fit=crop&q=80'],
+  },
 }
 
 const liveCategories = getLiveCategories()
@@ -43,10 +62,10 @@ export default function HomePage() {
   return (
     <>
       {/* ── HERO ─────────────────────────────────────── */}
-      <section className="relative min-h-[70vh] md:min-h-[70vh] flex items-center overflow-hidden">
+      <section className="relative min-h-[55vh] max-h-[600px] flex items-center overflow-hidden">
         <Image
-          src="https://images.unsplash.com/photo-1581094794329-c8112a89af12?w=1920&auto=format&fit=crop&q=80"
-          alt="South African professionals working"
+          src="https://images.unsplash.com/photo-1580060839134-75a5edca2e99?w=1600&auto=format&fit=crop&q=80"
+          alt="Aerial view of Cape Town, South Africa"
           fill
           priority
           className="object-cover object-center"
